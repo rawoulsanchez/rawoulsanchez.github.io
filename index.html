@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StreamVerse Dashboard</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* Base */
+    body { background:#0d0d0d; font-family:'Inter',sans-serif; color:#f5f5f5; }
+    .no-scrollbar::-webkit-scrollbar{display:none} .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none }
+
+    /* Cards */
+    .content-card{ transition:transform .3s cubic-bezier(.25,.8,.25,1), box-shadow .3s ease; transform-origin:center; z-index:1; will-change:transform }
+    .content-card:hover{ transform:scale(1.4); z-index:999; box-shadow:0 15px 30px -5px rgba(0,0,0,.9) }
+
+    /* Shelves */
+    .content-shelf{ padding-top:5rem; margin-bottom:-4.5rem } 
+    .content-shelf:last-of-type{ margin-bottom:0; padding-bottom:5rem }
+
+    /* Hero video */
+    .video-background-container{ position:absolute; inset:0; overflow:hidden; z-index:-2 }
+    .video-background-container iframe{ position:absolute; top:50%; left:50%; min-width:100vw; min-height:100vh; transform:translate(-50%,-50%); pointer-events:none }
+    @media (min-aspect-ratio:16/9){ .video-background-container iframe{ height:56.25vw; min-height:100vh } }
+    @media (max-aspect-ratio:16/9){ .video-background-container iframe{ width:177.78vh; min-width:100vw } }
+
+    /* Edge resistance visuals */
+    .resist-first{ position:relative; z-index:auto; transition:transform 160ms cubic-bezier(.16,1,.3,1); will-change:transform }
+    .edge-active{ z-index:80 }
+
+    /* Netflix-like hover preview */
+    .hover-preview{ position:fixed; z-index:9999; pointer-events:none; min-width:420px; max-width:640px; border-radius:.75rem; overflow:hidden; box-shadow:0 25px 70px rgba(0,0,0,.6),0 10px 25px rgba(0,0,0,.45); background:#111; opacity:0; transform:scale(.98); transition:opacity .12s ease, transform .12s ease }
+    .hover-preview.show{ opacity:1; transform:scale(1) }
+    .hover-preview .hp-banner{ aspect-ratio:16/9; background-size:cover; background-position:center; position:relative }
+    .hover-preview .hp-banner::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.8), rgba(0,0,0,0) 55%) }
+    .hover-preview .hp-body{ background:#1a1a1a; padding:14px 16px; display:flex; flex-direction:column; gap:10px }
+    .hp-title{ font-weight:800; font-size:1.25rem; letter-spacing:.02em }
+    .hp-meta{ display:flex; align-items:center; gap:10px; font-size:.85rem; color:#cbd5e1 }
+    .hp-chips{ display:flex; gap:12px; flex-wrap:wrap; font-size:.85rem; color:#e2e8f0 }
+    .hp-btns{ display:flex; gap:10px }
+    .hp-btn{ display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:9999px; background:#fff; color:#000 }
+    .hp-btn.secondary{ background:#2a2a2a; color:#fff }
+  </style>
+</head>
+<body class="overflow-x-hidden">
+  <!-- Top Nav -->
+  <nav class="fixed top-0 left-0 right-0 bg-gradient-to-b from-black/90 to-transparent p-4 z-[100] flex items-center justify-between">
+    <div class="flex items-center space-x-8">
+      <h1 class="text-2xl font-extrabold text-red-600 tracking-wider">StreamVerse</h1>
+      <ul class="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-300">
+        <li><a class="text-white font-bold border-b-2 border-red-600 pb-1">Home</a></li>
+        <li><a class="hover:text-white">TV Shows</a></li>
+        <li><a class="hover:text-white">Movies</a></li>
+        <li><a class="hover:text-white">My List</a></li>
+      </ul>
+    </div>
+    <div class="flex items-center space-x-4">
+      <svg class="w-6 h-6 text-gray-300 hover:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg class="w-6 h-6 text-gray-300 hover:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Hero -->
+    <section class="relative h-screen flex items-end pb-24 md:pb-32 text-white">
+      <div class="video-background-container">
+        <iframe src="https://www.youtube.com/embed/6stlCkUDG_s?autoplay=1&mute=1&loop=1&playlist=6stlCkUDG_s&controls=0&showinfo=0&autohide=1&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      </div>
+      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/10 z-0"></div>
+      <div class="z-10 text-left max-w-lg lg:max-w-3xl px-6 md:px-12">
+        <div class="mb-4"><img src="https://placehold.co/300x80/1d1d1d/e50914?text=TITAN+PROJECT" alt="Movie Title Logo" class="w-64 md:w-80 rounded-lg opacity-90"></div>
+        <p class="text-sm font-medium text-red-500 uppercase mb-2">New Release | Thriller, Sci‑Fi | 2024</p>
+        <p class="text-base md:text-xl text-gray-200 mb-8 font-light">As a rogue AI network threatens global collapse, a disgraced former agent is called back into the field for one last, impossible mission to save humanity.</p>
+        <div class="flex space-x-4">
+          <button class="bg-white hover:bg-gray-200 text-black font-bold py-3 px-8 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center space-x-2">
+            <svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg>
+            <span class="text-lg">Play Now</span>
+          </button>
+          <button class="bg-gray-700/70 hover:bg-gray-600/70 text-white font-bold py-3 px-8 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center space-x-2">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="text-lg">Details</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Shelves -->
+    <section class="relative z-10 space-y-2 px-0 md:px-8 pb-12 -mt-40">
+      <div class="content-shelf px-6 md:px-4">
+        <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Popular on Stream (Scrolls Left)</h3>
+        <div class="shelf-row relative overflow-hidden py-4 group/shelf"></div>
+      </div>
+      <div class="content-shelf px-6 md:px-4">
+        <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Trending Now (Scrolls Right)</h3>
+        <div class="shelf-row relative overflow-hidden py-4 group/shelf"></div>
+      </div>
+      <div class="content-shelf px-6 md:px-4">
+        <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Design Inspiration (Scrolls Left)</h3>
+        <div class="shelf-row relative overflow-hidden py-4 group/shelf"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const shelves = document.querySelectorAll('.shelf-row');
+
+    // Config
+    const scrollDistance = 300;
+    const NUM_SETS = 3;
+    const ITEMS_PER_ROW = 10;
+
+    // Edge resistance
+    const MAX_PULL = 180;
+    const PULL_FEEL = 0.6;
+    const MAX_SCALE = 1.12;
+
+    // Row data A..C
+    const alpha = ['A','B','C','D','E','F','G','H','I','J'];
+    const palette = ['bg-neutral-800','bg-blue-800','bg-green-800','bg-amber-800','bg-purple-800','bg-rose-700','bg-teal-800','bg-orange-600','bg-sky-700','bg-lime-700'];
+    const makeRowData = (rowIndex) => { const L = alpha[rowIndex] || 'X'; return Array.from({length:ITEMS_PER_ROW}, (_,i)=>({ key:`${L}${i+1}`, color:palette[i%palette.length] })); };
+
+    // Card HTML
+    const createCardHTML = (item,isFirst=false) => {
+      const cssVar = `--${item.key}`; const resist = isFirst ? 'resist-first' : '';
+      return `
+        <div class="relative flex-shrink-0 w-56 md:w-64 h-32 md:h-36 group ${resist}">
+          <div class="content-card absolute inset-0 ${item.color} rounded-lg overflow-hidden cursor-pointer flex items-center justify-center">
+            <div class="absolute inset-0" style="background-image:var(${cssVar}, none); background-size:cover; background-position:center;"></div>
+            <div class="relative z-10 text-white text-3xl md:text-4xl font-extrabold tracking-wide select-none">${item.key}</div>
+            <div class="info-panel absolute left-0 bottom-0 w-full h-full bg-gradient-to-t from-black/60 via-black/20 to-transparent p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+          </div>
+        </div>`;
+    };
+
+    // Global hover preview element
+    if (!window.__hoverPreview){
+      const hp = document.createElement('div');
+      hp.className='hover-preview';
+      hp.innerHTML=`
+        <div class="hp-banner"></div>
+        <div class="hp-body">
+          <div class="hp-title">Title</div>
+          <div class="hp-meta">98% Match • 95m • HD</div>
+          <div class="hp-btns">
+            <button class="hp-btn" title="Play"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg></button>
+            <button class="hp-btn secondary" title="Add"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+          <div class="hp-chips"></div>
+        </div>`;
+      document.body.appendChild(hp);
+      hp.addEventListener('mouseleave', ()=> hp.classList.remove('show'));
+      window.__hoverPreview = hp;
+    }
+    const hp = window.__hoverPreview;
+
+    // Show preview near a card
+    const showPreview = (cardEl, label) => {
+      const rect = cardEl.getBoundingClientRect();
+      const w = Math.min(640, Math.max(480, rect.width*1.8));
+      const estH = w*9/16 + 130; // banner + body
+      const left = Math.max(16, Math.min(rect.left, innerWidth - w - 16));
+      const top  = Math.max(16, Math.min(rect.top - estH*0.35, innerHeight - estH - 16));
+      hp.style.width = w+'px';
+      hp.style.left  = left+'px';
+      hp.style.top   = top+'px';
+      const cssVar = `--${label}`;
+      const bg = getComputedStyle(document.documentElement).getPropertyValue(cssVar);
+      hp.querySelector('.hp-banner').style.backgroundImage = bg && bg.trim()? bg : 'linear-gradient(135deg,#1f2937,#0f172a)';
+      hp.querySelector('.hp-title').textContent = label;
+      hp.querySelector('.hp-chips').textContent = 'Action • Sci‑Fi • Trending';
+      hp.classList.add('show');
+    };
+
+    // Build each shelf
+    shelves.forEach((shelf, idx) => {
+      const rowData = makeRowData(idx);
+      const track = document.createElement('div');
+      track.classList.add('card-track','flex','space-x-3','isolate');
+      track.style.position='relative';
+
+      // Repeat data for wrap + add COMING SOON banner
+      let html='';
+      for(let s=0;s<NUM_SETS;s++){ for(let i=0;i<rowData.length;i++){ html += createCardHTML(rowData[i], i===0); } }
+      html += `
+        <div class="relative flex-shrink-0 w-[1200px] md:w-[1600px] h-32 md:h-36 rounded-xl bg-pink-600/90 flex items-center justify-center px-6">
+          <div class="w-full text-black font-extrabold tracking-widest uppercase text-xl md:text-2xl whitespace-nowrap overflow-hidden">COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON</div>
+        </div>`;
+      track.innerHTML = html;
+      shelf.appendChild(track);
+
+      // Hover behavior with delay; cancel on scroll
+      let hoverTimer=null; const cancelPreview=()=>{ clearTimeout(hoverTimer); hp.classList.remove('show'); };
+      addEventListener('scroll', cancelPreview, {passive:true});
+      track.querySelectorAll('.content-card').forEach(card=>{
+        const label = card.querySelector('.relative.z-10')?.textContent.trim() || '';
+        card.addEventListener('mouseenter', ()=>{ card.parentElement.style.zIndex='1000'; hoverTimer=setTimeout(()=>showPreview(card,label),220); });
+        card.addEventListener('mouseleave', ()=>{ card.parentElement.style.zIndex=''; cancelPreview(); });
+      });
+
+      // Measure set width and position start at set 2
+      const setWidth = track.children[ITEMS_PER_ROW].offsetLeft;
+      shelf.dataset.setWidth = String(setWidth);
+      let currentX = -setWidth; shelf.dataset.currentX = String(currentX);
+      track.style.transform = `translateX(${currentX}px)`; track.style.transition='transform 120ms linear';
+
+      // Edge resistance helpers
+      const firstTileEl = ()=> track.children[ITEMS_PER_ROW];
+      const setFirstScale = (overflow)=>{ const s=1+Math.min(MAX_PULL,Math.max(0,overflow))/(MAX_PULL/(MAX_SCALE-1)); const el=firstTileEl(); el.classList.add('edge-active'); el.style.transform=`scaleX(${Math.min(s,MAX_SCALE)})`; };
+      const clearFirstScale = ()=>{ const el=firstTileEl(); el.style.transform='none'; el.classList.remove('edge-active'); };
+      const clampWithResistance = (x)=>{ const w=+shelf.dataset.setWidth; if(x>-w){ const raw=x+w; const pull=Math.min(MAX_PULL, raw*PULL_FEEL); setFirstScale(pull); return -w+pull; } clearFirstScale(); return x; };
+      const wrapRightIfNeeded = (x)=>{ const w=+shelf.dataset.setWidth; if(x<-(NUM_SETS)*w) x += (NUM_SETS-1)*w; return x; };
+
+      // Arrows
+      const leftArrow=document.createElement('button');
+      leftArrow.className='shelf-nav-left absolute left-0 top-1/2 -translate-y-1/2 z-40 bg-black/80 hover:bg-black/90 p-3 rounded-r-full opacity-0 transition-opacity duration-300 hidden md:block group-hover/shelf:opacity-100';
+      leftArrow.innerHTML='<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>';
+      leftArrow.onclick=()=>{ let x=+shelf.dataset.currentX; x+=scrollDistance; x=clampWithResistance(x); shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`; };
+      shelf.parentElement.style.position='relative'; leftArrow.style.left='1.5rem'; shelf.parentElement.appendChild(leftArrow);
+
+      const rightArrow=document.createElement('button');
+      rightArrow.className='shelf-nav-right absolute right-0 top-1/2 -translate-y-1/2 z-40 bg-black/80 hover:bg-black/90 p-3 rounded-l-full opacity-0 transition-opacity duration-300 hidden md:block group-hover/shelf:opacity-100';
+      rightArrow.innerHTML='<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>';
+      rightArrow.onclick=()=>{ let x=+shelf.dataset.currentX; x-=scrollDistance; x=wrapRightIfNeeded(x); clearFirstScale(); shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`; };
+      rightArrow.style.right='1.5rem'; shelf.parentElement.appendChild(rightArrow);
+
+      // Wheel scroll -> horizontal translate
+      shelf.addEventListener('wheel', (e)=>{
+        e.preventDefault(); hp.classList.remove('show');
+        let x=+shelf.dataset.currentX; x -= e.deltaY; x = clampWithResistance(x); x = wrapRightIfNeeded(x);
+        shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`;
+      }, {passive:false});
+
+      // Snap on leave
+      shelf.addEventListener('mouseleave', ()=>{ const w=+shelf.dataset.setWidth; if(+shelf.dataset.currentX>-w){ shelf.dataset.currentX=String(-w); track.style.transform=`translateX(${-w}px)`; } clearFirstScale(); });
+    });
+
+    // Public helper: set image for all duplicates of a key
+    window.setThumb = (key, url) => { document.documentElement.style.setProperty(`--${key}`, `url(${url})`); };
+
+    // Smoke tests (console)
+    console.group('[StreamVerse tests]');
+    console.assert(document.querySelectorAll('.shelf-row').length === 3, 'Three shelves expected');
+    console.assert(typeof window.setThumb === 'function', 'setThumb exposed');
+    console.assert(!!window.__hoverPreview, 'Hover preview element exists');
+    console.groupEnd();
+  });
+  </script>
+</body>
+</html>
