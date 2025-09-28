@@ -52,6 +52,9 @@
     /* Drag cursors */
     .drag-grab { cursor: grab; }
     .drag-grabbing { cursor: grabbing; user-select: none; }
+  
+    /* Prevent page scroll hijack when interacting with a shelf */
+    .shelf-row { overscroll-behavior: contain; }
   </style>
 </head>
 <body class="overflow-x-hidden">
@@ -180,17 +183,48 @@
       window.__hoverPreview = hp;
     }
     const hp = window.__hoverPreview;
+    // Track which shelf spawned the preview so wheel-on-preview scrolls that row
+    let lastActiveShelf = null;
+    // Route wheel on preview to last active shelf
+    hp.addEventListener('wheel', (e) => {
+      if (lastActiveShelf && typeof lastActiveShelf._moveBy === 'function') {
+        e.preventDefault();
+        lastActiveShelf._moveBy(-e.deltaY);
+      }
+    }, { passive: false });
 
     // Shared preview timers / hide control
     let hoverTimer = null, hideTimer = null;
+    let currentPreviewCard = null;
     const smoothHide = () => { hp.style.opacity='0'; hp.style.transform='translate(0,0) scale(.98)'; hideTimer = setTimeout(()=>{ hp.classList.remove('show'); }, HIDE_DELAY); };
     const cancelPreview = () => { clearTimeout(hoverTimer); clearTimeout(hideTimer); smoothHide(); };
     window.addEventListener('scroll', cancelPreview, { passive: true });
     hp.addEventListener('mouseenter', () => clearTimeout(hideTimer));
     hp.addEventListener('mouseleave', smoothHide);
 
+    // While hovering the preview, let the cursor "slide" to the card under it.
+    // We temporarily disable pointer-events on the preview to hit-test the card beneath.
+    hp.addEventListener('mousemove', (e) => {
+      // Don't retarget if interacting with buttons/text inside the body area
+      if (e.target.closest('.hp-body')) return;
+      const prevPE = hp.style.pointerEvents;
+      hp.style.pointerEvents = 'none';
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      hp.style.pointerEvents = prevPE || 'auto';
+      const card = el && el.closest ? el.closest('.content-card') : null;
+      if (card && card !== currentPreviewCard) {
+        const label = card.querySelector('.relative.z-10')?.textContent.trim() || '';
+        clearTimeout(hoverTimer);
+        clearTimeout(hideTimer);
+        showPreview(card, label); // immediate swap without delay
+      }
+    });
+
     // Show preview near a card
     const showPreview = (cardEl, label) => {
+      // Remember owning shelf for wheel routing
+      lastActiveShelf = cardEl.closest('.shelf-row');
+      currentPreviewCard = cardEl;
       const rect = cardEl.getBoundingClientRect();
       const w = Math.min(PREVIEW_MAX_W, Math.max(PREVIEW_MIN_W, rect.width * PREVIEW_SCALE));
       const estH = w * 9/16 + PREVIEW_BODY_EXTRA; // banner + body
@@ -298,10 +332,21 @@
       rightArrow.style.right='1.5rem'; shelf.parentElement.appendChild(rightArrow);
 
       // Wheel scroll -> horizontal translate
+      // Movement helper for this shelf
+      const moveBy = (delta) => {
+        let x = +shelf.dataset.currentX + delta;
+        x = clampWithResistance(x);
+        x = wrapRightIfNeeded(x);
+        shelf.dataset.currentX = String(x);
+        track.style.transform = `translateX(${x}px)`;
+      };
+      // expose for preview wheel routing
+      shelf._moveBy = moveBy;
+
+      // Wheel scroll -> horizontal translate
       shelf.addEventListener('wheel', (e)=>{
         e.preventDefault(); hp.classList.remove('show');
-        let x=+shelf.dataset.currentX; x -= e.deltaY; x = clampWithResistance(x); x = wrapRightIfNeeded(x);
-        shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`;
+        moveBy(-e.deltaY);
       }, {passive:false});
 
       // Pointer drag to scroll with inertia
