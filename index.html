@@ -37,7 +37,7 @@
     .edge-active{ z-index:80 }
 
     /* Netflix-like hover preview */
-    .hover-preview{ position:fixed; z-index:9999; pointer-events:none; min-width:420px; max-width:640px; border-radius:.75rem; overflow:hidden; box-shadow:0 25px 70px rgba(0,0,0,.6),0 10px 25px rgba(0,0,0,.45); background:#111; opacity:0; transform:scale(.98); transition:opacity .12s ease, transform .12s ease }
+    .hover-preview{ position:fixed; z-index:9999; pointer-events:auto; min-width:360px; max-width:560px; border-radius:.75rem; overflow:hidden; box-shadow:0 25px 70px rgba(0,0,0,.6),0 10px 25px rgba(0,0,0,.45); background:#111; opacity:0; transform:translate(0,0) scale(.98); transform-origin:top left; transition:transform .18s cubic-bezier(.2,.8,.2,1), opacity .16s ease }
     .hover-preview.show{ opacity:1; transform:scale(1) }
     .hover-preview .hp-banner{ aspect-ratio:16/9; background-size:cover; background-position:center; position:relative }
     .hover-preview .hp-banner::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.8), rgba(0,0,0,0) 55%) }
@@ -48,6 +48,10 @@
     .hp-btns{ display:flex; gap:10px }
     .hp-btn{ display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:9999px; background:#fff; color:#000 }
     .hp-btn.secondary{ background:#2a2a2a; color:#fff }
+  
+    /* Drag cursors */
+    .drag-grab { cursor: grab; }
+    .drag-grabbing { cursor: grabbing; user-select: none; }
   </style>
 </head>
 <body class="overflow-x-hidden">
@@ -118,10 +122,25 @@
     const NUM_SETS = 3;
     const ITEMS_PER_ROW = 10;
 
+    // Preview sizing
+    const PREVIEW_SCALE = 1.55;   // multiplier applied to card width
+    const PREVIEW_MIN_W = 380;    // px
+    const PREVIEW_MAX_W = 560;    // px
+    const PREVIEW_BODY_EXTRA = 110; // px body below 16/9 banner
+
+    // Preview timings
+    const PREVIEW_DELAY = 800;   // ms before showing large hover preview   // ms before showing large hover preview
+    const HIDE_DELAY = 160;      // ms before hiding after mouseleave
+
     // Edge resistance
     const MAX_PULL = 180;
     const PULL_FEEL = 0.6;
     const MAX_SCALE = 1.12;
+
+    // Drag physics
+    const DRAG_DECAY = 0.92;       // inertia decay per frame
+    const DRAG_MIN_VELOCITY = 0.8; // px/frame cutoff
+    const DRAG_PREVIEW_BLOCK = 6;  // px movement before we suppress previews
 
     // Row data A..C
     const alpha = ['A','B','C','D','E','F','G','H','I','J'];
@@ -162,34 +181,68 @@
     }
     const hp = window.__hoverPreview;
 
+    // Shared preview timers / hide control
+    let hoverTimer = null, hideTimer = null;
+    const smoothHide = () => { hp.style.opacity='0'; hp.style.transform='translate(0,0) scale(.98)'; hideTimer = setTimeout(()=>{ hp.classList.remove('show'); }, HIDE_DELAY); };
+    const cancelPreview = () => { clearTimeout(hoverTimer); clearTimeout(hideTimer); smoothHide(); };
+    window.addEventListener('scroll', cancelPreview, { passive: true });
+    hp.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+    hp.addEventListener('mouseleave', smoothHide);
+
     // Show preview near a card
     const showPreview = (cardEl, label) => {
       const rect = cardEl.getBoundingClientRect();
-      const w = Math.min(640, Math.max(480, rect.width*1.8));
-      const estH = w*9/16 + 130; // banner + body
+      const w = Math.min(PREVIEW_MAX_W, Math.max(PREVIEW_MIN_W, rect.width * PREVIEW_SCALE));
+      const estH = w * 9/16 + PREVIEW_BODY_EXTRA; // banner + body
       const left = Math.max(16, Math.min(rect.left, innerWidth - w - 16));
-      const top  = Math.max(16, Math.min(rect.top - estH*0.35, innerHeight - estH - 16));
+      const top  = Math.max(16, Math.min(rect.top - estH * 0.28, innerHeight - estH - 16));
+
+      // Set target box size and anchor
       hp.style.width = w+'px';
       hp.style.left  = left+'px';
       hp.style.top   = top+'px';
+
+      // Content fill
       const cssVar = `--${label}`;
       const bg = getComputedStyle(document.documentElement).getPropertyValue(cssVar);
       hp.querySelector('.hp-banner').style.backgroundImage = bg && bg.trim()? bg : 'linear-gradient(135deg,#1f2937,#0f172a)';
       hp.querySelector('.hp-title').textContent = label;
       hp.querySelector('.hp-chips').textContent = 'Action • Sci‑Fi • Trending';
+
+      // Morph from card -> preview using transforms (origin top-left)
+      const startTx = rect.left - left;
+      const startTy = rect.top  - top;
+      const sx = rect.width / w;
+      const sy = rect.height / estH;
+
+      // Prepare start state
       hp.classList.add('show');
+      hp.style.opacity = '0';
+      hp.style.transform = `translate(${startTx}px, ${startTy}px) scale(${sx}, ${sy})`;
+
+      // Next frame -> animate to final
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          hp.style.opacity = '1';
+          hp.style.transform = 'translate(0,0) scale(1,1)';
+        });
+      });
     };
 
     // Build each shelf
     shelves.forEach((shelf, idx) => {
       const rowData = makeRowData(idx);
       const track = document.createElement('div');
-      track.classList.add('card-track','flex','space-x-3','isolate');
+      track.classList.add('card-track','flex','space-x-3','isolate','drag-grab');
       track.style.position='relative';
 
       // Repeat data for wrap + add COMING SOON banner
       let html='';
-      for(let s=0;s<NUM_SETS;s++){ for(let i=0;i<rowData.length;i++){ html += createCardHTML(rowData[i], i===0); } }
+      for(let s=0;s<NUM_SETS;s++){
+        for(let i=0;i<rowData.length;i++){
+          html += createCardHTML(rowData[i], i===0);
+        }
+      }
       html += `
         <div class="relative flex-shrink-0 w-[1200px] md:w-[1600px] h-32 md:h-36 rounded-xl bg-pink-600/90 flex items-center justify-center px-6">
           <div class="w-full text-black font-extrabold tracking-widest uppercase text-xl md:text-2xl whitespace-nowrap overflow-hidden">COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON</div>
@@ -198,19 +251,31 @@
       shelf.appendChild(track);
 
       // Hover behavior with delay; cancel on scroll
-      let hoverTimer=null; const cancelPreview=()=>{ clearTimeout(hoverTimer); hp.classList.remove('show'); };
-      addEventListener('scroll', cancelPreview, {passive:true});
-      track.querySelectorAll('.content-card').forEach(card=>{
+      track.querySelectorAll('.content-card').forEach(card => {
         const label = card.querySelector('.relative.z-10')?.textContent.trim() || '';
-        card.addEventListener('mouseenter', ()=>{ card.parentElement.style.zIndex='1000'; hoverTimer=setTimeout(()=>showPreview(card,label),220); });
-        card.addEventListener('mouseleave', ()=>{ card.parentElement.style.zIndex=''; cancelPreview(); });
+        card.addEventListener('mouseenter', () => {
+          clearTimeout(hideTimer);
+          card.parentElement.style.zIndex='1000';
+          if (hp.classList.contains('show')) {
+            showPreview(card, label);
+          } else {
+            hoverTimer = setTimeout(() => showPreview(card, label), PREVIEW_DELAY);
+          }
+        });
+        card.addEventListener('mouseleave', () => {
+          card.parentElement.style.zIndex='';
+          clearTimeout(hoverTimer);
+          hideTimer = setTimeout(() => { if (!hp.matches(':hover')) hp.classList.remove('show'); }, HIDE_DELAY);
+        });
       });
 
       // Measure set width and position start at set 2
       const setWidth = track.children[ITEMS_PER_ROW].offsetLeft;
       shelf.dataset.setWidth = String(setWidth);
-      let currentX = -setWidth; shelf.dataset.currentX = String(currentX);
-      track.style.transform = `translateX(${currentX}px)`; track.style.transition='transform 120ms linear';
+      let currentX = -setWidth; 
+      shelf.dataset.currentX = String(currentX);
+      track.style.transform = `translateX(${currentX}px)`; 
+      track.style.transition='transform 120ms linear';
 
       // Edge resistance helpers
       const firstTileEl = ()=> track.children[ITEMS_PER_ROW];
@@ -239,6 +304,45 @@
         shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`;
       }, {passive:false});
 
+      // Pointer drag to scroll with inertia
+      let isDragging=false, startX=0, lastX=0, v=0, dragAccum=0, inertiaId=null;
+      const stopInertia=()=>{ if(inertiaId){ cancelAnimationFrame(inertiaId); inertiaId=null; } };
+      const onPointerDown=(e)=>{
+        if(e.button !== undefined && e.button !== 0) return;
+        stopInertia();
+        isDragging=true; startX=e.clientX; lastX=startX; v=0; dragAccum=0;
+        track.classList.remove('drag-grab'); track.classList.add('drag-grabbing');
+        hp.classList.remove('show');
+        try { shelf.setPointerCapture(e.pointerId); } catch(_) {}
+      };
+      const onPointerMove=(e)=>{
+        if(!isDragging) return;
+        const dx = e.clientX - lastX; lastX = e.clientX; v = dx; dragAccum += Math.abs(dx);
+        let x = +shelf.dataset.currentX + dx;
+        x = clampWithResistance(x); x = wrapRightIfNeeded(x);
+        shelf.dataset.currentX = String(x);
+        track.style.transform = `translateX(${x}px)`;
+      };
+      const onPointerUp=(e)=>{
+        if(!isDragging) return;
+        isDragging=false; track.classList.remove('drag-grabbing'); track.classList.add('drag-grab');
+        try { shelf.releasePointerCapture(e.pointerId); } catch(_) {}
+        const step=()=>{
+          if(Math.abs(v) < DRAG_MIN_VELOCITY){ inertiaId=null; return; }
+          let x = +shelf.dataset.currentX + v;
+          x = clampWithResistance(x); x = wrapRightIfNeeded(x);
+          shelf.dataset.currentX = String(x);
+          track.style.transform = `translateX(${x}px)`;
+          v *= DRAG_DECAY; inertiaId = requestAnimationFrame(step);
+        };
+        inertiaId = requestAnimationFrame(step);
+        if (dragAccum > DRAG_PREVIEW_BLOCK) { hp.classList.remove('show'); }
+      };
+      shelf.addEventListener('pointerdown', onPointerDown);
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerUp);
+      window.addEventListener('pointercancel', onPointerUp);
+
       // Snap on leave
       shelf.addEventListener('mouseleave', ()=>{ const w=+shelf.dataset.setWidth; if(+shelf.dataset.currentX>-w){ shelf.dataset.currentX=String(-w); track.style.transform=`translateX(${-w}px)`; } clearFirstScale(); });
     });
@@ -251,6 +355,9 @@
     console.assert(document.querySelectorAll('.shelf-row').length === 3, 'Three shelves expected');
     console.assert(typeof window.setThumb === 'function', 'setThumb exposed');
     console.assert(!!window.__hoverPreview, 'Hover preview element exists');
+    const lefts = document.querySelectorAll('.shelf-nav-left').length;
+    const rights = document.querySelectorAll('.shelf-nav-right').length;
+    console.assert(lefts === 3 && rights === 3, 'Arrow buttons present for each shelf');
     console.groupEnd();
   });
   </script>
