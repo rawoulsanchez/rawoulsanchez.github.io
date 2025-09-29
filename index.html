@@ -37,11 +37,11 @@
     .edge-active{ z-index:80 }
 
     /* Netflix-like hover preview */
-    .hover-preview{ position:fixed; z-index:9999; pointer-events:auto; min-width:360px; max-width:560px; border-radius:.75rem; overflow:hidden; box-shadow:0 25px 70px rgba(0,0,0,.6),0 10px 25px rgba(0,0,0,.45); background:#111; opacity:0; transform:translate(0,0) scale(.98); transform-origin:top left; transition:transform .18s cubic-bezier(.2,.8,.2,1), opacity .16s ease }
+    .hover-preview{ position:fixed; z-index:9999; pointer-events:none; min-width:520px; max-width:520px; border-radius:.75rem; overflow:hidden; box-shadow:0 25px 70px rgba(0,0,0,.6),0 10px 25px rgba(0,0,0,.45); background:#111; opacity:0; transform:translate(0,0) scale(.98); transform-origin:top left; transition:transform .18s cubic-bezier(.2,.8,.2,1), opacity .16s ease }
     .hover-preview.show{ opacity:1; transform:scale(1) }
     .hover-preview .hp-banner{ aspect-ratio:16/9; background-size:cover; background-position:center; position:relative }
     .hover-preview .hp-banner::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.8), rgba(0,0,0,0) 55%) }
-    .hover-preview .hp-body{ background:#1a1a1a; padding:14px 16px; display:flex; flex-direction:column; gap:10px }
+    .hover-preview .hp-body{ background:#1a1a1a; padding:14px 16px; display:flex; flex-direction:column; gap:10px; pointer-events:auto }
     .hp-title{ font-weight:800; font-size:1.25rem; letter-spacing:.02em }
     .hp-meta{ display:flex; align-items:center; gap:10px; font-size:.85rem; color:#cbd5e1 }
     .hp-chips{ display:flex; gap:12px; flex-wrap:wrap; font-size:.85rem; color:#e2e8f0 }
@@ -58,7 +58,7 @@
   </style>
 </head>
 <body class="overflow-x-hidden">
-  <!-- Top Nav -->
+  <!-- Fixed Navigation Bar -->
   <nav class="fixed top-0 left-0 right-0 bg-gradient-to-b from-black/90 to-transparent p-4 z-[100] flex items-center justify-between">
     <div class="flex items-center space-x-8">
       <h1 class="text-2xl font-extrabold text-red-600 tracking-wider">StreamVerse</h1>
@@ -70,13 +70,13 @@
       </ul>
     </div>
     <div class="flex items-center space-x-4">
-      <svg class="w-6 h-6 text-gray-300 hover:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <svg class="w-6 h-6 text-gray-300 hover:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <svg class="w-6 h-6 text-gray-300 hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg class="w-6 h-6 text-gray-300 hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     </div>
   </nav>
 
   <main>
-    <!-- Hero -->
+    <!-- Hero Section -->
     <section class="relative h-screen flex items-end pb-24 md:pb-32 text-white">
       <div class="video-background-container">
         <iframe src="https://www.youtube.com/embed/6stlCkUDG_s?autoplay=1&mute=1&loop=1&playlist=6stlCkUDG_s&controls=0&showinfo=0&autohide=1&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
@@ -99,7 +99,7 @@
       </div>
     </section>
 
-    <!-- Shelves -->
+    <!-- Content Shelves Section -->
     <section class="relative z-10 space-y-2 px-0 md:px-8 pb-12 -mt-40">
       <div class="content-shelf px-6 md:px-4">
         <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Popular on Stream (Scrolls Left)</h3>
@@ -118,291 +118,283 @@
 
   <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const shelves = document.querySelectorAll('.shelf-row');
-
-    // Config
-    const scrollDistance = 300;
-    const NUM_SETS = 3;
+    // ---------- Constants ----------
     const ITEMS_PER_ROW = 10;
+    const NUM_SETS = 3; // repeat for wrap buffer
 
-    // Preview sizing
-    const PREVIEW_SCALE = 1.55;   // multiplier applied to card width
-    const PREVIEW_MIN_W = 380;    // px
-    const PREVIEW_MAX_W = 560;    // px
-    const PREVIEW_BODY_EXTRA = 110; // px body below 16/9 banner
+    // Preview sizing and timing
+    const PREVIEW_MIN_W = 520; // fixed
+    const PREVIEW_MAX_W = 520; // fixed
+    const PREVIEW_SCALE = 1.0; // ignored when min=max
+    const PREVIEW_BODY_EXTRA = 110; // body below 16/9 banner
+    const PREVIEW_DELAY = 1200; // ms to open
 
-    // Preview timings
-    const PREVIEW_DELAY = 800;   // ms before showing large hover preview   // ms before showing large hover preview
-    const HIDE_DELAY = 160;      // ms before hiding after mouseleave
+    // Drag inertia
+    const DRAG_DECAY = 0.92;
+    const DRAG_MIN_VELOCITY = 0.8;
 
     // Edge resistance
     const MAX_PULL = 180;
     const PULL_FEEL = 0.6;
     const MAX_SCALE = 1.12;
 
-    // Drag physics
-    const DRAG_DECAY = 0.92;       // inertia decay per frame
-    const DRAG_MIN_VELOCITY = 0.8; // px/frame cutoff
-    const DRAG_PREVIEW_BLOCK = 6;  // px movement before we suppress previews
-
-    // Row data A..C
-    const alpha = ['A','B','C','D','E','F','G','H','I','J'];
-    const palette = ['bg-neutral-800','bg-blue-800','bg-green-800','bg-amber-800','bg-purple-800','bg-rose-700','bg-teal-800','bg-orange-600','bg-sky-700','bg-lime-700'];
-    const makeRowData = (rowIndex) => { const L = alpha[rowIndex] || 'X'; return Array.from({length:ITEMS_PER_ROW}, (_,i)=>({ key:`${L}${i+1}`, color:palette[i%palette.length] })); };
-
-    // Card HTML
-    const createCardHTML = (item,isFirst=false) => {
-      const cssVar = `--${item.key}`; const resist = isFirst ? 'resist-first' : '';
-      return `
-        <div class="relative flex-shrink-0 w-56 md:w-64 h-32 md:h-36 group ${resist}">
-          <div class="content-card absolute inset-0 ${item.color} rounded-lg overflow-hidden cursor-pointer flex items-center justify-center">
-            <div class="absolute inset-0" style="background-image:var(${cssVar}, none); background-size:cover; background-position:center;"></div>
-            <div class="relative z-10 text-white text-3xl md:text-4xl font-extrabold tracking-wide select-none">${item.key}</div>
-            <div class="info-panel absolute left-0 bottom-0 w-full h-full bg-gradient-to-t from-black/60 via-black/20 to-transparent p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-          </div>
-        </div>`;
-    };
-
-    // Global hover preview element
-    if (!window.__hoverPreview){
-      const hp = document.createElement('div');
-      hp.className='hover-preview';
-      hp.innerHTML=`
-        <div class="hp-banner"></div>
-        <div class="hp-body">
-          <div class="hp-title">Title</div>
-          <div class="hp-meta">98% Match • 95m • HD</div>
-          <div class="hp-btns">
-            <button class="hp-btn" title="Play"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg></button>
-            <button class="hp-btn secondary" title="Add"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
-          </div>
-          <div class="hp-chips"></div>
-        </div>`;
-      document.body.appendChild(hp);
-      hp.addEventListener('mouseleave', ()=> hp.classList.remove('show'));
-      window.__hoverPreview = hp;
+    // ---------- Build or fetch hover preview ----------
+    function getHoverPreview() {
+      if (!window.__hoverPreview) {
+        const el = document.createElement('div');
+        el.className = 'hover-preview';
+        el.innerHTML = `
+          <div class="hp-banner"></div>
+          <div class="hp-body">
+            <div class="hp-title">Title</div>
+            <div class="hp-meta">98% Match • 95m • HD</div>
+            <div class="hp-btns">
+              <button class="hp-btn" title="Play"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg></button>
+              <button class="hp-btn secondary" title="Add"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+            <div class="hp-chips"></div>
+          </div>`;
+        document.body.appendChild(el);
+        window.__hoverPreview = el;
+      }
+      return window.__hoverPreview;
     }
-    const hp = window.__hoverPreview;
-    // Track which shelf spawned the preview so wheel-on-preview scrolls that row
-    let lastActiveShelf = null;
-    // Route wheel on preview to last active shelf
-    hp.addEventListener('wheel', (e) => {
-      if (lastActiveShelf && typeof lastActiveShelf._moveBy === 'function') {
-        e.preventDefault();
-        lastActiveShelf._moveBy(-e.deltaY);
-      }
-    }, { passive: false });
+    const hp = getHoverPreview();
 
-    // Shared preview timers / hide control
-    let hoverTimer = null, hideTimer = null;
+    // ---------- Data ----------
+    const shelves = document.querySelectorAll('.shelf-row');
+    const rowsLetters = ['A','B','C'];
+    const palette = ['bg-neutral-800','bg-blue-800','bg-green-800','bg-amber-800','bg-purple-800','bg-rose-700','bg-teal-800','bg-orange-600','bg-sky-700','bg-lime-700'];
+    const makeRowData = (L)=> Array.from({length:ITEMS_PER_ROW}, (_,i)=>({ key:`${L}${i+1}`, color:palette[i%palette.length] }));
+
+    // ---------- Helpers ----------
+    const clamp = (x,min,max)=> Math.max(min, Math.min(max, x));
+
+    // Preview control state
+    let hoverTimer = null;
     let currentPreviewCard = null;
-    const smoothHide = () => { hp.style.opacity='0'; hp.style.transform='translate(0,0) scale(.98)'; hideTimer = setTimeout(()=>{ hp.classList.remove('show'); }, HIDE_DELAY); };
-    const cancelPreview = () => { clearTimeout(hoverTimer); clearTimeout(hideTimer); smoothHide(); };
-    window.addEventListener('scroll', cancelPreview, { passive: true });
-    hp.addEventListener('mouseenter', () => clearTimeout(hideTimer));
-    hp.addEventListener('mouseleave', smoothHide);
+    let lastActiveShelf = null;
 
-    // While hovering the preview, let the cursor "slide" to the card under it.
-    // We temporarily disable pointer-events on the preview to hit-test the card beneath.
-    hp.addEventListener('mousemove', (e) => {
-      // Don't retarget if interacting with buttons/text inside the body area
-      if (e.target.closest('.hp-body')) return;
-      const prevPE = hp.style.pointerEvents;
+    function hidePreviewImmediate(){
+      clearTimeout(hoverTimer);
+      hp.classList.remove('show');
       hp.style.pointerEvents = 'none';
-      const el = document.elementFromPoint(e.clientX, e.clientY);
-      hp.style.pointerEvents = prevPE || 'auto';
-      const card = el && el.closest ? el.closest('.content-card') : null;
-      if (card && card !== currentPreviewCard) {
-        const label = card.querySelector('.relative.z-10')?.textContent.trim() || '';
-        clearTimeout(hoverTimer);
-        clearTimeout(hideTimer);
-        showPreview(card, label); // immediate swap without delay
-      }
+      hp.style.opacity = '0';
+      hp.style.transform = 'translate(0,0) scale(0.98)';
+      currentPreviewCard = null;
+    }
+
+    // Close when mouse leaves the preview box
+    hp.addEventListener('mouseleave', hidePreviewImmediate);
+    hp.addEventListener('pointerleave', hidePreviewImmediate);
+
+    // Extra hard closes
+    document.addEventListener('pointerdown', hidePreviewImmediate, true);   // any click
+    window.addEventListener('blur', hidePreviewImmediate);                  // window loses focus
+    document.addEventListener('pointerout', (e)=>{                          // pointer leaves window
+      if (!e.relatedTarget) hidePreviewImmediate();
+    }, true);
+
+    // Hard guard #1: if the pointer lands on ANY element that is not inside the preview, hide it immediately.
+    // Use capture so it triggers even when other elements stop propagation.
+    document.addEventListener('pointerover', (e) => {
+      if (!hp.classList.contains('show')) return;
+      if (!hp.contains(e.target)) hidePreviewImmediate();
+    }, true);
+
+    // Hard guard #2: if we hover another tile while preview is open, close immediately
+    document.addEventListener('pointerover', (e) => {
+      if (!hp.classList.contains('show')) return;
+      const otherCard = e.target.closest('.content-card');
+      if (otherCard && otherCard !== currentPreviewCard) hidePreviewImmediate();
+    }, true);
+
+    // Hard guard #3: if the pointer is neither over the preview NOR the originating card, close
+    document.addEventListener('mousemove', (e) => {
+      if (!hp.classList.contains('show') || !currentPreviewCard) return;
+      const pr = hp.getBoundingClientRect();
+      const cr = currentPreviewCard.getBoundingClientRect();
+      const inPreview = e.clientX>=pr.left && e.clientX<=pr.right && e.clientY>=pr.top && e.clientY<=pr.bottom;
+      const inCard = e.clientX>=cr.left && e.clientX<=cr.right && e.clientY>=cr.top && e.clientY<=cr.bottom;
+      if (!inPreview && !inCard) hidePreviewImmediate();
     });
 
+    // Hard guard #4: hit-testing so we close even if layouts/transforms fool target/bounds
+    document.addEventListener('pointermove', (e) => {
+      if (!hp.classList.contains('show')) return;
+      const topEl = document.elementFromPoint(e.clientX, e.clientY);
+      if (!topEl) return;
+      const overPreview = hp.contains(topEl);
+      const overOrigin  = currentPreviewCard && currentPreviewCard.contains(topEl);
+      if (!overPreview && !overOrigin) hidePreviewImmediate();
+    }, {passive:true});
+
+    // Global wheel closes preview instantly
+    window.addEventListener('wheel', ()=>{ if (hp.classList.contains('show')) hidePreviewImmediate(); }, {passive:true});
+
     // Show preview near a card
-    const showPreview = (cardEl, label) => {
-      // Remember owning shelf for wheel routing
+    function showPreview(cardEl, label){
       lastActiveShelf = cardEl.closest('.shelf-row');
       currentPreviewCard = cardEl;
-      const rect = cardEl.getBoundingClientRect();
-      const w = Math.min(PREVIEW_MAX_W, Math.max(PREVIEW_MIN_W, rect.width * PREVIEW_SCALE));
-      const estH = w * 9/16 + PREVIEW_BODY_EXTRA; // banner + body
-      const left = Math.max(16, Math.min(rect.left, innerWidth - w - 16));
-      const top  = Math.max(16, Math.min(rect.top - estH * 0.28, innerHeight - estH - 16));
 
-      // Set target box size and anchor
+      const rect = cardEl.getBoundingClientRect();
+      const w = PREVIEW_MIN_W; // fixed
+      const estH = w * 9/16 + PREVIEW_BODY_EXTRA;
+      const left = clamp(rect.left, 16, innerWidth - w - 16);
+      const top  = clamp(rect.top - estH * 0.28, 16, innerHeight - estH - 16);
+
       hp.style.width = w+'px';
       hp.style.left  = left+'px';
       hp.style.top   = top+'px';
 
-      // Content fill
       const cssVar = `--${label}`;
       const bg = getComputedStyle(document.documentElement).getPropertyValue(cssVar);
       hp.querySelector('.hp-banner').style.backgroundImage = bg && bg.trim()? bg : 'linear-gradient(135deg,#1f2937,#0f172a)';
       hp.querySelector('.hp-title').textContent = label;
       hp.querySelector('.hp-chips').textContent = 'Action • Sci‑Fi • Trending';
 
-      // Morph from card -> preview using transforms (origin top-left)
+      // Morph in
       const startTx = rect.left - left;
       const startTy = rect.top  - top;
       const sx = rect.width / w;
       const sy = rect.height / estH;
-
-      // Prepare start state
       hp.classList.add('show');
+      hp.style.pointerEvents = 'auto';
       hp.style.opacity = '0';
       hp.style.transform = `translate(${startTx}px, ${startTy}px) scale(${sx}, ${sy})`;
+      requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ hp.style.opacity='1'; hp.style.transform='translate(0,0) scale(1,1)'; }); });
+    }
 
-      // Next frame -> animate to final
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          hp.style.opacity = '1';
-          hp.style.transform = 'translate(0,0) scale(1,1)';
-        });
-      });
-    };
-
-    // Build each shelf
+    // ---------- Build shelves ----------
     shelves.forEach((shelf, idx) => {
-      const rowData = makeRowData(idx);
+      // Track element
       const track = document.createElement('div');
-      track.classList.add('card-track','flex','space-x-3','isolate','drag-grab');
-      track.style.position='relative';
+      track.className = 'card-track flex space-x-3 isolate drag-grab';
+      track.style.position = 'relative';
 
-      // Repeat data for wrap + add COMING SOON banner
-      let html='';
+      // Data for this row
+      const rowData = makeRowData(rowsLetters[idx] || 'X');
+      let html = '';
       for(let s=0;s<NUM_SETS;s++){
         for(let i=0;i<rowData.length;i++){
-          html += createCardHTML(rowData[i], i===0);
+          const item = rowData[i];
+          const cssVar = `--${item.key}`;
+          const resistClass = i===0 ? 'resist-first' : '';
+          html += `
+            <div class="relative flex-shrink-0 w-56 md:w-64 h-32 md:h-36 group ${resistClass}">
+              <div class="content-card absolute inset-0 ${item.color} rounded-lg overflow-hidden cursor-pointer flex items-center justify-center">
+                <div class="absolute inset-0" style="background-image:var(${cssVar}, none); background-size:cover; background-position:center;"></div>
+                <div class="relative z-10 text-white text-3xl md:text-4xl font-extrabold tracking-wide select-none">${item.key}</div>
+                <div class="info-panel absolute left-0 bottom-0 w-full h-full bg-gradient-to-t from-black/60 via-black/20 to-transparent p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+              </div>
+            </div>`;
         }
       }
+      // Pink COMING SOON plank
       html += `
         <div class="relative flex-shrink-0 w-[1200px] md:w-[1600px] h-32 md:h-36 rounded-xl bg-pink-600/90 flex items-center justify-center px-6">
           <div class="w-full text-black font-extrabold tracking-widest uppercase text-xl md:text-2xl whitespace-nowrap overflow-hidden">COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON</div>
         </div>`;
+
       track.innerHTML = html;
       shelf.appendChild(track);
 
-      // Hover behavior with delay; cancel on scroll
-      track.querySelectorAll('.content-card').forEach(card => {
-        const label = card.querySelector('.relative.z-10')?.textContent.trim() || '';
-        card.addEventListener('mouseenter', () => {
-          clearTimeout(hideTimer);
-          card.parentElement.style.zIndex='1000';
-          if (hp.classList.contains('show')) {
-            showPreview(card, label);
-          } else {
-            hoverTimer = setTimeout(() => showPreview(card, label), PREVIEW_DELAY);
-          }
-        });
-        card.addEventListener('mouseleave', () => {
-          card.parentElement.style.zIndex='';
-          clearTimeout(hoverTimer);
-          hideTimer = setTimeout(() => { if (!hp.matches(':hover')) hp.classList.remove('show'); }, HIDE_DELAY);
-        });
-      });
-
-      // Measure set width and position start at set 2
+      // Measure one-set width and set initial X to -setWidth (start at set 2)
       const setWidth = track.children[ITEMS_PER_ROW].offsetLeft;
       shelf.dataset.setWidth = String(setWidth);
-      let currentX = -setWidth; 
+      let currentX = -setWidth;
       shelf.dataset.currentX = String(currentX);
-      track.style.transform = `translateX(${currentX}px)`; 
-      track.style.transition='transform 120ms linear';
+      track.style.transform = `translateX(${currentX}px)`;
+      track.style.transition = 'transform 120ms linear';
 
-      // Edge resistance helpers
+      // Resistance helpers
       const firstTileEl = ()=> track.children[ITEMS_PER_ROW];
       const setFirstScale = (overflow)=>{ const s=1+Math.min(MAX_PULL,Math.max(0,overflow))/(MAX_PULL/(MAX_SCALE-1)); const el=firstTileEl(); el.classList.add('edge-active'); el.style.transform=`scaleX(${Math.min(s,MAX_SCALE)})`; };
       const clearFirstScale = ()=>{ const el=firstTileEl(); el.style.transform='none'; el.classList.remove('edge-active'); };
       const clampWithResistance = (x)=>{ const w=+shelf.dataset.setWidth; if(x>-w){ const raw=x+w; const pull=Math.min(MAX_PULL, raw*PULL_FEEL); setFirstScale(pull); return -w+pull; } clearFirstScale(); return x; };
       const wrapRightIfNeeded = (x)=>{ const w=+shelf.dataset.setWidth; if(x<-(NUM_SETS)*w) x += (NUM_SETS-1)*w; return x; };
 
-      // Arrows
-      const leftArrow=document.createElement('button');
-      leftArrow.className='shelf-nav-left absolute left-0 top-1/2 -translate-y-1/2 z-40 bg-black/80 hover:bg-black/90 p-3 rounded-r-full opacity-0 transition-opacity duration-300 hidden md:block group-hover/shelf:opacity-100';
-      leftArrow.innerHTML='<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>';
-      leftArrow.onclick=()=>{ let x=+shelf.dataset.currentX; x+=scrollDistance; x=clampWithResistance(x); shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`; };
-      shelf.parentElement.style.position='relative'; leftArrow.style.left='1.5rem'; shelf.parentElement.appendChild(leftArrow);
+      // Movement helper
+      const moveBy = (delta) => { let x = +shelf.dataset.currentX + delta; x = clampWithResistance(x); x = wrapRightIfNeeded(x); shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`; };
+      shelf._moveBy = moveBy; // expose
 
-      const rightArrow=document.createElement('button');
-      rightArrow.className='shelf-nav-right absolute right-0 top-1/2 -translate-y-1/2 z-40 bg-black/80 hover:bg-black/90 p-3 rounded-l-full opacity-0 transition-opacity duration-300 hidden md:block group-hover/shelf:opacity-100';
-      rightArrow.innerHTML='<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>';
-      rightArrow.onclick=()=>{ let x=+shelf.dataset.currentX; x-=scrollDistance; x=wrapRightIfNeeded(x); clearFirstScale(); shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`; };
-      rightArrow.style.right='1.5rem'; shelf.parentElement.appendChild(rightArrow);
-
-      // Wheel scroll -> horizontal translate
-      // Movement helper for this shelf
-      const moveBy = (delta) => {
-        let x = +shelf.dataset.currentX + delta;
-        x = clampWithResistance(x);
-        x = wrapRightIfNeeded(x);
-        shelf.dataset.currentX = String(x);
-        track.style.transform = `translateX(${x}px)`;
-      };
-      // expose for preview wheel routing
-      shelf._moveBy = moveBy;
-
-      // Wheel scroll -> horizontal translate
+      // Mouse wheel -> horizontal translate, also close preview
       shelf.addEventListener('wheel', (e)=>{
-        e.preventDefault(); hp.classList.remove('show');
-        moveBy(-e.deltaY);
+        e.preventDefault();
+        const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+        moveBy(-delta);
+        hidePreviewImmediate();
       }, {passive:false});
 
-      // Pointer drag to scroll with inertia
-      let isDragging=false, startX=0, lastX=0, v=0, dragAccum=0, inertiaId=null;
+      // Pointer dragging with inertia
+      let isDragging=false, lastX=0, v=0, inertiaId=null;
       const stopInertia=()=>{ if(inertiaId){ cancelAnimationFrame(inertiaId); inertiaId=null; } };
-      const onPointerDown=(e)=>{
-        if(e.button !== undefined && e.button !== 0) return;
-        stopInertia();
-        isDragging=true; startX=e.clientX; lastX=startX; v=0; dragAccum=0;
+      shelf.addEventListener('pointerdown',(e)=>{
+        if(e.button!==undefined && e.button!==0) return;
+        stopInertia(); isDragging=true; lastX=e.clientX; v=0;
         track.classList.remove('drag-grab'); track.classList.add('drag-grabbing');
-        hp.classList.remove('show');
-        try { shelf.setPointerCapture(e.pointerId); } catch(_) {}
-      };
-      const onPointerMove=(e)=>{
+        hidePreviewImmediate();
+        try{ shelf.setPointerCapture(e.pointerId);}catch(_){ }
+      });
+      window.addEventListener('pointermove',(e)=>{
         if(!isDragging) return;
-        const dx = e.clientX - lastX; lastX = e.clientX; v = dx; dragAccum += Math.abs(dx);
-        let x = +shelf.dataset.currentX + dx;
-        x = clampWithResistance(x); x = wrapRightIfNeeded(x);
-        shelf.dataset.currentX = String(x);
-        track.style.transform = `translateX(${x}px)`;
-      };
-      const onPointerUp=(e)=>{
-        if(!isDragging) return;
-        isDragging=false; track.classList.remove('drag-grabbing'); track.classList.add('drag-grab');
-        try { shelf.releasePointerCapture(e.pointerId); } catch(_) {}
+        const dx=e.clientX-lastX; lastX=e.clientX; v=dx;
+        let x=+shelf.dataset.currentX+dx; x=clampWithResistance(x); x=wrapRightIfNeeded(x);
+        shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`;
+      });
+      const endDrag=(e)=>{
+        if(!isDragging) return; isDragging=false;
+        track.classList.remove('drag-grabbing'); track.classList.add('drag-grab');
+        try{ shelf.releasePointerCapture(e.pointerId);}catch(_){ }
         const step=()=>{
-          if(Math.abs(v) < DRAG_MIN_VELOCITY){ inertiaId=null; return; }
-          let x = +shelf.dataset.currentX + v;
-          x = clampWithResistance(x); x = wrapRightIfNeeded(x);
-          shelf.dataset.currentX = String(x);
-          track.style.transform = `translateX(${x}px)`;
-          v *= DRAG_DECAY; inertiaId = requestAnimationFrame(step);
-        };
-        inertiaId = requestAnimationFrame(step);
-        if (dragAccum > DRAG_PREVIEW_BLOCK) { hp.classList.remove('show'); }
+          if(Math.abs(v)<DRAG_MIN_VELOCITY){ inertiaId=null; return; }
+          let x=+shelf.dataset.currentX+v; x=clampWithResistance(x); x=wrapRightIfNeeded(x);
+          shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`; v*=DRAG_DECAY;
+          inertiaId=requestAnimationFrame(step);
+        }; inertiaId=requestAnimationFrame(step);
       };
-      shelf.addEventListener('pointerdown', onPointerDown);
-      window.addEventListener('pointermove', onPointerMove);
-      window.addEventListener('pointerup', onPointerUp);
-      window.addEventListener('pointercancel', onPointerUp);
+      window.addEventListener('pointerup', endDrag);
+      window.addEventListener('pointercancel', endDrag);
 
-      // Snap on leave
-      shelf.addEventListener('mouseleave', ()=>{ const w=+shelf.dataset.setWidth; if(+shelf.dataset.currentX>-w){ shelf.dataset.currentX=String(-w); track.style.transform=`translateX(${-w}px)`; } clearFirstScale(); });
+      // Snap back on leave to remove stretched first tile
+      shelf.addEventListener('mouseleave',()=>{ const w=+shelf.dataset.setWidth; if(+shelf.dataset.currentX>-w){ shelf.dataset.currentX=String(-w); track.style.transform=`translateX(${-w}px)`; } clearFirstScale(); });
+
+      // Hover to show preview
+      track.querySelectorAll('.content-card').forEach(card=>{
+        const label = card.querySelector('.relative.z-10')?.textContent.trim() || '';
+        card.addEventListener('mouseenter', ()=>{
+          // If another card's preview is open, close and require fresh hover
+          if (hp.classList.contains('show') && currentPreviewCard && currentPreviewCard!==card) {
+            hidePreviewImmediate();
+          }
+          clearTimeout(hoverTimer);
+          hoverTimer = setTimeout(()=> showPreview(card, label), PREVIEW_DELAY);
+        });
+        card.addEventListener('mouseleave', ()=>{ clearTimeout(hoverTimer); });
+      });
     });
 
     // Public helper: set image for all duplicates of a key
     window.setThumb = (key, url) => { document.documentElement.style.setProperty(`--${key}`, `url(${url})`); };
 
-    // Smoke tests (console)
+    // ---------- Smoke tests ----------
     console.group('[StreamVerse tests]');
-    console.assert(document.querySelectorAll('.shelf-row').length === 3, 'Three shelves expected');
-    console.assert(typeof window.setThumb === 'function', 'setThumb exposed');
-    console.assert(!!window.__hoverPreview, 'Hover preview element exists');
-    const lefts = document.querySelectorAll('.shelf-nav-left').length;
-    const rights = document.querySelectorAll('.shelf-nav-right').length;
-    console.assert(lefts === 3 && rights === 3, 'Arrow buttons present for each shelf');
+    console.assert(document.querySelectorAll('.shelf-row').length===3, '3 shelves expected');
+    console.assert(!!window.__hoverPreview, 'hover preview element exists');
+    console.assert(typeof window.setThumb==='function','setThumb exposed');
+    console.assert(getComputedStyle(document.querySelector('.hover-preview')).pointerEvents==='none','preview overlay pointer-events none');
+    console.assert(document.querySelectorAll('.content-card').length>=30,'cards rendered');
+
+    // Extra tests: preview hide on mouseleave and programmatic open/close
+    (function(){
+      const hp = window.__hoverPreview;
+      const okOpenClose = ()=>{
+        hp.classList.add('show');
+        hp.dispatchEvent(new Event('mouseleave'));
+        return !hp.classList.contains('show');
+      };
+      console.assert(okOpenClose(), 'Preview hides on mouseleave event');
+    })();
     console.groupEnd();
   });
   </script>
