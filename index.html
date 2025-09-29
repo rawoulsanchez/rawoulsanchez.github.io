@@ -52,37 +52,50 @@
     /* Drag cursors */
     .drag-grab { cursor: grab; }
     .drag-grabbing { cursor: grabbing; user-select: none; }
-  
-    /* Prevent page scroll hijack when interacting with a shelf */
-    .shelf-row { overscroll-behavior: contain; }
+  /* Mobile-friendly horizontal scrolling */
+.shelf-row{
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  touch-action: pan-x;
+}
+.card-track > .relative{ scroll-snap-align: start; }
     @media (prefers-reduced-motion: reduce) {
   .content-card,
   .hover-preview { transition: none !important; }
 }
     .content-card:focus-visible { outline: 3px solid #e50914; outline-offset: 2px; }
+    @media (max-width: 768px){
+  /* simpler header */
+  nav ul{ display:none; }
+
+  /* lighter swipe: smaller tiles */
+  .card-track .relative{ width:10rem; height:6rem; }
+
+  /* disable desktop-only hover UI */
+  .hover-preview{ display:none !important; }
+}
+    @media (max-width: 768px){
+  /* Simplify hero on phones */
+  .hero{ min-height:70vh; background-image:url('https://placehold.co/1200x800/0f0f10/ffffff?text=SanchezNinjah'); background-size:cover; background-position:center; }
+  .video-background-container{ display:none; }  /* remove autoplay video on mobile */
+
+  /* Stop big hover zoom on cards (prevents jitter) */
+  .content-card:hover{ transform:none !important; box-shadow:none !important; z-index:auto !important; }
+}
   </style>
 </head>
 <body class="overflow-x-hidden">
   <!-- Fixed Navigation Bar -->
   <nav class="fixed top-0 left-0 right-0 bg-gradient-to-b from-black/90 to-transparent p-4 z-[100] flex items-center justify-between">   <div class="flex items-center space-x-8">     <a href="/" class="text-2xl font-extrabold text-red-600 tracking-wider" aria-label="SanchezNinjah home">SanchezNinjah</a>     <ul class="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-300">       <li><a href="/" class="text-white font-bold border-b-2 border-red-600 pb-1" aria-current="page">Home</a></li>       <li><a href="/shows" class="hover:text-white">TV Shows</a></li>       <li><a href="/movies" class="hover:text-white">Movies</a></li>       <li><a href="/list" class="hover:text-white">My List</a></li>     </ul>   </div>   <div class="flex items-center space-x-4">     <svg aria-hidden="true" focusable="false" class="w-6 h-6 text-gray-300 hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>     <svg aria-hidden="true" focusable="false" class="w-6 h-6 text-gray-300 hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>   </div> </nav>
-    <div class="flex items-center space-x-8">
-      <h1 class="text-2xl font-extrabold text-red-600 tracking-wider">SanchezNinjah</h1>
-      <ul class="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-300">
-        <li><a class="text-white font-bold border-b-2 border-red-600 pb-1">Home</a></li>
-        <li><a class="hover:text-white">TV Shows</a></li>
-        <li><a class="hover:text-white">Movies</a></li>
-        <li><a class="hover:text-white">My List</a></li>
-      </ul>
-    </div>
-    <div class="flex items-center space-x-4">
-      <svg class="w-6 h-6 text-gray-300 hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <svg class="w-6 h-6 text-gray-300 hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-    </div>
-  </nav>
+     </nav>
 
   <h1 class="sr-only">SanchezNinjah portfolio</h1>
     <!-- Hero Section -->
-    <section class="relative h-screen flex items-end pb-24 md:pb-32 text-white">
+    <section class="hero relative h-screen flex items-end pb-24 md:pb-32 text-white">
       <div class="video-background-container">
         <iframe   src="https://www.youtube-nocookie.com/embed/6stlCkUDG_s?autoplay=1&mute=1&loop=1&playlist=6stlCkUDG_s&controls=0&modestbranding=1"   title="Background trailer"   playsinline   referrerpolicy="strict-origin-when-cross-origin"   frameborder="0"   allow="autoplay; encrypted-media"   allowfullscreen></iframe>
       </div>
@@ -93,7 +106,7 @@
         <p class="text-base md:text-xl text-gray-200 mb-8 font-light">As a rogue AI network threatens global collapse, a disgraced former agent is called back into the field for one last, impossible mission to save humanity.</p>
         <div class="flex space-x-4">
           <button type="button" class="bg-white hover:bg-gray-200 text-black font-bold py-3 px-8 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center space-x-2">
-            <svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg>
+            <svg aria-hidden="true" focusable="false" class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg>
             <span class="text-lg">Play Now</span>
           </button>
           <button type="button" class="bg-gray-700/70 hover:bg-gray-600/70 text-white font-bold py-3 px-8 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center space-x-2">
@@ -108,15 +121,15 @@
     <section class="relative z-10 space-y-2 px-0 md:px-8 pb-12 -mt-40">
       <div class="content-shelf px-6 md:px-4">
         <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Popular on Stream (Scrolls Left)</h3>
-        <div class="shelf-row relative overflow-hidden py-4 group/shelf"></div>
+        <div class="shelf-row relative overflow-x-auto overflow-y-hidden no-scrollbar py-4 group/shelf"></div>
       </div>
       <div class="content-shelf px-6 md:px-4">
         <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Trending Now (Scrolls Right)</h3>
-        <div class="shelf-row relative overflow-hidden py-4 group/shelf"></div>
+        <div class="shelf-row relative overflow-x-auto overflow-y-hidden no-scrollbar py-4 group/shelf"></div>
       </div>
       <div class="content-shelf px-6 md:px-4">
         <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Design Inspiration (Scrolls Left)</h3>
-        <div class="shelf-row relative overflow-hidden py-4 group/shelf"></div>
+        <div class="shelf-row relative overflow-x-auto overflow-y-hidden no-scrollbar py-4 group/shelf"></div>
       </div>
     </section>
   </main>
@@ -323,61 +336,75 @@
       const moveBy = (delta) => { let x = +shelf.dataset.currentX + delta; x = clampWithResistance(x); x = wrapRightIfNeeded(x); shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`; };
       shelf._moveBy = moveBy; // expose
 
-      // Mouse wheel -> horizontal translate, also close preview
-      shelf.addEventListener('wheel', (e)=>{
-        e.preventDefault();
-        const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-        moveBy(-delta);
-        hidePreviewImmediate();
-      }, {passive:false});
+const isCoarse = window.matchMedia('(pointer:coarse)').matches;
+// Mouse wheel -> horizontal translate (desktop only)
+if (!isCoarse) {
+  shelf.addEventListener('wheel', (e)=>{
+    e.preventDefault();
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    moveBy(-delta);
+    hidePreviewImmediate();
+  }, {passive:false});
+}
 
-      // Pointer dragging with inertia
-      let isDragging=false, lastX=0, v=0, inertiaId=null;
-      const stopInertia=()=>{ if(inertiaId){ cancelAnimationFrame(inertiaId); inertiaId=null; } };
-      shelf.addEventListener('pointerdown',(e)=>{
-        if(e.button!==undefined && e.button!==0) return;
-        stopInertia(); isDragging=true; lastX=e.clientX; v=0;
-        track.classList.remove('drag-grab'); track.classList.add('drag-grabbing');
-        hidePreviewImmediate();
-        try{ shelf.setPointerCapture(e.pointerId);}catch(_){ }
-      });
-      window.addEventListener('pointermove',(e)=>{
-        if(!isDragging) return;
-        const dx=e.clientX-lastX; lastX=e.clientX; v=dx;
-        let x=+shelf.dataset.currentX+dx; x=clampWithResistance(x); x=wrapRightIfNeeded(x);
-        shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`;
-      });
-      const endDrag=(e)=>{
-        if(!isDragging) return; isDragging=false;
-        track.classList.remove('drag-grabbing'); track.classList.add('drag-grab');
-        try{ shelf.releasePointerCapture(e.pointerId);}catch(_){ }
-        const step=()=>{
-          if(Math.abs(v)<DRAG_MIN_VELOCITY){ inertiaId=null; return; }
-          let x=+shelf.dataset.currentX+v; x=clampWithResistance(x); x=wrapRightIfNeeded(x);
-          shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`; v*=DRAG_DECAY;
-          inertiaId=requestAnimationFrame(step);
-        }; inertiaId=requestAnimationFrame(step);
-      };
-      window.addEventListener('pointerup', endDrag);
-      window.addEventListener('pointercancel', endDrag);
+     // Pointer dragging with inertia (desktop only)
+if (!isCoarse) {
+  let isDragging=false, lastX=0, v=0, inertiaId=null;
+  const stopInertia=()=>{ if(inertiaId){ cancelAnimationFrame(inertiaId); inertiaId=null; } };
+  shelf.addEventListener('pointerdown',(e)=>{
+    if(e.button!==undefined && e.button!==0) return;
+    stopInertia(); isDragging=true; lastX=e.clientX; v=0;
+    track.classList.remove('drag-grab'); track.classList.add('drag-grabbing');
+    hidePreviewImmediate();
+    try{ shelf.setPointerCapture(e.pointerId);}catch(_){ }
+  });
+  window.addEventListener('pointermove',(e)=>{
+    if(!isDragging) return;
+    const dx=e.clientX-lastX; lastX=e.clientX; v=dx;
+    let x=+shelf.dataset.currentX+dx; x=clampWithResistance(x); x=wrapRightIfNeeded(x);
+    shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`;
+  });
+  const endDrag=(e)=>{
+    if(!isDragging) return; isDragging=false;
+    track.classList.remove('drag-grabbing'); track.classList.add('drag-grab');
+    try{ shelf.releasePointerCapture(e.pointerId);}catch(_){ }
+    const step=()=>{
+      if(Math.abs(v)<DRAG_MIN_VELOCITY){ inertiaId=null; return; }
+      let x=+shelf.dataset.currentX+v; x=clampWithResistance(x); x=wrapRightIfNeeded(x);
+      shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`; v*=DRAG_DECAY;
+      inertiaId=requestAnimationFrame(step);
+    }; inertiaId=requestAnimationFrame(step);
+  };
+  window.addEventListener('pointerup', endDrag);
+  window.addEventListener('pointercancel', endDrag);
+} else {
+  // Touch devices: rely on native horizontal scroll
+  track.style.transition = '';
+  track.style.transform = ''; // no transform; use native scroll position
+  track.classList.remove('drag-grab','drag-grabbing');
+}
 
       // Snap back on leave to remove stretched first tile
       shelf.addEventListener('mouseleave',()=>{ const w=+shelf.dataset.setWidth; if(+shelf.dataset.currentX>-w){ shelf.dataset.currentX=String(-w); track.style.transform=`translateX(${-w}px)`; } clearFirstScale(); });
 
-      // Hover to show preview
-      track.querySelectorAll('.content-card').forEach(card=>{
-        const label = card.querySelector('.relative.z-10')?.textContent.trim() || '';
-        card.addEventListener('mouseenter', ()=>{
-          // If another card's preview is open, close and require fresh hover
-          if (hp.classList.contains('show') && currentPreviewCard && currentPreviewCard!==card) {
-            hidePreviewImmediate();
-          }
-          clearTimeout(hoverTimer);
-          hoverTimer = setTimeout(()=> showPreview(card, label), PREVIEW_DELAY);
-        });
-        card.addEventListener('mouseleave', ()=>{ clearTimeout(hoverTimer); });
-      });
+// Hover on desktop. Tap-only on touch.
+track.querySelectorAll('.content-card').forEach(card=>{
+  const label = card.querySelector('.relative.z-10')?.textContent.trim() || '';
+  card.setAttribute('tabindex','0');
+
+  if (!isCoarse) {
+    card.addEventListener('mouseenter', ()=>{
+      if (hp.classList.contains('show') && currentPreviewCard && currentPreviewCard!==card) hidePreviewImmediate();
+      clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(()=> showPreview(card, label), PREVIEW_DELAY);
     });
+    card.addEventListener('mouseleave', ()=>{ clearTimeout(hoverTimer); });
+    card.addEventListener('focus', ()=>{ clearTimeout(hoverTimer); showPreview(card, label); });
+  } else {
+    // Touch: native swipe only; tap can open details later
+    card.addEventListener('click', ()=>{ /* open details for mobile if needed */ });
+  }
+});
 
     // Public helper: set image for all duplicates of a key
     window.setThumb = (key, url) => { document.documentElement.style.setProperty(`--${key}`, `url(${url})`); };
