@@ -63,6 +63,10 @@
   touch-action: pan-x;
 }
 .card-track > .relative{ scroll-snap-align: start; }
+@media (max-width: 768px){
+  .card-track > .relative{ scroll-snap-align: center; }
+  .shelf-row{ scroll-snap-type: x proximity; scroll-padding-inline: 50%; }
+}
 
 /* Extra headroom on phones for scaled cards */
 @media (max-width: 768px){
@@ -91,7 +95,7 @@
   /* Stop big hover zoom on cards (prevents jitter) */
   .content-card:hover{ transform:none !important; box-shadow:none !important; z-index:auto !important; }
 }
-    @media (max-width: 768px){
+@media (max-width: 768px){
   .dock-card{ transform-origin: center center; transition: transform 180ms cubic-bezier(.2,.8,.2,1), z-index 0s; }
 }
   </style>
@@ -409,9 +413,8 @@ if (isCoarse) {
       const c  = cr.left + cr.width / 2;
       const dist  = Math.abs(c - center);
       const norm  = Math.min(1, dist / (r.width * 0.5)); // 0 center, 1 far edge
-      const scale = 1.0 + (1 - norm) * 0.45;             // up to ~1.45x at center
-      const drop  = norm * 18;                            // lower outer cards
-
+      const scale = 1.0 + (1 - norm) * 0.42;     // slightly softer
+      const drop  = 6 + norm * 14;               // add base offset so center isn't higher
       card.style.transform = `translateY(${drop}px) scale(${scale})`;
       card.style.zIndex = String(1000 - Math.round(norm * 1000));
     });
@@ -451,11 +454,14 @@ if (isCoarse) {
 
   const scheduleAlign = () => {
     if (alignTimer) clearTimeout(alignTimer);
-    alignTimer = setTimeout(centerNearest, 120);
+    alignTimer = setTimeout(centerNearest, 240); // slower, more natural
   };
 
+  // run once on load, and after user scrolls or resizes
+  requestAnimationFrame(centerNearest);
   shelf.addEventListener('scroll', scheduleAlign, { passive: true });
   window.addEventListener('resize', scheduleAlign);
+  shelf.addEventListener('touchend', scheduleAlign, { passive: true });
 }
 
       // Snap back on leave to remove stretched first tile
