@@ -70,7 +70,8 @@
 
 /* Extra headroom on phones for scaled cards */
 @media (max-width: 768px){
-  .shelf-row{ padding-block: 1.25rem; }
+  .shelf-row{ padding-block: 0.5rem; }   /* tighter rows */
+  .dock-card{ overflow: visible; }       /* keep rounded corners visible */
 }
     @media (prefers-reduced-motion: reduce) {
   .content-card,
@@ -413,10 +414,15 @@ if (isCoarse) {
       const c  = cr.left + cr.width / 2;
       const dist  = Math.abs(c - center);
       const norm  = Math.min(1, dist / (r.width * 0.5)); // 0 center, 1 far edge
-      const scale = 1.0 + (1 - norm) * 0.42;     // slightly softer
-      const drop  = 6 + norm * 14;               // add base offset so center isn't higher
-      card.style.transform = `translateY(${drop}px) scale(${scale})`;
-      card.style.zIndex = String(1000 - Math.round(norm * 1000));
+const scale = 1.0 + (1 - norm) * 0.40;   // slightly softer
+const drop  = 4 + norm * 10;             // less vertical shift
+
+const inner = card.querySelector('.content-card');
+if (inner) {
+  inner.style.transform = `translateY(${drop}px) scale(${scale})`;
+  inner.style.willChange = 'transform';
+}
+card.style.zIndex = String(1000 - Math.round(norm * 1000));
     });
   };
 
