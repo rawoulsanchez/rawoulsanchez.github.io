@@ -73,7 +73,7 @@
   nav ul{ display:none; }
 
   /* lighter swipe: smaller tiles */
-  .card-track .relative{ width:10rem; height:6rem; }
+  .card-track .relative{ width:9rem; height:5.25rem; }
 
   /* disable desktop-only hover UI */
   .hover-preview{ display:none !important; }
@@ -85,6 +85,11 @@
 
   /* Stop big hover zoom on cards (prevents jitter) */
   .content-card:hover{ transform:none !important; box-shadow:none !important; z-index:auto !important; }
+}
+    @media (max-width: 768px){
+  .dock-card{ transform-origin: center bottom; transition: transform 180ms cubic-bezier(.2,.8,.2,1), z-index 0s; }
+  /* optional: slightly rounder cards on mobile */
+  .dock-card .content-card{ border-radius: 0.85rem; }
 }
   </style>
 </head>
@@ -299,7 +304,7 @@
           const cssVar = `--${item.key}`;
           const resistClass = i===0 ? 'resist-first' : '';
           html += `
-            <div class="relative flex-shrink-0 w-56 md:w-64 h-32 md:h-36 group ${resistClass}">
+            <div class="relative dock-card flex-shrink-0 w-56 md:w-64 h-32 md:h-36 group ${resistClass}">
               <div class="content-card absolute inset-0 ${item.color} rounded-lg overflow-hidden cursor-pointer flex items-center justify-center">
                 <div class="absolute inset-0" style="background-image:var(${cssVar}, none); background-size:cover; background-position:center;"></div>
                 <div class="relative z-10 text-white text-3xl md:text-4xl font-extrabold tracking-wide select-none">${item.key}</div>
@@ -387,6 +392,33 @@ setTimeout(()=>{ suppressHover = false; }, 150);
   track.style.transition = '';
   track.style.transform = ''; // no transform; use native scroll position
   track.classList.remove('drag-grab','drag-grabbing');
+}
+
+// Mobile dock magnification effect
+if (isCoarse) {
+  const cards = Array.from(track.querySelectorAll('.dock-card'));
+  const updateDock = () => {
+    const r = shelf.getBoundingClientRect();
+    const center = r.left + r.width / 2;
+
+    cards.forEach(card => {
+      const cr = card.getBoundingClientRect();
+      const c = cr.left + cr.width / 2;
+      const dist = Math.abs(c - center);
+      const norm = Math.min(1, dist / (r.width * 0.5)); // 0 center, 1 far edge
+
+      const scale = 1.0 + (1 - norm) * 0.45;           // up to ~1.45x at center
+      const drop  = norm * 18;                          // lower outer cards
+
+      card.style.transform = `translateY(${drop}px) scale(${scale})`;
+      card.style.zIndex = String(1000 - Math.round(norm * 1000));
+    });
+  };
+
+  // Run initially and on scroll/resize
+  updateDock();
+  shelf.addEventListener('scroll', updateDock, { passive: true });
+  window.addEventListener('resize', updateDock);
 }
 
       // Snap back on leave to remove stretched first tile
