@@ -190,7 +190,8 @@
     // Preview control state
     let hoverTimer = null;
     let currentPreviewCard = null;
-    let lastActiveShelf = null;
+    let lastActiveShelf = null; 
+    let suppressHover = false; // blocks preview during drag/scroll
 
     function hidePreviewImmediate(){
       clearTimeout(hoverTimer);
@@ -340,9 +341,12 @@ const isCoarse = window.matchMedia('(pointer:coarse)').matches;
 if (!isCoarse) {
   shelf.addEventListener('wheel', (e)=>{
     e.preventDefault();
+    suppressHover = true;
+    clearTimeout(hoverTimer);
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
     moveBy(-delta);
     hidePreviewImmediate();
+    setTimeout(()=>{ suppressHover = false; }, 150);
   }, {passive:false});
 }
 
@@ -353,8 +357,9 @@ if (!isCoarse) {
   shelf.addEventListener('pointerdown',(e)=>{
     if(e.button!==undefined && e.button!==0) return;
     stopInertia(); isDragging=true; lastX=e.clientX; v=0;
-    track.classList.remove('drag-grab'); track.classList.add('drag-grabbing');
-    hidePreviewImmediate();
+track.classList.remove('drag-grab'); track.classList.add('drag-grabbing');
+suppressHover = true; clearTimeout(hoverTimer);
+hidePreviewImmediate();
     try{ shelf.setPointerCapture(e.pointerId);}catch(_){ }
   });
   window.addEventListener('pointermove',(e)=>{
@@ -364,8 +369,9 @@ if (!isCoarse) {
     shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`;
   });
   const endDrag=(e)=>{
-    if(!isDragging) return; isDragging=false;
-    track.classList.remove('drag-grabbing'); track.classList.add('drag-grab');
+if(!isDragging) return; isDragging=false;
+track.classList.remove('drag-grabbing'); track.classList.add('drag-grab');
+setTimeout(()=>{ suppressHover = false; }, 150);
     try{ shelf.releasePointerCapture(e.pointerId);}catch(_){ }
     const step=()=>{
       if(Math.abs(v)<DRAG_MIN_VELOCITY){ inertiaId=null; return; }
@@ -392,13 +398,21 @@ track.querySelectorAll('.content-card').forEach(card=>{
   card.setAttribute('tabindex','0');
 
   if (!isCoarse) {
-    card.addEventListener('mouseenter', ()=>{
-      if (hp.classList.contains('show') && currentPreviewCard && currentPreviewCard!==card) hidePreviewImmediate();
-      clearTimeout(hoverTimer);
-      hoverTimer = setTimeout(()=> showPreview(card, label), PREVIEW_DELAY);
-    });
+card.addEventListener('mouseenter', ()=>{
+  if (suppressHover) return;
+  if (hp.classList.contains('show') && currentPreviewCard && currentPreviewCard!==card) hidePreviewImmediate();
+  clearTimeout(hoverTimer);
+  hoverTimer = setTimeout(()=>{
+    if (suppressHover) return;
+    showPreview(card, label);
+  }, PREVIEW_DELAY);
+});
     card.addEventListener('mouseleave', ()=>{ clearTimeout(hoverTimer); });
-    card.addEventListener('focus', ()=>{ clearTimeout(hoverTimer); showPreview(card, label); });
+   card.addEventListener('focus', ()=>{
+  if (suppressHover) return;
+  clearTimeout(hoverTimer);
+  showPreview(card, label);
+});
     } else {
     // Touch: native swipe only; tap can open details later
     card.addEventListener('click', ()=>{ /* open details for mobile if needed */ });
