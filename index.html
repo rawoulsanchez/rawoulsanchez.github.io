@@ -52,10 +52,10 @@
     /* Drag cursors */
     .drag-grab { cursor: grab; }
     .drag-grabbing { cursor: grabbing; user-select: none; }
-  /* Mobile-friendly horizontal scrolling */
+/* Mobile-friendly horizontal scrolling */
 .shelf-row{
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: visible;            /* changed from hidden */
   overscroll-behavior-x: contain;
   overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
@@ -63,6 +63,11 @@
   touch-action: pan-x;
 }
 .card-track > .relative{ scroll-snap-align: start; }
+
+/* Extra headroom on phones for scaled cards */
+@media (max-width: 768px){
+  .shelf-row{ padding-block: 1.25rem; }
+}
     @media (prefers-reduced-motion: reduce) {
   .content-card,
   .hover-preview { transition: none !important; }
@@ -87,9 +92,7 @@
   .content-card:hover{ transform:none !important; box-shadow:none !important; z-index:auto !important; }
 }
     @media (max-width: 768px){
-  .dock-card{ transform-origin: center bottom; transition: transform 180ms cubic-bezier(.2,.8,.2,1), z-index 0s; }
-  /* optional: slightly rounder cards on mobile */
-  .dock-card .content-card{ border-radius: 0.85rem; }
+  .dock-card{ transform-origin: center center; transition: transform 180ms cubic-bezier(.2,.8,.2,1), z-index 0s; }
 }
   </style>
 </head>
@@ -394,21 +397,20 @@ setTimeout(()=>{ suppressHover = false; }, 150);
   track.classList.remove('drag-grab','drag-grabbing');
 }
 
-// Mobile dock magnification effect
+      // Mobile dock magnification effect
 if (isCoarse) {
   const cards = Array.from(track.querySelectorAll('.dock-card'));
   const updateDock = () => {
     const r = shelf.getBoundingClientRect();
-    const center = r.left + r.width / 2;
+    const center = window.innerWidth / 2;    // viewport center
 
     cards.forEach(card => {
       const cr = card.getBoundingClientRect();
-      const c = cr.left + cr.width / 2;
-      const dist = Math.abs(c - center);
-      const norm = Math.min(1, dist / (r.width * 0.5)); // 0 center, 1 far edge
-
-      const scale = 1.0 + (1 - norm) * 0.45;           // up to ~1.45x at center
-      const drop  = norm * 18;                          // lower outer cards
+      const c  = cr.left + cr.width / 2;
+      const dist  = Math.abs(c - center);
+      const norm  = Math.min(1, dist / (r.width * 0.5)); // 0 center, 1 far edge
+      const scale = 1.0 + (1 - norm) * 0.45;             // up to ~1.45x at center
+      const drop  = norm * 18;                            // lower outer cards
 
       card.style.transform = `translateY(${drop}px) scale(${scale})`;
       card.style.zIndex = String(1000 - Math.round(norm * 1000));
@@ -419,6 +421,41 @@ if (isCoarse) {
   updateDock();
   shelf.addEventListener('scroll', updateDock, { passive: true });
   window.addEventListener('resize', updateDock);
+}
+      
+// Auto-center nearest card after scroll settles (mobile)
+if (isCoarse) {
+  let alignTimer = null;
+
+  const centerNearest = () => {
+    const cards = Array.from(track.querySelectorAll('.dock-card'));
+    if (!cards.length) return;
+
+    const viewportCenter = window.innerWidth / 2;
+    let best = { card: null, dist: Infinity };
+
+    cards.forEach(card => {
+      const cr = card.getBoundingClientRect();
+      const c  = cr.left + cr.width / 2;
+      const d  = Math.abs(c - viewportCenter);
+      if (d < best.dist) best = { card, dist: d };
+    });
+
+    if (!best.card) return;
+    const cardRect = best.card.getBoundingClientRect();
+    const targetLeft =
+      shelf.scrollLeft + (cardRect.left + cardRect.width / 2) - (shelf.clientWidth / 2);
+
+    shelf.scrollTo({ left: targetLeft, behavior: 'smooth' });
+  };
+
+  const scheduleAlign = () => {
+    if (alignTimer) clearTimeout(alignTimer);
+    alignTimer = setTimeout(centerNearest, 120);
+  };
+
+  shelf.addEventListener('scroll', scheduleAlign, { passive: true });
+  window.addEventListener('resize', scheduleAlign);
 }
 
       // Snap back on leave to remove stretched first tile
