@@ -22,9 +22,15 @@
     .content-card{ transition:transform .3s cubic-bezier(.25,.8,.25,1), box-shadow .3s ease; transform-origin:center; z-index:1 } .content-card:hover{ will-change: transform; }
     .content-card:hover{ transform:scale(1.4); z-index:999; box-shadow:0 15px 30px -5px rgba(0,0,0,.9) }
 
-    /* Shelves */
-    .content-shelf{ padding-top:5rem; margin-bottom:-4.5rem; content-visibility: auto; contain-intrinsic-size: 600px; } 
-    .content-shelf:last-of-type{ margin-bottom:0; padding-bottom:5rem }
+/* Shelves — consistent vertical rhythm */
+.content-shelf{
+  padding-top:2rem;
+  padding-bottom:2rem;
+  margin:0;
+  content-visibility:auto;
+  contain-intrinsic-size:600px;
+}
+.content-shelf:last-of-type{ padding-bottom:2.5rem }
 
     /* Hero video */
     .video-background-container{ position:absolute; inset:0; overflow:hidden; z-index:-2 }
@@ -133,15 +139,15 @@
     <section class="relative z-10 space-y-2 px-0 md:px-8 pb-12 -mt-40">
       <div class="content-shelf px-6 md:px-4">
         <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Popular on Stream (Scrolls Left)</h3>
-        <div class="shelf-row relative overflow-x-auto overflow-y-hidden no-scrollbar py-4 group/shelf"></div>
+        <div class="shelf-row relative overflow-x-auto overflow-y-hidden no-scrollbar py-2 group/shelf"></div>
       </div>
       <div class="content-shelf px-6 md:px-4">
         <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Trending Now (Scrolls Right)</h3>
-        <div class="shelf-row relative overflow-x-auto overflow-y-hidden no-scrollbar py-4 group/shelf"></div>
+        <div class="shelf-row relative overflow-x-auto overflow-y-hidden no-scrollbar py-2 group/shelf"></div>
       </div>
       <div class="content-shelf px-6 md:px-4">
         <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Design Inspiration (Scrolls Left)</h3>
-        <div class="shelf-row relative overflow-x-auto overflow-y-hidden no-scrollbar py-4 group/shelf"></div>
+        <div class="shelf-row relative overflow-x-auto overflow-y-hidden no-scrollbar py-2 group/shelf"></div>
       </div>
     </section>
   </main>
