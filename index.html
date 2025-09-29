@@ -19,11 +19,11 @@
     .no-scrollbar::-webkit-scrollbar{display:none} .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none }
 
     /* Cards */
-    .content-card{ transition:transform .3s cubic-bezier(.25,.8,.25,1), box-shadow .3s ease; transform-origin:center; z-index:1; will-change:transform }
+    .content-card{ transition:transform .3s cubic-bezier(.25,.8,.25,1), box-shadow .3s ease; transform-origin:center; z-index:1 } .content-card:hover{ will-change: transform; }
     .content-card:hover{ transform:scale(1.4); z-index:999; box-shadow:0 15px 30px -5px rgba(0,0,0,.9) }
 
     /* Shelves */
-    .content-shelf{ padding-top:5rem; margin-bottom:-4.5rem } 
+    .content-shelf{ padding-top:5rem; margin-bottom:-4.5rem; content-visibility: auto; contain-intrinsic-size: 600px; } 
     .content-shelf:last-of-type{ margin-bottom:0; padding-bottom:5rem }
 
     /* Hero video */
@@ -37,7 +37,7 @@
     .edge-active{ z-index:80 }
 
     /* Netflix-like hover preview */
-    .hover-preview{ position:fixed; z-index:9999; pointer-events:none; min-width:520px; max-width:520px; border-radius:.75rem; overflow:hidden; box-shadow:0 25px 70px rgba(0,0,0,.6),0 10px 25px rgba(0,0,0,.45); background:#111; opacity:0; transform:translate(0,0) scale(.98); transform-origin:top left; transition:transform .18s cubic-bezier(.2,.8,.2,1), opacity .16s ease }
+    .hover-preview{ position:fixed; z-index:9999; pointer-events:none; min-width:min(92vw,520px); max-width:min(92vw,520px); border-radius:.75rem; overflow:hidden; box-shadow:0 25px 70px rgba(0,0,0,.6),0 10px 25px rgba(0,0,0,.45); background:#111; opacity:0; transform:translate(0,0) scale(.98); transform-origin:top left; transition:transform .18s cubic-bezier(.2,.8,.2,1), opacity .16s ease }
     .hover-preview.show{ opacity:1; transform:scale(1) }
     .hover-preview .hp-banner{ aspect-ratio:16/9; background-size:cover; background-position:center; position:relative }
     .hover-preview .hp-banner::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.8), rgba(0,0,0,0) 55%) }
@@ -55,11 +55,16 @@
   
     /* Prevent page scroll hijack when interacting with a shelf */
     .shelf-row { overscroll-behavior: contain; }
+    @media (prefers-reduced-motion: reduce) {
+  .content-card,
+  .hover-preview { transition: none !important; }
+}
+    .content-card:focus-visible { outline: 3px solid #e50914; outline-offset: 2px; }
   </style>
 </head>
 <body class="overflow-x-hidden">
   <!-- Fixed Navigation Bar -->
-  <nav class="fixed top-0 left-0 right-0 bg-gradient-to-b from-black/90 to-transparent p-4 z-[100] flex items-center justify-between">
+  <nav class="fixed top-0 left-0 right-0 bg-gradient-to-b from-black/90 to-transparent p-4 z-[100] flex items-center justify-between">   <div class="flex items-center space-x-8">     <a href="/" class="text-2xl font-extrabold text-red-600 tracking-wider" aria-label="SanchezNinjah home">SanchezNinjah</a>     <ul class="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-300">       <li><a href="/" class="text-white font-bold border-b-2 border-red-600 pb-1" aria-current="page">Home</a></li>       <li><a href="/shows" class="hover:text-white">TV Shows</a></li>       <li><a href="/movies" class="hover:text-white">Movies</a></li>       <li><a href="/list" class="hover:text-white">My List</a></li>     </ul>   </div>   <div class="flex items-center space-x-4">     <svg aria-hidden="true" focusable="false" class="w-6 h-6 text-gray-300 hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>     <svg aria-hidden="true" focusable="false" class="w-6 h-6 text-gray-300 hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>   </div> </nav>
     <div class="flex items-center space-x-8">
       <h1 class="text-2xl font-extrabold text-red-600 tracking-wider">SanchezNinjah</h1>
       <ul class="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-300">
@@ -75,11 +80,11 @@
     </div>
   </nav>
 
-  <main>
+  <h1 class="sr-only">SanchezNinjah portfolio</h1>
     <!-- Hero Section -->
     <section class="relative h-screen flex items-end pb-24 md:pb-32 text-white">
       <div class="video-background-container">
-        <iframe src="https://www.youtube.com/embed/6stlCkUDG_s?autoplay=1&mute=1&loop=1&playlist=6stlCkUDG_s&controls=0&showinfo=0&autohide=1&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <iframe   src="https://www.youtube-nocookie.com/embed/6stlCkUDG_s?autoplay=1&mute=1&loop=1&playlist=6stlCkUDG_s&controls=0&modestbranding=1"   title="Background trailer"   playsinline   referrerpolicy="strict-origin-when-cross-origin"   frameborder="0"   allow="autoplay; encrypted-media"   allowfullscreen></iframe>
       </div>
       <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/10 z-0"></div>
       <div class="z-10 text-left max-w-lg lg:max-w-3xl px-6 md:px-12">
@@ -87,11 +92,11 @@
         <p class="text-sm font-medium text-red-500 uppercase mb-2">New Release | Thriller, Sci‑Fi | 2024</p>
         <p class="text-base md:text-xl text-gray-200 mb-8 font-light">As a rogue AI network threatens global collapse, a disgraced former agent is called back into the field for one last, impossible mission to save humanity.</p>
         <div class="flex space-x-4">
-          <button class="bg-white hover:bg-gray-200 text-black font-bold py-3 px-8 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center space-x-2">
+          <button type="button" class="bg-white hover:bg-gray-200 text-black font-bold py-3 px-8 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center space-x-2">
             <svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg>
             <span class="text-lg">Play Now</span>
           </button>
-          <button class="bg-gray-700/70 hover:bg-gray-600/70 text-white font-bold py-3 px-8 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center space-x-2">
+          <button type="button" class="bg-gray-700/70 hover:bg-gray-600/70 text-white font-bold py-3 px-8 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center space-x-2">
             <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             <span class="text-lg">Details</span>
           </button>
