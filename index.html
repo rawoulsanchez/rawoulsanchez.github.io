@@ -561,8 +561,7 @@ card.addEventListener('mouseenter', ()=>{
     const dy = Math.abs(t.clientY - tY);
     const dt = Date.now() - tTime;
 
-    // ignore taps immediately after closing the preview
-    if (Date.now() < suppressTapUntil) return;
+    if (Date.now() < suppressTapUntil) return; // guard after close
 
     // treat as tap only if quick and with little movement
     if (dx < 10 && dy < 10 && dt < 300) {
@@ -570,11 +569,10 @@ card.addEventListener('mouseenter', ()=>{
       suppressHover = false;
 
       if (hp.classList.contains('show')) {
-        // any tap closes the open preview first
         hidePreviewImmediate();
       } else {
-        // open preview for the tapped card
-        showPreview(card, label);
+        // defer to next tick so it doesn't collide with touch sequence
+        setTimeout(()=>{ showPreview(card, label); }, 0);
       }
     }
   }, {passive:true});
