@@ -235,8 +235,7 @@ let lastActiveShelf = null;
 let suppressHover = false; // blocks preview during drag/scroll
 let suppressTapUntil = 0;  // blocks taps briefly after closing preview
 let previewOpen = false;   // true while preview is shown
-    function blockTouchMove(e){
-  if (previewOpen) e.preventDefault();
+function blockTouchMove(e){ if (previewOpen) e.preventDefault(); }
 }
 
 function hidePreviewImmediate(){
