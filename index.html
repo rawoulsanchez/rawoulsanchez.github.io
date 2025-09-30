@@ -415,12 +415,13 @@ document.addEventListener('touchmove', blockTouchMove, { passive: false });
 const isCoarse = window.matchMedia('(pointer:coarse)').matches;
 // Mouse wheel -> horizontal translate (desktop only)
 if (!isCoarse) {
+  const DIR = (idx === 1 ? -1 : 1); // middle shelf scrolls right
   shelf.addEventListener('wheel', (e)=>{
     e.preventDefault();
     suppressHover = true;
     clearTimeout(hoverTimer);
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    moveBy(-delta);
+    moveBy(-delta * DIR);
     hidePreviewImmediate();
     setTimeout(()=>{ suppressHover = false; }, 150);
   }, {passive:false});
