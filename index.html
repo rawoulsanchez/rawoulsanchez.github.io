@@ -24,12 +24,11 @@
 
 /* Shelves — even spacing desktop + mobile */
 .content-shelf{
-  padding-block: 2.5rem;   /* top and bottom */
+  padding-block: 1.25rem;  /* tighter, consistent */
   margin: 0;
   content-visibility:auto;
   contain-intrinsic-size:600px;
 }
-
 
     /* Hero video */
     .video-background-container{ position:absolute; inset:0; overflow:hidden; z-index:-2 }
@@ -138,15 +137,15 @@
     <section class="relative z-10 space-y-2 px-0 md:px-8 pb-12 -mt-40">
       <div class="content-shelf px-6 md:px-4">
         <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Popular on Stream (Scrolls Left)</h3>
-        <div class="shelf-row relative overflow-x-auto overflow-y-hidden no-scrollbar py-3 group/shelf"></div>
+        <div class="shelf-row relative overflow-x-auto overflow-y-visible no-scrollbar py-2 group/shelf"></div>
       </div>
       <div class="content-shelf px-6 md:px-4">
         <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Trending Now (Scrolls Right)</h3>
-        <div class="shelf-row relative overflow-x-auto overflow-y-hidden no-scrollbar py-3 group/shelf"></div>
+        <div class="shelf-row relative overflow-x-auto overflow-y-visible no-scrollbar py-2 group/shelf"></div>
       </div>
       <div class="content-shelf px-6 md:px-4">
         <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Design Inspiration (Scrolls Left)</h3>
-        <div class="shelf-row relative overflow-x-auto overflow-y-hidden no-scrollbar py-3 group/shelf"></div>
+        <div class="shelf-row relative overflow-x-auto overflow-y-visible no-scrollbar py-2 group/shelf"></div>
       </div>
     </section>
   </main>
@@ -412,24 +411,31 @@ if (isCoarse) {
   const cards = Array.from(track.querySelectorAll('.dock-card'));
   const updateDock = () => {
 const r = shelf.getBoundingClientRect();
-const center = window.innerWidth / 2;    // viewport center
-// reset any stale wrapper transforms from older versions
-cards.forEach(c => { c.style.transform = 'none'; });
+const center = r.left + r.width / 2;     // shelf's visual center
+// reset any stale transforms so no card stays small
+cards.forEach(c => {
+  c.style.transform = 'none';
+  c.style.overflow = 'visible';
+  const inner0 = c.querySelector('.content-card');
+  if (inner0) inner0.style.transform = 'translateY(4px) scale(1)';
+});
 
-    cards.forEach(card => {
-      const cr = card.getBoundingClientRect();
-      const c  = cr.left + cr.width / 2;
-      const dist  = Math.abs(c - center);
-      const norm  = Math.min(1, dist / (r.width * 0.5)); // 0 center, 1 far edge
-// clamp to avoid < 1.0 due to rounding
-const scale = Math.max(1, 1.0 + (1 - norm) * 0.40);
-const drop  = 4 + norm * 8; // softer vertical shift
+   cards.forEach(card => {
+  const cr = card.getBoundingClientRect();
+  const c  = cr.left + cr.width / 2;
+  const dist  = Math.abs(c - center);
+  const norm  = Math.min(1, dist / (r.width * 0.5)); // 0 center, 1 far edge
 
-const inner = card.querySelector('.content-card');
-if (inner) {
-  inner.style.transform = `translateY(${drop}px) scale(${scale})`;
-  inner.style.willChange = 'transform';
-}
+  // never below 1.0, baseline drop = 4px (matches center)
+  const scale = Math.max(1, 1.0 + (1 - norm) * 0.36);
+  const drop  = 4 + norm * 8;
+
+  const inner = card.querySelector('.content-card');
+  if (inner) {
+    inner.style.transform = `translateY(${drop}px) scale(${scale})`;
+    inner.style.willChange = 'transform';
+  }
+
 // ensure stacking without clipping
 card.style.zIndex = String(1000 - Math.round(norm * 1000));
 card.style.overflow = 'visible';
