@@ -244,12 +244,18 @@ function hidePreviewImmediate(){
   hp.style.transform = 'translate(0,0) scale(0.98)';
   currentPreviewCard = null;
 
-  // hide backdrop and unlock scroll
-  if (window.__hoverBackdrop) window.__hoverBackdrop.style.display = 'none';
-  document.body.classList.remove('no-scroll');
+// hide backdrop and unlock scroll
+if (window.__hoverBackdrop){
+  const bd = window.__hoverBackdrop;
+  bd.style.pointerEvents = 'none';
+  bd.style.display = 'none';
+}
+document.body.classList.remove('no-scroll');
 
-  // brief tap suppression so swipe feels natural
-  suppressTapUntil = Date.now() + 200;
+previewOpen = false; // preview is now closed
+
+// brief tap suppression so swipe feels natural
+suppressTapUntil = Date.now() + 200;
 }
 
     // Close when mouse leaves the preview box
