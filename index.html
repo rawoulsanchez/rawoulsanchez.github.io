@@ -233,7 +233,7 @@ let lastActiveShelf = null;
 let suppressHover = false; // blocks preview during drag/scroll
 let suppressTapUntil = 0;  // blocks taps briefly after closing preview
 
-    function hidePreviewImmediate(){
+function hidePreviewImmediate(){
   clearTimeout(hoverTimer);
   hp.classList.remove('show');
   hp.style.pointerEvents = 'none';
@@ -248,7 +248,6 @@ let suppressTapUntil = 0;  // blocks taps briefly after closing preview
   // brief tap suppression so swipe feels natural
   suppressTapUntil = Date.now() + 200;
 }
-    }
 
     // Close when mouse leaves the preview box
     hp.addEventListener('mouseleave', hidePreviewImmediate);
@@ -318,6 +317,11 @@ let suppressTapUntil = 0;  // blocks taps briefly after closing preview
       hp.querySelector('.hp-banner').style.backgroundImage = bg && bg.trim()? bg : 'linear-gradient(135deg,#1f2937,#0f172a)';
       hp.querySelector('.hp-title').textContent = label;
       hp.querySelector('.hp-chips').textContent = 'Action • Sci‑Fi • Trending';
+      
+      // show backdrop and lock scroll
+if (window.__hoverBackdrop) window.__hoverBackdrop.style.display = 'block';
+document.body.classList.add('no-scroll');
+
 
       // Morph in
       const startTx = rect.left - left;
@@ -545,6 +549,7 @@ card.addEventListener('mouseenter', ()=>{
 } else {
   // Touch: open preview on a real tap (not a swipe)
   let tX = 0, tY = 0, tTime = 0;
+
   card.addEventListener('touchstart', (e)=>{
     const t = e.changedTouches[0];
     tX = t.clientX; tY = t.clientY; tTime = Date.now();
@@ -556,14 +561,19 @@ card.addEventListener('mouseenter', ()=>{
     const dy = Math.abs(t.clientY - tY);
     const dt = Date.now() - tTime;
 
+    // ignore taps immediately after closing the preview
+    if (Date.now() < suppressTapUntil) return;
+
     // treat as tap only if quick and with little movement
     if (dx < 10 && dy < 10 && dt < 300) {
       clearTimeout(hoverTimer);
       suppressHover = false;
-      if (hp.classList.contains('show') && currentPreviewCard === card) {
-        // tap same card toggles off
+
+      if (hp.classList.contains('show')) {
+        // any tap closes the open preview first
         hidePreviewImmediate();
       } else {
+        // open preview for the tapped card
         showPreview(card, label);
       }
     }
