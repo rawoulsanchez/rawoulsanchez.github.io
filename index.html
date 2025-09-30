@@ -42,6 +42,11 @@
 
     /* Netflix-like hover preview */
     .hover-preview{ position:fixed; z-index:9999; pointer-events:none; min-width:min(92vw,520px); max-width:min(92vw,520px); border-radius:.75rem; overflow:hidden; box-shadow:0 25px 70px rgba(0,0,0,.6),0 10px 25px rgba(0,0,0,.45); background:#111; opacity:0; transform:translate(0,0) scale(.98); transform-origin:top left; transition:transform .18s cubic-bezier(.2,.8,.2,1), opacity .16s ease }
+    /* Preview backdrop that blocks taps to underlying cards */
+.hp-backdrop{ position:fixed; inset:0; z-index:9998; background:transparent; display:none; touch-action:none; }
+
+/* Lock background scrolling while preview is open */
+body.no-scroll{ overflow:hidden; overscroll-behavior:contain; }
     .hover-preview.show{ opacity:1; transform:scale(1) }
     .hover-preview .hp-banner{ aspect-ratio:16/9; background-size:cover; background-position:center; position:relative }
     .hover-preview .hp-banner::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.8), rgba(0,0,0,0) 55%) }
@@ -178,26 +183,38 @@
     const MAX_SCALE = 1.12;
 
     // ---------- Build or fetch hover preview ----------
-    function getHoverPreview() {
-      if (!window.__hoverPreview) {
-        const el = document.createElement('div');
-        el.className = 'hover-preview';
-        el.innerHTML = `
-          <div class="hp-banner"></div>
-          <div class="hp-body">
-            <div class="hp-title">Title</div>
-            <div class="hp-meta">98% Match • 95m • HD</div>
-            <div class="hp-btns">
-              <button class="hp-btn" title="Play"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg></button>
-              <button class="hp-btn secondary" title="Add"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
-            </div>
-            <div class="hp-chips"></div>
-          </div>`;
-        document.body.appendChild(el);
-        window.__hoverPreview = el;
-      }
-      return window.__hoverPreview;
-    }
+function getHoverPreview() {
+  if (!window.__hoverPreview) {
+    const el = document.createElement('div');
+    el.className = 'hover-preview';
+    el.innerHTML = `
+      <div class="hp-banner"></div>
+      <div class="hp-body">
+        <div class="hp-title">Title</div>
+        <div class="hp-meta">98% Match • 95m • HD</div>
+        <div class="hp-btns">
+          <button class="hp-btn" title="Play"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg></button>
+          <button class="hp-btn secondary" title="Add"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+        <div class="hp-chips"></div>
+      </div>`;
+
+    const bd = document.createElement('div');
+    bd.className = 'hp-backdrop';
+    bd.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      hidePreviewImmediate();
+    }, {capture:true});
+
+    document.body.appendChild(bd);
+    document.body.appendChild(el);
+
+    window.__hoverPreview = el;
+    window.__hoverBackdrop = bd;
+  }
+  return window.__hoverPreview;
+}
     const hp = getHoverPreview();
 
     // ---------- Data ----------
@@ -210,18 +227,27 @@
     const clamp = (x,min,max)=> Math.max(min, Math.min(max, x));
 
     // Preview control state
-    let hoverTimer = null;
-    let currentPreviewCard = null;
-    let lastActiveShelf = null; 
-    let suppressHover = false; // blocks preview during drag/scroll
+let hoverTimer = null;
+let currentPreviewCard = null;
+let lastActiveShelf = null; 
+let suppressHover = false; // blocks preview during drag/scroll
+let suppressTapUntil = 0;  // blocks taps briefly after closing preview
 
     function hidePreviewImmediate(){
-      clearTimeout(hoverTimer);
-      hp.classList.remove('show');
-      hp.style.pointerEvents = 'none';
-      hp.style.opacity = '0';
-      hp.style.transform = 'translate(0,0) scale(0.98)';
-      currentPreviewCard = null;
+  clearTimeout(hoverTimer);
+  hp.classList.remove('show');
+  hp.style.pointerEvents = 'none';
+  hp.style.opacity = '0';
+  hp.style.transform = 'translate(0,0) scale(0.98)';
+  currentPreviewCard = null;
+
+  // hide backdrop and unlock scroll
+  if (window.__hoverBackdrop) window.__hoverBackdrop.style.display = 'none';
+  document.body.classList.remove('no-scroll');
+
+  // brief tap suppression so swipe feels natural
+  suppressTapUntil = Date.now() + 200;
+}
     }
 
     // Close when mouse leaves the preview box
