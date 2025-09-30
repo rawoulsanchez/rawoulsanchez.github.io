@@ -206,6 +206,8 @@ function getHoverPreview() {
       e.stopPropagation();
       hidePreviewImmediate();
     }, {capture:true});
+    // Block scroll/drag while preview is open by consuming touchmove on the backdrop only
+bd.addEventListener('touchmove', (e)=> e.preventDefault(), { passive: false });
 
     document.body.appendChild(bd);
     document.body.appendChild(el);
@@ -233,7 +235,6 @@ let lastActiveShelf = null;
 let suppressHover = false; // blocks preview during drag/scroll
 let suppressTapUntil = 0;  // blocks taps briefly after closing preview
 let previewOpen = false;   // true while preview is shown
-const blockTouchMove = (e)=> { e.preventDefault(); }; // stop page from moving while preview is open
 
 function hidePreviewImmediate(){
   clearTimeout(hoverTimer);
@@ -321,8 +322,13 @@ function hidePreviewImmediate(){
       hp.querySelector('.hp-chips').textContent = 'Action • Sci‑Fi • Trending';
       
       // show backdrop and lock scroll
-if (window.__hoverBackdrop) window.__hoverBackdrop.style.display = 'block';
 document.body.classList.add('no-scroll');
+previewOpen = true;
+if (window.__hoverBackdrop){
+  const bd = window.__hoverBackdrop;
+  bd.style.display = 'block';
+  bd.style.pointerEvents = 'auto';
+}
 previewOpen = true;
 document.addEventListener('touchmove', blockTouchMove, { passive: false });
 
