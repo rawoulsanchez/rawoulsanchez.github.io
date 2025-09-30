@@ -227,6 +227,8 @@ bd.addEventListener('touchmove', (e)=> e.preventDefault(), { passive: false });
 
     // ---------- Helpers ----------
     const clamp = (x,min,max)=> Math.max(min, Math.min(max, x));
+    const add = (cls)=> document.body.classList.add(cls);
+    const remove = (cls)=> document.body.classList.remove(cls);
 
     // Preview control state
 let hoverTimer = null;
@@ -236,7 +238,6 @@ let suppressHover = false; // blocks preview during drag/scroll
 let suppressTapUntil = 0;  // blocks taps briefly after closing preview
 let previewOpen = false;   // true while preview is shown
 function blockTouchMove(e){ if (previewOpen) e.preventDefault(); }
-}
 
 function hidePreviewImmediate(){
   clearTimeout(hoverTimer);
@@ -253,6 +254,7 @@ if (window.__hoverBackdrop){
   bd.style.display = 'none';
 }
 remove('no-scroll');
+document.removeEventListener('touchmove', blockTouchMove, { passive: false });
 
 previewOpen = false; // preview is now closed
 
@@ -264,15 +266,18 @@ suppressTapUntil = Date.now() + 200;
     hp.addEventListener('mouseleave', hidePreviewImmediate);
     hp.addEventListener('pointerleave', hidePreviewImmediate);
 
-    // Extra hard closes
-    document.addEventListener('pointerdown', hidePreviewImmediate, true);   // any click
+       // Extra hard closes
+    document.addEventListener('pointerdown', (e)=>{                         // any click
+      if (Date.now() < suppressTapUntil) { e.preventDefault(); e.stopPropagation(); return; }
+      hidePreviewImmediate();
+    }, true);   // any click
     window.addEventListener('blur', hidePreviewImmediate);                  // window loses focus
+    document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') hidePreviewImmediate(); }, true);
     document.addEventListener('pointerout', (e)=>{                          // pointer leaves window
       if (!e.relatedTarget) hidePreviewImmediate();
     }, true);
 
     // Hard guard #1: if the pointer lands on ANY element that is not inside the preview, hide it immediately.
-    // Use capture so it triggers even when other elements stop propagation.
     document.addEventListener('pointerover', (e) => {
       if (!hp.classList.contains('show')) return;
       if (!hp.contains(e.target)) hidePreviewImmediate();
@@ -307,6 +312,8 @@ suppressTapUntil = Date.now() + 200;
 
     // Global wheel closes preview instantly
     window.addEventListener('wheel', ()=>{ if (hp.classList.contains('show')) hidePreviewImmediate(); }, {passive:true});
+    // Global scroll closes preview instantly (keyboard/page scroll, programmatic)
+    document.addEventListener('scroll', ()=>{ if (hp.classList.contains('show')) hidePreviewImmediate(); }, true);
 
     // Show preview near a card
     function showPreview(cardEl, label){
@@ -565,6 +572,7 @@ card.addEventListener('mouseenter', ()=>{
   clearTimeout(hoverTimer);
   showPreview(card, label);
 });
+   card.addEventListener('blur', ()=>{ hidePreviewImmediate(); });
 } else {
   // Touch: open (or switch) preview on a real tap (not a swipe)
 let tX = 0, tY = 0, tTime = 0;
