@@ -306,7 +306,7 @@ function hidePreviewImmediate(){
       const w = PREVIEW_MIN_W; // fixed
       const estH = w * 9/16 + PREVIEW_BODY_EXTRA;
       const left = clamp(rect.left, 16, innerWidth - w - 16);
-      const top  = clamp(rect.top - estH * 0.28, 16, innerHeight - estH - 16);
+      const top  = clamp(rect.top + rect.height/2 - estH/2, 16, innerHeight - estH - 16);
 
       hp.style.width = w+'px';
       hp.style.left  = left+'px';
@@ -581,29 +581,29 @@ card.addEventListener('mouseenter', ()=>{
 
 }); // <-- add this line
 
-// Public helper: set image for all duplicates of a key
-    window.setThumb = (key, url) => { document.documentElement.style.setProperty(`--${key}`, `url(${url})`); };
+  // Public helper: set image for all duplicates of a key
+  window.setThumb = (key, url) => {
+    document.documentElement.style.setProperty(`--${key}`, `url(${url})`);
+  };
 
-    // ---------- Smoke tests ----------
-    console.group('[SanchezNinjah tests]');
-    console.assert(document.querySelectorAll('.shelf-row').length===3, '3 shelves expected');
-    console.assert(!!window.__hoverPreview, 'hover preview element exists');
-    console.assert(typeof window.setThumb==='function','setThumb exposed');
-    console.assert(getComputedStyle(document.querySelector('.hover-preview')).pointerEvents==='none','preview overlay pointer-events none');
-    console.assert(document.querySelectorAll('.content-card').length>=30,'cards rendered');
-
-    // Extra tests: preview hide on mouseleave and programmatic open/close
-    (function(){
-      const hp = window.__hoverPreview;
-      const okOpenClose = ()=>{
-        hp.classList.add('show');
-        hp.dispatchEvent(new Event('mouseleave'));
-        return !hp.classList.contains('show');
-      };
-      console.assert(okOpenClose(), 'Preview hides on mouseleave event');
-    })();
-    console.groupEnd();
-  });
+  // ---------- Smoke tests ----------
+  console.group('[SanchezNinjah tests]');
+  console.assert(document.querySelectorAll('.shelf-row').length===3, '3 shelves expected');
+  console.assert(!!window.__hoverPreview, 'hover preview element exists');
+  console.assert(typeof window.setThumb==='function','setThumb exposed');
+  console.assert(getComputedStyle(document.querySelector('.hover-preview')).pointerEvents==='none','preview overlay pointer-events none');
+  console.assert(document.querySelectorAll('.content-card').length>=30,'cards rendered');
+  (function(){
+    const hp = window.__hoverPreview;
+    const okOpenClose = ()=>{
+      hp.classList.add('show');
+      hp.dispatchEvent(new Event('mouseleave'));
+      return !hp.classList.contains('show');
+    };
+    console.assert(okOpenClose(), 'Preview hides on mouseleave event');
+  })();
+  console.groupEnd();
+}); // <-- this is the ONLY closing brace for DOMContentLoaded
   </script>
 </body>
 </html>
