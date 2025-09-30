@@ -77,24 +77,29 @@
   .shelf-row{ padding-block: 0.5rem; }   /* tighter rows */
   .dock-card{ overflow: visible; }       /* keep rounded corners visible */
 }
-    @media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) {
   .content-card,
   .hover-preview { transition: none !important; }
 }
-    .content-card:focus-visible { outline: 3px solid #e50914; outline-offset: 2px; }
-    @media (max-width: 768px){
+
+.content-card:focus-visible { outline: 3px solid #e50914; outline-offset: 2px; }
+
+@media (max-width: 768px){
   /* simpler header */
   nav ul{ display:none; }
 
   /* lighter swipe: smaller tiles */
   .card-track .relative{ width:9rem; height:5.25rem; }
-
-  /* disable desktop-only hover UI */
-  .hover-preview{ display:none !important; }
 }
-    @media (max-width: 768px){
+
+@media (max-width: 768px){
   /* Simplify hero on phones */
-  .hero{ min-height:70vh; background-image:url('https://placehold.co/1200x800/0f0f10/ffffff?text=SanchezNinjah'); background-size:cover; background-position:center; }
+  .hero{
+    min-height:70vh;
+    background-image:url('https://placehold.co/1200x800/0f0f10/ffffff?text=SanchezNinjah');
+    background-size:cover;
+    background-position:center;
+  }
   .video-background-container{ display:none; }  /* remove autoplay video on mobile */
 
   /* Stop big hover zoom on cards (prevents jitter) */
@@ -410,15 +415,16 @@ setTimeout(()=>{ suppressHover = false; }, 150);
 if (isCoarse) {
   const cards = Array.from(track.querySelectorAll('.dock-card'));
   const updateDock = () => {
-const r = shelf.getBoundingClientRect();
-const center = r.left + r.width / 2;     // shelf's visual center
-// reset any stale transforms so no card stays small
-cards.forEach(c => {
-  c.style.transform = 'none';
-  c.style.overflow = 'visible';
-  const inner0 = c.querySelector('.content-card');
-  if (inner0) inner0.style.transform = 'translateY(4px) scale(1)';
-});
+    const r = shelf.getBoundingClientRect();
+    const center = r.left + r.width / 2;     // shelf's visual center
+
+    // reset baseline so taps never leave a card small
+    cards.forEach(c => {
+      c.style.transform = 'none';
+      c.style.overflow = 'visible';
+      const inner0 = c.querySelector('.content-card');
+      if (inner0) inner0.style.transform = 'translateY(4px) scale(1)';
+    });
 
    cards.forEach(card => {
   const cr = card.getBoundingClientRect();
@@ -510,10 +516,33 @@ card.addEventListener('mouseenter', ()=>{
   clearTimeout(hoverTimer);
   showPreview(card, label);
 });
-    } else {
-    // Touch: native swipe only; tap can open details later
-    card.addEventListener('click', ()=>{ /* open details for mobile if needed */ });
-  }
+} else {
+  // Touch: open preview on a real tap (not a swipe)
+  let tX = 0, tY = 0, tTime = 0;
+  card.addEventListener('touchstart', (e)=>{
+    const t = e.changedTouches[0];
+    tX = t.clientX; tY = t.clientY; tTime = Date.now();
+  }, {passive:true});
+
+  card.addEventListener('touchend', (e)=>{
+    const t = e.changedTouches[0];
+    const dx = Math.abs(t.clientX - tX);
+    const dy = Math.abs(t.clientY - tY);
+    const dt = Date.now() - tTime;
+
+    // treat as tap only if quick and with little movement
+    if (dx < 10 && dy < 10 && dt < 300) {
+      clearTimeout(hoverTimer);
+      suppressHover = false;
+      if (hp.classList.contains('show') && currentPreviewCard === card) {
+        // tap same card toggles off
+        hidePreviewImmediate();
+      } else {
+        showPreview(card, label);
+      }
+    }
+  }, {passive:true});
+}
 });
 
 }); // <-- add this line
