@@ -547,35 +547,27 @@ card.addEventListener('mouseenter', ()=>{
   showPreview(card, label);
 });
 } else {
-  // Touch: open preview on a real tap (not a swipe)
-  let tX = 0, tY = 0, tTime = 0;
+  // Touch: open (or switch) preview on a real tap (not a swipe)
+let tX = 0, tY = 0, tTime = 0;
 
-  card.addEventListener('touchstart', (e)=>{
-    const t = e.changedTouches[0];
-    tX = t.clientX; tY = t.clientY; tTime = Date.now();
-  }, {passive:true});
+card.addEventListener('touchstart', (e)=>{
+  const t = e.changedTouches[0];
+  tX = t.clientX; tY = t.clientY; tTime = Date.now();
+}, {passive:true});
 
-  card.addEventListener('touchend', (e)=>{
-    const t = e.changedTouches[0];
-    const dx = Math.abs(t.clientX - tX);
-    const dy = Math.abs(t.clientY - tY);
-    const dt = Date.now() - tTime;
+card.addEventListener('touchend', (e)=>{
+  const t = e.changedTouches[0];
+  const dx = Math.abs(t.clientX - tX);
+  const dy = Math.abs(t.clientY - tY);
+  const dt = Date.now() - tTime;
 
-    if (Date.now() < suppressTapUntil) return; // guard after close
-
-    // treat as tap only if quick and with little movement
-    if (dx < 10 && dy < 10 && dt < 300) {
-      clearTimeout(hoverTimer);
-      suppressHover = false;
-
-      if (hp.classList.contains('show')) {
-        hidePreviewImmediate();
-      } else {
-        // defer to next tick so it doesn't collide with touch sequence
-        setTimeout(()=>{ showPreview(card, label); }, 0);
-      }
-    }
-  }, {passive:true});
+  // treat as tap only if quick and with little movement
+  if (dx < 10 && dy < 10 && dt < 300) {
+    clearTimeout(hoverTimer);
+    suppressHover = false;
+    showPreview(card, label); // always open/switch to this card
+  }
+}, {passive:true});
 }
 });
 
