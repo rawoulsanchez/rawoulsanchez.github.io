@@ -137,6 +137,20 @@ body.no-scroll main{ overflow: hidden !important; }
 
   /* Stop big hover zoom on cards (prevents jitter) */
   .content-card:hover{ transform:none !important; box-shadow:none !important; z-index:auto !important; }
+
+  /* Hero CTA sizing: smaller buttons and icons on phones */
+  .hero .grid button{
+    padding: 0.625rem 0.875rem;          /* ~10px x 14px */
+    min-height: 44px;                    /* tap target */
+    border-radius: 9999px;
+  }
+  .hero .grid button svg{
+    width: 20px; height: 20px;
+  }
+  .hero .grid button .text-lg{
+    font-size: 1rem;                     /* override lg */
+    line-height: 1.5rem;
+  }
 }
 
 @media (max-width: 768px){
