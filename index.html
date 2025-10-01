@@ -237,6 +237,31 @@ bd.addEventListener('touchmove', (e)=> e.preventDefault(), { passive: false });
     const add = (cls)=> document.body.classList.add(cls);
     const remove = (cls)=> document.body.classList.remove(cls);
 
+    // Mobile-only: active shelf highlight
+    (function(){
+      const isCoarse = window.matchMedia('(pointer:coarse)').matches;
+      if (!isCoarse) return;
+
+      let last = null;
+      const pick = () => {
+        if (previewOpen) return; // freeze while preview open
+        let best = null, bestDist = Infinity;
+        shelves.forEach(shelf => {
+          const r = shelf.getBoundingClientRect();
+          const dist = Math.abs((r.top + r.height / 2) - (innerHeight / 2));
+          if (dist < bestDist) { best = shelf; bestDist = dist; }
+        });
+        if (!best || best === last) return;
+        shelves.forEach(s => s.classList.toggle('shelf-active', s === best));
+        last = best;
+      };
+
+      // initialize and keep updated
+      pick();
+      document.addEventListener('scroll', pick, { passive: true });
+      window.addEventListener('resize', pick);
+    })();
+
     // Preview control state
 let hoverTimer = null;
 let currentPreviewCard = null;
