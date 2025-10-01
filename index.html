@@ -167,11 +167,23 @@ body.no-scroll main{ overflow: hidden !important; }
   .hero .z-10{
     transform: translateY(-6svh);
   }
-  .hero .z-10 p.mb-6{
-    margin-bottom: 0.75rem; /* was 1.5rem */
+  .hero .z-10 > .mb-3{
+    margin-bottom: 0.5rem; /* tighter below title chip */
   }
   .hero .z-10 p.text-xs{
-    margin-bottom: 0.25rem; /* was 0.5rem */
+    margin-bottom: 0.25rem;            /* was 0.5rem */
+    font-size: 0.9rem;                  /* up from text-xs */
+    letter-spacing: 0.08em;
+  }
+  .hero .z-10 p.mb-6{
+    margin-bottom: 0.75rem;             /* was 1.5rem */
+    font-size: 0.95rem;                 /* slightly larger body */
+    line-height: 1.6;
+    max-width: 22rem;                   /* narrower for readability */
+    margin-left: auto; margin-right: auto;
+  }
+  .hero .z-10 .grid{
+    gap: 0.5rem;                        /* tighter gap between buttons */
   }
 }
 @media (max-width: 768px){
