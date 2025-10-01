@@ -140,19 +140,29 @@ body.no-scroll main{ overflow: hidden !important; }
 
   /* Hero CTA sizing: smaller buttons and icons on phones */
   .hero .grid button{
-    padding: 0.625rem 0.875rem;          /* ~10px x 14px */
-    min-height: 44px;                    /* tap target */
+    padding: 0.625rem 0.875rem;
+    min-height: 44px;
     border-radius: 9999px;
   }
   .hero .grid button svg{
     width: 20px; height: 20px;
   }
   .hero .grid button .text-lg{
-    font-size: 1rem;                     /* override lg */
+    font-size: 1rem;
     line-height: 1.5rem;
   }
-}
 
+  /* Hero content spacing: lift and tighten on phones */
+  .hero .z-10{
+    transform: translateY(-6svh);
+  }
+  .hero .z-10 p.mb-6{
+    margin-bottom: 0.75rem; /* was 1.5rem */
+  }
+  .hero .z-10 p.text-xs{
+    margin-bottom: 0.25rem; /* was 0.5rem */
+  }
+}
 @media (max-width: 768px){
   .dock-card{ transform-origin: center center; transition: transform 180ms cubic-bezier(.2,.8,.2,1), z-index 0s; }
 
