@@ -51,6 +51,8 @@
 
 /* Lock background scrolling while preview is open */
 body.no-scroll{ overflow:hidden; overscroll-behavior:contain; }
+/* While preview is open, also lock the <main> scroller */
+body.no-scroll main{ overflow: hidden !important; }
     .hover-preview.show{ opacity:1; transform:scale(1) }
     .hover-preview .hp-banner{ aspect-ratio:16/9; background-size:cover; background-position:center; position:relative }
     .hover-preview .hp-banner::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.8), rgba(0,0,0,0) 55%) }
@@ -121,10 +123,10 @@ body.no-scroll{ overflow:hidden; overscroll-behavior:contain; }
 @media (max-width: 768px){
   .dock-card{ transform-origin: center center; transition: transform 180ms cubic-bezier(.2,.8,.2,1), z-index 0s; }
 
-  /* Mobile: active shelf highlight + size contrast */
-  .content-shelf{ opacity: 0.75; transition: opacity 180ms ease; }
+  /* Mobile: active shelf highlight + size contrast (stronger) */
+  .content-shelf{ opacity: 0.60; transition: opacity 180ms ease; }
   .content-shelf.shelf-active{ opacity: 1; }
-  .content-shelf:not(.shelf-active) .content-card{ transform: translateY(4px) scale(0.96); }
+  .content-shelf:not(.shelf-active) .content-card{ transform: translateY(4px) scale(0.92); }
 
   /* Mobile: section + shelf scroll snap */
   main{
@@ -686,6 +688,15 @@ card.addEventListener('touchend', (e)=>{
     const iframe = document.getElementById('heroVideo');
     if (!heroEl || !iframe) return;
 
+    // Ensure YouTube has an explicit origin for postMessage API reliability
+    try{
+      const u = new URL(iframe.src);
+      if (!u.searchParams.has('origin')) {
+        u.searchParams.set('origin', location.origin);
+        iframe.src = u.toString();
+      }
+    }catch(_){}
+
     const ytCommand = (cmd) => {
       if (!iframe.contentWindow) return;
       iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: cmd, args: [] }), '*');
@@ -724,14 +735,14 @@ card.addEventListener('touchend', (e)=>{
       if (!best) return;
       // activate only when most of the shelf is in view to avoid flicker
       const el = best.target;
-      if (best.isIntersecting && best.intersectionRatio >= 0.6) {
+      if (best.isIntersecting && best.intersectionRatio >= 0.7) {
         if (active !== el) {
           shelvesEls.forEach(s => s.classList.toggle('shelf-active', s === el));
           active = el;
           document.dispatchEvent(new CustomEvent('shelf-active-change', { detail: { active: el } }));
         }
       }
-    }, { threshold: [0, 0.4, 0.6, 0.8, 1] });
+    }, { threshold: [0, 0.5, 0.7, 0.9, 1] });
 
     shelvesEls.forEach(s => io.observe(s));
   })();
