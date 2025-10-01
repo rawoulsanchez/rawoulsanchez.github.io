@@ -113,7 +113,12 @@ body.no-scroll main{ overflow: hidden !important; }
     background-position:center;
     /* avoid navbar overlap, respect iOS safe area */
     padding-top: calc(env(safe-area-inset-top, 0px) + 56px);
+    /* smooth recede animation */
+    transition: transform 220ms cubic-bezier(.2,.8,.2,1);
   }
+  /* hero recedes when not active */
+  .hero.dimmed{ transform: translateY(-8px) scale(0.94); }
+
   /* keep video visible on mobile: do NOT hide .video-background-container */
 
   /* Stop big hover zoom on cards (prevents jitter) */
@@ -123,9 +128,9 @@ body.no-scroll main{ overflow: hidden !important; }
 @media (max-width: 768px){
   .dock-card{ transform-origin: center center; transition: transform 180ms cubic-bezier(.2,.8,.2,1), z-index 0s; }
 
-  /* Mobile: active shelf highlight + size contrast (stronger) */
-  .content-shelf{ opacity: 0.60; transition: opacity 180ms ease; }
-  .content-shelf.shelf-active{ opacity: 1; }
+  /* Mobile: active shelf highlight + depth */
+  .content-shelf{ opacity: 0.60; transform: translateY(6px) scale(0.96); transition: opacity 180ms ease, transform 220ms cubic-bezier(.2,.8,.2,1); }
+  .content-shelf.shelf-active{ opacity: 1; transform: translateY(0) scale(1); }
   .content-shelf:not(.shelf-active) .content-card{ transform: translateY(4px) scale(0.92); }
 
   /* Mobile: section + shelf scroll snap */
@@ -136,7 +141,7 @@ body.no-scroll main{ overflow: hidden !important; }
     -webkit-overflow-scrolling: touch; /* momentum on iOS */
     scroll-behavior: smooth;           /* smoother snap transitions */
   }
-  main > section, .content-shelf{ scroll-snap-align: start; scroll-snap-stop: always; }
+  main > section, .content-shelf{ scroll-snap-align: start; scroll-snap-stop: normal; }
   /* Show neighbors: shelf ~70% viewport height with breathing room */
   .content-shelf{ min-height: 62svh; padding-block: 4svh; display:flex; flex-direction:column; justify-content:center; gap: 0.5rem; }
   .content-shelf > h3{ text-align:center; margin: 0 0 0.75rem 0; color:#cbd5e1; }
