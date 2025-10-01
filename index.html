@@ -124,8 +124,12 @@ body.no-scroll main{ overflow: hidden !important; }
   /* simpler header */
   nav ul{ display:none; }
 
-  /* lighter swipe: smaller tiles */
-  .dock-card{ width:8rem; height:4.5rem; }
+  /* poster sizing: width + aspect ratio for clean 16:9 */
+  .dock-card{
+    width:8.5rem;
+    aspect-ratio: 16 / 9;
+    height:auto;
+  }
 }
 
 @media (max-width: 768px){
@@ -189,19 +193,28 @@ body.no-scroll main{ overflow: hidden !important; }
 @media (max-width: 768px){
   .dock-card{ transform-origin: center center; transition: transform 180ms cubic-bezier(.2,.8,.2,1), z-index 0s; }
 
-  /* Mobile: active shelf depth — no panel */
-  .content-shelf{
-    opacity: 0.60;
-    transform: translateY(8px) scale(0.96);
+  /* poster sizing: width + aspect ratio for clean 16:9 */
+  .dock-card{
+    width:8.5rem;
+    aspect-ratio: 16 / 9;
+    height:auto;
+  }
+
+  /* Mobile: card-only depth — shelves stay neutral */
+  .content-shelf{ transition: none; }
+  .content-shelf .content-card{
     transition:
       opacity 180ms ease,
       transform 220ms cubic-bezier(.2,.8,.2,1);
   }
-  .content-shelf.shelf-active{
+  .content-shelf.shelf-active .content-card{
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: none;
   }
-  .content-shelf:not(.shelf-active) .content-card{ transform: translateY(4px) scale(0.92); }
+  .content-shelf:not(.shelf-active) .content-card{
+    opacity: 0.85;
+    transform: translateY(6px) scale(0.96);
+  }
 
   /* Mobile: section + shelf scroll snap */
   main{
@@ -214,7 +227,8 @@ body.no-scroll main{ overflow: hidden !important; }
   main > section, .content-shelf{ scroll-snap-align: start; scroll-snap-stop: normal; }
   /* Show neighbors: shelf ~58% viewport height with breathing room */
   .content-shelf{ min-height: 62svh; padding-block: 4svh; display:flex; flex-direction:column; justify-content:center; gap: 0.5rem; }
-  .content-shelf > h3{ text-align:center; margin: 0 0 0.5rem 0; color:#cbd5e1; }
+  .content-shelf > h3{ text-align:left; margin: 0 0 0.25rem 0 !important; color:#e5e7eb; font-weight:700; }
+  .content-shelf > h3::after{ content:""; display:block; height:1px; background:linear-gradient(to right, rgba(255,255,255,0.18), rgba(255,255,255,0.04)); margin-top:0.25rem; }
   .content-shelf.shelf-active > h3{ color:#ffffff; }
 
   /* duplicate removed: see earlier "Mobile: active shelf highlight + depth + panel look" block */
@@ -222,8 +236,8 @@ body.no-scroll main{ overflow: hidden !important; }
   /* Make Row A peek under hero on phones */
   .content-shelf:first-of-type{ margin-top: -6svh; }
 
-  /* Mobile: tighter horizontal gutter for cards */
-  .card-track > * + *{ margin-left: 0.5rem; }
+  /* Mobile: tighter horizontal gutter for cards (≈10px) */
+  .card-track > * + *{ margin-left: 0.625rem; }
 
 }
   </style>
