@@ -100,7 +100,7 @@ body.no-scroll main{ overflow: hidden !important; }
   nav ul{ display:none; }
 
   /* lighter swipe: smaller tiles */
-  .card-track .relative{ width:9rem; height:5.25rem; }
+  .dock-card{ width:9rem; height:5.25rem; }
 }
 
 @media (max-width: 768px){
@@ -160,7 +160,7 @@ body.no-scroll main{ overflow: hidden !important; }
   }
   main > section, .content-shelf{ scroll-snap-align: start; scroll-snap-stop: normal; }
   /* Show neighbors: shelf ~58% viewport height with breathing room */
-  .content-shelf{ min-height: 62svh; padding-block: 4svh; d...; flex-direction:column; justify-content:center; gap: 0.5rem; }
+  .content-shelf{ min-height: 62svh; padding-block: 4svh; display:flex; flex-direction:column; justify-content:center; gap: 0.5rem; }
   .content-shelf > h3{ text-align:center; margin: 0 0 0.5rem 0; color:#cbd5e1; }
   .content-shelf.shelf-active > h3{ color:#ffffff; }
 
@@ -247,6 +247,7 @@ function getHoverPreview() {
     el.setAttribute('role', 'dialog');
     el.setAttribute('aria-modal', 'true');
     el.setAttribute('aria-label', 'Content preview');
+    el.setAttribute('aria-hidden', 'true');
     el.innerHTML = `
       <div class="hp-banner"></div>
       <div class="hp-body">
@@ -261,6 +262,8 @@ function getHoverPreview() {
 
     const bd = document.createElement('div');
     bd.className = 'hp-backdrop';
+    bd.setAttribute('aria-hidden','true');
+    bd.setAttribute('role','presentation');
     bd.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -305,6 +308,7 @@ function blockTouchMove(e){ if (previewOpen) e.preventDefault(); }
 function hidePreviewImmediate(){
   clearTimeout(hoverTimer);
   hp.classList.remove('show');
+  hp.setAttribute('aria-hidden','true');
   hp.style.pointerEvents = 'none';
   hp.style.opacity = '0';
   hp.style.transform = 'translate(0,0) scale(0.98)';
@@ -368,15 +372,8 @@ suppressTapUntil = Date.now() + 200;
       if (!inPreview && !inCard) hidePreviewImmediate();
     });
 
-    // Hard guard #4: hit-testing so we close even if layouts/transforms fool target/bounds
-    document.addEventListener('pointermove', (e) => {
-      if (!hp.classList.contains('show')) return;
-      const topEl = document.elementFromPoint(e.clientX, e.clientY);
-      if (!topEl) return;
-      const overPreview = hp.contains(topEl);
-      const overOrigin  = currentPreviewCard && currentPreviewCard.contains(topEl);
-      if (!overPreview && !overOrigin) hidePreviewImmediate();
-    }, {passive:true});
+    /* removed: redundant pointermove hard guard.
+       pointerover + mousemove guards already handle outside/other-card cases. */
 
     // Global wheel closes preview instantly
     window.addEventListener('wheel', ()=>{ if (hp.classList.contains('show')) hidePreviewImmediate(); }, {passive:true});
@@ -419,6 +416,7 @@ document.addEventListener('touchmove', blockTouchMove, { passive: false });
       const startTy = rect.top  - top;
       const sx = rect.width / w;
       const sy = rect.height / estH;
+      hp.setAttribute('aria-hidden','false');
       hp.classList.add('show');
       hp.style.pointerEvents = 'auto';
       hp.style.opacity = '0';
