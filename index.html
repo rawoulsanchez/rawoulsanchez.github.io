@@ -112,6 +112,10 @@ body.no-scroll{ overflow:hidden; overscroll-behavior:contain; }
 }
 @media (max-width: 768px){
   .dock-card{ transform-origin: center center; transition: transform 180ms cubic-bezier(.2,.8,.2,1), z-index 0s; }
+
+  /* Mobile: active shelf highlight via opacity only (no scaling yet) */
+  .content-shelf{ opacity: 0.75; transition: opacity 180ms ease; }
+  .content-shelf.shelf-active{ opacity: 1; }
 }
   </style>
 </head>
