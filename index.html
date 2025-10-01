@@ -515,13 +515,12 @@ document.addEventListener('touchmove', blockTouchMove, { passive: false });
           const cssVar = `--${item.key}`;
           const resistClass = i===0 ? 'resist-first' : '';
           html += `
-            <div class="relative dock-card flex-shrink-0 w-56 md:w-64 h-32 md:h-36 group ${resistClass}">
-              <div class="content-card absolute inset-0 ${item.color} rounded-lg overflow-hidden cursor-pointer flex items-center justify-center">
-                <div class="absolute inset-0" style="background-image:var(${cssVar}, none); background-size:cover; background-position:center;"></div>
-                <div class="relative z-10 text-white text-3xl md:text-4xl font-extrabold tracking-wide select-none">${item.key}</div>
-                <div class="info-panel pointer-events-none absolute left-0 bottom-0 w-full h-full bg-gradient-to-t from-black/60 via-black/20 to-transparent p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
-              </div>
-            </div>`;
+            <div class="relative dock-card flex-shrink-0 w-56 md:w-64 h-32 md:h-36 group ${resistClass}">
+              <div class="content-card absolute inset-0 ${item.color} rounded-md overflow-hidden cursor-pointer flex items-center justify-center">
+                <div class="absolute inset-0" style="background-image:var(${cssVar}, none); background-size:cover; background-position:center;"></div>
+                <div class="relative z-10 text-white text-3xl md:text-4xl font-extrabold tracking-wide select-none">${item.key}</div>
+              </div>
+            </div>
         }
       }
       // Pink COMING SOON plank
