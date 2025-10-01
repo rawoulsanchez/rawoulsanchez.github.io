@@ -330,27 +330,32 @@ suppressTapUntil = Date.now() + 200;
     hp.addEventListener('pointerleave', hidePreviewImmediate);
 
        // Extra hard closes
-    document.addEventListener('pointerdown', (e)=>{                         // any click
+    document.addEventListener('pointerdown', (e)=>{                         // any click outside preview
       if (Date.now() < suppressTapUntil) { e.preventDefault(); e.stopPropagation(); return; }
+      if (!hp.classList.contains('show')) return;
+      const t = e.target;
+      // do not close if click is inside the preview element
+      if (hp.contains(t)) return;
       hidePreviewImmediate();
-    }, true);   // any click
+    }, true);   // any click outside preview
     window.addEventListener('blur', hidePreviewImmediate);                  // window loses focus
     document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') hidePreviewImmediate(); }, true);
     document.addEventListener('pointerout', (e)=>{                          // pointer leaves window
       if (!e.relatedTarget) hidePreviewImmediate();
     }, true);
 
-    // Hard guard #1: if the pointer lands on ANY element that is not inside the preview, hide it immediately.
+    // Hard guard: while preview is open
+    // - close if pointer is outside the preview
+    // - also close if pointer is on a different card
     document.addEventListener('pointerover', (e) => {
       if (!hp.classList.contains('show')) return;
-      if (!hp.contains(e.target)) hidePreviewImmediate();
-    }, true);
-
-    // Hard guard #2: if we hover another tile while preview is open, close immediately
-    document.addEventListener('pointerover', (e) => {
-      if (!hp.classList.contains('show')) return;
-      const otherCard = e.target.closest('.content-card');
-      if (otherCard && otherCard !== currentPreviewCard) hidePreviewImmediate();
+      const t = e.target;
+      if (hp.contains(t)) return; // inside preview -> keep open
+      const overOrigin = currentPreviewCard && currentPreviewCard.contains(t);
+      const otherCard = t.closest('.content-card');
+      if (!overOrigin || (otherCard && otherCard !== currentPreviewCard)) {
+        hidePreviewImmediate();
+      }
     }, true);
 
     // Hard guard #3: if the pointer is neither over the preview NOR the originating card, close
