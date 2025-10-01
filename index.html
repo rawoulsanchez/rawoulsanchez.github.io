@@ -160,7 +160,7 @@ body.no-scroll main{ overflow: hidden !important; }
   }
   main > section, .content-shelf{ scroll-snap-align: start; scroll-snap-stop: normal; }
   /* Show neighbors: shelf ~58% viewport height with breathing room */
-  .content-shelf{ min-height: 58svh; padding-block: 3svh; display:flex; flex-direction:column; justify-content:center; gap: 0.5rem; }
+  .content-shelf{ min-height: 62svh; padding-block: 4svh; d...; flex-direction:column; justify-content:center; gap: 0.5rem; }
   .content-shelf > h3{ text-align:center; margin: 0 0 0.5rem 0; color:#cbd5e1; }
   .content-shelf.shelf-active > h3{ color:#ffffff; }
 
@@ -310,30 +310,8 @@ bd.addEventListener('touchmove', (e)=> e.preventDefault(), { passive: false });
     const add = (cls)=> document.body.classList.add(cls);
     const remove = (cls)=> document.body.classList.remove(cls);
 
-    // Mobile-only: active shelf highlight
-    (function(){
-      const isCoarse = window.matchMedia('(pointer:coarse)').matches;
-      if (!isCoarse) return;
-
-      let last = null;
-      const pick = () => {
-        if (hp.classList.contains('show')) return; // freeze while preview open
-        let best = null, bestDist = Infinity;
-        shelves.forEach(shelf => {
-          const r = shelf.getBoundingClientRect();
-          const dist = Math.abs((r.top + r.height / 2) - (innerHeight / 2));
-          if (dist < bestDist) { best = shelf; bestDist = dist; }
-        });
-        if (!best || best === last) return;
-        shelves.forEach(s => s.classList.toggle('shelf-active', s === best));
-        last = best;
-      };
-
-      // initialize and keep updated
-      pick();
-      document.addEventListener('scroll', pick, { passive: true });
-      window.addEventListener('resize', pick);
-    })();
+     /* removed: duplicate mobile center-pick for shelf-active.
+       The IntersectionObserver at 0.7 handles this. */
 
     // Preview control state
 let hoverTimer = null;
