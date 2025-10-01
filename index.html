@@ -564,6 +564,7 @@ card.style.overflow = 'visible';
   updateDock();
   shelf.addEventListener('scroll', updateDock, { passive: true });
   window.addEventListener('resize', updateDock);
+  document.addEventListener('shelf-active-change', updateDock);
   shelf.addEventListener('touchstart', () => { if (previewOpen) hidePreviewImmediate(); }, { passive: true });
 shelf.addEventListener('scroll',      () => { if (previewOpen) hidePreviewImmediate(); }, { passive: true });
 }
@@ -573,6 +574,9 @@ if (isCoarse) {
   let alignTimer = null;
 
   const centerNearest = () => {
+    // Only auto-center when this shelf is the active one
+    if (!shelf.classList.contains('shelf-active')) return;
+
     const cards = Array.from(track.querySelectorAll('.dock-card'));
     if (!cards.length) return;
 
@@ -714,6 +718,7 @@ card.addEventListener('touchend', (e)=>{
         if (active !== el) {
           shelvesEls.forEach(s => s.classList.toggle('shelf-active', s === el));
           active = el;
+          document.dispatchEvent(new CustomEvent('shelf-active-change', { detail: { active: el } }));
         }
       }
     }, { threshold: [0, 0.4, 0.6, 0.8, 1] });
