@@ -127,7 +127,8 @@ body.no-scroll{ overflow:hidden; overscroll-behavior:contain; }
   /* Mobile: section + shelf scroll snap */
   main{ scroll-snap-type: y mandatory; overscroll-behavior-y: contain; scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
   main > section, .content-shelf{ scroll-snap-align: start; scroll-snap-stop: always; }
-  .content-shelf{ min-height: 100svh; display:flex; flex-direction:column; justify-content:center; gap: 0.5rem; }
+  /* Show neighbors: shelf ~70% viewport height with breathing room */
+  .content-shelf{ min-height: 70svh; padding-block: 6svh; display:flex; flex-direction:column; justify-content:center; gap: 0.5rem; }
   .content-shelf > h3{ text-align:center; margin: 0 0 0.75rem 0; }
 }
   </style>
@@ -514,6 +515,18 @@ setTimeout(()=>{ suppressHover = false; }, 150);
 if (isCoarse) {
   const cards = Array.from(track.querySelectorAll('.dock-card'));
   const updateDock = () => {
+    // Only magnify when this shelf is active; otherwise keep baseline
+    if (!shelf.classList.contains('shelf-active')) {
+      cards.forEach(c => {
+        c.style.transform = 'none';
+        c.style.overflow = 'visible';
+        const inner0 = c.querySelector('.content-card');
+        if (inner0) inner0.style.transform = 'translateY(4px) scale(1)';
+        c.style.zIndex = '';
+      });
+      return;
+    }
+
     const r = shelf.getBoundingClientRect();
     const center = r.left + r.width / 2;     // shelf's visual center
 
