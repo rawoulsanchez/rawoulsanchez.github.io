@@ -47,15 +47,15 @@
     @media (min-aspect-ratio:16/9){ .video-background-container iframe{ height:56.25vw; min-height:100vh } }
     @media (max-aspect-ratio:16/9){ .video-background-container iframe{ width:177.78vh; min-width:100vw } }
 
-    /* Mobile: punch-in video ~20% (crop sides for impact) */
+    /* Mobile: punch-in video 40% total (20% crop each side) */
     @media (max-width: 768px){
       .video-background-container iframe{
         position: absolute;
         left: 50%;
         top: 0;
         transform: translateX(-50%);
-        width: 120vw;             /* zoom in */
-        height: 67.5vw;           /* 16:9 from 120vw */
+        width: 140vw;            /* 20vw overflow on each side */
+        height: 78.75vw;         /* 16:9 of 140vw */
         min-width: 0;
         min-height: 0;
       }
@@ -244,7 +244,7 @@ body.no-scroll main{ overflow: hidden !important; }
         <iframe id="heroVideo" src="https://www.youtube-nocookie.com/embed/t1x7Q0IA3Os?autoplay=1&mute=1&loop=1&playlist=t1x7Q0IA3Os&controls=0&modestbranding=1&enablejsapi=1" title="Background trailer" playsinline referrerpolicy="strict-origin-when-cross-origin" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
       </div>
       <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-0"></div>
-      <div class="z-10 text-center md:text-left max-w-[22rem] md:max-w-xl lg:max-w-3xl px-4 md:px-12 leading-relaxed">
+      <div class="z-10 text-left max-w-[22rem] md:max-w-xl lg:max-w-3xl px-4 md:px-12 leading-relaxed">
         <div class="mb-3">
           <div class="title-chip mx-auto md:mx-0" role="heading" aria-level="1">
             <span class="title-chip-text">TITAN PROJECT</span>
