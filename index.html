@@ -311,7 +311,7 @@ if (window.__hoverBackdrop){
   bd.style.display = 'none';
 }
 remove('no-scroll');
-document.removeEventListener('touchmove', blockTouchMove, { passive: false });
+document.removeEventListener('touchmove', blockTouchMove);
 
 previewOpen = false; // preview is now closed
 
@@ -532,7 +532,7 @@ if (isCoarse) {
         c.style.transform = 'none';
         c.style.overflow = 'visible';
         const inner0 = c.querySelector('.content-card');
-        if (inner0) inner0.style.transform = 'translateY(4px) scale(1)';
+        if (inner0) inner0.style.transform = ''; // let CSS apply scale(0.92) on inactive shelves
         c.style.zIndex = '';
       });
       return;
