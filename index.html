@@ -227,7 +227,7 @@ body.no-scroll main{ overflow: hidden !important; }
   }
   main > section, .content-shelf{ scroll-snap-align: start; scroll-snap-stop: normal; }
   /* Show neighbors: shelf ~58% viewport height with breathing room */
-  .content-shelf{ min-height: 62svh; padding-block: 4svh; display:flex; flex-direction:column; justify-content:center; gap: 0.5rem; }
+  .content-shelf{ min-height: 58svh; padding-block: 2.5svh; padding-inline: 0; display:flex; flex-direction:column; justify-content:center; gap: 0.5rem; }
   .content-shelf > h3{ text-align:left; margin: 0 0 0.25rem 0 !important; color:#e5e7eb; font-weight:700; }
   .content-shelf > h3::after{ content:""; display:block; height:1px; background:linear-gradient(to right, rgba(255,255,255,0.18), rgba(255,255,255,0.04)); margin-top:0.25rem; }
   .content-shelf.shelf-active > h3{ color:#ffffff; }
@@ -235,7 +235,7 @@ body.no-scroll main{ overflow: hidden !important; }
   /* duplicate removed: see earlier "Mobile: active shelf highlight + depth + panel look" block */
 
   /* Make Row A peek under hero on phones */
-  .content-shelf:first-of-type{ margin-top: -8svh; }
+  .content-shelf:first-of-type{ margin-top: -12svh; }
 
   /* Mobile: tighter horizontal gutter for cards (≈10px) */
   .card-track > * + *{ margin-left: 0.625rem; }
@@ -249,7 +249,7 @@ body.no-scroll main{ overflow: hidden !important; }
 <main class="h-[100svh] overflow-y-auto md:h-auto md:overflow-visible">
   <h1 class="sr-only">SanchezNinjah portfolio</h1>
     <!-- Hero Section -->
-    <section class="hero relative min-h-[100svh] flex items-end pb-10 md:pb-32 pt-0 md:pt-24 text-white">
+    <section class="hero relative min-h-[70svh] md:min-h-[100svh] flex items-end pb-4 md:pb-32 pt-0 md:pt-24 text-white">
       <div class="video-background-container">
         <iframe id="heroVideo" src="https://www.youtube-nocookie.com/embed/t1x7Q0IA3Os?autoplay=1&mute=1&loop=1&playlist=t1x7Q0IA3Os&controls=0&modestbranding=1&enablejsapi=1" title="Background trailer" playsinline referrerpolicy="strict-origin-when-cross-origin" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
       </div>
