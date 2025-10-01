@@ -159,10 +159,36 @@ body.no-scroll main{ overflow: hidden !important; }
     scroll-behavior: smooth;           /* smoother snap transitions */
   }
   main > section, .content-shelf{ scroll-snap-align: start; scroll-snap-stop: normal; }
-  /* Show neighbors: shelf ~70% viewport height with breathing room */
-  .content-shelf{ min-height: 62svh; padding-block: 4svh; display:flex; flex-direction:column; justify-content:center; gap: 0.5rem; }
-  .content-shelf > h3{ text-align:center; margin: 0 0 0.75rem 0; color:#cbd5e1; }
+  /* Show neighbors: shelf ~58% viewport height with breathing room */
+  .content-shelf{ min-height: 58svh; padding-block: 3svh; display:flex; flex-direction:column; justify-content:center; gap: 0.5rem; }
+  .content-shelf > h3{ text-align:center; margin: 0 0 0.5rem 0; color:#cbd5e1; }
   .content-shelf.shelf-active > h3{ color:#ffffff; }
+
+  /* Mobile: active shelf highlight + depth + panel look */
+  .content-shelf{
+    opacity: 0.60;
+    transform: translateY(8px) scale(0.96);
+    transition:
+      opacity 180ms ease,
+      transform 220ms cubic-bezier(.2,.8,.2,1),
+      box-shadow 220ms ease,
+      background-color 220ms ease;
+    background: rgba(17,17,17,0.60);
+    border-radius: 14px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.45);
+    padding-inline: 10px;
+  }
+  .content-shelf.shelf-active{
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    background: rgba(26,26,26,0.92);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.55);
+  }
+  .content-shelf:not(.shelf-active) .content-card{ transform: translateY(4px) scale(0.92); }
+
+  /* Mobile: tighter horizontal gutter for cards */
+  .card-track > * + *{ margin-left: 0.5rem; }
+
 }
   </style>
 </head>
