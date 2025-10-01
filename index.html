@@ -244,7 +244,7 @@ bd.addEventListener('touchmove', (e)=> e.preventDefault(), { passive: false });
 
       let last = null;
       const pick = () => {
-        if (previewOpen) return; // freeze while preview open
+        if (hp.classList.contains('show')) return; // freeze while preview open
         let best = null, bestDist = Infinity;
         shelves.forEach(shelf => {
           const r = shelf.getBoundingClientRect();
