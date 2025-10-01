@@ -104,8 +104,8 @@ body.no-scroll main{ overflow: hidden !important; }
 }
 .card-track > .relative{ scroll-snap-align: start; }
 @media (max-width: 768px){
-  .card-track > .relative{ scroll-snap-align: center; }
-  .shelf-row{ scroll-snap-type: x proximity; scroll-padding-inline: 50%; }
+  .card-track > .relative{ scroll-snap-align: start; }
+  .shelf-row{ scroll-snap-type: x proximity; scroll-padding-inline: 8px; }
 }
 
 /* Extra headroom on phones for scaled cards */
@@ -142,6 +142,7 @@ body.no-scroll main{ overflow: hidden !important; }
     background-position:center;
     /* avoid navbar overlap, respect iOS safe area */
     padding-top: calc(env(safe-area-inset-top, 0px) + 56px);
+    padding-bottom: 1rem; /* allow Row A to peek */
     /* smooth recede animation */
     transition: transform 220ms cubic-bezier(.2,.8,.2,1);
   }
@@ -234,7 +235,7 @@ body.no-scroll main{ overflow: hidden !important; }
   /* duplicate removed: see earlier "Mobile: active shelf highlight + depth + panel look" block */
 
   /* Make Row A peek under hero on phones */
-  .content-shelf:first-of-type{ margin-top: -6svh; }
+  .content-shelf:first-of-type{ margin-top: -8svh; }
 
   /* Mobile: tighter horizontal gutter for cards (≈10px) */
   .card-track > * + *{ margin-left: 0.625rem; }
