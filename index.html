@@ -109,6 +109,8 @@ body.no-scroll{ overflow:hidden; overscroll-behavior:contain; }
     background-image:none;
     background-size:cover;
     background-position:center;
+    /* avoid navbar overlap, respect iOS safe area */
+    padding-top: calc(env(safe-area-inset-top, 0px) + 56px);
   }
   /* keep video visible on mobile: do NOT hide .video-background-container */
 
@@ -122,15 +124,17 @@ body.no-scroll{ overflow:hidden; overscroll-behavior:contain; }
   .content-shelf{ opacity: 0.75; transition: opacity 180ms ease; }
   .content-shelf.shelf-active{ opacity: 1; }
 
-  /* Mobile: section scroll snap */
-  main{ scroll-snap-type: y mandatory; overscroll-behavior-y: contain; }
-  main > section{ scroll-snap-align: start; }
+  /* Mobile: section + shelf scroll snap */
+  main{ scroll-snap-type: y mandatory; overscroll-behavior-y: contain; scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
+  main > section, .content-shelf{ scroll-snap-align: start; scroll-snap-stop: always; }
+  .content-shelf{ min-height: 100svh; display:flex; flex-direction:column; justify-content:center; gap: 0.5rem; }
+  .content-shelf > h3{ text-align:center; margin: 0 0 0.75rem 0; }
 }
   </style>
 </head>
-<body class="overflow-x-hidden">
+<body class="overflow-x-hidden overflow-y-hidden h-[100svh] md:overflow-y-visible md:h-auto">
   <!-- Fixed Navigation Bar -->
-  <nav class="fixed top-0 left-0 right-0 bg-gradient-to-b from-black/90 to-transparent p-4 z-[100] flex items-center justify-between">   <div class="flex items-center space-x-8">     <a href="/" class="text-2xl font-extrabold text-red-600 tracking-wider" aria-label="SanchezNinjah home">SanchezNinjah</a>     <ul class="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-300">       <li><a href="/" class="text-white font-bold border-b-2 border-red-600 pb-1" aria-current="page">Home</a></li>       <li><a href="/shows" class="hover:text-white">TV Shows</a></li>       <li><a href="/movies" class="hover:text-white">Movies</a></li>       <li><a href="/list" class="hover:text-white">My List</a></li>     </ul>   </div>   <div class="flex items-center space-x-4">     <svg aria-hidden="true" focusable="false" class="w-6 h-6 text-gray-300 hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>     <svg aria-hidden="true" focusable="false" class="w-6 h-6 text-gray-300 hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>   </div> </nav>
+  <nav class="fixed top-0 left-0 right-0 bg-gradient-to-b from-black/90 to-transparent p-4 z-[100] flex items-center justify-between">   <div class="flex items-center space-x-8">     <a href="/" class="text-xl sm:text-2xl font-extrabold text-red-600 tracking-wide sm:tracking-wider whitespace-nowrap" aria-label="SanchezNinjah home">SanchezNinjah</a>     <ul class="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-300">       <li><a href="/" class="text-white font-bold border-b-2 border-red-600 pb-1" aria-current="page">Home</a></li>       <li><a href="/shows" class="hover:text-white">TV Shows</a></li>       <li><a href="/movies" class="hover:text-white">Movies</a></li>       <li><a href="/list" class="hover:text-white">My List</a></li>     </ul>   </div>   <div class="flex items-center space-x-4">     <svg aria-hidden="true" focusable="false" class="w-6 h-6 text-gray-300 hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>     <svg aria-hidden="true" focusable="false" class="w-6 h-6 text-gray-300 hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>   </div> </nav>
 <main class="h-[100svh] overflow-y-auto md:h-auto md:overflow-visible">
   <h1 class="sr-only">SanchezNinjah portfolio</h1>
     <!-- Hero Section -->
@@ -138,12 +142,12 @@ body.no-scroll{ overflow:hidden; overscroll-behavior:contain; }
       <div class="video-background-container">
         <iframe   src="https://www.youtube-nocookie.com/embed/6stlCkUDG_s?autoplay=1&mute=1&loop=1&playlist=6stlCkUDG_s&controls=0&modestbranding=1"   title="Background trailer"   playsinline   referrerpolicy="strict-origin-when-cross-origin"   frameborder="0"   allow="autoplay; encrypted-media"   allowfullscreen></iframe>
       </div>
-      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/10 z-0"></div>
-      <div class="z-10 text-left max-w-[22rem] md:max-w-xl lg:max-w-3xl px-4 md:px-12 leading-relaxed">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-0"></div>
+      <div class="z-10 text-center md:text-left max-w-[22rem] md:max-w-xl lg:max-w-3xl px-4 md:px-12 leading-relaxed">
         <div class="mb-3"><img src="https://placehold.co/300x80/1d1d1d/e50914?text=TITAN+PROJECT" alt="Movie Title Logo" class="w-48 sm:w-56 md:w-80 rounded-lg opacity-90 mx-auto md:mx-0"></div>
         <p class="text-xs md:text-sm font-medium text-red-500 uppercase tracking-wide mb-2">New Release | Thriller, Sci-Fi | 2024</p>
         <p class="text-sm md:text-xl text-gray-200/90 leading-relaxed mb-6 font-light">As a rogue AI network threatens global collapse, a disgraced former agent is called back into the field for one last, impossible mission to save humanity.</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full max-w-sm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full max-w-sm">
           <button type="button" class="bg-white hover:bg-gray-200 text-black font-bold py-3 px-8 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg w-full flex items-center justify-center space-x-2">
             <svg aria-hidden="true" focusable="false" class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg>
             <span class="text-lg">Play Now</span>
@@ -673,6 +677,35 @@ card.addEventListener('touchend', (e)=>{
     }, { threshold: [0, 0.6, 1] });
 
     io.observe(heroEl);
+  })();
+
+  // Mobile: mark the visible shelf as active for opacity highlight
+  (function(){
+    const isCoarse = window.matchMedia('(pointer:coarse)').matches;
+    if (!isCoarse) return;
+
+    const shelvesEls = Array.from(document.querySelectorAll('.content-shelf'));
+    if (!shelvesEls.length) return;
+
+    let active = null;
+    const io = new IntersectionObserver((entries)=>{
+      // pick the entry with the highest intersection ratio
+      let best = null;
+      for (const e of entries) {
+        if (!best || e.intersectionRatio > best.intersectionRatio) best = e;
+      }
+      if (!best) return;
+      // activate only when most of the shelf is in view to avoid flicker
+      const el = best.target;
+      if (best.isIntersecting && best.intersectionRatio >= 0.6) {
+        if (active !== el) {
+          shelvesEls.forEach(s => s.classList.toggle('shelf-active', s === el));
+          active = el;
+        }
+      }
+    }, { threshold: [0, 0.4, 0.6, 0.8, 1] });
+
+    shelvesEls.forEach(s => io.observe(s));
   })();
 
   // ---------- Smoke tests ----------
