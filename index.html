@@ -187,6 +187,9 @@ function getHoverPreview() {
   if (!window.__hoverPreview) {
     const el = document.createElement('div');
     el.className = 'hover-preview';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-label', 'Content preview');
     el.innerHTML = `
       <div class="hp-banner"></div>
       <div class="hp-body">
@@ -344,7 +347,6 @@ if (window.__hoverBackdrop){
   bd.style.display = 'block';
   bd.style.pointerEvents = 'auto';
 }
-previewOpen = true;
 document.addEventListener('touchmove', blockTouchMove, { passive: false });
 
       // Morph in
