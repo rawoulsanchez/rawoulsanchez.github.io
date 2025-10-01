@@ -715,6 +715,17 @@ card.addEventListener('touchend', (e)=>{
     }, { threshold: [0, 0.6, 1] });
 
     io.observe(heroEl);
+
+    // Also pause when page is hidden; resume on visible if hero is active
+    document.addEventListener('visibilitychange', ()=>{
+      if (document.hidden) {
+        ytCommand('pauseVideo');
+      } else {
+        const r = heroEl.getBoundingClientRect();
+        const visible = r.top < innerHeight && r.bottom > 0 && (Math.min(r.bottom, innerHeight) - Math.max(r.top, 0)) / r.height >= 0.7;
+        if (visible) ytCommand('playVideo');
+      }
+    });
   })();
 
   // Mobile: mark the visible shelf as active for opacity highlight
