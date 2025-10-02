@@ -56,7 +56,7 @@ body.no-scroll main{overflow:hidden!important}
     --m-hero-vid-w:192vw;          /* punch-in width (~50% total) */
     --m-hero-vid-h:108vw;          /* 16:9 of 192vw */
     --m-synopsis-firstline-offset:164px; /* align first-line baseline to video bottom on small iPhones */
-    --m-gap-ctas-to-row:48px;      /* larger gap from CTAs to first shelf title */
+    --m-gap-ctas-to-row:64px;      /* enforce bigger gap from CTAs to first shelf title */
   }
 
   /* mobile-hero-iframe */
@@ -114,9 +114,8 @@ body.no-scroll main{overflow:hidden!important}
   .content-shelf.shelf-active>h3{color:#fff}
 
   /* mobile-rowA-peek */
-  /* 5) Show only the top ~⅕ of Row A below hero, with a clean gap */
-  .content-shelf:first-of-type{margin-top:-4svh;padding-top:2rem}
-  /* mobile-shelf-title-visibility */
+  /* 5) Minimize peek on short phones and add breathing room */
+  .content-shelf:first-of-type{margin-top:0;padding-top:2.25rem}
   .content-shelf:first-of-type>h3{
     opacity:1;pointer-events:auto;
     margin-top:var(--m-gap-ctas-to-row) !important;
