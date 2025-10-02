@@ -51,11 +51,11 @@ body.no-scroll main{overflow:hidden!important}
    ==============  MOBILE — CLEAN CONSOLIDATED RULES  =================
    =================================================================== */
 @media (max-width:768px){
-  /* 0) Punch the video in by ~10% each side (total width ~120vw) */
+  /* 0) Punch the video in by ~30% total width (160vw) */
   .video-background-container iframe{
     left:50%;top:0;transform:translateX(-50%);
-    width:120vw;              /* 10% crop each side */
-    height:67.5vw;            /* 16:9 of 120vw */
+    width:160vw;              /* 30% punch-in */
+    height:90vw;              /* 16:9 of 160vw */
     min-width:0;min-height:0;
   }
 
@@ -64,7 +64,7 @@ body.no-scroll main{overflow:hidden!important}
     min-height:66svh;         /* lower overall so Row A can peek */
     background-color:#0f0f10;background-image:none;background-size:cover;background-position:center;
     padding-top:calc(env(safe-area-inset-top,0px) + 56px);
-    padding-bottom:.25rem;    /* tiny bottom padding */
+    padding-bottom:0;         /* tighter gap to avoid overlap */
     transition:transform 220ms cubic-bezier(.2,.8,.2,1);
   }
   .hero.dimmed{transform:translateY(-8px) scale(.94)}
@@ -78,8 +78,8 @@ body.no-scroll main{overflow:hidden!important}
 
   /* 2) Portrait posters — ~3 visible per viewport */
   .dock-card{
-    width:30vw;               /* ~3 across */
-    max-width:6.25rem;        /* cap for big phones */
+    width:28vw;               /* ≈3 across */
+    max-width:6rem;           /* tighter cap for big phones */
     min-width:5rem;           /* guard for small phones */
     aspect-ratio:2/3;         /* portrait */
     height:auto;overflow:visible;
@@ -100,8 +100,11 @@ body.no-scroll main{overflow:hidden!important}
 
   /* 5) Show only the top ~⅓ of Row A below hero, with a clean gap
         (no overlap with the CTAs or the “Popular on Stream” title) */
-  .content-shelf:first-of-type{margin-top:-14svh;padding-top:1rem}  /* tweak -14svh → more/less peek */
-  .content-shelf:first-of-type>h3{opacity:0;pointer-events:none}
+  .content-shelf:first-of-type{margin-top:-18svh;padding-top:1rem}  /* -18svh = deeper peek */
+  .content-shelf:first-of-type>h3{
+    opacity:0;pointer-events:none;
+    margin-top:.75rem !important; /* extra separation from hero CTAs */
+  }
   .content-shelf.shelf-active:first-of-type>h3{opacity:1;pointer-events:auto}
 }
 </style>
