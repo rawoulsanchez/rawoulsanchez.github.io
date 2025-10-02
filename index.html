@@ -52,11 +52,12 @@ body.no-scroll main{overflow:hidden!important}
    =================================================================== */
 @media (max-width:768px){
   /* Mobile anchor variables: adjust here to tune layout uniformly */
+  /* mobile-hero-anchors-vars */
   :root{
     --m-hero-vid-w:192vw;          /* punch-in width (~50% total) */
     --m-hero-vid-h:108vw;          /* 16:9 of 192vw */
-    --m-synopsis-firstline-offset:156px; /* baseline sits a touch higher */
-    --m-gap-ctas-to-row:20px;      /* clearer gap above first shelf title */
+    --m-synopsis-firstline-offset:164px; /* align first-line baseline to video bottom on small iPhones */
+    --m-gap-ctas-to-row:24px;      /* extra breathing room above first shelf title */
   }
 
   /* 0) Punch the video in via vars */
@@ -113,8 +114,9 @@ body.no-scroll main{overflow:hidden!important}
   .content-shelf>h3::after{content:"";display:block;height:1px;background:linear-gradient(to right,rgba(255,255,255,.18),rgba(255,255,255,.04));margin-top:.25rem}
   .content-shelf.shelf-active>h3{color:#fff}
 
-  /* 5) Show only the top ~¼–⅓ of Row A below hero, with a clean gap */
-  .content-shelf:first-of-type{margin-top:-12svh;padding-top:1.5rem}
+  /* mobile-rowA-peek */
+  /* 5) Show only the top ~¼ of Row A below hero, with a clean gap */
+  .content-shelf:first-of-type{margin-top:-10svh;padding-top:1.75rem}
   .content-shelf:first-of-type>h3{
     opacity:0;pointer-events:none;
     margin-top:var(--m-gap-ctas-to-row) !important;
