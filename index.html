@@ -51,6 +51,14 @@ body.no-scroll main{overflow:hidden!important}
    ==============  MOBILE — CLEAN CONSOLIDATED RULES  =================
    =================================================================== */
 @media (max-width:768px){
+  /* Mobile anchor variables: adjust here to tune layout uniformly */
+  :root{
+    --m-hero-vid-w:192vw;          /* punch-in width (~50% total) */
+    --m-hero-vid-h:108vw;          /* 16:9 of 192vw */
+    --m-synopsis-firstline-offset:148px; /* distance from video bottom up to first line baseline */
+    --m-gap-ctas-to-row:14px;      /* space from CTA group to first shelf title */
+  }
+
   /* 0) Punch the video in via vars */
   .video-background-container iframe{
     left:50%;top:0;transform:translateX(-50%);
@@ -58,7 +66,6 @@ body.no-scroll main{overflow:hidden!important}
     height:var(--m-hero-vid-h);
     min-width:0;min-height:0;
   }
-}
 
   /* 1) Hero layout: lower the text, small inline CTAs, leave a gap */
   .hero{
@@ -115,6 +122,8 @@ body.no-scroll main{overflow:hidden!important}
   }
   .content-shelf.shelf-active:first-of-type>h3{opacity:1;pointer-events:auto}
 }
+
+/* moved: these mobile rules now live inside @media (max-width:768px) */
 </style>
 </head>
 <body class="overflow-x-hidden overflow-y-hidden h-[100svh] md:overflow-y-visible md:h-auto">
