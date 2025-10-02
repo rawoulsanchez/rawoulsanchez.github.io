@@ -118,6 +118,54 @@
     /* Disable big hover zoom on touch */
     .content-card:hover{transform:none!important;box-shadow:none!important;z-index:auto!important}
   }
+  /* === MOBILE COVER LAYOUT (paste at end of <style>) === */
+@media (max-width:768px){
+
+  /* Slight video punch-in (~10% each side) */
+  .video-background-container iframe{
+    width:120vw;                 /* crop */
+    height:67.5vw;               /* 16:9 of 120vw */
+    left:50%; top:0; transform:translateX(-50%);
+  }
+
+  /* Lower the hero copy and keep CTAs inline + smaller */
+  .hero .z-10{ margin-top:auto; }
+  .hero .grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:0.5rem;
+  }
+  .hero .grid button{
+    padding:0.45rem 0.75rem;
+    min-height:38px;
+    border-radius:9999px;
+  }
+  .hero .grid button svg{ width:18px; height:18px; }
+  .hero .grid button .text-lg{ font-size:0.9rem; line-height:1.2rem; }
+
+  /* Create a clean gap between CTAs and Row A */
+  .hero{ padding-bottom:1.25rem; }
+
+  /* Row A peek: show about the top third of the cards on the cover */
+  .content-shelf:first-of-type{ margin-top:-14svh; }  /* adjust -12 ↔ -16 if needed */
+
+  /* Prevent Row A title from overlapping CTAs on the cover */
+  .content-shelf:first-of-type > h3{ opacity:0; pointer-events:none; }
+  .content-shelf.shelf-active:first-of-type > h3{ opacity:1; pointer-events:auto; }
+
+  /* Portrait cards (~3 on screen) */
+  .dock-card{
+    width:28vw;                 /* ≈3 across */
+    max-width:6.25rem;
+    min-width:5rem;
+    aspect-ratio:2/3;
+    height:auto;
+  }
+  .card-track > * + *{ margin-left:0.5rem; }
+  .shelf-row{ padding-block:0.5rem; }
+
+  /* Stacked “car slide” feel between rows */
+  .content-shelf{ min-height:56svh; padding-block:1.25svh; }
+}
 </style>
 </head>
 <body class="overflow-x-hidden overflow-y-hidden h-[100svh] md:overflow-y-visible md:h-auto">
