@@ -14,157 +14,95 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
 <style>
-  /* Base */
-  body{background:#0d0d0d;font-family:'Inter',sans-serif;color:#f5f5f5}
-  .no-scrollbar::-webkit-scrollbar{display:none}
-  .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+/* ---------------- Base ---------------- */
+body{background:#0d0d0d;font-family:'Inter',sans-serif;color:#f5f5f5}
+.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+.content-card{transition:transform .3s cubic-bezier(.25,.8,.25,1),box-shadow .3s ease;transform-origin:center;z-index:1}
+.content-card:hover{will-change:transform;transform:scale(1.4);z-index:999;box-shadow:0 15px 30px -5px rgba(0,0,0,.9)}
+.title-chip{display:inline-flex;align-items:center;justify-content:center;padding:.5rem .875rem;background:rgba(17,17,17,.85);border-radius:.75rem;box-shadow:0 6px 20px rgba(0,0,0,.45),inset 0 0 0 2px rgba(229,9,20,.65)}
+.title-chip-text{font-weight:800;letter-spacing:.08em;color:#e50914;font-size:1.125rem}
+@media (min-width:768px){.title-chip-text{font-size:1.5rem}}
+@media (max-width:768px){.title-chip{padding:.4rem .75rem}.title-chip-text{font-size:1rem;letter-spacing:.09em}}
+.content-shelf{padding-block:1.25rem;margin:0;content-visibility:auto;contain-intrinsic-size:600px}
 
-  /* Cards (desktop hover only; disabled on mobile below) */
-  .content-card{transition:transform .3s cubic-bezier(.25,.8,.25,1),box-shadow .3s ease;transform-origin:center;z-index:1}
-  .content-card:hover{will-change:transform;transform:scale(1.4);z-index:999;box-shadow:0 15px 30px -5px rgba(0,0,0,.9)}
+/* ---------------- Hero video ---------------- */
+.video-background-container{position:absolute;inset:0;overflow:hidden;z-index:0}
+.video-background-container iframe{position:absolute;top:50%;left:50%;min-width:100vw;min-height:100vh;transform:translate(-50%,-50%);pointer-events:none}
+@media (min-aspect-ratio:16/9){.video-background-container iframe{height:56.25vw;min-height:100vh}}
+@media (max-aspect-ratio:16/9){.video-background-container iframe{width:177.78vh;min-width:100vw}}
 
-  /* Title chip */
-  .title-chip{display:inline-flex;align-items:center;justify-content:center;padding:.5rem .875rem;background:rgba(17,17,17,.85);border-radius:.75rem;box-shadow:0 6px 20px rgba(0,0,0,.45),inset 0 0 0 2px rgba(229,9,20,.65)}
-  .title-chip-text{font-weight:800;letter-spacing:.08em;color:#e50914;font-size:1.125rem}
-  @media (min-width:768px){.title-chip-text{font-size:1.5rem}}
-  @media (max-width:768px){.title-chip{padding:.4rem .75rem}.title-chip-text{font-size:1rem;letter-spacing:.09em}}
+/* ---------------- Preview ---------------- */
+.hover-preview{position:fixed;z-index:9999;pointer-events:none;min-width:min(92vw,520px);max-width:min(92vw,520px);border-radius:.75rem;overflow:hidden;box-shadow:0 25px 70px rgba(0,0,0,.6),0 10px 25px rgba(0,0,0,.45);background:#111;opacity:0;transform:translate(0,0) scale(.98);transform-origin:top left;transition:transform .18s cubic-bezier(.2,.8,.2,1),opacity .16s ease}
+.hp-backdrop{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.35);display:none;touch-action:none}
+body.no-scroll{overflow:hidden;overscroll-behavior:contain}
+body.no-scroll main{overflow:hidden!important}
+.hover-preview.show{opacity:1;transform:scale(1)}
+.hover-preview .hp-banner{aspect-ratio:16/9;background-size:cover;background-position:center;position:relative}
+.hover-preview .hp-banner::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8),rgba(0,0,0,0) 55%)}
+.hover-preview .hp-body{background:#1a1a1a;padding:14px 16px;display:flex;flex-direction:column;gap:10px;pointer-events:auto}
 
-  /* Shelves */
-  .content-shelf{padding-block:1.25rem;margin:0;content-visibility:auto;contain-intrinsic-size:600px}
+/* ---------------- Shelves (horizontal) ---------------- */
+.shelf-row{overflow-x:auto;overflow-y:visible;overscroll-behavior-x:contain;overscroll-behavior-y:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;touch-action:pan-x}
+.card-track>.relative{scroll-snap-align:start}
+@media (prefers-reduced-motion:reduce){.content-card,.hover-preview{transition:none!important}}
+.content-card:focus-visible{outline:3px solid #e50914;outline-offset:2px}
 
-  /* Hero video base */
-  .video-background-container{position:absolute;inset:0;overflow:hidden;z-index:0}
-  .video-background-container iframe{position:absolute;top:50%;left:50%;min-width:100vw;min-height:100vh;transform:translate(-50%,-50%);pointer-events:none}
-  @media (min-aspect-ratio:16/9){.video-background-container iframe{height:56.25vw;min-height:100vh}}
-  @media (max-aspect-ratio:16/9){.video-background-container iframe{width:177.78vh;min-width:100vw}}
-
-  /* Preview overlay (desktop) */
-  .hover-preview{position:fixed;z-index:9999;pointer-events:none;min-width:min(92vw,520px);max-width:min(92vw,520px);border-radius:.75rem;overflow:hidden;box-shadow:0 25px 70px rgba(0,0,0,.6),0 10px 25px rgba(0,0,0,.45);background:#111;opacity:0;transform:translate(0,0) scale(.98);transform-origin:top left;transition:transform .18s cubic-bezier(.2,.8,.2,1),opacity .16s ease}
-  .hover-preview.show{opacity:1;transform:scale(1)}
-  .hover-preview .hp-banner{aspect-ratio:16/9;background-size:cover;background-position:center;position:relative}
-  .hover-preview .hp-banner::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8),rgba(0,0,0,0) 55%)}
-  .hover-preview .hp-body{background:#1a1a1a;padding:14px 16px;display:flex;flex-direction:column;gap:10px;pointer-events:auto}
-  .hp-backdrop{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.35);display:none;touch-action:none}
-  body.no-scroll{overflow:hidden;overscroll-behavior:contain}
-  body.no-scroll main{overflow:hidden!important}
-
-  /* Horizontal shelves */
-  .shelf-row{overflow-x:auto;overflow-y:visible;overscroll-behavior-x:contain;overscroll-behavior-y:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;touch-action:pan-x}
-  .card-track > .relative{scroll-snap-align:start}
-
-  @media (prefers-reduced-motion:reduce){
-    .content-card,.hover-preview{transition:none!important}
-  }
-  .content-card:focus-visible{outline:3px solid #e50914;outline-offset:2px}
-
-  /* ====================== MOBILE LAYOUT ====================== */
-  @media (max-width:768px){
-
-    /* Hide desktop nav items */
-    nav ul{display:none}
-
-    /* Punch-in video 20% each side (total 40%) */
-    .video-background-container iframe{
-      left:50%;top:0;transform:translateX(-50%);
-      width:140vw;height:78.75vw; /* 16:9 of 140vw */
-      min-width:0;min-height:0;
-    }
-
-    /* HERO: lower text, inline smaller CTAs, allow Row A to peek */
-    .hero{
-      min-height:62svh;                   /* shorter hero so Row A shows */
-      background:#0f0f10;
-      padding-top:calc(env(safe-area-inset-top,0px) + 56px);
-      padding-bottom:.25rem;               /* tight bottom */
-      transition:transform 220ms cubic-bezier(.2,.8,.2,1);
-    }
-    .hero.dimmed{transform:translateY(-8px) scale(.94)}
-    /* Make hero copy sit LOWER (no upward translate) */
-    .hero .z-10{transform:none}
-    /* Buttons inline & smaller */
-    .hero .grid{gap:.5rem;grid-template-columns:repeat(2,minmax(0,1fr))}
-    .hero .grid button{padding:.45rem .7rem;min-height:38px;border-radius:9999px}
-    .hero .grid button svg{width:18px;height:18px}
-    .hero .grid button .text-lg{font-size:.9rem;line-height:1.2rem}
-
-    /* Portrait posters (~3 across) */
-    .dock-card{
-      width:28vw;max-width:6.25rem;min-width:5rem;
-      aspect-ratio:2/3;height:auto;overflow:visible;
-      transform-origin:center center;transition:transform 180ms cubic-bezier(.2,.8,.2,1),z-index 0s;
-    }
-    .card-track > * + *{margin-left:.5rem}
-    .shelf-row{padding-block:.5rem}
-
-    /* Section snap for vertical card-stack feel */
-    main{scroll-snap-type:y mandatory;overscroll-behavior-y:contain;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 56px);-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
-    main > section,.content-shelf{scroll-snap-align:start;scroll-snap-stop:normal}
-
-    /* Shelf block tighter; headings subtle line */
-    .content-shelf{
-      min-height:54svh;                    /* tighter rows -> closer together */
-      padding-block:1.25svh;padding-inline:0;
-      display:flex;flex-direction:column;justify-content:center;gap:.5rem;
-    }
-    .content-shelf > h3{margin:0 0 .25rem 0!important;color:#e5e7eb;font-weight:700;text-align:left}
-    .content-shelf > h3::after{content:"";display:block;height:1px;background:linear-gradient(to right,rgba(255,255,255,.18),rgba(255,255,255,.04));margin-top:.25rem}
-    .content-shelf.shelf-active > h3{color:#fff}
-
-    /* Show only top ~⅓ of Row A peeking under hero */
-    .content-shelf:first-of-type{
-      margin-top:-20svh;                   /* adjust to taste: -18 to -22 */
-    }
-
-    /* Disable big hover zoom on touch */
-    .content-card:hover{transform:none!important;box-shadow:none!important;z-index:auto!important}
-  }
-  /* === MOBILE COVER LAYOUT (paste at end of <style>) === */
+/* ===================================================================
+   ==============  MOBILE — CLEAN CONSOLIDATED RULES  =================
+   =================================================================== */
 @media (max-width:768px){
-
-  /* Slight video punch-in (~10% each side) */
+  /* 0) Punch the video in by ~10% each side (total width ~120vw) */
   .video-background-container iframe{
-    width:120vw;                 /* crop */
-    height:67.5vw;               /* 16:9 of 120vw */
-    left:50%; top:0; transform:translateX(-50%);
+    left:50%;top:0;transform:translateX(-50%);
+    width:120vw;              /* 10% crop each side */
+    height:67.5vw;            /* 16:9 of 120vw */
+    min-width:0;min-height:0;
   }
 
-  /* Lower the hero copy and keep CTAs inline + smaller */
-  .hero .z-10{ margin-top:auto; }
-  .hero .grid{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:0.5rem;
+  /* 1) Hero layout: lower the text, small inline CTAs, leave a gap */
+  .hero{
+    min-height:66svh;         /* lower overall so Row A can peek */
+    background-color:#0f0f10;background-image:none;background-size:cover;background-position:center;
+    padding-top:calc(env(safe-area-inset-top,0px) + 56px);
+    padding-bottom:.25rem;    /* tiny bottom padding */
+    transition:transform 220ms cubic-bezier(.2,.8,.2,1);
   }
-  .hero .grid button{
-    padding:0.45rem 0.75rem;
-    min-height:38px;
-    border-radius:9999px;
-  }
-  .hero .grid button svg{ width:18px; height:18px; }
-  .hero .grid button .text-lg{ font-size:0.9rem; line-height:1.2rem; }
+  .hero.dimmed{transform:translateY(-8px) scale(.94)}
+  .content-card:hover{transform:none!important;box-shadow:none!important;z-index:auto!important}
 
-  /* Create a clean gap between CTAs and Row A */
-  .hero{ padding-bottom:1.25rem; }
+  /* Put buttons on one line, make them smaller */
+  .hero .grid{gap:.5rem;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero .grid button{padding:.45rem .7rem;min-height:38px;border-radius:9999px}
+  .hero .grid button svg{width:18px;height:18px}
+  .hero .grid button .text-lg{font-size:.9rem;line-height:1.2rem}
 
-  /* Row A peek: show about the top third of the cards on the cover */
-  .content-shelf:first-of-type{ margin-top:-14svh; }  /* adjust -12 ↔ -16 if needed */
-
-  /* Prevent Row A title from overlapping CTAs on the cover */
-  .content-shelf:first-of-type > h3{ opacity:0; pointer-events:none; }
-  .content-shelf.shelf-active:first-of-type > h3{ opacity:1; pointer-events:auto; }
-
-  /* Portrait cards (~3 on screen) */
+  /* 2) Portrait posters — ~3 visible per viewport */
   .dock-card{
-    width:28vw;                 /* ≈3 across */
-    max-width:6.25rem;
-    min-width:5rem;
-    aspect-ratio:2/3;
-    height:auto;
+    width:30vw;               /* ~3 across */
+    max-width:6.25rem;        /* cap for big phones */
+    min-width:5rem;           /* guard for small phones */
+    aspect-ratio:2/3;         /* portrait */
+    height:auto;overflow:visible;
+    transform-origin:center center;transition:transform 180ms cubic-bezier(.2,.8,.2,1),z-index 0s;
   }
-  .card-track > * + *{ margin-left:0.5rem; }
-  .shelf-row{ padding-block:0.5rem; }
+  .card-track>*+*{margin-left:.5rem}
+  .shelf-row{padding-block:.5rem}
 
-  /* Stacked “car slide” feel between rows */
-  .content-shelf{ min-height:56svh; padding-block:1.25svh; }
+  /* 3) Section snap for “vertical cards sliding” feel */
+  main{scroll-snap-type:y mandatory;overscroll-behavior-y:contain;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 56px);-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
+  main>section,.content-shelf{scroll-snap-align:start;scroll-snap-stop:normal}
+
+  /* 4) Shelves are tighter; headings subtle */
+  .content-shelf{min-height:56svh;padding-block:1.25svh;padding-inline:0;display:flex;flex-direction:column;justify-content:center;gap:.5rem}
+  .content-shelf>h3{margin:0 0 .25rem 0!important;color:#e5e7eb;font-weight:700}
+  .content-shelf>h3::after{content:"";display:block;height:1px;background:linear-gradient(to right,rgba(255,255,255,.18),rgba(255,255,255,.04));margin-top:.25rem}
+  .content-shelf.shelf-active>h3{color:#fff}
+
+  /* 5) Show only the top ~⅓ of Row A below hero, with a clean gap
+        (no overlap with the CTAs or the “Popular on Stream” title) */
+  .content-shelf:first-of-type{margin-top:-14svh;padding-top:1rem}  /* tweak -14svh → more/less peek */
+  .content-shelf:first-of-type>h3{opacity:0;pointer-events:none}
+  .content-shelf.shelf-active:first-of-type>h3{opacity:1;pointer-events:auto}
 }
 </style>
 </head>
