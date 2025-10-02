@@ -55,8 +55,8 @@ body.no-scroll main{overflow:hidden!important}
   :root{
     --m-hero-vid-w:192vw;          /* punch-in width (~50% total) */
     --m-hero-vid-h:108vw;          /* 16:9 of 192vw */
-    --m-synopsis-firstline-offset:164px; /* align first-line baseline to video bottom on small iPhones */
-    --m-gap-ctas-to-row:88px;      /* extra breathing room above first shelf title */
+    --m-synopsis-firstline-offset:140px; /* align first-line baseline to video bottom on small iPhones */
+    --m-gap-ctas-to-row:36px;      /* extra breathing room above first shelf title */
   }
 
   /* mobile-hero-iframe */
@@ -108,7 +108,7 @@ body.no-scroll main{overflow:hidden!important}
   main>section,.content-shelf{scroll-snap-align:start;scroll-snap-stop:normal}
 
   /* 4) Shelves are tighter; headings subtle */
-  .content-shelf{padding-block:2svh;padding-inline:0;display:flex;flex-direction:column;gap:.5rem}
+  .content-shelf{padding-block:1rem;padding-inline:0;display:flex;flex-direction:column;gap:.5rem}
   .content-shelf>h3{margin:0 0 .5rem 0!important;color:#e5e7eb;font-weight:700} /* more space under title */
   .content-shelf>h3::after{content:"";display:block;height:1px;background:linear-gradient(to right,rgba(255,255,255,.18),rgba(255,255,255,.04));margin-top:.25rem}
   .content-shelf.shelf-active>h3{color:#fff}
