@@ -55,8 +55,8 @@ body.no-scroll main{overflow:hidden!important}
   :root{
     --m-hero-vid-w:192vw;          /* punch-in width (~50% total) */
     --m-hero-vid-h:108vw;          /* 16:9 of 192vw */
-    --m-synopsis-firstline-offset:148px; /* distance from video bottom up to first line baseline */
-    --m-gap-ctas-to-row:14px;      /* space from CTA group to first shelf title */
+    --m-synopsis-firstline-offset:156px; /* baseline sits a touch higher */
+    --m-gap-ctas-to-row:20px;      /* clearer gap above first shelf title */
   }
 
   /* 0) Punch the video in via vars */
@@ -113,12 +113,11 @@ body.no-scroll main{overflow:hidden!important}
   .content-shelf>h3::after{content:"";display:block;height:1px;background:linear-gradient(to right,rgba(255,255,255,.18),rgba(255,255,255,.04));margin-top:.25rem}
   .content-shelf.shelf-active>h3{color:#fff}
 
-  /* 5) Show only the top ~⅓ of Row A below hero, with a clean gap
-        (no overlap with the CTAs or the “Popular on Stream” title) */
-  .content-shelf:first-of-type{margin-top:-18svh;padding-top:1.25rem}  /* deeper peek + uniform padding */
+  /* 5) Show only the top ~¼–⅓ of Row A below hero, with a clean gap */
+  .content-shelf:first-of-type{margin-top:-12svh;padding-top:1.5rem}
   .content-shelf:first-of-type>h3{
     opacity:0;pointer-events:none;
-    margin-top:1rem !important; /* consistent gap below hero CTAs */
+    margin-top:var(--m-gap-ctas-to-row) !important;
   }
   .content-shelf.shelf-active:first-of-type>h3{opacity:1;pointer-events:auto}
 }
