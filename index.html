@@ -156,39 +156,40 @@ body.no-scroll main{ overflow: hidden !important; }
 
   /* Hero CTA sizing: smaller buttons and icons on phones */
   .hero .grid button{
-    padding: 0.625rem 0.875rem;
-    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    min-height: 40px;
     border-radius: 9999px;
   }
   .hero .grid button svg{
-    width: 20px; height: 20px;
+    width: 18px; height: 18px;
   }
   .hero .grid button .text-lg{
-    font-size: 1rem;
-    line-height: 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.35rem;
   }
 
-  /* Hero content spacing: lift and tighten on phones */
+  /* Hero content spacing: place text lower on phones */
   .hero .z-10{
-    transform: translateY(-6svh);
+    transform: none;
   }
   .hero .z-10 > .mb-3{
-    margin-bottom: 0.5rem; /* tighter below title chip */
+    margin-bottom: 0.5rem; /* keep tighter below title chip */
   }
   .hero .z-10 p.text-xs{
-    margin-bottom: 0.25rem;            /* was 0.5rem */
-    font-size: 0.9rem;                  /* up from text-xs */
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
     letter-spacing: 0.08em;
   }
   .hero .z-10 p.mb-6{
-    margin-bottom: 0.75rem;             /* was 1.5rem */
-    font-size: 0.95rem;                 /* slightly larger body */
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
     line-height: 1.6;
-    max-width: 22rem;                   /* narrower for readability */
+    max-width: 22rem;
     margin-left: auto; margin-right: auto;
   }
   .hero .z-10 .grid{
-    gap: 0.5rem;                        /* tighter gap between buttons */
+    gap: 0.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* force inline buttons */
   }
 }
 @media (max-width: 768px){
