@@ -51,20 +51,21 @@ body.no-scroll main{overflow:hidden!important}
    ==============  MOBILE — CLEAN CONSOLIDATED RULES  =================
    =================================================================== */
 @media (max-width:768px){
-  /* 0) Punch the video in by ~30% total width (160vw) */
+  /* 0) Punch the video in by ~50% total width (192vw) */
   .video-background-container iframe{
     left:50%;top:0;transform:translateX(-50%);
-    width:160vw;              /* 30% punch-in */
-    height:90vw;              /* 16:9 of 160vw */
+    width:192vw;              /* +20% from 160 → 192 */
+    height:108vw;             /* 16:9 of 192vw */
     min-width:0;min-height:0;
   }
+}
 
   /* 1) Hero layout: lower the text, small inline CTAs, leave a gap */
   .hero{
-    min-height:66svh;         /* lower overall so Row A can peek */
+    min-height:64svh;         /* slightly shorter to bring text baseline to video bottom */
     background-color:#0f0f10;background-image:none;background-size:cover;background-position:center;
     padding-top:calc(env(safe-area-inset-top,0px) + 56px);
-    padding-bottom:0;         /* tighter gap to avoid overlap */
+    padding-bottom:0;         /* baseline flush with video bottom */
     transition:transform 220ms cubic-bezier(.2,.8,.2,1);
   }
   .hero.dimmed{transform:translateY(-8px) scale(.94)}
@@ -100,10 +101,10 @@ body.no-scroll main{overflow:hidden!important}
 
   /* 5) Show only the top ~⅓ of Row A below hero, with a clean gap
         (no overlap with the CTAs or the “Popular on Stream” title) */
-  .content-shelf:first-of-type{margin-top:-18svh;padding-top:1rem}  /* -18svh = deeper peek */
+  .content-shelf:first-of-type{margin-top:-18svh;padding-top:1.25rem}  /* deeper peek + uniform padding */
   .content-shelf:first-of-type>h3{
     opacity:0;pointer-events:none;
-    margin-top:.75rem !important; /* extra separation from hero CTAs */
+    margin-top:1rem !important; /* consistent gap below hero CTAs */
   }
   .content-shelf.shelf-active:first-of-type>h3{opacity:1;pointer-events:auto}
 }
