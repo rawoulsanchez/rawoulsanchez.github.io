@@ -151,6 +151,56 @@
     /* Make Row A peek up under the hero */
     .content-shelf:first-of-type{ margin-top:-16svh; }
   }
+  /* === MOBILE OVERRIDES (paste at end) === */
+@media (max-width:768px){
+  /* 0) Punch-in video 20% (20vw each side) */
+  .video-background-container iframe{
+    width:140vw;
+    height:78.75vw; /* 16:9 of 140vw */
+    left:50%; top:0; transform:translateX(-50%);
+  }
+
+  /* 1) Hero: push content lower & shrink CTAs (inline) */
+  .hero{
+    padding-bottom:0.25rem; /* closer to bottom so cards can peek */
+  }
+  .hero .grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:0.5rem;
+  }
+  .hero .grid button{
+    padding:0.45rem 0.7rem;
+    min-height:38px;
+    border-radius:9999px;
+  }
+  .hero .grid button svg{ width:18px; height:18px; }
+  .hero .grid button .text-lg{ font-size:0.9rem; line-height:1.2rem; }
+
+  /* 2) Row A: keep its heading out of the hero view; reveal when active */
+  .content-shelf:first-of-type > h3{ opacity:0; pointer-events:none; }
+  .content-shelf.shelf-active:first-of-type > h3{ opacity:1; pointer-events:auto; }
+
+  /* 3) Show only top ~⅓ of Row-A under hero */
+  .content-shelf:first-of-type{ margin-top:-10svh; }
+
+  /* 4) Portrait posters smaller (~3 across) */
+  .dock-card{
+    width:28vw;           /* ≈3 per row */
+    max-width:6rem;
+    min-width:5rem;
+    aspect-ratio:2/3;
+    height:auto;
+    overflow:visible;
+  }
+  .card-track > * + *{ margin-left:0.5rem; }
+  .shelf-row{ padding-block:0.5rem; }
+
+  /* 5) Tighten shelf block height for stacked, card-carrousel feel */
+  .content-shelf{
+    min-height:56svh;
+    padding-block:1.25svh;
+  }
+}
 </style>
 </head>
 <body class="overflow-x-hidden overflow-y-hidden h-[100svh] md:overflow-y-visible md:h-auto">
