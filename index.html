@@ -227,8 +227,8 @@ body.no-scroll main{ overflow: hidden !important; }
     scroll-behavior: smooth;           /* smoother snap transitions */
   }
   main > section, .content-shelf{ scroll-snap-align: start; scroll-snap-stop: normal; }
-  /* Show neighbors: shelf ~58% viewport height with breathing room */
-  .content-shelf{ min-height: 58svh; padding-block: 2.5svh; padding-inline: 0; display:flex; flex-direction:column; justify-content:center; gap: 0.5rem; }
+  /* Show neighbors: shelf ~56% viewport height with tighter spacing */
+  .content-shelf{ min-height: 56svh; padding-block: 1.5svh; padding-inline: 0; display:flex; flex-direction:column; justify-content:center; gap: 0.5rem; }
   .content-shelf > h3{ text-align:left; margin: 0 0 0.25rem 0 !important; color:#e5e7eb; font-weight:700; }
   .content-shelf > h3::after{ content:""; display:block; height:1px; background:linear-gradient(to right, rgba(255,255,255,0.18), rgba(255,255,255,0.04)); margin-top:0.25rem; }
   .content-shelf.shelf-active > h3{ color:#ffffff; }
@@ -240,6 +240,13 @@ body.no-scroll main{ overflow: hidden !important; }
 
   /* Mobile: tighter horizontal gutter for cards (≈10px) */
   .card-track > * + *{ margin-left: 0.625rem; }
+
+  /* Portrait posters on phones (2:3 like Netflix) */
+  .dock-card{
+    width: 6.25rem;
+    aspect-ratio: 2 / 3;
+    height: auto !important;
+  }
 
 }
   </style>
