@@ -56,7 +56,7 @@ body.no-scroll main{overflow:hidden!important}
     --m-hero-vid-w:192vw;          /* punch-in width (~50% total) */
     --m-hero-vid-h:108vw;          /* 16:9 of 192vw */
     --m-synopsis-firstline-offset:164px; /* align first-line baseline to video bottom on small iPhones */
-    --m-gap-ctas-to-row:64px;      /* enforce bigger gap from CTAs to first shelf title */
+    --m-gap-ctas-to-row:88px;      /* extra breathing room above first shelf title */
   }
 
   /* mobile-hero-iframe */
@@ -94,22 +94,22 @@ body.no-scroll main{overflow:hidden!important}
   /* 2) Portrait posters — ~3 visible per viewport */
   .dock-card{
     width:28vw;               /* ≈3 across */
-    max-width:6rem;           /* tighter cap for big phones */
-    min-width:5rem;           /* guard for small phones */
-    aspect-ratio:2/3;         /* portrait */
+    max-width:6rem;           
+    min-width:5rem;           
+    aspect-ratio:2/3;         
     height:auto;overflow:visible;
     transform-origin:center center;transition:transform 180ms cubic-bezier(.2,.8,.2,1),z-index 0s;
   }
-  .card-track>*+*{margin-left:.5rem}
-  .shelf-row{padding-block:.5rem}
+  .card-track>*+*{margin-left:.75rem}        /* wider card gutter */
+  .shelf-row{padding-block:.75rem;padding-inline:.75rem} /* side padding like Netflix */
 
   /* 3) Section snap for “vertical cards sliding” feel */
   main{scroll-snap-type:y mandatory;overscroll-behavior-y:contain;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 56px);-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
   main>section,.content-shelf{scroll-snap-align:start;scroll-snap-stop:normal}
 
   /* 4) Shelves are tighter; headings subtle */
-  .content-shelf{min-height:56svh;padding-block:1.25svh;padding-inline:0;display:flex;flex-direction:column;justify-content:center;gap:.5rem}
-  .content-shelf>h3{margin:0 0 .25rem 0!important;color:#e5e7eb;font-weight:700}
+  .content-shelf{min-height:56svh;padding-block:2svh;padding-inline:0;display:flex;flex-direction:column;justify-content:center;gap:.5rem}
+  .content-shelf>h3{margin:0 0 .5rem 0!important;color:#e5e7eb;font-weight:700} /* more space under title */
   .content-shelf>h3::after{content:"";display:block;height:1px;background:linear-gradient(to right,rgba(255,255,255,.18),rgba(255,255,255,.04));margin-top:.25rem}
   .content-shelf.shelf-active>h3{color:#fff}
 
