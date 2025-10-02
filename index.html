@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SanchezPortfolio</title>
+  <title>Sanchez Portfolio</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -269,7 +269,7 @@ bd.addEventListener('touchmove', (e)=> e.preventDefault(), { passive: false });
     const remove = (cls)=> document.body.classList.remove(cls);
 
      /* removed: duplicate mobile center-pick for shelf-active.
-       The IntersectionObserver at 0.7 handles this. */
+       The IntersectionObserver (≥50% visible) handles this. */
 
     // Preview control state
 let hoverTimer = null;
@@ -361,7 +361,7 @@ suppressTapUntil = Date.now() + 200;
       currentPreviewCard = cardEl;
 
       const rect = cardEl.getBoundingClientRect();
-      const w = PREVIEW_MIN_W; // fixed
+      const w = Math.min(PREVIEW_MAX_W, innerWidth - 32);
       const estH = w * 9/16 + PREVIEW_BODY_EXTRA;
       const left = clamp(rect.left, 16, innerWidth - w - 16);
       const top  = clamp(rect.top + rect.height/2 - estH/2, 16, innerHeight - estH - 16);
@@ -790,6 +790,8 @@ card.addEventListener('touchend', (e)=>{
   console.assert(!!window.__hoverPreview, 'hover preview element exists');
   console.assert(typeof window.setThumb==='function','setThumb exposed');
   console.assert(getComputedStyle(document.querySelector('.hover-preview')).pointerEvents==='none','preview overlay pointer-events none');
+  const backdrop = document.querySelector('.hp-backdrop'); // cards-missing-fix
+  console.assert(backdrop && getComputedStyle(backdrop).display === 'none', 'hover preview backdrop hidden by default'); // cards-missing-fix
   console.assert(document.querySelectorAll('.content-card').length>=30,'cards rendered');
   (function(){
     const hp = window.__hoverPreview;
@@ -800,6 +802,7 @@ card.addEventListener('touchend', (e)=>{
     };
     console.assert(okOpenClose(), 'Preview hides on mouseleave event');
   })();
+  console.log('[cards]', document.querySelectorAll('.content-card').length); // cards-missing-fix
   console.groupEnd();
 }); // <-- this is the ONLY closing brace for DOMContentLoaded
   </script>
