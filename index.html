@@ -60,6 +60,16 @@ body.no-scroll main{overflow:hidden!important}
     --m-gap-ctas-to-row:24px;      /* extra breathing room above first shelf title */
   }
 
+@media (max-width:768px){
+  /* mobile-hero-anchors-vars */
+  :root{
+    --m-hero-vid-w:192vw;          /* punch-in width (~50% total) */
+    --m-hero-vid-h:108vw;          /* 16:9 of 192vw */
+    --m-synopsis-firstline-offset:164px; /* align first-line baseline to video bottom on small iPhones */
+    --m-gap-ctas-to-row:24px;      /* gap from CTAs to first shelf title */
+  }
+
+  /* mobile-hero-iframe */
   /* 0) Punch the video in via vars */
   .video-background-container iframe{
     left:50%;top:0;transform:translateX(-50%);
@@ -77,11 +87,11 @@ body.no-scroll main{overflow:hidden!important}
     transition:transform 220ms cubic-bezier(.2,.8,.2,1);
   }
 
+  /* mobile-hero-content-anchor */
   /* Anchor the content to video bottom using variables */
   .hero .hero-content{
     position:absolute; left:0; right:0;
     top:calc(var(--m-hero-vid-h) - var(--m-synopsis-firstline-offset));
-    /* keep original spacing styles from utility classes */
   }
   .hero.dimmed{transform:translateY(-8px) scale(.94)}
   .content-card:hover{transform:none!important;box-shadow:none!important;z-index:auto!important}
@@ -123,6 +133,8 @@ body.no-scroll main{overflow:hidden!important}
   }
   .content-shelf.shelf-active:first-of-type>h3{opacity:1;pointer-events:auto}
 }
+
+/* mobile-media-scope: removed duplicate mobile rules now inside @media (max-width:768px) */
 
 /* moved: these mobile rules now live inside @media (max-width:768px) */
 </style>
