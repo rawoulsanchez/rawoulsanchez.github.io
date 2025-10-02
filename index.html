@@ -30,7 +30,7 @@ body{background:#0d0d0d;font-family:'Inter',sans-serif;color:#f5f5f5}
 .video-background-container iframe{position:absolute;top:50%;left:50%;min-width:100vw;min-height:100vh;transform:translate(-50%,-50%);pointer-events:none}
 @media (min-aspect-ratio:16/9){.video-background-container iframe{height:56.25vw;min-height:100vh}}
 @media (max-aspect-ratio:16/9){.video-background-container iframe{width:177.78vh;min-width:100vw}}
-.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:24svh;background:linear-gradient(to top,rgba(0,0,0,.95),rgba(0,0,0,0));pointer-events:none;z-index:5}
+.hero::after{content:"";position:absolute;inset-inline:0;bottom:0;height:24svh;background:linear-gradient(to top,rgba(0,0,0,.95),rgba(0,0,0,0));pointer-events:none;z-index:5}
 
 /* ---------------- Preview ---------------- */
 .hover-preview{position:fixed;z-index:9999;pointer-events:none;min-width:min(92vw,520px);max-width:min(92vw,520px);border-radius:.75rem;overflow:hidden;box-shadow:0 25px 70px rgba(0,0,0,.6),0 10px 25px rgba(0,0,0,.45);background:#111;opacity:0;transform:translate(0,0) scale(.98);transform-origin:top left;transition:transform .18s cubic-bezier(.2,.8,.2,1),opacity .16s ease}
@@ -56,8 +56,8 @@ body.no-scroll main{overflow:hidden!important}
   :root{
     --m-hero-vid-w:192vw;          /* punch-in width (~50% total) */
     --m-hero-vid-h:108vw;          /* 16:9 of 192vw */
-    --m-synopsis-firstline-offset:140px; /* align first-line baseline to video bottom on small iPhones */
-    --m-gap-ctas-to-row:36px;      /* extra breathing room above first shelf title */
+    --m-synopsis-firstline-offset:140px; /* align first-line baseline nearer to video bottom on small iPhones */
+    --m-gap-ctas-to-row:36px;      /* tighter gap above first shelf title */
   }
 
   /* mobile-hero-iframe */
@@ -116,7 +116,7 @@ body.no-scroll main{overflow:hidden!important}
 
   /* mobile-rowA-peek */
   /* 5) Minimize peek on short phones and add breathing room */
-  .content-shelf:first-of-type{margin-top:0;padding-top:2.25rem}
+  .content-shelf:first-of-type{margin-top:0;padding-top:1.5rem}
   .content-shelf:first-of-type>h3{
     opacity:1;pointer-events:auto;
     margin-top:var(--m-gap-ctas-to-row) !important;
@@ -785,27 +785,26 @@ card.addEventListener('touchend', (e)=>{
     shelvesEls.forEach(s => io.observe(s));
   })();
 
-// --------  Smoke tests  --------
-console.group('[SanchezNinjah tests]');
-console.assert(document.querySelectorAll('.shelf-row').length===3, '3 shelves expected');
-console.assert(!!window.__hoverPreview, 'hover preview element exists');
-console.assert(typeof window.setThumb==='function','setThumb exposed');
-console.assert(getComputedStyle(document.querySelector('.hover-preview')).pointerEvents==='none','preview overlay pointer-events none');
-
-const backdrop = document.querySelector('.hp-backdrop');
-console.assert(backdrop && getComputedStyle(backdrop).display === 'none', 'hover preview backdrop hidden by default');
-
-console.assert(document.querySelectorAll('.content-card').length>=30,'cards rendered');
-(function(){
-  const hp = window.__hoverPreview;
-  const okOpenClose = ()=>{ 
-    hp.classList.add('show');
-    hp.dispatchEvent(new Event('mouseleave'));
-    return !hp.classList.contains('show');
-  };
-  console.assert(okOpenClose(), 'Preview hides on mouseleave event');
-})();
-console.groupEnd();
+  // ---------- Smoke tests ----------
+  console.group('[SanchezNinjah tests]');
+  console.assert(document.querySelectorAll('.shelf-row').length===3, '3 shelves expected');
+  console.assert(!!window.__hoverPreview, 'hover preview element exists');
+  console.assert(typeof window.setThumb==='function','setThumb exposed');
+  console.assert(getComputedStyle(document.querySelector('.hover-preview')).pointerEvents==='none','preview overlay pointer-events none');
+  const backdrop = document.querySelector('.hp-backdrop'); // cards-missing-fix
+  console.assert(backdrop && getComputedStyle(backdrop).display === 'none', 'hover preview backdrop hidden by default'); // cards-missing-fix
+  console.assert(document.querySelectorAll('.content-card').length>=30,'cards rendered');
+  (function(){
+    const hp = window.__hoverPreview;
+    const okOpenClose = ()=>{
+      hp.classList.add('show');
+      hp.dispatchEvent(new Event('mouseleave'));
+      return !hp.classList.contains('show');
+    };
+    console.assert(okOpenClose(), 'Preview hides on mouseleave event');
+  })();
+  console.log('[cards]', document.querySelectorAll('.content-card').length); // cards-missing-fix
+  console.groupEnd();
 }); // <-- this is the ONLY closing brace for DOMContentLoaded
   </script>
 </body>
