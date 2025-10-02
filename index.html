@@ -116,8 +116,9 @@ body.no-scroll main{overflow:hidden!important}
   /* mobile-rowA-peek */
   /* 5) Show only the top ~⅕ of Row A below hero, with a clean gap */
   .content-shelf:first-of-type{margin-top:-4svh;padding-top:2rem}
+  /* mobile-shelf-title-visibility */
   .content-shelf:first-of-type>h3{
-    opacity:0;pointer-events:none;
+    opacity:1;pointer-events:auto;
     margin-top:var(--m-gap-ctas-to-row) !important;
   }
   .content-shelf.shelf-active:first-of-type>h3{opacity:1;pointer-events:auto}
@@ -754,6 +755,7 @@ card.addEventListener('touchend', (e)=>{
   })();
 
   // Mobile: mark the visible shelf as active for opacity highlight
+  /* shelf-active-threshold */
   (function(){
     const isCoarse = window.matchMedia('(pointer:coarse)').matches;
     if (!isCoarse) return;
@@ -769,16 +771,16 @@ card.addEventListener('touchend', (e)=>{
         if (!best || e.intersectionRatio > best.intersectionRatio) best = e;
       }
       if (!best) return;
-      // activate only when most of the shelf is in view to avoid flicker
+      // activate when ≥50% visible to avoid hidden titles on short viewports
       const el = best.target;
-      if (best.isIntersecting && best.intersectionRatio >= 0.7) {
+      if (best.isIntersecting && best.intersectionRatio >= 0.5) {
         if (active !== el) {
           shelvesEls.forEach(s => s.classList.toggle('shelf-active', s === el));
           active = el;
           document.dispatchEvent(new CustomEvent('shelf-active-change', { detail: { active: el } }));
         }
       }
-    }, { threshold: [0, 0.5, 0.7, 0.9, 1] });
+    }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
 
     shelvesEls.forEach(s => io.observe(s));
   })();
