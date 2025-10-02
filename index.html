@@ -784,27 +784,27 @@ card.addEventListener('touchend', (e)=>{
     shelvesEls.forEach(s => io.observe(s));
   })();
 
-  // ---------- Smoke tests ----------
-  console.group('[SanchezNinjah tests]');
-  console.assert(document.querySelectorAll('.shelf-row').length===3, '3 shelves expected');
-  console.assert(!!window.__hoverPreview, 'hover preview element exists');
-  console.assert(typeof window.setThumb==='function','setThumb exposed');
-  console.assert(getComputedStyle(document.querySelector('.hover-preview')).pointerEvents==='none','preview overlay pointer-events none');
-  console.assert(() => {
-    const backdrop = document.querySelector('.hp-backdrop');
-    return backdrop && getComputedStyle(backdrop).display === 'none';
-  }(), 'hover preview backdrop hidden by default');
-  console.assert(document.querySelectorAll('.content-card').length>=30,'cards rendered');
-  (function(){
-    const hp = window.__hoverPreview;
-    const okOpenClose = ()=>{
-      hp.classList.add('show');
-      hp.dispatchEvent(new Event('mouseleave'));
-      return !hp.classList.contains('show');
-    };
-    console.assert(okOpenClose(), 'Preview hides on mouseleave event');
-  })();
-  console.groupEnd();
+// --------  Smoke tests  --------
+console.group('[SanchezNinjah tests]');
+console.assert(document.querySelectorAll('.shelf-row').length===3, '3 shelves expected');
+console.assert(!!window.__hoverPreview, 'hover preview element exists');
+console.assert(typeof window.setThumb==='function','setThumb exposed');
+console.assert(getComputedStyle(document.querySelector('.hover-preview')).pointerEvents==='none','preview overlay pointer-events none');
+
+const backdrop = document.querySelector('.hp-backdrop');
+console.assert(backdrop && getComputedStyle(backdrop).display === 'none', 'hover preview backdrop hidden by default');
+
+console.assert(document.querySelectorAll('.content-card').length>=30,'cards rendered');
+(function(){
+  const hp = window.__hoverPreview;
+  const okOpenClose = ()=>{ 
+    hp.classList.add('show');
+    hp.dispatchEvent(new Event('mouseleave'));
+    return !hp.classList.contains('show');
+  };
+  console.assert(okOpenClose(), 'Preview hides on mouseleave event');
+})();
+console.groupEnd();
 }); // <-- this is the ONLY closing brace for DOMContentLoaded
   </script>
 </body>
