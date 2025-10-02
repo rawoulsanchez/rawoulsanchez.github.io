@@ -201,6 +201,16 @@
     padding-block:1.25svh;
   }
 }
+/* === HARD NUDGE: make Row A peek more === */
+@media (max-width:768px){
+  .hero{
+    min-height:64svh;    /* was 70svh */
+    padding-bottom:0;    /* was 0.25rem */
+  }
+  .content-shelf:first-of-type{
+    margin-top:-18svh;   /* was -10svh */
+  }
+}
 </style>
 </head>
 <body class="overflow-x-hidden overflow-y-hidden h-[100svh] md:overflow-y-visible md:h-auto">
