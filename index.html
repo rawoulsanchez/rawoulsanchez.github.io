@@ -51,26 +51,15 @@ body.no-scroll main{overflow:hidden!important}
    ==============  MOBILE — CLEAN CONSOLIDATED RULES  =================
    =================================================================== */
 @media (max-width:768px){
-  /* Mobile anchor variables: adjust here to tune layout uniformly */
   /* mobile-hero-anchors-vars */
   :root{
     --m-hero-vid-w:192vw;          /* punch-in width (~50% total) */
     --m-hero-vid-h:108vw;          /* 16:9 of 192vw */
     --m-synopsis-firstline-offset:164px; /* align first-line baseline to video bottom on small iPhones */
-    --m-gap-ctas-to-row:24px;      /* extra breathing room above first shelf title */
-  }
-
-@media (max-width:768px){
-  /* mobile-hero-anchors-vars */
-  :root{
-    --m-hero-vid-w:192vw;          /* punch-in width (~50% total) */
-    --m-hero-vid-h:108vw;          /* 16:9 of 192vw */
-    --m-synopsis-firstline-offset:164px; /* align first-line baseline to video bottom on small iPhones */
-    --m-gap-ctas-to-row:24px;      /* gap from CTAs to first shelf title */
+    --m-gap-ctas-to-row:32px;      /* larger gap from CTAs to first shelf title */
   }
 
   /* mobile-hero-iframe */
-  /* 0) Punch the video in via vars */
   .video-background-container iframe{
     left:50%;top:0;transform:translateX(-50%);
     width:var(--m-hero-vid-w);
