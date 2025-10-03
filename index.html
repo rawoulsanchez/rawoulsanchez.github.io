@@ -307,6 +307,51 @@ body.no-scroll main{overflow:hidden!important}
     const PULL_FEEL = 0.6;
     const MAX_SCALE = 1.12;
 
+    // ---------- Mobile helpers ----------
+    const __vw = (value = '') => {
+      const raw = String(value).trim();
+      if (!raw) return 0;
+      const num = parseFloat(raw);
+      if (Number.isNaN(num)) return 0;
+      if (raw.endsWith('vw')) {
+        const vw = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+        return (num / 100) * vw;
+      }
+      if (raw.endsWith('vh')) {
+        const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        return (num / 100) * vh;
+      }
+      return raw.endsWith('px') ? num : num;
+    };
+
+    const syncSynopsisToVideoBottom = () => {
+      if (!window.matchMedia('(pointer:coarse)').matches) return;
+
+      const content = document.querySelector('.hero .hero-content');
+      const synopsis = document.querySelector('#heroSynopsis');
+      if (!content || !synopsis) return;
+
+      const styles = getComputedStyle(document.documentElement);
+      const heroVidHeight = __vw(styles.getPropertyValue('--m-hero-vid-h'));
+      const synopsisPadBottom = __vw(styles.getPropertyValue('--m-synopsis-pad-bottom'));
+
+      if (!heroVidHeight) return;
+
+      const synopsisBottom = synopsis.offsetTop + synopsis.offsetHeight;
+      const top = Math.max(0, heroVidHeight - synopsisBottom - synopsisPadBottom);
+
+      content.style.top = `${Math.round(top)}px`;
+    };
+
+    syncSynopsisToVideoBottom();
+    window.addEventListener('resize', syncSynopsisToVideoBottom);
+    window.addEventListener('orientationchange', syncSynopsisToVideoBottom);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(syncSynopsisToVideoBottom).catch(() => {});
+    }
+    setTimeout(syncSynopsisToVideoBottom, 0);
+    setTimeout(syncSynopsisToVideoBottom, 250);
+
     // ---------- Build or fetch hover preview ----------
 function getHoverPreview() {
   if (!window.__hoverPreview) {
