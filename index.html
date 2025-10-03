@@ -23,7 +23,7 @@ body{background:#0d0d0d;font-family:'Inter',sans-serif;color:#f5f5f5}
 .title-chip-text{font-weight:800;letter-spacing:.08em;color:#e50914;font-size:1.125rem}
 @media (min-width:768px){.title-chip-text{font-size:1.5rem}}
 @media (max-width:768px){.title-chip{padding:.4rem .75rem}.title-chip-text{font-size:1rem;letter-spacing:.09em}}
-.content-shelf{padding-block:1.25rem;margin:0;content-visibility:auto;contain-intrinsic-size:600px}
+.content-shelf{padding-block:.75rem;margin:0;content-visibility:auto;contain-intrinsic-size:600px}
 
 /* ---------------- Hero video ---------------- */
 .video-background-container{position:absolute;inset:0;overflow:hidden;z-index:0}
@@ -150,7 +150,7 @@ body.no-scroll main{overflow:hidden!important}
   main>section,.content-shelf{scroll-snap-align:start;scroll-snap-stop:normal}
 
   /* 4) Shelves are tighter; headings subtle */
-  .content-shelf{padding-block:1rem;padding-inline:0;display:flex;flex-direction:column;gap:.5rem}
+  .content-shelf{padding-block:.75rem;padding-inline:0;display:flex;flex-direction:column;gap:.5rem}
   .content-shelf>h3{margin:0 0 .5rem 0!important;color:#e5e7eb;font-weight:700} /* more space under title */
   .content-shelf>h3::after{content:"";display:block;height:1px;background:linear-gradient(to right,rgba(255,255,255,.18),rgba(255,255,255,.04));margin-top:.25rem}
   .content-shelf.shelf-active>h3{color:#fff}
@@ -218,7 +218,7 @@ body.no-scroll main{overflow:hidden!important}
     </section>
 
     <!-- Content Shelves Section -->
-    <section class="relative z-10 space-y-2 px-0 md:px-8 pb-12">
+    <section class="relative z-10 flex flex-col gap-3 px-0 md:px-8 pb-12">
       <div class="content-shelf px-6 md:px-4">
         <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Popular on Stream (Scrolls Left)</h3>
         <div class="shelf-row relative overflow-x-auto overflow-y-visible no-scrollbar py-2 group/shelf"></div>
