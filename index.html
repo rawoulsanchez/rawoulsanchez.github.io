@@ -336,20 +336,35 @@ body.no-scroll main{overflow:hidden!important}
     const syncSynopsisToVideoBottom = () => {
       if (!window.matchMedia('(pointer:coarse)').matches) return;
 
-      const content = document.querySelector('.hero .hero-content');
-      const synopsis = document.querySelector('#heroSynopsis');
-      if (!content || !synopsis) return;
+      const hero = document.querySelector('.hero');
+      const content = hero ? hero.querySelector('.hero-content') : null;
+      const synopsis = hero ? hero.querySelector('#heroSynopsis') : null;
+      const video = hero ? hero.querySelector('.video-background-container iframe') || hero.querySelector('.video-background-container video') || hero.querySelector('.video-background-container') : null;
+
+      if (!hero || !content || !synopsis || !video) return;
 
       const styles = getComputedStyle(document.documentElement);
-      const heroVidHeight = __vw(styles.getPropertyValue('--m-hero-vid-h'));
       const synopsisPadBottom = __vw(styles.getPropertyValue('--m-synopsis-pad-bottom'));
 
-      if (!heroVidHeight) return;
+      const previousTop = content.style.top;
+      content.style.top = '';
 
-      const synopsisBottom = synopsis.offsetTop + synopsis.offsetHeight;
-      const top = Math.max(0, heroVidHeight - synopsisBottom - synopsisPadBottom);
+      const heroRect = hero.getBoundingClientRect();
+      const synopsisRect = synopsis.getBoundingClientRect();
+      const videoRect = video.getBoundingClientRect();
 
-      content.style.top = `${Math.round(top)}px`;
+      const padBottom = Number.isFinite(synopsisPadBottom) ? synopsisPadBottom : 0;
+      const synopsisBottom = synopsisRect.bottom - heroRect.top;
+      const videoBottom = videoRect.bottom - heroRect.top;
+
+      let nextTop = videoBottom - synopsisBottom - padBottom;
+      if (!Number.isFinite(nextTop)) {
+        content.style.top = previousTop;
+        return;
+      }
+
+      nextTop = Math.max(0, nextTop);
+      content.style.top = `${Math.round(nextTop)}px`;
     };
 
     syncSynopsisToVideoBottom();
