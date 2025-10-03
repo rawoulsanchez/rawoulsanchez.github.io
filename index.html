@@ -101,6 +101,7 @@ body.no-scroll main{overflow:hidden!important}
   }
   .hero.dimmed{transform:translateY(-8px) scale(.94)}
   .content-card:hover{transform:none!important;box-shadow:none!important;z-index:auto!important}
+  .content-card{transform-origin:top center;}
 
   .hero-tagline{
     margin-bottom:var(--m-hero-gap);
@@ -561,7 +562,7 @@ if (isCoarse) {
       c.style.transform = 'none';
       c.style.overflow = 'visible';
       const inner0 = c.querySelector('.content-card');
-      if (inner0) inner0.style.transform = 'translateY(4px) scale(1)';
+      if (inner0) inner0.style.transform = 'scale(1)';
     });
 
    cards.forEach(card => {
@@ -572,11 +573,9 @@ if (isCoarse) {
 
   // gentler magnification and lift
   const scale = Math.max(1, 1.0 + (1 - norm) * 0.24);
-  const drop  = 3 + norm * 6;
-
   const inner = card.querySelector('.content-card');
   if (inner) {
-    inner.style.transform = `translateY(${drop}px) scale(${scale})`;
+    inner.style.transform = `scale(${scale})`;
     inner.style.willChange = 'transform';
   }
 
