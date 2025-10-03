@@ -56,8 +56,10 @@ body.no-scroll main{overflow:hidden!important}
   :root{
     --m-hero-vid-w:192vw;          /* punch-in width (~50% total) */
     --m-hero-vid-h:108vw;          /* 16:9 of 192vw */
-    --m-synopsis-firstline-offset:140px; /* align first-line baseline nearer to video bottom on small iPhones */
-    --m-gap-ctas-to-row:36px;      /* tighter gap above first shelf title */
+    --m-hero-gap:24px;             /* base vertical spacing unit */
+    --m-hero-synopsis-line:1.5rem; /* synopsis line-height (≈24px) */
+    --m-synopsis-firstline-offset:calc(68px + (var(--m-hero-synopsis-line) * 3)); /* chip stack + three synopsis lines */
+    --m-gap-ctas-to-row:calc(var(--m-hero-gap) * 1.5);      /* tighter gap above first shelf title */
   }
 
   /* mobile-hero-iframe */
@@ -86,8 +88,23 @@ body.no-scroll main{overflow:hidden!important}
   .hero.dimmed{transform:translateY(-8px) scale(.94)}
   .content-card:hover{transform:none!important;box-shadow:none!important;z-index:auto!important}
 
+  .hero-tagline{
+    margin-bottom:var(--m-hero-gap);
+    line-height:1.2;
+  }
+
+  .hero-synopsis{
+    margin-bottom:var(--m-hero-gap);
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:4;
+    line-height:var(--m-hero-synopsis-line);
+    max-height:calc(var(--m-hero-synopsis-line) * 4);
+    overflow:hidden;
+  }
+
   /* Put buttons on one line, make them smaller */
-  .hero .grid{gap:.5rem;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero .grid{gap:.5rem;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:var(--m-hero-gap)}
   .hero .grid button{padding:.45rem .7rem;min-height:38px;border-radius:9999px}
   .hero .grid button svg{width:18px;height:18px}
   .hero .grid button .text-lg{font-size:.9rem;line-height:1.2rem}
@@ -146,8 +163,8 @@ body.no-scroll main{overflow:hidden!important}
             <span class="title-chip-text">TITAN PROJECT</span>
           </div>
         </div>
-        <p class="text-xs md:text-sm font-medium text-red-500 uppercase tracking-wide mb-2">New Release | Thriller, Sci-Fi | 2024</p>
-        <p class="text-sm md:text-xl text-gray-200/90 leading-relaxed mb-6 font-light">As a rogue AI network threatens global collapse, a disgraced former agent is called back into the field for one last, impossible mission to save humanity.</p>
+        <p class="hero-tagline text-xs md:text-sm font-medium text-red-500 uppercase tracking-wide mb-2">New Release | Thriller, Sci-Fi | 2024</p>
+        <p class="hero-synopsis text-sm md:text-xl text-gray-200/90 leading-relaxed mb-6 font-light">As a rogue AI network threatens global collapse, a disgraced former agent is called back into the field for one last, impossible mission to save humanity.</p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full max-w-sm">
           <button type="button" class="bg-white hover:bg-gray-200 text-black font-bold py-3 px-8 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg w-full flex items-center justify-center space-x-2">
             <svg aria-hidden="true" focusable="false" class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg>
