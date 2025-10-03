@@ -99,7 +99,7 @@ body.no-scroll main{overflow:hidden!important}
     position:relative;
     min-height:96svh;         /* ensures room for overlayed content */
     background-color:#0f0f10;background-image:none;background-size:cover;background-position:center;
-    padding-top:calc(env(safe-area-inset-top,0px) + 24px);
+    padding-top:0;
     padding-bottom:calc(var(--m-hero-gap) * 2.25);
     padding-inline:1.5rem;
     transition:transform 220ms cubic-bezier(.2,.8,.2,1);
@@ -116,6 +116,7 @@ body.no-scroll main{overflow:hidden!important}
     position:relative;
     width:100%;
     padding:0;
+    padding-top:calc(env(safe-area-inset-top,0px) + 24px);
     margin-top:auto;
     display:flex;
     flex-direction:column;
