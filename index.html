@@ -70,6 +70,7 @@ body.no-scroll main{overflow:hidden!important}
     --m-hero-gap:24px;             /* base vertical spacing unit */
     --m-hero-line:1.5rem;          /* synopsis line-height (≈24px) */
     --m-hero-tagline-line:1.2;     /* compact tagline leading */
+    --m-nav-h:64px;                /* locked mobile nav height */
   }
 
   /* mobile-hero-iframe */
@@ -100,7 +101,7 @@ body.no-scroll main{overflow:hidden!important}
     position:relative;
     min-height:96svh;         /* ensures room for overlayed content */
     background-color:#0f0f10;background-image:none;background-size:cover;background-position:center;
-    padding-top:0;
+    padding-top:calc(env(safe-area-inset-top, 0px) + var(--m-nav-h)) !important;
     padding-bottom:calc(var(--m-hero-gap) * 2.25);
     padding-inline:1.5rem;
     transition:transform 220ms cubic-bezier(.2,.8,.2,1);
@@ -166,6 +167,21 @@ body.no-scroll main{overflow:hidden!important}
   /* 3) Section snap for “vertical cards sliding” feel */
   main{scroll-snap-type:y mandatory;overscroll-behavior-y:contain;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 80px);-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
   main>section,.content-shelf{scroll-snap-align:start;scroll-snap-stop:normal}
+
+  nav{
+    height:var(--m-nav-h);
+    display:flex;
+    align-items:center;
+    padding-block:0;
+  }
+
+  main{
+    margin-top:0 !important;
+  }
+
+  .content-shelf:first-of-type{
+    margin-top:0 !important;
+  }
 
   /* 4) Shelves are tighter; headings subtle */
   .content-shelf{padding-block:1rem;padding-inline:clamp(1rem,5vw,1.75rem);display:flex;flex-direction:column;gap:.75rem}
