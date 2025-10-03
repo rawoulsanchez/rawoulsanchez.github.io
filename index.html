@@ -15,6 +15,7 @@
 
 <style>
 /* ---------------- Base ---------------- */
+:root{--hero-gap:1.5rem}
 body{background:#0d0d0d;font-family:'Inter',sans-serif;color:#f5f5f5}
 .no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
 .content-card{position:relative;display:flex;align-items:stretch;justify-content:center;width:100%;height:100%;border-radius:.85rem;overflow:hidden;background:#111;box-shadow:0 18px 40px -12px rgba(0,0,0,.65);transition:transform .32s cubic-bezier(.25,.8,.25,1),box-shadow .32s ease;transform-origin:center;z-index:1}
@@ -35,6 +36,9 @@ body{background:#0d0d0d;font-family:'Inter',sans-serif;color:#f5f5f5}
 @media (min-width:768px){.title-chip-text{font-size:1.5rem}}
 @media (max-width:768px){.title-chip{padding:.4rem .75rem}.title-chip-text{font-size:1rem;letter-spacing:.09em}}
 .content-shelf{padding-block:.75rem;margin:0;content-visibility:auto;contain-intrinsic-size:600px}
+.hero+.row-section{margin-top:var(--hero-gap)!important}
+.hero .hero-content *{margin-bottom:0!important}
+.hero .hero-content>.cta-group{margin-bottom:.75rem!important}
 
 /* ---------------- Hero video ---------------- */
 .video-background-container{position:absolute;inset:0;overflow:hidden;z-index:0}
@@ -232,7 +236,7 @@ body.no-scroll main{overflow:hidden!important}
 <main class="h-[100svh] overflow-y-auto md:h-auto md:overflow-visible pt-0 md:pt-20">
   <h1 class="sr-only">SanchezNinjah portfolio</h1>
     <!-- Hero Section -->
-    <section class="hero relative min-h-[90svh] md:min-h-[125svh] flex items-end pb-4 md:pb-24 pt-0 md:pt-0 text-white">
+    <section class="hero relative min-h-[90svh] md:min-h-[125svh] flex items-end text-white">
       <div class="video-background-container">
         <iframe id="heroVideo" src="https://www.youtube-nocookie.com/embed/VBdaOkpLe_o?autoplay=1&mute=1&loop=1&playlist=VBdaOkpLe_o&controls=0&modestbranding=1&enablejsapi=1" title="Background trailer" playsinline referrerpolicy="strict-origin-when-cross-origin" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
       </div>
@@ -245,7 +249,7 @@ body.no-scroll main{overflow:hidden!important}
         </div>
         <p class="hero-tagline text-xs md:text-sm font-medium text-red-500 uppercase tracking-wide mb-2">New Release | Thriller, Sci-Fi | 2024</p>
         <p id="heroSynopsis" class="hero-synopsis text-sm md:text-xl text-gray-200/90 leading-relaxed mb-6 font-light">As a rogue AI network threatens global collapse, a disgraced former agent is called back into the field for one last, impossible mission to save humanity.</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full max-w-sm">
+        <div class="cta-group grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full max-w-sm">
           <button type="button" class="bg-white hover:bg-gray-200 text-black font-bold py-3 px-8 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg w-full flex items-center justify-center space-x-2">
             <svg aria-hidden="true" focusable="false" class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg>
             <span class="text-lg">Play Now</span>
@@ -274,7 +278,7 @@ body.no-scroll main{overflow:hidden!important}
     </section>
 
     <!-- Content Shelves Section -->
-    <section class="relative z-10 space-y-2 px-0 md:px-8 pb-12">
+    <section class="row-section relative z-10 space-y-2 px-0 md:px-8 pb-12">
       <div class="content-shelf">
         <h3 class="text-xl md:text-2xl font-bold mb-2">Popular on Stream (Scrolls Left)</h3>
         <div class="shelf-row relative overflow-x-auto overflow-y-visible no-scrollbar py-2 group/shelf"></div>
