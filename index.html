@@ -126,6 +126,7 @@ body.no-scroll main{overflow:hidden!important}
     justify-content:flex-end;
     align-items:flex-start;
     gap:calc(var(--m-hero-gap) * 1.1);
+    margin-bottom:0 !important;
   }
 
   /* mobile-hero-content-anchor */
@@ -179,7 +180,7 @@ body.no-scroll main{overflow:hidden!important}
   }
   .card-track{padding-inline:clamp(1rem, 5vw, 1.75rem);gap:clamp(.65rem,5vw,.85rem)}
   .card-track>*+*{margin-left:0}
-  .shelf-row{padding-block:.5rem;padding-inline:0}
+  .shelf-row{padding-block:.5rem;padding-inline:12px !important;}
 
   /* 3) Section snap for “vertical cards sliding” feel */
   main{scroll-snap-type:y mandatory;overscroll-behavior-y:contain;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 80px);-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
@@ -194,21 +195,23 @@ body.no-scroll main{overflow:hidden!important}
 
   main{
     margin-top:0 !important;
+    padding-top:0 !important;
   }
 
   .content-shelf:first-of-type{
     margin-top:0 !important;
+    padding-top:0 !important;
   }
 
   /* 4) Shelves are tighter; headings subtle */
-  .content-shelf{padding-block:1rem;padding-inline:clamp(1rem,5vw,1.75rem);display:flex;flex-direction:column;gap:.75rem}
-  .content-shelf>h3{margin:0 0 .35rem 0!important;color:#e5e7eb;font-weight:700}
+  .content-shelf{padding-block:1rem;padding-inline:clamp(1rem,5vw,1.75rem);display:flex;flex-direction:column;gap:.75rem;margin-top:0 !important;padding-top:0 !important;padding-inline:0 !important;}
+  .content-shelf>h3{margin:0 !important;color:#e5e7eb;font-weight:700;padding-inline:16px !important;}
   .content-shelf>h3::after{content:"";display:block;height:1px;background:linear-gradient(to right,rgba(255,255,255,.18),rgba(255,255,255,.04));margin-top:.25rem}
   .content-shelf.shelf-active>h3{color:#fff}
 
   /* mobile-rowA-peek */
   /* 5) Minimize peek on short phones and add breathing room */
-  .content-shelf:first-of-type{margin-top:0}
+  .content-shelf:first-of-type{margin-top:0 !important;padding-top:0 !important;}
   .content-shelf:first-of-type>h3{
     opacity:1;pointer-events:auto;
     margin-top:var(--m-gap-ctas-to-row) !important;
