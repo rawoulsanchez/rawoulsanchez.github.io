@@ -705,7 +705,7 @@ setTimeout(()=>{ suppressHover = false; }, 150);
 }
 
       // Mobile dock magnification effect
-if (isCoarse) {
+if (!isCoarse) {
   const cards = Array.from(track.querySelectorAll('.dock-card'));
   const updateDock = () => {
     // Only magnify when this shelf is active; otherwise keep baseline
@@ -761,7 +761,7 @@ shelf.addEventListener('scroll',      () => { if (previewOpen) hidePreviewImmedi
 }
       
 // Auto-center nearest card after scroll settles (mobile)
-if (isCoarse) {
+if (!isCoarse) {
   let alignTimer = null;
 
   const centerNearest = () => {
