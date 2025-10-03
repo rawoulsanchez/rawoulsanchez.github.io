@@ -58,6 +58,7 @@ body.no-scroll main{overflow:hidden!important}
     --m-hero-vid-h:108vw;          /* 16:9 of 192vw */
     --m-hero-gap:24px;             /* base vertical spacing unit */
     --m-hero-line:1.5rem;          /* synopsis line-height (≈24px) */
+    --m-hero-tagline-line:1.2;     /* compact tagline leading */
     --m-hero-tagline-height:44px;  /* chip + tagline block height */
     --m-synopsis-firstline-offset:calc(var(--m-hero-tagline-height) + var(--m-hero-gap) + (var(--m-hero-line) * 3));
     --m-gap-ctas-to-row:calc(var(--m-hero-gap) * 1.5);
@@ -88,7 +89,7 @@ body.no-scroll main{overflow:hidden!important}
   }
   .hero-content>p:nth-of-type(1){
     margin-bottom:var(--m-hero-gap);
-    line-height:var(--m-hero-line);
+    line-height:var(--m-hero-tagline-line);
   }
   .hero-content>p:nth-of-type(2){
     margin-bottom:var(--m-hero-gap);
@@ -103,7 +104,7 @@ body.no-scroll main{overflow:hidden!important}
 
   .hero-tagline{
     margin-bottom:var(--m-hero-gap);
-    line-height:var(--m-hero-line);
+    line-height:var(--m-hero-tagline-line);
   }
 
   .hero-synopsis{
