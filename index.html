@@ -140,7 +140,8 @@ body.no-scroll main{overflow:hidden!important}
   .hero .hero-content{
     position:absolute;
     inset-inline:0;
-    top:0 !important;
+    top:0;
+    will-change: top;
     width:100%;
     padding:0;
     padding-top:calc(env(safe-area-inset-top,0px) + 24px);
