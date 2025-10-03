@@ -34,7 +34,7 @@ body{background:#0d0d0d;font-family:'Inter',sans-serif;color:#f5f5f5}
 .title-chip-text{font-weight:800;letter-spacing:.08em;color:#e50914;font-size:1.125rem}
 @media (min-width:768px){.title-chip-text{font-size:1.5rem}}
 @media (max-width:768px){.title-chip{padding:.4rem .75rem}.title-chip-text{font-size:1rem;letter-spacing:.09em}}
-.content-shelf{padding-block:1.25rem;margin:0;content-visibility:auto;contain-intrinsic-size:600px}
+.content-shelf{padding-block:.75rem;margin:0;content-visibility:auto;contain-intrinsic-size:600px}
 
 /* ---------------- Hero video ---------------- */
 .video-background-container{position:absolute;inset:0;overflow:hidden;z-index:0}
@@ -70,17 +70,30 @@ body.no-scroll main{overflow:hidden!important}
     --m-hero-gap:24px;             /* base vertical spacing unit */
     --m-hero-line:1.5rem;          /* synopsis line-height (≈24px) */
     --m-hero-tagline-line:1.2;     /* compact tagline leading */
-    --m-hero-tagline-height:44px;  /* chip + tagline block height */
-    --m-synopsis-firstline-offset:calc(var(--m-hero-tagline-height) + var(--m-hero-gap) + (var(--m-hero-line) * 3));
-    --m-gap-ctas-to-row:calc(var(--m-hero-gap) * 1.5);
   }
 
   /* mobile-hero-iframe */
+  .video-background-container{
+    position:relative;
+    inset:auto;
+    width:100vw;
+    max-width:100%;
+    margin-inline:auto;
+    overflow:hidden;
+    flex-shrink:0;
+  }
   .video-background-container iframe{
-    left:50%;top:0;transform:translateX(-50%);
-    width:var(--m-hero-vid-w);
-    height:var(--m-hero-vid-h);
-    min-width:0;min-height:0;
+    position:relative;
+    top:0;
+    left:0;
+    transform:none;
+    width:100vw;
+    max-width:100%;
+    aspect-ratio:16/9;
+    height:auto;
+    min-width:0;
+    min-height:0;
+    object-fit:cover;
   }
 
   /* 1) Hero layout: lower the text, small inline CTAs, leave a gap */
@@ -88,39 +101,37 @@ body.no-scroll main{overflow:hidden!important}
     min-height:64svh;         /* ensures room for overlayed content */
     background-color:#0f0f10;background-image:none;background-size:cover;background-position:center;
     padding-top:calc(env(safe-area-inset-top,0px) + 56px);
-    padding-bottom:0;         /* baseline aligned via .hero-content */
+    padding-bottom:calc(var(--m-hero-gap) * 2);
     transition:transform 220ms cubic-bezier(.2,.8,.2,1);
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:stretch;
+    gap:calc(var(--m-hero-gap) * 1.1);
   }
 
   /* mobile-hero-content-anchor */
-  /* Anchor the content to video bottom using variables */
+  /* Flex stack the content below the video */
   .hero .hero-content{
-    position:absolute; left:0; right:0;
-    top:calc(var(--m-hero-vid-h) - var(--m-synopsis-firstline-offset));
+    width:100%;
+    padding-inline:1.5rem;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:var(--m-hero-gap);
   }
-  .hero-content>p:nth-of-type(1){
-    margin-bottom:var(--m-hero-gap);
-    line-height:var(--m-hero-tagline-line);
-  }
-  .hero-content>p:nth-of-type(2){
-    margin-bottom:var(--m-hero-gap);
-    line-height:var(--m-hero-line);
-    display:-webkit-box;
-    -webkit-line-clamp:4;
-    -webkit-box-orient:vertical;
-    overflow:hidden;
+  .hero .hero-content>*{
+    margin:0!important;
   }
   .hero.dimmed{transform:translateY(-8px) scale(.94)}
   .content-card:hover{transform:none!important;box-shadow:none!important;z-index:auto!important}
   .content-card{transform-origin:top center;}
 
   .hero-tagline{
-    margin-bottom:var(--m-hero-gap);
     line-height:var(--m-hero-tagline-line);
   }
 
   .hero-synopsis{
-    margin-bottom:var(--m-hero-gap);
     display:-webkit-box;
     -webkit-box-orient:vertical;
     -webkit-line-clamp:4;
@@ -130,7 +141,7 @@ body.no-scroll main{overflow:hidden!important}
   }
 
   /* Put buttons on one line, make them smaller */
-  .hero .grid{gap:.5rem;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:var(--m-hero-gap)}
+  .hero .grid{gap:.75rem;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:calc(var(--m-hero-gap) * .5);width:100%}
   .hero .grid button{padding:.45rem .7rem;min-height:38px;border-radius:9999px}
   .hero .grid button svg{width:18px;height:18px}
   .hero .grid button .text-lg{font-size:.9rem;line-height:1.2rem}
@@ -160,10 +171,10 @@ body.no-scroll main{overflow:hidden!important}
 
   /* mobile-rowA-peek */
   /* 5) Minimize peek on short phones and add breathing room */
-  .content-shelf:first-of-type{margin-top:0;padding-top:1.5rem}
+  .content-shelf:first-of-type{margin-top:0;padding-top:calc(var(--m-hero-gap) * 1.2)}
   .content-shelf:first-of-type>h3{
     opacity:1;pointer-events:auto;
-    margin-top:var(--m-gap-ctas-to-row) !important;
+    margin-top:calc(var(--m-hero-gap) * .3) !important;
   }
   .content-shelf.shelf-active:first-of-type>h3{opacity:1;pointer-events:auto}
 }
