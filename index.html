@@ -58,7 +58,8 @@ body.no-scroll main{overflow:hidden!important}
     --m-hero-vid-h:108vw;          /* 16:9 of 192vw */
     --m-hero-gap:24px;             /* base vertical spacing unit */
     --m-hero-line:1.5rem;          /* synopsis line-height (≈24px) */
-    --m-synopsis-firstline-offset:calc(68px + var(--m-hero-gap) + (var(--m-hero-line) * 3));
+    --m-hero-tagline-height:44px;  /* chip + tagline block height */
+    --m-synopsis-firstline-offset:calc(var(--m-hero-tagline-height) + var(--m-hero-gap) + (var(--m-hero-line) * 3));
     --m-gap-ctas-to-row:calc(var(--m-hero-gap) * 1.5);
   }
 
