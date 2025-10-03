@@ -65,7 +65,9 @@ body.no-scroll main{overflow:hidden!important}
 @media (max-width:768px){
   /* mobile-hero-anchors-vars */
   :root{
-    --m-hero-gap:20px;             /* base vertical spacing unit */
+    --m-hero-vid-w:130vw;          /* punch-in width (~30% total) */
+    --m-hero-vid-h:73.125vw;       /* 16:9 of 130vw */
+    --m-hero-gap:24px;             /* base vertical spacing unit */
     --m-hero-line:1.5rem;          /* synopsis line-height (≈24px) */
     --m-hero-tagline-line:1.2;     /* compact tagline leading */
   }
@@ -190,7 +192,7 @@ body.no-scroll main{overflow:hidden!important}
     <!-- Hero Section -->
     <section class="hero relative min-h-[70svh] md:min-h-[100svh] flex items-end pb-4 md:pb-32 pt-0 md:pt-24 text-white">
       <div class="video-background-container">
-        <iframe id="heroVideo" src="https://www.youtube-nocookie.com/embed/t1x7Q0IA3Os?autoplay=1&mute=1&loop=1&playlist=t1x7Q0IA3Os&controls=0&modestbranding=1&enablejsapi=1&start=8" title="Background trailer" playsinline referrerpolicy="strict-origin-when-cross-origin" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <iframe id="heroVideo" src="https://www.youtube-nocookie.com/embed/VBdaOkpLe_o?autoplay=1&mute=1&loop=1&playlist=VBdaOkpLe_o&controls=0&modestbranding=1&enablejsapi=1" title="Background trailer" playsinline referrerpolicy="strict-origin-when-cross-origin" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
       </div>
       <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-0"></div>
       <div class="hero-content z-10 text-left max-w-[22rem] md:max-w-xl lg:max-w-3xl px-4 md:px-12 leading-relaxed">
