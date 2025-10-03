@@ -182,9 +182,9 @@ body.no-scroll main{overflow:hidden!important}
   .card-track>*+*{margin-left:0}
   .shelf-row{padding-block:.5rem;padding-inline:12px !important;}
 
-  /* 3) Section snap for “vertical cards sliding” feel */
-  main{scroll-snap-type:y mandatory;overscroll-behavior-y:contain;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 80px);-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
-  main>section,.content-shelf{scroll-snap-align:start;scroll-snap-stop:normal}
+  /* 3) Disable section snap on mobile */
+  main{scroll-snap-type:none !important;}
+  main>section,.content-shelf{scroll-snap-align:auto !important;scroll-snap-stop:normal !important;}
 
   nav{
     height:var(--m-nav-h);
