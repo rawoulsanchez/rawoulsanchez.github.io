@@ -150,17 +150,17 @@ body.no-scroll main{overflow:hidden!important}
   main>section,.content-shelf{scroll-snap-align:start;scroll-snap-stop:normal}
 
   /* 4) Shelves are tighter; headings subtle */
-  .content-shelf{padding-block:.75rem;padding-inline:0;display:flex;flex-direction:column;gap:.5rem}
+  .content-shelf{padding-block:.5rem;padding-inline:0;display:flex;flex-direction:column;gap:.5rem}
   .content-shelf>h3{margin:0 0 .5rem 0!important;color:#e5e7eb;font-weight:700} /* more space under title */
   .content-shelf>h3::after{content:"";display:block;height:1px;background:linear-gradient(to right,rgba(255,255,255,.18),rgba(255,255,255,.04));margin-top:.25rem}
   .content-shelf.shelf-active>h3{color:#fff}
 
   /* mobile-rowA-peek */
   /* 5) Minimize peek on short phones and add breathing room */
-  .content-shelf:first-of-type{margin-top:0;padding-top:calc(var(--m-hero-gap) * 1.25)}
+  .content-shelf:first-of-type{margin-top:0;padding-top:calc(var(--m-hero-gap) * 1.2)}
   .content-shelf:first-of-type>h3{
     opacity:1;pointer-events:auto;
-    margin-top:var(--m-hero-gap) !important;
+    margin-top:calc(var(--m-hero-gap) * .3) !important;
   }
   .content-shelf.shelf-active:first-of-type>h3{opacity:1;pointer-events:auto}
 }
@@ -218,7 +218,7 @@ body.no-scroll main{overflow:hidden!important}
     </section>
 
     <!-- Content Shelves Section -->
-    <section class="relative z-10 flex flex-col gap-3 px-0 md:px-8 pb-12">
+    <section class="relative z-10 flex flex-col gap-4 md:gap-6 px-0 md:px-8 pb-12">
       <div class="content-shelf px-6 md:px-4">
         <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Popular on Stream (Scrolls Left)</h3>
         <div class="shelf-row relative overflow-x-auto overflow-y-visible no-scrollbar py-2 group/shelf"></div>
