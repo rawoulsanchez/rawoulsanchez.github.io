@@ -17,8 +17,19 @@
 /* ---------------- Base ---------------- */
 body{background:#0d0d0d;font-family:'Inter',sans-serif;color:#f5f5f5}
 .no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
-.content-card{transition:transform .3s cubic-bezier(.25,.8,.25,1),box-shadow .3s ease;transform-origin:center;z-index:1}
-.content-card:hover{will-change:transform;transform:scale(1.4);z-index:999;box-shadow:0 15px 30px -5px rgba(0,0,0,.9)}
+.content-card{position:relative;display:flex;align-items:stretch;justify-content:center;width:100%;height:100%;border-radius:.85rem;overflow:hidden;background:#111;box-shadow:0 18px 40px -12px rgba(0,0,0,.65);transition:transform .32s cubic-bezier(.25,.8,.25,1),box-shadow .32s ease;transform-origin:center;z-index:1}
+.content-card:hover{will-change:transform;transform:scale(1.18);z-index:20;box-shadow:0 30px 55px -18px rgba(0,0,0,.85)}
+.card-track{display:flex;align-items:flex-start;gap:clamp(.75rem,1.8vw,1.25rem);padding-inline:clamp(1.25rem,5vw,3rem);padding-block:.75rem}
+.dock-card{position:relative;flex:0 0 auto;width:clamp(6.75rem,26vw,11.5rem);aspect-ratio:2/3;display:flex;align-items:stretch}
+.dock-card .poster-image{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;transition:transform .35s ease}
+.dock-card .poster-gradient{position:absolute;inset-x:0;bottom:0;height:55%;background:linear-gradient(to top,rgba(0,0,0,.75),rgba(0,0,0,0));opacity:0;transition:opacity .3s ease;pointer-events:none}
+.dock-card .poster-ring{position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);pointer-events:none}
+.group:hover .poster-image{transform:scale(1.04)}
+.group:hover .poster-gradient{opacity:1}
+.group:focus-within .poster-image{transform:scale(1.04)}
+.group:focus-within .poster-gradient{opacity:1}
+.content-shelf{padding-inline:clamp(1.25rem,5vw,3rem);padding-block:1.25rem;display:flex;flex-direction:column;gap:.9rem}
+.content-shelf>h3{margin:0;color:#f4f4f5;font-weight:700;letter-spacing:.01em}
 .title-chip{display:inline-flex;align-items:center;justify-content:center;padding:.5rem .875rem;background:rgba(17,17,17,.85);border-radius:.75rem;box-shadow:0 6px 20px rgba(0,0,0,.45),inset 0 0 0 2px rgba(229,9,20,.65)}
 .title-chip-text{font-weight:800;letter-spacing:.08em;color:#e50914;font-size:1.125rem}
 @media (min-width:768px){.title-chip-text{font-size:1.5rem}}
@@ -135,23 +146,24 @@ body.no-scroll main{overflow:hidden!important}
 
   /* 2) Portrait posters — ~3 visible per viewport */
   .dock-card{
-    width:28vw;               /* ≈3 across */
-    max-width:6rem;           
-    min-width:5rem;           
-    aspect-ratio:2/3;         
-    height:auto;overflow:visible;
-    transform-origin:center center;transition:transform 180ms cubic-bezier(.2,.8,.2,1),z-index 0s;
+    width:clamp(6.25rem, 32vw, 8.5rem);
+    aspect-ratio:2/3;
+    height:auto;
+    overflow:visible;
+    transform-origin:center center;
+    transition:transform 180ms cubic-bezier(.2,.8,.2,1),z-index 0s;
   }
-  .card-track>*+*{margin-left:.75rem}        /* wider card gutter */
-  .shelf-row{padding-block:.75rem;padding-inline:.75rem} /* side padding like Netflix */
+  .card-track{padding-inline:clamp(1rem, 5vw, 1.75rem);gap:clamp(.65rem,5vw,.85rem)}
+  .card-track>*+*{margin-left:0}
+  .shelf-row{padding-block:.5rem;padding-inline:0}
 
   /* 3) Section snap for “vertical cards sliding” feel */
   main{scroll-snap-type:y mandatory;overscroll-behavior-y:contain;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 56px);-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
   main>section,.content-shelf{scroll-snap-align:start;scroll-snap-stop:normal}
 
   /* 4) Shelves are tighter; headings subtle */
-  .content-shelf{padding-block:.5rem;padding-inline:0;display:flex;flex-direction:column;gap:.5rem}
-  .content-shelf>h3{margin:0 0 .5rem 0!important;color:#e5e7eb;font-weight:700} /* more space under title */
+  .content-shelf{padding-block:1rem;padding-inline:clamp(1rem,5vw,1.75rem);display:flex;flex-direction:column;gap:.75rem}
+  .content-shelf>h3{margin:0 0 .35rem 0!important;color:#e5e7eb;font-weight:700}
   .content-shelf>h3::after{content:"";display:block;height:1px;background:linear-gradient(to right,rgba(255,255,255,.18),rgba(255,255,255,.04));margin-top:.25rem}
   .content-shelf.shelf-active>h3{color:#fff}
 
@@ -218,17 +230,17 @@ body.no-scroll main{overflow:hidden!important}
     </section>
 
     <!-- Content Shelves Section -->
-    <section class="relative z-10 flex flex-col gap-4 md:gap-6 px-0 md:px-8 pb-12">
-      <div class="content-shelf px-6 md:px-4">
-        <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Popular on Stream (Scrolls Left)</h3>
+    <section class="relative z-10 space-y-2 px-0 md:px-8 pb-12">
+      <div class="content-shelf">
+        <h3 class="text-xl md:text-2xl font-bold mb-2">Popular on Stream (Scrolls Left)</h3>
         <div class="shelf-row relative overflow-x-auto overflow-y-visible no-scrollbar py-2 group/shelf"></div>
       </div>
-      <div class="content-shelf px-6 md:px-4">
-        <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Trending Now (Scrolls Right)</h3>
+      <div class="content-shelf">
+        <h3 class="text-xl md:text-2xl font-bold mb-2">Trending Now (Scrolls Right)</h3>
         <div class="shelf-row relative overflow-x-auto overflow-y-visible no-scrollbar py-2 group/shelf"></div>
       </div>
-      <div class="content-shelf px-6 md:px-4">
-        <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Design Inspiration (Scrolls Left)</h3>
+      <div class="content-shelf">
+        <h3 class="text-xl md:text-2xl font-bold mb-2">Design Inspiration (Scrolls Left)</h3>
         <div class="shelf-row relative overflow-x-auto overflow-y-visible no-scrollbar py-2 group/shelf"></div>
       </div>
     </section>
@@ -302,8 +314,59 @@ bd.addEventListener('touchmove', (e)=> e.preventDefault(), { passive: false });
     // ---------- Data ----------
     const shelves = document.querySelectorAll('.shelf-row');
     const rowsLetters = ['A','B','C'];
-    const palette = ['bg-neutral-800','bg-blue-800','bg-green-800','bg-amber-800','bg-purple-800','bg-rose-700','bg-teal-800','bg-orange-600','bg-sky-700','bg-lime-700'];
-    const makeRowData = (L)=> Array.from({length:ITEMS_PER_ROW}, (_,i)=>({ key:`${L}${i+1}`, color:palette[i%palette.length] }));
+    const escapeAttr = (str = '') => String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+    const shelfBlueprint = {
+      A: [
+        { title: 'Brooklyn Nine-Nine', poster: 'https://image.tmdb.org/t/p/w500/9BWl3j6x9N1sUoJ9X0Agp7J44v.jpg', meta: '96% Match • 23m • HD', tags: ['Comedy', 'Feel-good', 'Series'] },
+        { title: 'The Good Place', poster: 'https://image.tmdb.org/t/p/w500/69OFpoD8xLZWdR9ZHrK9NggsCRM.jpg', meta: '92% Match • 25m • HD', tags: ['Comedy', 'Fantasy'] },
+        { title: 'Gilmore Girls', poster: 'https://image.tmdb.org/t/p/w500/6eCIHcIqWii42PXm7GXn4G9aoTu.jpg', meta: '94% Match • 44m • HD', tags: ['Drama', 'Comfort TV'] },
+        { title: "Zoey's Extraordinary Playlist", poster: 'https://image.tmdb.org/t/p/w500/8dVhFeZVt8iDSHPsuacqb6nwL41.jpg', meta: '91% Match • 45m • HD', tags: ['Musical', 'Comedy'] },
+        { title: "Schitt's Creek", poster: 'https://image.tmdb.org/t/p/w500/zdyphhFno1umdrF8sSUYFvERNTG.jpg', meta: '98% Match • 22m • HD', tags: ['Comedy', 'Award-winning'] },
+        { title: 'Arrested Development', poster: 'https://image.tmdb.org/t/p/w500/3LzNfnzRvNNa0ZAZZLwNG0Ax7An.jpg', meta: '93% Match • 22m • HD', tags: ['Comedy', 'Cult Classic'] },
+        { title: 'Community', poster: 'https://image.tmdb.org/t/p/w500/k3NTA9ZSfFeoJwPh0mX0AKqN0Pn.jpg', meta: '95% Match • 22m • HD', tags: ['Comedy', 'Meta'] },
+        { title: 'The Office', poster: 'https://image.tmdb.org/t/p/w500/qWnJzyZhyy74gjpSjIXWmuk0ifX.jpg', meta: '97% Match • 22m • HD', tags: ['Mockumentary', 'Sitcom'] },
+        { title: 'Parks and Recreation', poster: 'https://image.tmdb.org/t/p/w500/igxZIkX3TGZPq6QTN3CoG2vMrV5.jpg', meta: '95% Match • 22m • HD', tags: ['Comedy', 'Feel-good'] },
+        { title: 'Unbreakable Kimmy Schmidt', poster: 'https://image.tmdb.org/t/p/w500/3FqP6KyHRxY6SY3n9JVpaz6RtWL.jpg', meta: '90% Match • 30m • HD', tags: ['Comedy', 'Quirky'] },
+      ],
+      B: [
+        { title: 'Dark', poster: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg', meta: '99% Match • 60m • UHD', tags: ['Mystery', 'Sci-Fi'] },
+        { title: 'Mindhunter', poster: 'https://image.tmdb.org/t/p/w500/fbKeNU36t0f8l0w23zZP6bidXIJ.jpg', meta: '96% Match • 60m • HD', tags: ['Crime', 'Thriller'] },
+        { title: 'Black Mirror', poster: 'https://image.tmdb.org/t/p/w500/pX2UQiXEu4PQ6fSnarwTZYk1zY0.jpg', meta: '95% Match • Anthology • HD', tags: ['Sci-Fi', 'Anthology'] },
+        { title: 'Archive 81', poster: 'https://image.tmdb.org/t/p/w500/k3mW4qfJo6SKqe6laRyNGnbB9n5.jpg', meta: '93% Match • 52m • HD', tags: ['Supernatural', 'Thriller'] },
+        { title: 'The Haunting of Hill House', poster: 'https://image.tmdb.org/t/p/w500/l8lwjF7u9j0PpHjoqVbzWfx9HoL.jpg', meta: '97% Match • 60m • UHD', tags: ['Horror', 'Drama'] },
+        { title: 'Hannibal', poster: 'https://image.tmdb.org/t/p/w500/5ot9QRLhbJYp5dKovtuuIl9JZ4l.jpg', meta: '94% Match • 45m • HD', tags: ['Crime', 'Psychological'] },
+        { title: 'Stranger Things', poster: 'https://image.tmdb.org/t/p/w500/ovM06PdF3M8wvKb06i4sjW3xoww.jpg', meta: '98% Match • 50m • UHD', tags: ['Adventure', 'Sci-Fi'] },
+        { title: 'Behind Her Eyes', poster: 'https://image.tmdb.org/t/p/w500/ijGN0W8vdwQUiRVdBQfuVaSzu1Y.jpg', meta: '90% Match • 52m • HD', tags: ['Thriller', 'Mystery'] },
+        { title: 'You', poster: 'https://image.tmdb.org/t/p/w500/yxIdKGEgufptIE2IGq2n1LX3kho.jpg', meta: '92% Match • 45m • HD', tags: ['Thriller', 'Obsessions'] },
+        { title: 'Ozark', poster: 'https://image.tmdb.org/t/p/w500/eX4cNQ7gCmg0P94fgVLJX0QQ0nO.jpg', meta: '94% Match • 60m • UHD', tags: ['Crime', 'Drama'] },
+      ],
+      C: [
+        { title: 'Abstract: The Art of Design', poster: 'https://image.tmdb.org/t/p/w500/8tZBq0xTkbZVqhlVg3I8I4JVXu2.jpg', meta: '96% Match • 45m • HD', tags: ['Design', 'Documentary'] },
+        { title: "Chef's Table", poster: 'https://image.tmdb.org/t/p/w500/vMJ7tHJxobW48OV22DuanZjMDoA.jpg', meta: '95% Match • 50m • UHD', tags: ['Food', 'Documentary'] },
+        { title: 'The Creative Brain', poster: 'https://image.tmdb.org/t/p/w500/xSAnTHaj6MqFmoVoeAQMtk0iQF5.jpg', meta: '89% Match • 52m • HD', tags: ['Science', 'Creativity'] },
+        { title: 'Minimalism', poster: 'https://image.tmdb.org/t/p/w500/4gOt7lqzZo4PM8XsfS5aXoaZFyS.jpg', meta: '88% Match • 78m • HD', tags: ['Lifestyle', 'Documentary'] },
+        { title: "The World's Most Extraordinary Homes", poster: 'https://image.tmdb.org/t/p/w500/5NzVgh4eAbQni75KeH8sPhk1kYs.jpg', meta: '91% Match • 48m • HD', tags: ['Architecture', 'Travel'] },
+        { title: 'Tales by Light', poster: 'https://image.tmdb.org/t/p/w500/3f9blqGNJUg87b5iVd0Uy1Ik5dU.jpg', meta: '90% Match • 26m • HD', tags: ['Photography', 'Adventure'] },
+        { title: 'Street Food: Asia', poster: 'https://image.tmdb.org/t/p/w500/8j8CIctodj3Ycsw8FCL3fboGJ8D.jpg', meta: '93% Match • 30m • HD', tags: ['Food', 'Travel'] },
+        { title: 'High Score', poster: 'https://image.tmdb.org/t/p/w500/3EgBV4mQctC5NzUVKjfvX2gYdUv.jpg', meta: '92% Match • 44m • HD', tags: ['Gaming', 'History'] },
+        { title: 'Moving Art', poster: 'https://image.tmdb.org/t/p/w500/mkB9PvC6kAMPxQqvOB0fOkHn84E.jpg', meta: '87% Match • 30m • HD', tags: ['Nature', 'Relaxing'] },
+        { title: 'Connected', poster: 'https://image.tmdb.org/t/p/w500/wxz5GsyhQOdE31x4n4t4DccNIp9.jpg', meta: '90% Match • 46m • HD', tags: ['Science', 'Docuseries'] },
+      ],
+    };
+    const fallbackPoster = 'https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=600&q=80';
+    const makeRowData = (letter) => {
+      const blueprint = shelfBlueprint[letter] || shelfBlueprint.A;
+      return Array.from({ length: ITEMS_PER_ROW }, (_, i) => {
+        const source = blueprint[i] || blueprint[i % blueprint.length] || { title: `Feature ${letter}${i + 1}`, poster: fallbackPoster, meta: 'New • HD', tags: ['Streaming'] };
+        return {
+          key: `${letter}${i + 1}`,
+          title: source.title,
+          poster: source.poster || fallbackPoster,
+          meta: source.meta || 'New • HD',
+          tags: Array.isArray(source.tags) ? source.tags : ['Streaming'],
+        };
+      });
+    };
 
     // ---------- Helpers ----------
     const clamp = (x,min,max)=> Math.max(min, Math.min(max, x));
@@ -412,11 +475,13 @@ suppressTapUntil = Date.now() + 200;
       hp.style.left  = left+'px';
       hp.style.top   = top+'px';
 
-      const cssVar = `--${label}`;
-      const bg = getComputedStyle(document.documentElement).getPropertyValue(cssVar);
-      hp.querySelector('.hp-banner').style.backgroundImage = bg && bg.trim()? bg : 'linear-gradient(135deg,#1f2937,#0f172a)';
+      const poster = cardEl.dataset.poster || '';
+      const meta = cardEl.dataset.meta || '';
+      const tagList = (cardEl.dataset.tags || '').split('|').filter(Boolean);
+      hp.querySelector('.hp-banner').style.backgroundImage = poster ? `url(${poster})` : 'linear-gradient(135deg,#1f2937,#0f172a)';
       hp.querySelector('.hp-title').textContent = label;
-      hp.querySelector('.hp-chips').textContent = 'Action • Sci‑Fi • Trending';
+      hp.querySelector('.hp-meta').textContent = meta || 'New • HD';
+      hp.querySelector('.hp-chips').textContent = tagList.length ? tagList.join(' • ') : 'Recommended • Streaming';
       
       // show backdrop and lock scroll
 add('no-scroll');
@@ -445,7 +510,7 @@ document.addEventListener('touchmove', blockTouchMove, { passive: false });
     shelves.forEach((shelf, idx) => {
       // Track element
       const track = document.createElement('div');
-      track.className = 'card-track flex space-x-3 isolate drag-grab';
+      track.className = 'card-track isolate drag-grab';
       track.style.position = 'relative';
 
       // Data for this row
@@ -454,21 +519,26 @@ document.addEventListener('touchmove', blockTouchMove, { passive: false });
       for(let s=0;s<NUM_SETS;s++){
         for(let i=0;i<rowData.length;i++){
           const item = rowData[i];
-          const cssVar = `--${item.key}`;
-          const resistClass = i===0 ? 'resist-first' : '';
+          const resistClass = i === 0 ? 'resist-first' : '';
+          const titleAttr = escapeAttr(item.title || item.key);
+          const metaAttr = escapeAttr(item.meta || 'New • HD');
+          const posterAttr = escapeAttr(item.poster || fallbackPoster);
+          const tagsAttr = escapeAttr((item.tags || []).join('|'));
           html += `
-            <div class="relative dock-card flex-shrink-0 w-56 md:w-64 h-32 md:h-36 group ${resistClass}">
-              <div class="content-card absolute inset-0 ${item.color} rounded-md overflow-hidden cursor-pointer flex items-center justify-center">
-                <div class="absolute inset-0" style="background-image:var(${cssVar}, none); background-size:cover; background-position:center;"></div>
-                <div class="relative z-10 text-white text-3xl md:text-4xl font-extrabold tracking-wide select-none">${item.key}</div>
+            <div class="relative dock-card flex-shrink-0 group ${resistClass}">
+              <div class="content-card cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/80" data-key="${item.key}" data-title="${titleAttr}" data-meta="${metaAttr}" data-tags="${tagsAttr}" data-poster="${posterAttr}" aria-label="${titleAttr}">
+                <div class="poster-image" style="background-image:url('${posterAttr}')"></div>
+                <div class="poster-gradient"></div>
+                <div class="poster-ring"></div>
+                <span class="sr-only">${titleAttr}</span>
               </div>
             </div>`;
         }
       }
       // Pink COMING SOON plank
       html += `
-        <div class="relative flex-shrink-0 w-[1200px] md:w-[1600px] h-32 md:h-36 rounded-xl bg-pink-600/90 flex items-center justify-center px-6">
-          <div class="w-full text-black font-extrabold tracking-widest uppercase text-xl md:text-2xl whitespace-nowrap overflow-hidden">COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON</div>
+        <div class="relative flex-shrink-0 min-w-[min(960px,220vw)] h-[12.5rem] md:h-[14rem] rounded-[1.25rem] bg-pink-600/90 flex items-center justify-center px-6 shadow-[0_25px_45px_-20px_rgba(229,9,20,0.6)]">
+          <div class="w-full text-black font-extrabold tracking-[0.35em] uppercase text-lg md:text-2xl whitespace-nowrap overflow-hidden">COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON</div>
         </div>`;
 
       track.innerHTML = html;
@@ -651,7 +721,7 @@ if (isCoarse) {
 
 // Hover on desktop. Tap-only on touch.
 track.querySelectorAll('.content-card').forEach(card=>{
-  const label = card.querySelector('.relative.z-10')?.textContent.trim() || '';
+  const label = card.dataset.title || '';
   card.setAttribute('tabindex','0');
 
   if (!isCoarse) {
@@ -705,7 +775,13 @@ card.addEventListener('touchend', (e)=>{
 
   // Public helper: set image for all duplicates of a key
   window.setThumb = (key, url) => {
-    document.documentElement.style.setProperty(`--${key}`, `url(${url})`);
+    if (!key || !url) return;
+    const safeKey = (window.CSS && typeof CSS.escape === 'function') ? CSS.escape(key) : key.replace(/[^a-zA-Z0-9_-]/g, '\\$&');
+    document.querySelectorAll(`.content-card[data-key="${safeKey}"]`).forEach(card => {
+      card.dataset.poster = url;
+      const posterEl = card.querySelector('.poster-image');
+      if (posterEl) posterEl.style.backgroundImage = `url('${url}')`;
+    });
   };
 
   // Mobile: pause hero video when hero not active, play when active
