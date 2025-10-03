@@ -92,8 +92,10 @@ body.no-scroll main{overflow:hidden!important}
   /* mobile-hero-iframe */
   .video-background-container{
     position:absolute;
-    inset:0;
-    height:100%;
+    top:calc(var(--m-nav-h) + env(safe-area-inset-top, 0px));
+    left:0;
+    right:0;
+    height:calc(100% - (var(--m-nav-h) + env(safe-area-inset-top, 0px)));
     width:100%;
     margin:0;
     overflow:hidden;
@@ -117,7 +119,7 @@ body.no-scroll main{overflow:hidden!important}
     position:relative;
     min-height:96svh;         /* ensures room for overlayed content */
     background-color:#0f0f10;background-image:none;background-size:cover;background-position:center;
-    padding-top:calc(env(safe-area-inset-top, 0px) + var(--m-nav-h)) !important;
+    padding-top:env(safe-area-inset-top, 0px) !important;
     padding-bottom:calc(var(--m-hero-gap) * 2.25);
     padding-inline:1.5rem;
     transition:transform 220ms cubic-bezier(.2,.8,.2,1);
