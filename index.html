@@ -71,7 +71,7 @@ body.no-scroll main{overflow:hidden!important}
     --m-hero-vid-h:108vw;
     --m-hero-bottom-vh:46vh;
     --m-gap-ctas-to-row:28px;
-    --m-nav-h:64px;                /* locked mobile nav height */
+    --m-nav-h:64px;                /* fallback mobile nav height */
     --m-gap-chip-meta:12px;
     --m-gap-meta-copy:16px;
     --m-gap-copy-cta:20px;
@@ -287,6 +287,24 @@ body.no-scroll main{overflow:hidden!important}
 
   <script>
   document.addEventListener('DOMContentLoaded', () => {
+    const root = document.documentElement;
+    const nav = document.querySelector('nav');
+    if (root && nav) {
+      const navHeight = nav.getBoundingClientRect().height;
+      if (Number.isFinite(navHeight) && navHeight > 0) {
+        root.style.setProperty('--m-nav-h', `${Math.round(navHeight)}px`);
+      }
+
+      const realignSynopsis = () => {
+        if (typeof syncSynopsisToVideoBottom === 'function') {
+          syncSynopsisToVideoBottom();
+        }
+      };
+
+      requestAnimationFrame(realignSynopsis);
+      setTimeout(realignSynopsis, 200);
+    }
+
     // ---------- Constants ----------
     const ITEMS_PER_ROW = 10;
     const NUM_SETS = 3; // repeat for wrap buffer
