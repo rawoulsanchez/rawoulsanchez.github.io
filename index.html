@@ -364,8 +364,11 @@ body.no-scroll main{overflow:hidden!important}
       }
 
       const realignSynopsis = () => {
-        if (typeof syncSynopsisToVideoBottom === 'function') {
-          syncSynopsisToVideoBottom();
+        if (typeof scheduleSynopsisSync === 'function') {
+          scheduleSynopsisSync();
+        } else if (typeof syncSynopsisToVideoBottom === 'function') {
+          requestAnimationFrame(syncSynopsisToVideoBottom);
+          setTimeout(syncSynopsisToVideoBottom, 200);
         }
       };
 
@@ -415,26 +418,27 @@ body.no-scroll main{overflow:hidden!important}
 
       const hero = document.querySelector('.hero');
       const content = hero ? hero.querySelector('.hero-content') : null;
-      const synopsis = hero ? hero.querySelector('#heroSynopsis') : null;
-      const video = hero ? hero.querySelector('.video-background-container iframe') || hero.querySelector('.video-background-container video') || hero.querySelector('.video-background-container') : null;
+      const ctaGroup = hero ? hero.querySelector('.cta-group') : null;
+      const videoContainer = hero ? hero.querySelector('.video-background-container') : null;
 
-      if (!hero || !content || !synopsis || !video) return;
+      if (!hero || !content || !ctaGroup || !videoContainer) return;
 
       const styles = getComputedStyle(document.documentElement);
-      const synopsisPadBottom = __vw(styles.getPropertyValue('--m-synopsis-pad-bottom'));
+      const ctaPadBottomRaw = styles.getPropertyValue('--m-cta-pad-bottom').trim() || '14px';
+      let ctaPadBottom = __vw(ctaPadBottomRaw);
+      if (!Number.isFinite(ctaPadBottom)) ctaPadBottom = 14;
 
       const previousTop = content.style.top;
       content.style.top = '';
 
       const heroRect = hero.getBoundingClientRect();
-      const synopsisRect = synopsis.getBoundingClientRect();
-      const videoRect = video.getBoundingClientRect();
+      const videoRect = videoContainer.getBoundingClientRect();
+      const ctaRect = ctaGroup.getBoundingClientRect();
 
-      const padBottom = Number.isFinite(synopsisPadBottom) ? synopsisPadBottom : 0;
-      const synopsisBottom = synopsisRect.bottom - heroRect.top;
       const videoBottom = videoRect.bottom - heroRect.top;
+      const ctaBottom = ctaRect.bottom - heroRect.top;
 
-      let nextTop = videoBottom - synopsisBottom - padBottom;
+      let nextTop = videoBottom - ctaBottom - ctaPadBottom;
       if (!Number.isFinite(nextTop)) {
         content.style.top = previousTop;
         return;
@@ -444,14 +448,13 @@ body.no-scroll main{overflow:hidden!important}
       content.style.top = `${Math.round(nextTop)}px`;
     };
 
-    syncSynopsisToVideoBottom();
-    window.addEventListener('resize', syncSynopsisToVideoBottom);
-    window.addEventListener('orientationchange', syncSynopsisToVideoBottom);
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(syncSynopsisToVideoBottom).catch(() => {});
-    }
-    setTimeout(syncSynopsisToVideoBottom, 0);
-    setTimeout(syncSynopsisToVideoBottom, 250);
+    const scheduleSynopsisSync = () => {
+      requestAnimationFrame(syncSynopsisToVideoBottom);
+      setTimeout(syncSynopsisToVideoBottom, 200);
+    };
+
+    window.addEventListener('resize', scheduleSynopsisSync);
+    window.addEventListener('orientationchange', scheduleSynopsisSync);
 
     // ---------- Build or fetch hover preview ----------
 function getHoverPreview() {
