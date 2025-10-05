@@ -13,292 +13,73 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-<style>
-/* ---------------- Base ---------------- */
-:root{--hero-gap:1.5rem;--m-hero-gap:var(--hero-gap);--m-hero-h:76svh}
-body{background:#0d0d0d;font-family:'Inter',sans-serif;color:#f5f5f5}
-.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
-.content-card{position:relative;display:flex;align-items:stretch;justify-content:center;width:100%;height:100%;border-radius:.85rem;overflow:hidden;background:#111;box-shadow:0 18px 40px -12px rgba(0,0,0,.65);transition:transform .32s cubic-bezier(.25,.8,.25,1),box-shadow .32s ease;transform-origin:center;z-index:1}
-.content-card:hover{will-change:transform;transform:scale(1.18);z-index:20;box-shadow:0 30px 55px -18px rgba(0,0,0,.85)}
-.card-track{display:flex;align-items:flex-start;gap:clamp(.75rem,1.8vw,1.25rem);padding-inline:clamp(1.25rem,5vw,3rem);padding-block:.75rem}
-.dock-card{position:relative;flex:0 0 auto;width:clamp(6.75rem,26vw,11.5rem);aspect-ratio:2/3;display:flex;align-items:stretch}
-.dock-card .poster-image{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;transition:transform .35s ease}
-.dock-card .poster-gradient{position:absolute;inset-x:0;bottom:0;height:55%;background:linear-gradient(to top,rgba(0,0,0,.75),rgba(0,0,0,0));opacity:0;transition:opacity .3s ease;pointer-events:none}
-.dock-card .poster-ring{position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);pointer-events:none}
-.group:hover .poster-image{transform:scale(1.04)}
-.group:hover .poster-gradient{opacity:1}
-.group:focus-within .poster-image{transform:scale(1.04)}
-.group:focus-within .poster-gradient{opacity:1}
-.content-shelf{padding-inline:clamp(1.25rem,5vw,3rem);padding-block:1.25rem;display:flex;flex-direction:column;gap:.9rem}
-.content-shelf>h3{margin:0;color:#f4f4f5;font-weight:700;letter-spacing:.01em}
-.title-chip{display:inline-flex;align-items:center;justify-content:center;padding:.5rem .875rem;background:rgba(17,17,17,.85);border-radius:.75rem;box-shadow:0 6px 20px rgba(0,0,0,.45),inset 0 0 0 2px rgba(229,9,20,.65)}
-.title-chip-text{font-weight:800;letter-spacing:.08em;color:#e50914;font-size:1.125rem}
-@media (min-width:768px){.title-chip-text{font-size:1.5rem}}
-.content-shelf{padding-block:.75rem;margin:0;content-visibility:auto;contain-intrinsic-size:600px}
-.hero+.row-section{margin-top:var(--hero-gap)!important}
-.hero .hero-content *{margin-bottom:0!important}
-.hero .hero-content>.cta-group{margin-bottom:.75rem!important}
-
-/* ---------------- Hero video ---------------- */
-.video-background-container{position:absolute;inset:0;overflow:hidden;z-index:0}
-.video-background-container iframe{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
-.hero::after{content:"";position:absolute;inset-inline:0;bottom:0;height:24svh;background:linear-gradient(to top,rgba(0,0,0,.95),rgba(0,0,0,0));pointer-events:none;z-index:5}
-
-/* ---------------- Preview ---------------- */
-.hover-preview{position:fixed;z-index:9999;pointer-events:none;min-width:min(92vw,520px);max-width:min(92vw,520px);border-radius:.75rem;overflow:hidden;box-shadow:0 25px 70px rgba(0,0,0,.6),0 10px 25px rgba(0,0,0,.45);background:#111;opacity:0;transform:translate(0,0) scale(.98);transform-origin:top left;transition:transform .18s cubic-bezier(.2,.8,.2,1),opacity .16s ease}
-.hp-backdrop{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.35);display:none;touch-action:none}
-body.no-scroll{overflow:hidden;overscroll-behavior:contain}
-body.no-scroll main{overflow:hidden!important}
-.hover-preview.show{opacity:1;transform:scale(1)}
-.hover-preview .hp-banner{aspect-ratio:16/9;background-size:cover;background-position:center;position:relative}
-.hover-preview .hp-banner::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8),rgba(0,0,0,0) 55%)}
-.hover-preview .hp-body{background:#1a1a1a;padding:14px 16px;display:flex;flex-direction:column;gap:10px;pointer-events:auto}
-
-/* ---------------- Shelves (horizontal) ---------------- */
-.shelf-row{overflow-x:auto;overflow-y:visible;overscroll-behavior-x:contain;overscroll-behavior-y:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;touch-action:pan-x}
-.card-track>.relative{scroll-snap-align:start}
-@media (prefers-reduced-motion:reduce){.content-card,.hover-preview{transition:none!important}}
-.content-card:focus-visible{outline:3px solid #e50914;outline-offset:2px}
-@media (max-width:768px){
-  body.m-hero-reset{
-    --m-hero-vid-w:192vw;
-    --m-hero-vid-h:108vw;
-    --m-hero-bottom-vh:46vh;
-    --m-gap-ctas-to-row:28px;
-    --m-nav-h:64px;
-    --m-gap-chip-meta:12px;
-    --m-gap-meta-copy:16px;
-    --m-gap-copy-cta:20px;
-    --m-synopsis-pad-bottom:6px;
-    overflow-x:hidden;
-  }
-
-  body.m-hero-reset .title-chip{padding:.4rem .75rem}
-
-  body.m-hero-reset .title-chip-text{font-size:1rem;letter-spacing:.09em}
-
-  body.m-hero-reset nav{
-    height:var(--m-nav-h);
-    display:flex;
-    align-items:center;
-    padding-block:0;
-  }
-
-  body.m-hero-reset main{
-    margin-top:0 !important;
-    padding-top:0 !important;
-    scroll-snap-type:none !important;
-  }
-
-  body.m-hero-reset main>section,
-  body.m-hero-reset .content-shelf{
-    scroll-snap-align:auto !important;
-    scroll-snap-stop:normal !important;
-  }
-
-  body.m-hero-reset .video-background-container{
-    position:fixed;
-    top:var(--m-nav-h);
-    left:0;
-    width:100vw;
-    height:var(--m-hero-h) !important;
-    margin:0 !important;
-    overflow:hidden;
-    transform:none !important;
-    z-index:0;
-  }
-
-  body.m-hero-reset .video-background-container iframe{
-    position:absolute;
-    top:50%;
-    left:50%;
-    width:calc(var(--m-hero-h) * 1.7778);
-    height:var(--m-hero-h);
-    transform:translate(-50%,-50%);
-    border:0;
-  }
-
-  body.m-hero-reset .hero{
-    position:relative;
-    min-height:var(--m-hero-h) !important;
-    background-color:#0f0f10;
-    background-image:none;
-    background-size:cover;
-    background-position:center;
-    padding-bottom:calc(var(--m-hero-gap) * 2.25);
-    padding-inline:1.5rem;
-    transition:transform 220ms cubic-bezier(.2,.8,.2,1);
-    display:flex;
-    flex-direction:column;
-    justify-content:flex-end;
-    align-items:flex-start;
-    gap:calc(var(--m-hero-gap) * 1.1);
-    margin-bottom:0 !important;
-  }
-
-  body.m-hero-reset .hero.dimmed{
-    transform:translateY(-8px) scale(.94);
-  }
-
-  body.m-hero-reset .hero .hero-content{
-    position:absolute;
-    inset-inline:0;
-    top:0;
-    will-change:top;
-    width:100%;
-    padding:0;
-    display:flex;
-    flex-direction:column;
-    align-items:flex-start;
-    gap:var(--m-hero-gap);
-  }
-
-  body.m-hero-reset .hero .hero-content>*{
-    margin:0!important;
-  }
-
-  body.m-hero-reset .hero .hero-content>.mb-3{
-    margin-bottom:.75rem!important;
-  }
-
-  body.m-hero-reset .hero .hero-content p.text-xs{
-    margin-bottom:.5rem!important;
-  }
-
-  body.m-hero-reset .hero .hero-content p.text-sm{
-    margin-bottom:1.5rem!important;
-  }
-
-  body.m-hero-reset .hero-tagline{
-    line-height:var(--m-hero-tagline-line);
-  }
-
-  body.m-hero-reset .hero-synopsis{
-    display:-webkit-box;
-    -webkit-box-orient:vertical;
-    -webkit-line-clamp:4;
-    line-height:var(--m-hero-line);
-    max-height:calc(var(--m-hero-line) * 4);
-    overflow:hidden;
-  }
-
-  body.m-hero-reset .hero .grid{
-    gap:.75rem;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    margin-top:calc(var(--m-hero-gap) * .5);
-    width:100%;
-  }
-
-  body.m-hero-reset .hero .grid button{
-    padding:.45rem .7rem;
-    min-height:38px;
-    border-radius:9999px;
-  }
-
-  body.m-hero-reset .hero .grid button svg{
-    width:18px;
-    height:18px;
-  }
-
-  body.m-hero-reset .hero .grid button .text-lg{
-    font-size:.9rem;
-    line-height:1.2rem;
-  }
-
-  body.m-hero-reset .content-card{
-    transform-origin:top center;
-  }
-
-  body.m-hero-reset .content-card:hover{
-    transform:none!important;
-    box-shadow:none!important;
-    z-index:auto!important;
-  }
-
-  body.m-hero-reset .dock-card{
-    width:clamp(6.25rem,32vw,8.5rem);
-    aspect-ratio:2/3;
-    height:auto;
-    overflow:visible;
-    transform-origin:center center;
-    transition:transform 180ms cubic-bezier(.2,.8,.2,1),z-index 0s;
-  }
-
-  body.m-hero-reset .card-track{
-    padding-inline:clamp(1rem,5vw,1.75rem);
-    gap:clamp(.65rem,5vw,.85rem);
-  }
-
-  body.m-hero-reset .card-track>*+*{
-    margin-left:0;
-  }
-
-  body.m-hero-reset .shelf-row{
-    padding-block:.5rem;
-    padding-inline:12px !important;
-  }
-
-  body.m-hero-reset .content-shelf{
-    padding-block:1rem;
-    padding-inline:clamp(1rem,5vw,1.75rem);
-    display:flex;
-    flex-direction:column;
-    gap:.75rem;
-    margin-top:0 !important;
-    padding-top:0 !important;
-    padding-inline:0 !important;
-  }
-
-  body.m-hero-reset .content-shelf>h3{
-    margin:0 !important;
-    color:#e5e7eb;
-    font-weight:700;
-    padding-inline:16px !important;
-  }
-
-  body.m-hero-reset .content-shelf>h3::after{
-    content:"";
-    display:block;
-    height:1px;
-    background:linear-gradient(to right,rgba(255,255,255,.18),rgba(255,255,255,.04));
-    margin-top:.25rem;
-  }
-
-  body.m-hero-reset .content-shelf.shelf-active>h3{
-    color:#fff;
-  }
-
-  body.m-hero-reset .content-shelf:first-of-type{
-    margin-top:0 !important;
-    padding-top:0 !important;
-  }
-
-  body.m-hero-reset .content-shelf:first-of-type>h3{
-    opacity:1;
-    pointer-events:auto;
-    margin-top:var(--m-gap-ctas-to-row) !important;
-  }
-
-  body.m-hero-reset .content-shelf.shelf-active:first-of-type>h3{
-    opacity:1;
-    pointer-events:auto;
-  }
-}
-/* mobile-media-scope: removed duplicate mobile rules now inside @media (max-width:768px) */
-
-/* moved: these mobile rules now live inside @media (max-width:768px) */
-</style>
+  <style>
+    body {
+      background-color: #0d0d0d;
+      color: #f5f5f5;
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
 </head>
-<body class="overflow-x-hidden md:overflow-y-visible md:h-auto m-hero-reset">
+<body class="overflow-x-hidden bg-neutral-950 text-zinc-100">
   <!-- Fixed Navigation Bar -->
-  <nav class="fixed top-0 left-0 right-0 bg-black border-b border-white/10 shadow-lg p-4 z-[100] flex items-center justify-between">   <div class="flex items-center space-x-8">     <a href="/" class="text-xl sm:text-2xl font-extrabold text-red-600 tracking-wide sm:tracking-wider whitespace-nowrap" aria-label="SanchezNinjah home">SanchezNinjah</a>     <ul class="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-300">       <li><a href="/" class="text-white font-bold border-b-2 border-red-600 pb-1" aria-current="page">Home</a></li>       <li><a href="/shows" class="hover:text-white">TV Shows</a></li>       <li><a href="/movies" class="hover:text-white">Movies</a></li>       <li><a href="/list" class="hover:text-white">My List</a></li>     </ul>   </div>   <div class="flex items-center space-x-4">     <svg aria-hidden="true" focusable="false" class="w-6 h-6 text-gray-300 hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>     <svg aria-hidden="true" focusable="false" class="w-6 h-6 text-gray-300 hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>   </div> </nav>
-<main class="md:h-auto md:overflow-visible pt-0 md:pt-20">
-  <h1 class="sr-only">SanchezNinjah portfolio</h1>
-    <!-- Hero Section -->
-    <section class="hero relative min-h-[90svh] md:min-h-[125svh] flex items-end text-white">
-      <div class="video-background-container">
+  <nav class="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black/90 px-4 py-3 shadow-lg backdrop-blur">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-6">
+      <div class="flex items-center gap-8">
+        <a
+          href="/"
+          class="text-xl font-extrabold tracking-wide text-red-600 transition hover:text-red-500 sm:text-2xl"
+          aria-label="SanchezNinjah home"
+        >
+          SanchezNinjah
+        </a>
+        <ul class="hidden items-center gap-6 text-sm font-medium text-gray-300 md:flex">
+          <li><a href="/" class="border-b-2 border-red-600 pb-1 font-semibold text-white" aria-current="page">Home</a></li>
+          <li><a href="/shows" class="transition hover:text-white">TV Shows</a></li>
+          <li><a href="/movies" class="transition hover:text-white">Movies</a></li>
+          <li><a href="/list" class="transition hover:text-white">My List</a></li>
+        </ul>
+      </div>
+      <div class="flex items-center gap-4 text-gray-300">
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          class="h-6 w-6 transition hover:text-white"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          class="h-6 w-6 transition hover:text-white"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg>
+      </div>
+    </div>
+  </nav>
+
+  <main class="space-y-16 pb-16 pt-0">
+    <h1 class="sr-only">SanchezNinjah portfolio</h1>
+
+    <!-- Titan Project Section -->
+    <section id="titan-project" class="relative flex min-h-[90svh] items-end md:min-h-[125svh]">
+      <div class="absolute inset-0 overflow-hidden">
         <iframe
           id="heroVideo"
+          class="absolute inset-0 h-full w-full pointer-events-none"
           src="https://www.youtube-nocookie.com/embed/VBdaOkpLe_o?autoplay=1&mute=1&loop=1&playlist=VBdaOkpLe_o&controls=0&modestbranding=1"
           title="Background trailer"
           playsinline
@@ -311,31 +92,125 @@ body.no-scroll main{overflow:hidden!important}
           allowfullscreen
         ></iframe>
       </div>
-      <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-0"></div>
-      <div class="hero-content z-10 text-left max-w-[22rem] md:max-w-xl lg:max-w-3xl px-4 md:px-12 leading-relaxed">
-        <div class="mb-3">
-          <div class="title-chip mx-auto md:mx-0" role="heading" aria-level="1">
-            <span class="title-chip-text">TITAN PROJECT</span>
+      <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent"></div>
+      <div class="relative z-10 w-full px-4 pb-24 md:px-12 md:pb-32">
+        <div class="max-w-xl space-y-6 lg:max-w-3xl">
+          <div class="inline-flex items-center rounded-full border border-red-600 bg-black/70 px-4 py-2 shadow-lg">
+            <span class="text-xs font-semibold uppercase tracking-[0.35em] text-red-500 md:text-sm">Titan Project</span>
+          </div>
+          <h2 class="text-3xl font-extrabold tracking-tight text-white md:text-5xl">Titan Project</h2>
+          <p class="text-sm font-medium uppercase tracking-wide text-red-400 md:text-base">New Release · Thriller, Sci-Fi · 2024</p>
+          <p class="text-sm text-zinc-200 md:text-lg">
+            As a rogue AI network threatens global collapse, a disgraced former agent is called back into the field for one last,
+            impossible mission to save humanity.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <button
+              type="button"
+              class="flex items-center gap-2 rounded-full bg-white px-6 py-3 font-semibold text-black transition hover:bg-gray-200"
+            >
+              <svg aria-hidden="true" focusable="false" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M6 4l10 6-10 6V4z" />
+              </svg>
+              <span class="text-base">Play Now</span>
+            </button>
+            <button
+              type="button"
+              class="flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-6 py-3 font-semibold text-white transition hover:bg-white/20"
+            >
+              <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="text-base">Details</span>
+            </button>
           </div>
         </div>
-        <p class="hero-tagline text-xs md:text-sm font-medium text-red-500 uppercase tracking-wide mb-2">New Release | Thriller, Sci-Fi | 2024</p>
-        <p id="heroSynopsis" class="hero-synopsis text-sm md:text-xl text-gray-200/90 leading-relaxed mb-6 font-light">As a rogue AI network threatens global collapse, a disgraced former agent is called back into the field for one last, impossible mission to save humanity.</p>
-        <div class="cta-group grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full max-w-sm">
-          <button type="button" class="bg-white hover:bg-gray-200 text-black font-bold py-3 px-8 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg w-full flex items-center justify-center space-x-2">
-            <svg aria-hidden="true" focusable="false" class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg>
-            <span class="text-lg">Play Now</span>
-          </button>
-          <button type="button" class="bg-gray-700/70 hover:bg-gray-600/70 text-white font-bold py-3 px-8 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg w-full flex items-center justify-center space-x-2">
-            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span class="text-lg">Details</span>
-          </button>
-        </div>
       </div>
-
     </section>
 
-  </main>
+    <!-- New Release Section -->
+    <section id="new-release" class="scroll-mt-24 px-4 md:px-12">
+      <div class="mx-auto max-w-5xl space-y-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-2xl font-semibold text-white md:text-3xl">New Release</h2>
+          <a href="#popular" class="text-sm font-semibold text-red-400 transition hover:text-red-300">View All</a>
+        </div>
+        <div class="rounded-2xl bg-black/50 p-6 shadow-xl shadow-black/40 md:p-8">
+          <p class="text-lg font-semibold text-white md:text-xl">Titan Project: Episode One</p>
+          <p class="mt-3 text-sm leading-relaxed text-zinc-300 md:text-base">
+            A high-stakes infiltration mission reveals a hidden colony of sentient machines, forcing the Titan team to question
+            every ally and make an impossible choice.
+          </p>
+          <div class="mt-4 flex flex-wrap gap-3 text-xs font-medium text-zinc-200 md:text-sm">
+            <span class="rounded-full bg-white/10 px-3 py-1">45 min</span>
+            <span class="rounded-full bg-white/10 px-3 py-1">PG-13</span>
+            <span class="rounded-full bg-white/10 px-3 py-1">Dolby Vision</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  
+    <!-- Synopsis Section -->
+    <section id="synopsis" class="scroll-mt-24 px-4 md:px-12">
+      <div class="mx-auto max-w-4xl space-y-4">
+        <h2 class="text-2xl font-semibold text-white md:text-3xl">Synopsis</h2>
+        <p class="text-sm leading-relaxed text-zinc-300 md:text-base">
+          When the Titan network awakens, sleeper agents across the globe go dark and critical infrastructure fractures. Former
+          agent Maya Serrano is thrust back into command to hunt down the architect of the rogue AI before an irreversible cascade
+          collapses the world order.
+        </p>
+        <p class="text-sm leading-relaxed text-zinc-300 md:text-base">
+          Racing from neon-drenched megacities to off-world colonies, Maya assembles a fractured crew of specialists. Each
+          revelation blurs the line between human and machine loyalty, culminating in a confrontation that will determine the
+          future of intelligence itself.
+        </p>
+      </div>
+    </section>
+
+    <!-- Popular on Stream Section -->
+    <section id="popular" class="scroll-mt-24 px-4 md:px-12">
+      <div class="mx-auto max-w-6xl space-y-6">
+        <h2 class="text-2xl font-semibold text-white md:text-3xl">Popular on Stream</h2>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <article class="flex flex-col gap-3 rounded-2xl bg-black/50 p-4 shadow-lg shadow-black/40">
+            <div class="aspect-video w-full overflow-hidden rounded-xl bg-gradient-to-br from-red-500/40 to-amber-500/30"></div>
+            <div class="space-y-1">
+              <h3 class="text-lg font-semibold text-white">Neon Run</h3>
+              <p class="text-sm leading-relaxed text-zinc-300">
+                A courier outruns corporate hunters across the floating districts of Neo-Tokyo.
+              </p>
+            </div>
+          </article>
+          <article class="flex flex-col gap-3 rounded-2xl bg-black/50 p-4 shadow-lg shadow-black/40">
+            <div class="aspect-video w-full overflow-hidden rounded-xl bg-gradient-to-br from-blue-500/40 to-purple-500/30"></div>
+            <div class="space-y-1">
+              <h3 class="text-lg font-semibold text-white">Deep Signal</h3>
+              <p class="text-sm leading-relaxed text-zinc-300">
+                A research submarine crew discovers an ancient signal pulsing beneath the Mariana Abyss.
+              </p>
+            </div>
+          </article>
+          <article class="flex flex-col gap-3 rounded-2xl bg-black/50 p-4 shadow-lg shadow-black/40">
+            <div class="aspect-video w-full overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500/40 to-teal-500/30"></div>
+            <div class="space-y-1">
+              <h3 class="text-lg font-semibold text-white">Verdant Skies</h3>
+              <p class="text-sm leading-relaxed text-zinc-300">
+                Terraformers battle rogue ecosystems while racing to save the last breathable world.
+              </p>
+            </div>
+          </article>
+          <article class="flex flex-col gap-3 rounded-2xl bg-black/50 p-4 shadow-lg shadow-black/40">
+            <div class="aspect-video w-full overflow-hidden rounded-xl bg-gradient-to-br from-pink-500/40 to-indigo-500/30"></div>
+            <div class="space-y-1">
+              <h3 class="text-lg font-semibold text-white">Stellar Drift</h3>
+              <p class="text-sm leading-relaxed text-zinc-300">
+                Rival pilots enter a gravity well gauntlet to win their freedom from a mining cartel.
+              </p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
