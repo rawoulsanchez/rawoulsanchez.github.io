@@ -11,7 +11,7 @@
   body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif; background:var(--bg); color:var(--fg); line-height:1.5; }
 
   /* Fixed black nav */
-  .nav-bar{ position:fixed; top:0; left:0; right:0; z-index:100; background:#000; height:calc(var(--nav-height) + env(safe-area-inset-top)); padding-top:env(safe-area-inset-top); border-bottom:1px solid #111; }
+  .nav-bar{ position:fixed; top:0; left:0; right:0; z-index:100; background:#000; height:calc(var(--nav-height) + env(safe-area-inset-top)); padding-top:env(safe-area-inset-top); box-shadow: inset 0 -1px 0 #111; }
   .nav-inner{ max-width:960px; margin:0 auto; height:var(--nav-height); display:flex; align-items:center; justify-content:space-between; padding:0 16px; }
   .brand{ color:#e31b23; font-weight:800; font-size:24px; letter-spacing:.2px; text-decoration:none; }
   .nav-actions{ display:flex; gap:12px; align-items:center; }
@@ -21,7 +21,7 @@
   .icon-btn .dot{ position:absolute; top:4px; right:4px; width:9px; height:9px; background:#e31b23; border-radius:999px; box-shadow:0 0 0 2px #000; }
 
   /* Layout helpers used by the page */
-  main{ padding-top:calc(var(--nav-height) + env(safe-area-inset-top) + 1px); }
+  main{ padding-top:calc(var(--nav-height) + env(safe-area-inset-top)); }
   .wrap { max-width:960px; margin:0 auto; padding:16px; }
   .card { background:#14161c; border:1px solid #222; border-radius:12px; padding:16px; margin:16px; }
   footer { color:var(--muted); text-align:center; padding:24px; border-top:1px solid #222; }
@@ -32,7 +32,7 @@
   p{ margin:8px 0; color:var(--muted); }
 
   /* HERO */
-  .hero{ position:relative; height:72vh; height:72svh; overflow:hidden; background:#000; margin-top:-1px; }
+  .hero{ position:relative; height:72vh; height:72svh; overflow:hidden; background:#000; }
   @media (max-height:700px){ .hero{ height:64vh; height:64svh; } }
   @media (min-height:900px){ .hero{ height:78vh; height:78svh; } }
 
