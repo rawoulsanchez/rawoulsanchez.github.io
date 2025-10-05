@@ -399,9 +399,9 @@ body.no-scroll main{overflow:hidden!important}
     // ---------- Mobile helpers ----------
     const __vw = (value = '') => {
       const raw = String(value).trim();
-      if (!raw) return 0;
-      const num = parseFloat(raw);
-      if (Number.isNaN(num)) return 0;
+      if (!raw) return Number.NaN;
+      const num = Number.parseFloat(raw);
+      if (!Number.isFinite(num)) return Number.NaN;
       if (raw.endsWith('vw')) {
         const vw = window.visualViewport ? window.visualViewport.width : window.innerWidth;
         return (num / 100) * vw;
@@ -410,7 +410,7 @@ body.no-scroll main{overflow:hidden!important}
         const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
         return (num / 100) * vh;
       }
-      return raw.endsWith('px') ? num : num;
+      return num;
     };
 
     const syncSynopsisToVideoBottom = () => {
@@ -424,7 +424,7 @@ body.no-scroll main{overflow:hidden!important}
       if (!hero || !content || !ctaGroup || !videoContainer) return;
 
       const styles = getComputedStyle(document.documentElement);
-      const ctaPadBottomRaw = styles.getPropertyValue('--m-cta-pad-bottom').trim() || '14px';
+      const ctaPadBottomRaw = styles.getPropertyValue('--m-cta-pad-bottom');
       let ctaPadBottom = __vw(ctaPadBottomRaw);
       if (!Number.isFinite(ctaPadBottom)) ctaPadBottom = 14;
 
