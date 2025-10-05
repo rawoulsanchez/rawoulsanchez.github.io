@@ -6,13 +6,13 @@
   <title>Rawoul — Starter</title>
 <style>
   /* Design tokens */
-  :root { --bg:#0f0f12; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; }
+  :root { --bg:#0f0f12; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif; background:var(--bg); color:var(--fg); line-height:1.5; }
 
   /* Fixed black nav */
-  .nav-bar{ position:sticky; top:0; z-index:100; background:#000; height:64px; border-bottom:1px solid #111; }
-  .nav-inner{ max-width:960px; margin:0 auto; height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 16px; }
+  .nav-bar{ position:fixed; top:0; left:0; right:0; z-index:100; background:#000; height:calc(var(--nav-height) + env(safe-area-inset-top)); padding-top:env(safe-area-inset-top); border-bottom:1px solid #111; }
+  .nav-inner{ max-width:960px; margin:0 auto; height:var(--nav-height); display:flex; align-items:center; justify-content:space-between; padding:0 16px; }
   .brand{ color:#e31b23; font-weight:800; font-size:24px; letter-spacing:.2px; text-decoration:none; }
   .nav-actions{ display:flex; gap:12px; align-items:center; }
   .icon-btn{ position:relative; display:inline-grid; place-items:center; width:36px; height:36px; border-radius:999px; background:#121212; border:1px solid #222; cursor:pointer; color:#eaeaf0; }
@@ -21,6 +21,7 @@
   .icon-btn .dot{ position:absolute; top:4px; right:4px; width:9px; height:9px; background:#e31b23; border-radius:999px; box-shadow:0 0 0 2px #000; }
 
   /* Layout helpers used by the page */
+  main{ padding-top:calc(var(--nav-height) + env(safe-area-inset-top)); }
   .wrap { max-width:960px; margin:0 auto; padding:16px; }
   .card { background:#14161c; border:1px solid #222; border-radius:12px; padding:16px; margin:16px; }
   footer { color:var(--muted); text-align:center; padding:24px; border-top:1px solid #222; }
@@ -35,29 +36,32 @@
   @media (max-height:700px){ .hero{ height:64vh; height:64svh; } }
   @media (min-height:900px){ .hero{ height:78vh; height:78svh; } }
 
-  .hero-text{ padding:64px 0; display:grid; gap:16px; }
-  @media (max-width:600px){ .hero-text{ padding:48px 0; } }
+  .hero::after{
+    content:"";
+    position:absolute;
+    left:-2px;
+    right:-2px;
+    bottom:-1px;
+    height:45%;
+    background:linear-gradient(to top, #000 0%, rgba(0,0,0,.85) 65%, rgba(0,0,0,0) 100%);
+    pointer-events:none;
+  }
 
-  /* Pin the video to the nav and let it fill the container without overscan. */
+  .hero-video{ position:relative; width:100%; height:100%; }
+
   .hero-video iframe{
     position:absolute;
-    top:-3px;              /* nudge to hide player chrome gap */
-    left:0;
-    width:100%;
-    height:calc(100% + 3px);
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    transform-origin:top center;
+    width:135%;
+    height:100%;
     border:0;
   }
 
-  /* Bottom gradient: full-bleed with slight bleed to kill 1px slivers */
-  .hero-gradient{
-    position:absolute;
-    left:-2px;            /* bleed past edges to avoid subpixel gaps */
-    right:-2px;
-    bottom:-1px;
-    height:50%;
-    background:linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,.85) 75%, #000 100%);
-    pointer-events:none;
-  }
+  .hero-text{ padding:64px 0; display:grid; gap:16px; }
+  @media (max-width:600px){ .hero-text{ padding:48px 0; } }
 
   /* Mute button */
   .mute-btn{
@@ -70,49 +74,50 @@
 </style>
 </head>
 <body>
-<header class="nav-bar" role="navigation" aria-label="Main">
-  <div class="nav-inner">
-    <a class="brand" href="/" aria-label="Home">SanchezNunjah</a>
-    <div class="nav-actions">
-      <button class="icon-btn" aria-label="Search">
-        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 015.92 12.2l3.69 3.69-1.42 1.42-3.69-3.69A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z"/></svg>
-      </button>
-      <button class="icon-btn" aria-label="Notifications">
-        <span class="dot" aria-hidden="true"></span>
-        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a4 4 0 00-4 4v1.1C6.2 8 5 9.7 5 11.6V17l-1.5 1.5v1h17v-1L19 17v-5.4c0-1.9-1.2-3.6-3-4.5V6a4 4 0 00-4-4zm0 20a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
-      </button>
+  <header class="nav-bar" role="navigation" aria-label="Main">
+    <div class="nav-inner">
+      <a class="brand" href="/" aria-label="Home">SanchezNunjah</a>
+      <div class="nav-actions">
+        <button class="icon-btn" aria-label="Search">
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 015.92 12.2l3.69 3.69-1.42 1.42-3.69-3.69A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z"/></svg>
+        </button>
+        <button class="icon-btn" aria-label="Notifications">
+          <span class="dot" aria-hidden="true"></span>
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a4 4 0 00-4 4v1.1C6.2 8 5 9.7 5 11.6V17l-1.5 1.5v1h17v-1L19 17v-5.4c0-1.9-1.2-3.6-3-4.5V6a4 4 0 00-4-4zm0 20a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
+        </button>
+      </div>
     </div>
-  </div>
-</header>
-<section class="video-hero" id="hero">
-  <div class="hero-video">
-    <iframe
-      id="hero-yt"
-      title="Hero trailer"
-      src="https://www.youtube.com/embed/VBdaOkpLe_o?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o"
-      allow="autoplay; encrypted-media"
-      allowfullscreen
-    ></iframe>
-    <div class="hero-gradient" aria-hidden="true"></div>
-    <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
-  </div>
-</section>
-  <main class="wrap">
-    <section class="hero-text" id="home">
-      <h1>Hello, Rawoul</h1>
-      <p>Clean starter. Fast to edit. Accessible. No frameworks.</p>
-      <p style="margin-top:16px;"><button class="cta" onclick="alert('It works.')">Test button</button></p>
+  </header>
+  <main>
+    <section class="hero" id="hero">
+      <div class="hero-video">
+        <iframe
+          id="hero-yt"
+          title="Hero trailer"
+          src="https://www.youtube.com/embed/VBdaOkpLe_o?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o"
+          allow="autoplay; encrypted-media"
+          allowfullscreen
+        ></iframe>
+      </div>
+      <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
     </section>
+    <div class="wrap">
+      <section class="hero-text" id="home">
+        <h1>Hello, Rawoul</h1>
+        <p>Clean starter. Fast to edit. Accessible. No frameworks.</p>
+        <p style="margin-top:16px;"><button class="cta" onclick="alert('It works.')">Test button</button></p>
+      </section>
 
-    <section id="work" class="card" aria-labelledby="work-h">
-      <h2 id="work-h">Work</h2>
-      <p>Add your projects here. We will structure this together.</p>
-    </section>
+      <section id="work" class="card" aria-labelledby="work-h">
+        <h2 id="work-h">Work</h2>
+        <p>Add your projects here. We will structure this together.</p>
+      </section>
 
-    <section id="contact" class="card" aria-labelledby="contact-h">
-      <h2 id="contact-h">Contact</h2>
-      <p>Email link goes here.</p>
-    </section>
+      <section id="contact" class="card" aria-labelledby="contact-h">
+        <h2 id="contact-h">Contact</h2>
+        <p>Email link goes here.</p>
+      </section>
+    </div>
   </main>
 
   <footer>© <span id="y"></span> Rawoul</footer>
