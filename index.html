@@ -43,16 +43,16 @@
   /* Pin the video top to the nav. Center horizontally. Overscan via scale. */
   .hero-video iframe{
     position:absolute;
-    top:0;                 /* lock to hero top (under nav) */
+    top:-3px;              /* pull video upward to remove player chrome gap */
     left:50%;
     transform:translateX(-50%) scale(1.25);  /* default overscan */
     transform-origin:top center;
     width:120%;
-    height:120%;
+    height:calc(120% + 3px);
     border:0;
   }
-  @media (max-height:700px){ .hero-video iframe{ transform:translateX(-50%) scale(1.35); } }
-  @media (min-height:900px){ .hero-video iframe{ transform:translateX(-50%) scale(1.20); } }
+  @media (max-height:700px){ .hero-video iframe{ top:-12px; transform:translateX(-50%) scale(1.35); height:calc(120% + 12px); } }
+  @media (min-height:900px){ .hero-video iframe{ top:-3px; transform:translateX(-50%) scale(1.20); height:calc(120% + 3px); } }
 
   /* Bottom gradient: full-bleed with slight bleed to kill 1px slivers */
   .hero-gradient{
