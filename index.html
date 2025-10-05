@@ -19,18 +19,49 @@
     footer { color:var(--muted); text-align:center; padding:24px; border-top:1px solid #222; }
     button.cta { background:var(--accent); color:#0b1020; border:0; padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer; }
     button.cta:focus { outline:2px solid #fff4; outline-offset:2px; }
+    /* Fixed black nav */
+.nav-bar{
+  position: sticky; top:0; z-index:100;
+  background:#000; height:64px; border-bottom:1px solid #111;
+}
+.nav-inner{
+  max-width:960px; margin:0 auto; height:64px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 16px;
+}
+.brand{
+  color:#e31b23;
+  font-weight:800; font-size:24px; letter-spacing:.2px; text-decoration:none;
+}
+.nav-actions{ display:flex; gap:12px; align-items:center; }
+.icon-btn{
+  position:relative; display:inline-grid; place-items:center;
+  width:36px; height:36px; border-radius:999px;
+  background:#121212; border:1px solid #222; cursor:pointer; color:#eaeaf0;
+}
+.icon-btn:hover{ background:#161616; }
+.icon-btn svg{ fill:currentColor; }
+.icon-btn .dot{
+  position:absolute; top:4px; right:4px;
+  width:9px; height:9px; background:#e31b23; border-radius:999px; box-shadow:0 0 0 2px #000;
+}
   </style>
 </head>
 <body>
-  <header>
-    <div class="wrap" role="navigation" aria-label="Main">
-      <nav>
-        <a href="#" aria-current="page">Home</a>
-        <a href="#work">Work</a>
-        <a href="#contact">Contact</a>
-      </nav>
+<header class="nav-bar" role="navigation" aria-label="Main">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Home">SanchezNunjah</a>
+    <div class="nav-actions">
+      <button class="icon-btn" aria-label="Search">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 015.92 12.2l3.69 3.69-1.42 1.42-3.69-3.69A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="Notifications">
+        <span class="dot" aria-hidden="true"></span>
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a4 4 0 00-4 4v1.1C6.2 8 5 9.7 5 11.6V17l-1.5 1.5v1h17v-1L19 17v-5.4c0-1.9-1.2-3.6-3-4.5V6a4 4 0 00-4-4zm0 20a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
+      </button>
     </div>
-  </header>
+  </div>
+</header>
 
   <main class="wrap">
     <section class="hero" id="home">
