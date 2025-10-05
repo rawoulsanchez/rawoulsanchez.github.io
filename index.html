@@ -35,21 +35,18 @@
   @media (max-height:700px){ .hero{ height:64vh; height:64svh; } }
   @media (min-height:900px){ .hero{ height:78vh; height:78svh; } }
 
-  .hero-video{ position:relative; width:100%; height:100%; overflow:hidden; background:#000; }
+  .hero-text{ padding:64px 0; display:grid; gap:16px; }
+  @media (max-width:600px){ .hero-text{ padding:48px 0; } }
 
-  /* Pin the video top to the nav. Center horizontally. Overscan via scale. */
+  /* Pin the video to the nav and let it fill the container without overscan. */
   .hero-video iframe{
     position:absolute;
-    top:0;                 /* lock to hero top (under nav) */
-    left:50%;
-    transform:translateX(-50%) scale(1.25);  /* default overscan */
-    transform-origin:top center;
-    width:120%;
-    height:120%;
+    top:-3px;              /* nudge to hide player chrome gap */
+    left:0;
+    width:100%;
+    height:calc(100% + 3px);
     border:0;
   }
-  @media (max-height:700px){ .hero-video iframe{ transform:translateX(-50%) scale(1.35); } }
-  @media (min-height:900px){ .hero-video iframe{ transform:translateX(-50%) scale(1.20); } }
 
   /* Bottom gradient: full-bleed with slight bleed to kill 1px slivers */
   .hero-gradient{
@@ -87,7 +84,7 @@
     </div>
   </div>
 </header>
-<section class="hero" id="hero">
+<section class="video-hero" id="hero">
   <div class="hero-video">
     <iframe
       id="hero-yt"
@@ -101,7 +98,7 @@
   </div>
 </section>
   <main class="wrap">
-    <section class="hero" id="home">
+    <section class="hero-text" id="home">
       <h1>Hello, Rawoul</h1>
       <p>Clean starter. Fast to edit. Accessible. No frameworks.</p>
       <p style="margin-top:16px;"><button class="cta" onclick="alert('It works.')">Test button</button></p>
