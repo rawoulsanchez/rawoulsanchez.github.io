@@ -31,11 +31,14 @@
   p{ margin:8px 0; color:var(--muted); }
 
   /* HERO */
-  .hero{ position:relative; height:72vh; height:72svh; overflow:hidden; background:#000; }
-  @media (max-height:700px){ .hero{ height:64vh; height:64svh; } }
-  @media (min-height:900px){ .hero{ height:78vh; height:78svh; } }
+  .video-hero{ position:relative; height:72vh; height:72svh; overflow:hidden; background:#000; }
+  @media (max-height:700px){ .video-hero{ height:64vh; height:64svh; } }
+  @media (min-height:900px){ .video-hero{ height:78vh; height:78svh; } }
 
   .hero-video{ position:relative; width:100%; height:100%; overflow:hidden; background:#000; }
+
+  .hero-text{ padding:64px 0; display:grid; gap:16px; }
+  @media (max-width:600px){ .hero-text{ padding:48px 0; } }
 
   /* Pin the video top to the nav. Center horizontally. Overscan via scale. */
   .hero-video iframe{
@@ -87,7 +90,7 @@
     </div>
   </div>
 </header>
-<section class="hero" id="hero">
+<section class="video-hero" id="hero">
   <div class="hero-video">
     <iframe
       id="hero-yt"
@@ -101,7 +104,7 @@
   </div>
 </section>
   <main class="wrap">
-    <section class="hero" id="home">
+    <section class="hero-text" id="home">
       <h1>Hello, Rawoul</h1>
       <p>Clean starter. Fast to edit. Accessible. No frameworks.</p>
       <p style="margin-top:16px;"><button class="cta" onclick="alert('It works.')">Test button</button></p>
