@@ -49,19 +49,15 @@
   .hero-text{ padding:64px 0; display:grid; gap:16px; }
   @media (max-width:600px){ .hero-text{ padding:48px 0; } }
 
-  /* Pin the video top to the nav. Center horizontally. Overscan via scale. */
+  /* Pin the video to the nav and let it fill the container without overscan. */
   .hero-video iframe{
     position:absolute;
-    top:-3px;              /* pull video upward to remove player chrome gap */
-    left:50%;
-    transform:translateX(-50%) scale(1.25);  /* default overscan */
-    transform-origin:top center;
-    width:120%;
-    height:calc(120% + 3px);
+    top:-3px;              /* nudge to hide player chrome gap */
+    left:0;
+    width:100%;
+    height:calc(100% + 3px);
     border:0;
   }
-  @media (max-height:700px){ .hero-video iframe{ top:-12px; transform:translateX(-50%) scale(1.35); height:calc(120% + 12px); } }
-  @media (min-height:900px){ .hero-video iframe{ top:-3px; transform:translateX(-50%) scale(1.20); height:calc(120% + 3px); } }
 
   /* Bottom gradient: full-bleed with slight bleed to kill 1px slivers */
   .hero-gradient{
