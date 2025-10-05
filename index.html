@@ -21,7 +21,7 @@
   .icon-btn .dot{ position:absolute; top:4px; right:4px; width:9px; height:9px; background:#e31b23; border-radius:999px; box-shadow:0 0 0 2px #000; }
 
   /* Layout helpers used by the page */
-  main{ padding-top:calc(var(--nav-height) + env(safe-area-inset-top)); }
+  main{ padding-top:calc(var(--nav-height) + env(safe-area-inset-top) - 1px); }
   .wrap { max-width:960px; margin:0 auto; padding:16px; }
   .card { background:#14161c; border:1px solid #222; border-radius:12px; padding:16px; margin:16px; }
   footer { color:var(--muted); text-align:center; padding:24px; border-top:1px solid #222; }
@@ -58,6 +58,7 @@
     width:135%;
     height:100%;
     border:0;
+    margin-top:-1px;
   }
 
   .hero-text{ padding:64px 0; display:grid; gap:16px; }
