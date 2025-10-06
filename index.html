@@ -134,6 +134,58 @@
   height:100%;
   border:0;
 }
+  /* commit: hero-overlay-styles-v2 */
+/* Overlay sits on top of the video; keeps your 16:9 hero intact */
+.hero-overlay{
+  position:absolute;
+  left:16px;
+  right:16px;
+  bottom:16px;            /* CTA bottom ~16px above video bottom */
+  display:grid;
+  gap:10px;
+  color:#fff;
+  z-index:2;              /* above iframe, below nav */
+  pointer-events:auto;
+}
+
+/* Title chip (from older design) */
+.title-chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:.5rem .875rem;
+  background:rgba(17,17,17,.85);
+  border-radius:.75rem;
+  box-shadow:0 6px 20px rgba(0,0,0,.45), inset 0 0 0 2px rgba(229,9,20,.65);
+}
+.title-chip-text{
+  font-weight:800;
+  letter-spacing:.08em;
+  color:#e50914;
+  font-size:1.125rem;
+}
+
+/* Meta + synopsis */
+.meta{ font-size:14px; opacity:.9; }
+.synopsis{
+  font-size:14px;
+  display:-webkit-box;
+  -webkit-line-clamp:4;   /* max 4 lines */
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+/* CTAs */
+.ctas{ display:flex; gap:12px; }
+.btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer;
+  border:0; text-decoration:none;
+}
+.btn-primary{ background:#fff; color:#000; }
+.btn-primary:focus{ outline:2px solid #fff4; outline-offset:2px; }
+.btn-secondary{ background:#ffffff1a; color:#fff; border:1px solid #ffffff33; }
+.btn-secondary:focus{ outline:2px solid #fff4; outline-offset:2px; }
 
 .hero-text {
     padding:64px 0;
@@ -193,6 +245,24 @@ html { overflow-x: hidden; }
           allow="autoplay; encrypted-media"
           allowfullscreen
         ></iframe>
+      </div>
+      </div>
+      <!-- commit: hero-overlay-add-v2 -->
+      <div class="hero-overlay">
+        <div class="title-chip" role="heading" aria-level="1">
+          <span class="title-chip-text">TITAN PROJECT</span>
+        </div>
+
+        <div class="meta">Action • 2h 10m</div>
+
+        <p class="synopsis">
+          A rogue pilot risks everything to deliver a message that could end the war.
+        </p>
+
+        <div class="ctas">
+          <button type="button" class="btn btn-primary"><span>Play Now</span></button>
+          <button type="button" class="btn btn-secondary"><span>Details</span></button>
+        </div>
       </div>
       <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
     </section>
