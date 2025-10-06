@@ -6,7 +6,7 @@
   <title>Rawoul — Starter</title>
 <style>
   /* Design tokens */
-  :root { --bg:#0f0f12; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; --hero-shift: 480px; }
+  :root { --bg:#0f0f12; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; --hero-shift: 80vh; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif; background:var(--bg); color:var(--fg); line-height:1.5; overflow-x:hidden; }
 
@@ -115,7 +115,7 @@
     aspect-ratio:16 / 9;
     overflow:hidden;
     background:#000;
-    width:120vw;                               /* bleed past edges */
+    width:140vw;                               /* bleed past edges */
     left:50%;                                  /* center wider box */
     transform: translate(-50%, var(--hero-shift)); /* pull bottom down */
     margin-top: calc(var(--hero-shift) * -1);       /* keep top flush */
@@ -164,7 +164,6 @@
     outline:2px solid #fff4;
     outline-offset:2px;
   }
-  .hero { outline: 2px solid magenta; } /* TEMP: helps visualize the box */
 </style>
 </head>
 <body>
