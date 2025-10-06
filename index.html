@@ -77,7 +77,6 @@
     max-width:960px;
     margin:0 auto;
     padding:16px;
-    margin-top: var(--hero-shift);  /* ensures nothing appears under hero */
 }
   .card {
     background:#14161c;
@@ -116,10 +115,9 @@
     aspect-ratio:16 / 9;
     overflow:hidden;
     background:#000;
-    width:140vw;                               /* bleed past edges */
+    width:200vw;                               /* bigger bleed => taller hero */
     left:50%;                                  /* center wider box */
-    transform: translate(-50%, var(--hero-shift)); /* pull bottom down */
-    margin-top: calc(var(--hero-shift) * -1);       /* keep top flush */
+transform: translateX(-50%); /* center horizontally only */
     z-index:1;
 }
 
