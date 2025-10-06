@@ -115,10 +115,10 @@
     aspect-ratio:16 / 9;
     overflow:hidden;
     background:#000;
-    width:120vw;                               /* extend past screen */
-    left:50%;                                  /* center wide box */
+    width:120vw;                               /* bleed past edges */
+    left:50%;                                  /* center wider box */
     transform: translate(-50%, var(--hero-shift)); /* pull bottom down */
-    margin-top: calc(var(--hero-shift) * -1);       /* keep top touching nav */
+    margin-top: calc(var(--hero-shift) * -1);       /* keep top flush */
     z-index:1;
 }
 
