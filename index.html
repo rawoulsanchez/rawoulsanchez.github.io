@@ -6,7 +6,7 @@
   <title>Rawoul — Starter</title>
 <style>
   /* Design tokens */
-  :root { --bg:#0f0f12; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; }
+  :root { --bg:#0f0f12; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; --hero-shift:160px; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif; background:var(--bg); color:var(--fg); line-height:1.5; overflow-x:hidden; }
 
@@ -72,11 +72,12 @@
   main {
     padding-top: calc(var(--nav-height) + env(safe-area-inset-top));
   }
-  .wrap {
+.wrap {
     max-width:960px;
     margin:0 auto;
     padding:16px;
-  }
+    margin-top: var(--hero-shift);  /* ensures nothing appears under hero */
+}
   .card {
     background:#14161c;
     border:1px solid #222;
@@ -114,11 +115,11 @@
     aspect-ratio:16 / 9;
     overflow:hidden;
     background:#000;
-    width:110vw;                 /* extend past viewport */
-    left:50%;                    /* center the wider box */
-    transform: translate(-50%, 80px); /* center X, pull bottom down */
-    margin-top:-80px;                 /* keep top touching the nav */
-    z-index:1;                   /* sit above following content */
+    width:110vw;                               /* extend past screen */
+    left:50%;                                  /* center wide box */
+    transform: translate(-50%, var(--hero-shift)); /* pull bottom down */
+    margin-top: calc(var(--hero-shift) * -1);       /* keep top touching nav */
+    z-index:1;
 }
 
 .hero-video {
