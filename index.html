@@ -108,16 +108,17 @@
   h2 { font-size:clamp(18px,4.5vw,24px); margin:12px 0 8px; }
   p { margin:8px 0; color:var(--muted); }
 
-  /* HERO */
+/* commit: hero-width-200vw-to-170vw */
+/* HERO */
 .hero {
     position:relative;
     height:auto;
     aspect-ratio:16 / 9;
     overflow:hidden;
     background:#000;
-    width:200vw;                               /* bigger bleed => taller hero */
-    left:50%;                                  /* center wider box */
-transform: translateX(-50%); /* center horizontally only */
+    width:170vw;                 /* midpoint bleed */
+    left:50%;                    /* center wider box */
+    transform: translateX(-50%); /* center horizontally only */
     z-index:1;
 }
 
