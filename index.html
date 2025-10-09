@@ -106,18 +106,19 @@ fro mnow on<!doctype html>
     padding-top: calc(var(--nav-height) + env(safe-area-inset-top));
   }
 .wrap {
-    max-width:960px;
-    margin:0 auto;
-    padding:16px;
+  max-width:960px;
+  margin:0 auto;
+  padding:16px;
 }
-  .wrap--flush { padding-left:0; }   /* remove the 16px left padding only where needed */
-  .card {
-    background:#14161c;
-    border:1px solid #222;
-    border-radius:12px;
-    padding:16px;
-    margin:16px;
-  }
+/* flush wrapper under hero: tiny top pad, keep right/bottom, no left */
+.wrap--flush { padding:4px 16px 16px 0; }
+.card {
+  background:#14161c;
+  border:1px solid #222;
+  border-radius:12px;
+  padding:16px;
+  margin:16px;
+}
   footer {
     color:var(--muted);
     text-align:center;
@@ -283,7 +284,7 @@ html { overflow-x: hidden; }
   gap:8px;
   width:100%;
   max-width:340px;                   /* keep pills on one line */
-  margin:.25rem 0 0 0;               /* half the distance to synopsis */
+  margin:.125rem 0 0 0;             /* closer to synopsis */
 }
 
 /* Smaller buttons */
