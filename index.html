@@ -207,10 +207,10 @@ html { overflow-x: hidden; }
 <div class="hero-gradient"></div>
 <!-- commit: overlay-bottom-lock-wrapper-v3 -->
 <div class="hero-overlay-wrap" style="position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;pointer-events:none;overflow:hidden;">
-  <div class="hero-overlay-inline"
+<div class="hero-overlay-inline"
 style="pointer-events:auto;position:absolute;bottom:0;left:50%;transform:translateX(-50%);
               width:min(92vw,720px);color:#fff;padding:8px 16px 0;
-              display:flex;flex-direction:column;gap:.5rem;
+              display:flex;flex-direction:column; /* NOTE: 'gap:.5rem;' is removed */
               text-shadow:0 1px 3px rgba(0,0,0,.5);
               background:rgba(0,0,0,16);border-radius:12px 12px 0 0;">
 
@@ -219,25 +219,24 @@ style="pointer-events:auto;position:absolute;bottom:0;left:50%;transform:transla
                 padding:.5rem .875rem;border-radius:.75rem;
                 background:rgba(17,17,17,.85);
                 box-shadow:0 6px 20px rgba(0,0,0,.45),
-                           inset 0 0 0 2px rgba(229,9,20,.65);">
+                           inset 0 0 0 2px rgba(229,9,20,.65);
+                margin-bottom:.5rem;">
       <span style="font-weight:800;letter-spacing:.08em;
                    color:#e50914;font-size:clamp(1rem,2.6vw,1.35rem);">
         TITAN PROJECT
       </span>
     </div>
 
-    <!-- Meta -->
-    <p style="margin:.35rem 0 0;color:#ff4d57;
+    <p style="margin:0 0 .35rem;color:#ff4d57;
               font-size:clamp(.78rem,1.6vw,.95rem);
               font-weight:700;letter-spacing:.08em;text-transform:uppercase;">
       New Release | Thriller, Sci-Fi | 2024
     </p>
 
-    <!-- Synopsis: 3 lines, bottom-locked via wrapper -->
-<p class="hero-synopsis" style="position:absolute; bottom:0; left:16px; right:16px; margin:0; color:#e5e7eb;
-              font-size:clamp(.95rem,2.2vw,1.15rem);line-height:1.55;
-              display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;
-              overflow:hidden;">
+    <p class="hero-synopsis" style="margin:0;color:#e5e7eb;
+              font-size:clamp(.95rem,2.2vw,1.15rem);line-height:1.55;
+              display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;
+              overflow:hidden;">
       As a rogue AI network threatens global collapse, a disgraced former agent is called
       back into the field for one last, impossible mission to save humanity.
     </p>
