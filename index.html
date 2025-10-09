@@ -290,8 +290,8 @@ html { overflow-x: hidden; }
 .btn{
   appearance:none; border:0; cursor:pointer;
   display:inline-flex; align-items:center; justify-content:center;
-  gap:.28rem; padding:.28rem .70rem; border-radius:999px; /* ↓ height by ~33% */
-  font:700 .78rem/1 var(--font-ui);
+  gap:.35rem; padding:.42rem .56rem; border-radius:999px; /* same height, narrower */
+  font:700 .80rem/1 var(--font-ui);
   transition:transform .12s ease, opacity .12s ease, box-shadow .12s ease, background .12s ease;
   width:100%;
   box-shadow: 0 6px 14px rgba(0,0,0,.18);
@@ -319,7 +319,7 @@ html { overflow-x: hidden; }
 .btn--ghost:hover{ box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.5); }
 
 /* Smaller icons */
-.btn svg{ width:18px; height:18px; display:block; }
+.btn svg{ width:16px; height:16px; display:block; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -431,18 +431,23 @@ html { overflow-x: hidden; }
   }
 </script>
 <script>
-  // Make CTA width match the rendered width of the “New Release … 2024” line
-  (function() {
-    function alignCta() {
-      const meta = document.getElementById('meta-line');
-      const cta  = document.querySelector('.hero-cta');
-      if (!meta || !cta) return;
-      const w = Math.round(meta.getBoundingClientRect().width);
-      // Clamp to sensible bounds so it stays on one line
-      const clamped = Math.max(220, Math.min(w, 420));
+  // Make the CTA row 1/3 shorter than its own available width
+  (function(){
+    function alignCta(){
+      const cta = document.querySelector('.hero-cta');
+      if(!cta || !cta.parentElement) return;
+
+      // Use the parent’s current width as the stable base
+      const base = cta.parentElement.getBoundingClientRect().width;
+
+      // Target = 67% of that base (i.e., 1/3 shorter)
+      const target = Math.round(base * 0.67);
+
+      // Clamp to keep both pills on one line
+      const clamped = Math.max(200, Math.min(target, 420));
+
       cta.style.width = clamped + 'px';
     }
-    // Run on load and on resize/orientation changes
     window.addEventListener('load', alignCta);
     window.addEventListener('resize', alignCta);
     window.addEventListener('orientationchange', alignCta);
