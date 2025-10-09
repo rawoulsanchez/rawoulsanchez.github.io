@@ -275,6 +275,45 @@
   /* commit: no-horizontal-scroll */
 html { overflow-x: hidden; }
 /* commit: hero-gradient-styles */
+/* CTA row under the hero video (inside .after-hero) */
+.hero-cta{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  width: 100%;
+  max-width: 480px;   /* similar to your max-w-sm */
+  margin: 24px auto 0;/* centered under the hero */
+}
+@media (min-width:768px){
+  .hero-cta{ grid-template-columns: 1fr 1fr; gap: 16px; }
+}
+
+/* Buttons */
+.btn{
+  appearance:none; border:0; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center;
+  gap:.5rem; padding:.75rem 1.25rem; border-radius:999px;
+  font:700 1rem/1 var(--font-ui);
+  transition:transform .12s ease, opacity .12s ease, box-shadow .12s ease, background .12s ease;
+  width:100%;
+  box-shadow: 0 10px 24px rgba(0,0,0,.20);
+}
+.btn:focus{ outline:2px solid #ffffff33; outline-offset:2px; }
+.btn:active{ transform: translateY(1px); }
+
+.btn--solid{
+  background:#fff; color:#000;
+}
+.btn--solid:hover{ background:#e6e6e6; }
+
+.btn--ghost{
+  background: rgba(255,255,255,0.10); color:#fff;
+  box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.30);
+}
+.btn--ghost:hover{ box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.55); }
+
+/* Icons */
+.btn svg{ width:24px; height:24px; display:block; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -345,9 +384,28 @@ html { overflow-x: hidden; }
 
   <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
 </section>
-    <div class="wrap">
-      <section class="after-hero" aria-label="Placeholder"></section>
+<div class="wrap">
+  <section class="after-hero" aria-label="Actions">
+    <div class="hero-cta">
+      <!-- Play Now -->
+      <button type="button" class="btn btn--solid" onclick="alert('Play trailer')">
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M6 4l10 6-10 6V4z"/>
+        </svg>
+        <span>Play Now</span>
+      </button>
+
+      <!-- Details -->
+      <button type="button" class="btn btn--ghost" onclick="alert('More info')">
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M13 16h-1v-4h-1m1-4h.01"/>
+          <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span>Details</span>
+      </button>
     </div>
+  </section>
+</div>
   </main>
 
   <footer>© <span id="y"></span> Rawoul</footer>
