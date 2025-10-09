@@ -193,6 +193,17 @@
   .hero-text { padding:48px 0; }
 }
 
+  /* Apply drop shadow to all overlay text */
+.hero-overlay-inline,
+.hero-overlay-inline * {
+  text-shadow: 0 1px 3px rgba(0,0,0,0.70);
+}
+
+/* Stronger shadow for the synopsis for readability */
+.hero-overlay-inline .hero-synopsis {
+  text-shadow: 0 2px 6px rgba(0,0,0,0.85);
+}
+
 /* Mute button */
   .mute-btn {
     position:absolute;
