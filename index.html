@@ -111,16 +111,14 @@
 
 /* commit: hero-width-200vw-to-170vw */
 /* HERO */
+/* HERO */
 .hero {
-    position:relative;
-    height:auto;
-    aspect-ratio:16 / 9;
-    overflow:hidden;
-    background:#000;
-    width:170vw;                 /* midpoint bleed */
-    left:50%;                    /* center wider box */
-    transform: translateX(-50%); /* center horizontally only */
-    z-index:1;
+  position: relative;
+  width: 100vw;         /* fixed: use the viewport width */
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #000;
+  z-index: 1;
 }
 
 .hero-video {
@@ -212,7 +210,7 @@ style="pointer-events:auto;position:absolute;bottom:0;left:0;right:0;
               max-width:720px;color:#fff;
               padding:8px calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left));
               text-shadow:0 1px 3px rgba(0,0,0,.5);
-              background:rgba(0,0,0,16);border-radius:12px 12px 0 0;">
+              background:rgba(0,0,0,0.16);border-radius:12px 12px 0 0;">
   
     <!-- Title chip -->
     <div style="display:inline-flex;align-items:center;justify-content:center;
