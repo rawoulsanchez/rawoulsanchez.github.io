@@ -209,10 +209,10 @@ html { overflow-x: hidden; }
 <div class="hero-overlay-wrap" style="position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;pointer-events:none;overflow:hidden;">
   <div class="hero-overlay-inline"
 style="pointer-events:auto;position:absolute;bottom:0;left:50%;transform:translateX(-50%);
-              width:min(92vw,720px);color:#fff;padding:8px 16px 10px;
+              width:min(92vw,720px);color:#fff;padding:8px 16px 0;
               display:flex;flex-direction:column;gap:.5rem;
               text-shadow:0 1px 3px rgba(0,0,0,.5);
-              background:rgba(0,0,0,.16);border-radius:12px;">
+              background:rgba(0,0,0,16);border-radius:12px 12px 0 0;">
 
     <!-- Title chip -->
     <div style="display:inline-flex;align-items:center;justify-content:center;
@@ -243,7 +243,7 @@ style="pointer-events:auto;position:absolute;bottom:0;left:50%;transform:transla
     </p>
 
     <!-- CTAs -->
-    <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.5rem;">
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.5rem;padding-bottom:calc(8px + env(safe-area-inset-bottom));">
       <button type="button"
               style="display:flex;align-items:center;justify-content:center;gap:.4rem;
                      padding:.6rem .85rem;border-radius:9999px;background:#fff;color:#111;
