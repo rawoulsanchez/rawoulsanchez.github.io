@@ -139,6 +139,22 @@
   transform: translateX(-50%);/* center the wide video */
   border: 0;
 }
+  /* Hero gradient: bottom → top, covers full hero */
+.hero-gradient{
+  position:absolute;
+  inset:0;              /* cover full hero box */
+  z-index:1;            /* video (0) < gradient (1) < overlay (2) */
+  pointer-events:none;
+  background:linear-gradient(
+    to top,
+    rgba(0,0,0,0.60) 0%,
+    rgba(0,0,0,0.45) 14%,
+    rgba(0,0,0,0.28) 30%,
+    rgba(0,0,0,0.16) 48%,
+    rgba(0,0,0,0.08) 68%,
+    rgba(0,0,0,0.00) 100%
+  );
+}
 
 .hero-text {
     padding:64px 0;
@@ -200,6 +216,9 @@ html { overflow-x: hidden; }
       allowfullscreen
     ></iframe>
   </div>
+
+  <!-- Hero gradient: bottom → top -->
+  <div class="hero-gradient" aria-hidden="true"></div>
 
   <!-- Overlay area locked to viewport edges -->
   <div class="hero-overlay-wrap"
