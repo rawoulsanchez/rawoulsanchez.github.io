@@ -73,6 +73,33 @@
     border-radius:999px;
     box-shadow:0 0 0 2px #000;
 }
+  .title-chip{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:.5rem .875rem;
+  background:rgba(17,17,17,.85);
+  border-radius:.75rem;
+  /* keep same visual weight and red border using token */
+  box-shadow:
+    0 6px 20px rgba(0,0,0,.45),
+    inset 0 0 0 2px color-mix(in srgb, var(--brand) 65%, transparent);
+  margin-bottom:.5rem;         /* preserves your current spacing */
+}
+.title-chip-text{
+  font-family: var(--font-display);
+  font-weight:800;
+  letter-spacing:.08em;
+  color:#fff;
+  font-size:clamp(1rem,2.6vw,1.35rem);
+}
+
+/* Optional responsive tweak, mirrors your sample without Tailwind */
+@media (max-width:768px){
+  .title-chip{ padding:.4rem .75rem; }
+  .title-chip-text{ letter-spacing:.09em; }
+}
+@media (min-width:768px){
+  .title-chip-text{ font-size:1.35rem; } /* matches clamp’s max */
+}
 
   /* Layout helpers used by the page */
   main {
@@ -296,17 +323,9 @@ html { overflow-x: hidden; }
                 padding:12px calc(16px + env(safe-area-inset-right)) 8px calc(16px + env(safe-area-inset-left));
                 text-shadow:0 1px 3px rgba(0,0,0,.5);
                 background:transparent;border-radius:12px 12px 0 0;">
-<div style="display:inline-flex;align-items:center;justify-content:center;
-                  padding:.5rem .875rem;border-radius:.75rem;
-                  background:rgba(17,17,17,.85);
-                  box-shadow:0 6px 20px rgba(0,0,0,.45),
-                             inset 0 0 0 2px rgba(227,27,35,.65);
-                  margin-bottom:.5rem;display:table;">
-<span style="font-family:var(--font-display);font-weight:800;letter-spacing:.08em;
-             color:#ffffff;font-size:clamp(1rem,2.6vw,1.35rem);">
-  Sanchez Ninjah
-</span>
-      </div>
+<div class="title-chip" role="heading" aria-level="1">
+  <span class="title-chip-text">Sanchez Ninjah</span>
+</div>
 
 <p style="margin:0 0 .14rem;color:var(--brand);
                 font-size:clamp(.78rem,1.6vw,.95rem);
