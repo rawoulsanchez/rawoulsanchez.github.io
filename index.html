@@ -174,9 +174,16 @@ html { overflow-x: hidden; }
 /* commit: hero-gradient-styles */
 .hero-gradient{
   position:absolute;
-  inset:0;                                   /* lock to hero edges */
-  background:linear-gradient(to top,#000 0%, rgba(0,0,0,.62) 42%, rgba(0,0,0,0) 78%);
-  z-index:1;                                 /* above iframe, below overlay */
+  inset:0;
+  background:linear-gradient(
+    to top,
+    rgba(0,0,0,0.65) 0%,
+    rgba(0,0,0,0.45) 15%,
+    rgba(0,0,0,0.25) 35%,
+    rgba(0,0,0,0.12) 55%,
+    rgba(0,0,0,0.0) 75%
+  );
+  z-index:1;
   pointer-events:none;
 }
 </style>
