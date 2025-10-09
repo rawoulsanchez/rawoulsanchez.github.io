@@ -132,12 +132,30 @@
 
 .hero-video iframe {
   position: absolute;
-  inset: 0;
-  width: 170vw;               /* video only is wider */
+  inset: 0;                      /* keep top fixed at 0 */
+  width: 170vw;                  /* keep wide bleed */
   height: 100%;
   left: 50%;
-  transform: translateX(-50%);/* center the wide video */
+  transform: translateX(-50%);   /* center horizontally */
   border: 0;
+
+  /* crop ONLY the bottom (adjust %) */
+  clip-path: inset(0 0 8% 0);    /* hides bottom 8% without moving the top */
+}
+
+/* Optional: slightly more crop on small phones */
+@media (max-width:600px){
+  .hero-video iframe {
+    clip-path: inset(0 0 8% 0);
+  }
+}
+
+/* Optional: slightly more lift on small phones */
+@media (max-width:600px){
+  .hero-video iframe {
+    top: -10%;
+    height: 120%;
+  }
 }
 /* Black spacer under the hero with similar vertical length as before */
 .after-hero{
