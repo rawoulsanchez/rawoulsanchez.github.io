@@ -172,21 +172,6 @@
   /* commit: no-horizontal-scroll */
 html { overflow-x: hidden; }
 /* commit: hero-gradient-styles */
-.hero-gradient{
-  position:absolute;
-  inset:0;
-  background:linear-gradient(
-    to top,
-    rgba(0,0,0,0.65) 0%,
-    rgba(0,0,0,0.50) 18%,
-    rgba(0,0,0,0.32) 36%,
-    rgba(0,0,0,0.18) 60%,
-    rgba(0,0,0,0.08) 82%,
-    rgba(0,0,0,0.00) 100%
-  );
-  z-index:1;
-  pointer-events:none;
-}
 </style>
 </head>
 <body>
@@ -216,9 +201,6 @@ html { overflow-x: hidden; }
     ></iframe>
   </div>
 
-  <!-- Bottom-to-top smooth fade over full hero -->
-  <div class="hero-gradient"></div>
-
   <!-- Overlay area locked to viewport edges -->
   <div class="hero-overlay-wrap"
        style="position:absolute;top:0;bottom:0;
@@ -231,7 +213,7 @@ html { overflow-x: hidden; }
                 max-width:720px;color:#fff;text-align:left;
                 padding:12px calc(16px + env(safe-area-inset-right)) 8px calc(16px + env(safe-area-inset-left));
                 text-shadow:0 1px 3px rgba(0,0,0,.5);
-                background:rgba(0,0,0,0.10);border-radius:12px 12px 0 0;">
+                background:transparent;border-radius:12px 12px 0 0;">
       <div style="display:inline-flex;align-items:center;justify-content:center;
                   padding:.5rem .875rem;border-radius:.75rem;
                   background:rgba(17,17,17,.85);
