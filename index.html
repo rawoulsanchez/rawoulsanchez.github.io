@@ -8,7 +8,7 @@
   /* commit: hero-overlay-inline-v1 */
   /* Design tokens */
 /* commit: cleanup-remove-unused-hero-shift */
-:root { --bg:#0f0f12; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; }
+:root { --bg:#000; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif; background:var(--bg); color:var(--fg); line-height:1.5; overflow-x:hidden; }
 
@@ -138,6 +138,15 @@
   left: 50%;
   transform: translateX(-50%);/* center the wide video */
   border: 0;
+}
+/* Black spacer under the hero with similar vertical length as before */
+.after-hero{
+  min-height: 900px;     /* adjust if you want more/less space */
+  background: #000;      /* solid black to match the site bg */
+  border: 0;
+  margin: 16px 16px 0 16px;  /* keeps the same left/right breathing room as before */
+  border-radius: 0;
+  padding: 0;
 }
 
 /* Hero gradient: bottom → top, covers full hero */
@@ -283,21 +292,7 @@ html { overflow-x: hidden; }
   <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
 </section>
     <div class="wrap">
-      <section class="hero-text" id="home">
-        <h1>Hello, Rawoul</h1>
-        <p>Clean starter. Fast to edit. Accessible. No frameworks.</p>
-        <p style="margin-top:16px;"><button class="cta" onclick="alert('It works.')">Test button</button></p>
-      </section>
-
-      <section id="work" class="card" aria-labelledby="work-h">
-        <h2 id="work-h">Work</h2>
-        <p>Add your projects here. We will structure this together.</p>
-      </section>
-
-      <section id="contact" class="card" aria-labelledby="contact-h">
-        <h2 id="contact-h">Contact</h2>
-        <p>Email link goes here.</p>
-      </section>
+      <section class="after-hero" aria-label="Placeholder"></section>
     </div>
   </main>
 
