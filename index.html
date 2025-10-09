@@ -110,6 +110,7 @@ fro mnow on<!doctype html>
     margin:0 auto;
     padding:16px;
 }
+  .wrap--flush { padding-left:0; }   /* remove the 16px left padding only where needed */
   .card {
     background:#14161c;
     border:1px solid #222;
@@ -192,9 +193,9 @@ fro mnow on<!doctype html>
   min-height: 900px;
   background: #000;
   border: 0;
-  margin: 0 16px 0 16px;                         /* remove top gap under hero */
+  margin: 0;  /* no extra left margin */
   border-radius: 0;
-  padding: 0 0 0 calc(16px + env(safe-area-inset-left)); /* match overlay’s left inset */
+  padding: 0 0 0 calc(16px + env(safe-area-inset-left)); /* same inset as synopsis */
 }
 
 /* Hero gradient: bottom → top, covers full hero */
@@ -389,7 +390,7 @@ html { overflow-x: hidden; }
 
   <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
 </section>
-<div class="wrap">
+<div class="wrap wrap--flush">
   <section class="after-hero" aria-label="Actions">
     <div class="hero-cta">
       <!-- Play Now -->
