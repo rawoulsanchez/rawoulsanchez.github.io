@@ -142,7 +142,13 @@
   /* crop ONLY the bottom (adjust %) */
   clip-path: inset(0 0 8% 0);    /* hides bottom 8% without moving the top */
 }
-
+/* Optional: slightly more lift on small phones */
+@media (max-width:600px){
+  .hero-video iframe {
+    top: -10%;
+    height: 120%;
+  }
+}
 /* Optional: slightly more crop on small phones */
 @media (max-width:600px){
   .hero-video iframe {
