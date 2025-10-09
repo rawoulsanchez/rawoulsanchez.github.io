@@ -209,7 +209,8 @@ html { overflow-x: hidden; }
 <div class="hero-overlay-inline"
      style="position:absolute;left:50%;transform:translateX(-50%);
             width:min(92vw,720px);bottom:16px;z-index:2;color:#fff;
-            padding:0 16px;pointer-events:auto;">
+            padding:0 16px;pointer-events:auto;display:flex;flex-direction:column;gap:.5rem;
+            text-shadow:0 2px 12px rgba(0,0,0,.7),0 1px 0 rgba(0,0,0,.6);">
 
   <!-- Title chip -->
   <div style="display:inline-flex;align-items:center;justify-content:center;
@@ -231,10 +232,10 @@ html { overflow-x: hidden; }
   </p>
 
   <!-- Synopsis -->
-  <p style="margin:.5rem 0 .85rem;color:#e5e7eb;
+<p style="margin:.35rem 0 0;color:#e5e7eb;
             font-size:clamp(.95rem,2.2vw,1.15rem);
-            line-height:1.55;display:-webkit-box;-webkit-line-clamp:4;
-            -webkit-box-orient:vertical;overflow:hidden;">
+            line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;
+            -webkit-box-orient:vertical;overflow:hidden;margin-top:auto;">
     As a rogue AI network threatens global collapse, a disgraced former agent is called
     back into the field for one last, impossible mission to save humanity.
   </p>
