@@ -279,11 +279,11 @@ html { overflow-x: hidden; }
 /* CTA row under the hero video */
 .hero-cta{
   display:grid;
-  grid-template-columns: 1fr 1fr; /* always two columns */
+  grid-template-columns: 1fr 1fr;   /* always two columns */
   gap:8px;
-  width:100%;                    /* JS sets an exact px width to match “2024” line */
-  max-width:none;                /* allow JS width */
-  margin:.25rem 0 0 0;           /* moved closer to synopsis */
+  width:100%;
+  max-width:340px;                   /* keep pills on one line */
+  margin:.25rem 0 0 0;               /* half the distance to synopsis */
 }
 
 /* Smaller buttons */
