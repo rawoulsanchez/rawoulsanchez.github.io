@@ -173,12 +173,9 @@
 html { overflow-x: hidden; }
 /* commit: hero-gradient-styles */
 .hero-gradient{
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;          /* anchor at the bottom */
-  top: 0;             /* cover full height */
-  background: linear-gradient(
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
     to top,
     rgba(0,0,0,0.65) 0%,
     rgba(0,0,0,0.50) 18%,
@@ -187,8 +184,8 @@ html { overflow-x: hidden; }
     rgba(0,0,0,0.08) 82%,
     rgba(0,0,0,0.00) 100%
   );
-  z-index: 1;         /* above the video, below the overlay text */
-  pointer-events: none;
+  z-index:1;
+  pointer-events:none;
 }
 </style>
 </head>
@@ -208,59 +205,63 @@ html { overflow-x: hidden; }
     </div>
   </header>
   <main>
-    <section class="hero" id="hero">
-      <div class="hero-video">
-        <iframe
-          id="hero-yt"
-          title="Hero trailer"
-          src="https://www.youtube.com/embed/VBdaOkpLe_o?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o"
-          allow="autoplay; encrypted-media"
-          allowfullscreen
-        ></iframe>
-      </div>
-<!-- commit: hero-gradient-add -->
-<div class="hero-gradient"></div>
-<!-- commit: overlay-bottom-lock-wrapper-v3 -->
-<div class="hero-overlay-wrap" style="position:absolute;top:0;bottom:0;left:calc((100% - 100vw)/2);right:calc((100% - 100vw)/2);z-index:2;display:flex;flex-direction:column;justify-content:flex-end;pointer-events:none;overflow:hidden;">
-<div class="hero-overlay-inline"
-style="pointer-events:auto;position:absolute;bottom:0;left:0;
-              max-width:720px;color:#fff;text-align:left;
-              padding:12px calc(16px + env(safe-area-inset-right)) 8px calc(16px + env(safe-area-inset-left));
-              text-shadow:0 1px 3px rgba(0,0,0,.5);
-              background:rgba(0,0,0,0.16);border-radius:12px 12px 0 0;">
-  
-    <!-- Title chip -->
-    <div style="display:inline-flex;align-items:center;justify-content:center;
-                padding:.5rem .875rem;border-radius:.75rem;
-                background:rgba(17,17,17,.85);
-                box-shadow:0 6px 20px rgba(0,0,0,.45),
-                           inset 0 0 0 2px rgba(229,9,20,.65);
-                margin-bottom:.5rem; display:table;">
-      <span style="font-weight:800;letter-spacing:.08em;
-                   color:#e50914;font-size:clamp(1rem,2.6vw,1.35rem);">
-        TITAN PROJECT
-      </span>
-    </div>
-
-    <p style="margin:0 0 .35rem;color:#ff4d57;
-              font-size:clamp(.78rem,1.6vw,.95rem);
-              font-weight:700;letter-spacing:.08em;text-transform:uppercase;">
-      New Release | Thriller, Sci-Fi | 2024
-    </p>
-
-<p class="hero-synopsis" style="margin:0 0 -0.35em;color:#e5e7eb;
-              font-size:clamp(.95rem,2.2vw,1.15rem);line-height:1.55;
-              display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;
-              overflow:hidden;">
-      As a rogue AI network threatens global collapse, a disgraced former agent is called
-      back into the field for one last, impossible mission to save humanity.
-    </p>
-
-    <!-- CTAs -->
+<section class="hero" id="hero">
+  <div class="hero-video">
+    <iframe
+      id="hero-yt"
+      title="Hero trailer"
+      src="https://www.youtube.com/embed/VBdaOkpLe_o?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o"
+      allow="autoplay; encrypted-media"
+      allowfullscreen
+    ></iframe>
   </div>
-</div>
-<button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
-    </section>
+
+  <!-- Bottom-to-top smooth fade over full hero -->
+  <div class="hero-gradient"></div>
+
+  <!-- Overlay area locked to viewport edges -->
+  <div class="hero-overlay-wrap"
+       style="position:absolute;top:0;bottom:0;
+              left:calc((100% - 100vw)/2);
+              right:calc((100% - 100vw)/2);
+              z-index:2;display:flex;flex-direction:column;
+              justify-content:flex-end;pointer-events:none;overflow:hidden;">
+    <div class="hero-overlay-inline"
+         style="pointer-events:auto;position:absolute;bottom:0;left:0;
+                max-width:720px;color:#fff;text-align:left;
+                padding:12px calc(16px + env(safe-area-inset-right)) 8px calc(16px + env(safe-area-inset-left));
+                text-shadow:0 1px 3px rgba(0,0,0,.5);
+                background:rgba(0,0,0,0.10);border-radius:12px 12px 0 0;">
+      <div style="display:inline-flex;align-items:center;justify-content:center;
+                  padding:.5rem .875rem;border-radius:.75rem;
+                  background:rgba(17,17,17,.85);
+                  box-shadow:0 6px 20px rgba(0,0,0,.45),
+                             inset 0 0 0 2px rgba(229,9,20,.65);
+                  margin-bottom:.5rem;display:table;">
+        <span style="font-weight:800;letter-spacing:.08em;
+                     color:#e50914;font-size:clamp(1rem,2.6vw,1.35rem);">
+          TITAN PROJECT
+        </span>
+      </div>
+
+      <p style="margin:0 0 .35rem;color:#ff4d57;
+                font-size:clamp(.78rem,1.6vw,.95rem);
+                font-weight:700;letter-spacing:.08em;text-transform:uppercase;">
+        New Release | Thriller, Sci-Fi | 2024
+      </p>
+
+      <p class="hero-synopsis" style="margin:0 0 -0.35em;color:#e5e7eb;
+                font-size:clamp(.95rem,2.2vw,1.15rem);line-height:1.55;
+                display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;
+                overflow:hidden;">
+        As a rogue AI network threatens global collapse, a disgraced former agent is called
+        back into the field for one last, impossible mission to save humanity.
+      </p>
+    </div>
+  </div>
+
+  <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
+</section>
     <div class="wrap">
       <section class="hero-text" id="home">
         <h1>Hello, Rawoul</h1>
