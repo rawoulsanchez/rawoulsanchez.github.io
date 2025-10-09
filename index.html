@@ -279,22 +279,22 @@ html { overflow-x: hidden; }
 /* CTA row under the hero video */
 .hero-cta{
   display:grid;
-  grid-template-columns: 1fr 1fr;   /* always two columns */
+  grid-template-columns: 1fr 1fr; /* always two columns */
   gap:8px;
-  width:100%;
-  max-width:340px;                   /* keep pills on one line */
-  margin:.5rem 0 0 0;                /* SAME gap as chip→New Release (.5rem) */
+  width:100%;                    /* JS sets an exact px width to match “2024” line */
+  max-width:none;                /* allow JS width */
+  margin:.25rem 0 0 0;           /* moved closer to synopsis */
 }
 
 /* Smaller buttons */
 .btn{
   appearance:none; border:0; cursor:pointer;
   display:inline-flex; align-items:center; justify-content:center;
-  gap:.35rem; padding:.5rem .8rem; border-radius:999px;
-  font:700 0.85rem/1 var(--font-ui);
+  gap:.30rem; padding:.42rem .70rem; border-radius:999px;
+  font:700 .80rem/1 var(--font-ui);
   transition:transform .12s ease, opacity .12s ease, box-shadow .12s ease, background .12s ease;
   width:100%;
-  box-shadow: 0 8px 18px rgba(0,0,0,.18);
+  box-shadow: 0 6px 14px rgba(0,0,0,.18);
 }
 .btn:focus{ outline:2px solid #ffffff33; outline-offset:2px; }
 .btn:active{ transform: translateY(1px); }
@@ -304,12 +304,12 @@ html { overflow-x: hidden; }
 
 .btn--ghost{
   background: rgba(255,255,255,0.10); color:#fff;
-  box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.28);
+  box-shadow: inset 0 0 0 1.1px rgba(255,255,255,0.28);
 }
-.btn--ghost:hover{ box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.5); }
+.btn--ghost:hover{ box-shadow: inset 0 0 0 1.1px rgba(255,255,255,0.5); }
 
 /* Smaller icons */
-.btn svg{ width:18px; height:18px; display:block; }
+.btn svg{ width:16px; height:16px; display:block; }
 .btn--solid:hover{ background:#e6e6e6; }
 
 .btn--ghost{
@@ -372,7 +372,7 @@ html { overflow-x: hidden; }
   <span class="title-chip-text">Sanchez Ninjah</span>
 </div>
 
-<p style="margin:0 0 .14rem;color:var(--brand);
+<p id="meta-line" style="margin:0 0 .14rem;color:var(--brand);
                 font-size:clamp(.78rem,1.6vw,.95rem);
                 font-weight:700;letter-spacing:.08em;text-transform:uppercase;">
   New Release | Thriller, Sci-Fi | 2024
@@ -429,6 +429,24 @@ html { overflow-x: hidden; }
     if(isMuted){ ytPlayer.unMute(); isMuted=false; document.querySelector('.mute-btn').textContent='🔊'; document.querySelector('.mute-btn').setAttribute('aria-pressed','false'); }
     else{ ytPlayer.mute(); isMuted=true; document.querySelector('.mute-btn').textContent='🔇'; document.querySelector('.mute-btn').setAttribute('aria-pressed','true'); }
   }
+</script>
+<script>
+  // Make CTA width match the rendered width of the “New Release … 2024” line
+  (function() {
+    function alignCta() {
+      const meta = document.getElementById('meta-line');
+      const cta  = document.querySelector('.hero-cta');
+      if (!meta || !cta) return;
+      const w = Math.round(meta.getBoundingClientRect().width);
+      // Clamp to sensible bounds so it stays on one line
+      const clamped = Math.max(220, Math.min(w, 420));
+      cta.style.width = clamped + 'px';
+    }
+    // Run on load and on resize/orientation changes
+    window.addEventListener('load', alignCta);
+    window.addEventListener('resize', alignCta);
+    window.addEventListener('orientationchange', alignCta);
+  })();
 </script>
 </body>
 </html>
