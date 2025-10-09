@@ -171,7 +171,7 @@ html { overflow-x: hidden; }
 .hero-gradient{
   position:absolute;
   inset:0;                                   /* lock to hero edges */
-  background:linear-gradient(to top,#000 0%, rgba(0,0,0,.85) 45%, rgba(0,0,0,0) 75%);
+  background:linear-gradient(to top,#000 0%, rgba(0,0,0,.62) 42%, rgba(0,0,0,0) 78%);
   z-index:1;                                 /* above iframe, below overlay */
   pointer-events:none;
 }
@@ -205,14 +205,15 @@ html { overflow-x: hidden; }
       </div>
 <!-- commit: hero-gradient-add -->
 <div class="hero-gradient"></div>
-<!-- commit: overlay-bottom-lock-wrapper-v2 -->
+<!-- commit: overlay-bottom-lock-wrapper-v3 -->
 <div class="hero-overlay-wrap" style="position:absolute;inset:0;z-index:2;display:flex;pointer-events:none;">
   <div class="hero-overlay-inline"
        style="margin-top:auto;margin-bottom:16px;pointer-events:auto;
               position:relative;left:50%;transform:translateX(-50%);
-              width:min(92vw,720px);color:#fff;padding:0 16px;
+              width:min(92vw,720px);color:#fff;padding:8px 16px 10px;
               display:flex;flex-direction:column;gap:.5rem;
-              text-shadow:0 2px 12px rgba(0,0,0,.7),0 1px 0 rgba(0,0,0,.6);">
+              text-shadow:0 1px 3px rgba(0,0,0,.5);
+              background:rgba(0,0,0,.16);border-radius:12px;">
 
     <!-- Title chip -->
     <div style="display:inline-flex;align-items:center;justify-content:center;
@@ -226,14 +227,14 @@ html { overflow-x: hidden; }
       </span>
     </div>
 
-    <!-- Meta line -->
+    <!-- Meta -->
     <p style="margin:.35rem 0 0;color:#ff4d57;
               font-size:clamp(.78rem,1.6vw,.95rem);
               font-weight:700;letter-spacing:.08em;text-transform:uppercase;">
       New Release | Thriller, Sci-Fi | 2024
     </p>
 
-    <!-- Synopsis (3 lines), bottom-locked via wrapper + margin-top:auto on this block’s sibling order -->
+    <!-- Synopsis: 3 lines, bottom-locked via wrapper -->
     <p class="hero-synopsis" style="margin:.35rem 0 0;color:#e5e7eb;
               font-size:clamp(.95rem,2.2vw,1.15rem);line-height:1.55;
               display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;
