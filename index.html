@@ -102,9 +102,12 @@ fro mnow on<!doctype html>
 }
 
   /* Layout helpers used by the page */
-  main {
-    padding-top: calc(var(--nav-height) + env(safe-area-inset-top));
-  }
+/* Keep hero flush under fixed nav */
+main {
+  padding-top: var(--nav-height);
+  /* If you still see a tiny line from the nav’s inset shadow, use this instead:
+     padding-top: calc(var(--nav-height) - 1px); */
+}
 .wrap {
   max-width:960px;
   margin:0 auto;
