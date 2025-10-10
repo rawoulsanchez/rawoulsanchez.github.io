@@ -106,7 +106,8 @@ border-bottom:0;
 /* Layout helpers used by the page */
 /* Keep hero flush under fixed nav (hide the 1px inset line) */
 main{
-  padding-top: calc(var(--nav-height) + env(safe-area-inset-top));
+  /* 1px upward overlap to kill rounding sliver on DPR 2/3 */
+  padding-top: calc(var(--nav-height) + env(safe-area-inset-top) - 1px);
 }
 .wrap {
   max-width:960px;
@@ -157,8 +158,8 @@ main{
   left:50%;
   transform: translateX(-50%);
   z-index:1;
-  margin-top:-1px;  /* overlap by 1px to kill sub-pixel seam */
-  border-top:0;     /* no hairline that looks like a gap */
+  margin-top:0;   /* single source of truth = main’s -1px */
+  border-top:0;
 }
 
 .hero-video {
