@@ -307,9 +307,11 @@ html { overflow-x: hidden; }
 
 /* Smaller icons */
 .btn svg{ width:16px; height:16px; display:block; }
-/* Scoped gap highlighter: only the hero shows pink if uncovered */
-body.debug-gap { background:#000 !important; }          /* keep page black */
-body.debug-gap .hero { background:#ff00aa !important; } /* only hero background is pink */
+
+/* ALWAYS-ON GAP CHECK BACKGROUND */
+body { background:#ff00aa !important; }        /* page background stays pink */
+.hero { background:#ff00aa !important; }       /* hero box pink to reveal any uncovered area */
+.after-hero { background:#000 !important; }    /* keep content section black for contrast */
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
