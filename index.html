@@ -288,7 +288,7 @@ html { overflow-x: hidden; }
   gap:8px;
   width:100%;
   max-width:340px;                   /* keep pills on one line */
-  margin:.375rem 0 0 0;              /* moved down a little */
+  margin: calc(8px + .125rem) 0 0 0; /* FIXED gap below synopsis */
 }
 
 /* Smaller buttons */
@@ -370,7 +370,7 @@ html { overflow-x: hidden; }
     <div class="hero-overlay-inline"
          style="pointer-events:auto;position:absolute;bottom:0;left:0;
                 max-width:720px;color:#fff;text-align:left;
-                padding:12px calc(16px + env(safe-area-inset-right)) 8px calc(16px + env(safe-area-inset-left));
+                padding:12px calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left));
                 text-shadow:0 1px 3px rgba(0,0,0,.5);
                 background:transparent;border-radius:12px 12px 0 0;">
 <div class="title-chip" role="heading" aria-level="1">
@@ -383,7 +383,7 @@ html { overflow-x: hidden; }
   New Release | Thriller, Sci-Fi | 2024
 </p>
 
-      <p class="hero-synopsis" style="margin:0 0 -0.35em;color:#e5e7eb;
+      <p class="hero-synopsis" style="margin:0;color:#e5e7eb;
                 font-size:clamp(.95rem,2.2vw,1.15rem);line-height:1.55;
                 display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;
                 overflow:hidden;">
