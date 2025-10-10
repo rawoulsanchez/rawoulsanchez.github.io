@@ -111,7 +111,7 @@ fro mnow on<!doctype html>
   padding:16px;
 }
 /* flush wrapper under hero: tiny top pad, keep right/bottom, no left */
-.wrap--flush { padding:4px 16px 16px 0; }
+.wrap--flush { padding:0 16px 16px 0; }
 .card {
   background:#14161c;
   border:1px solid #222;
@@ -197,6 +197,7 @@ fro mnow on<!doctype html>
   margin: 0;  /* no extra left margin */
   border-radius: 0;
   padding: 0 0 0 calc(16px + env(safe-area-inset-left)); /* same inset as synopsis */
+  margin-top: -3px; /* pull pills closer to synopsis */
 }
 
 /* Hero gradient: bottom → top, covers full hero */
