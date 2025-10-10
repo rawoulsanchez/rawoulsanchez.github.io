@@ -144,9 +144,8 @@ main{
   }
   h1 { font-size:clamp(28px,4vw,40px); margin:0 0 8px; }
   h2 { font-size:clamp(18px,4.5vw,24px); margin:12px 0 8px; }
-  p { margin:8px 0; color:var(--muted); }
+  p  { margin:8px 0; color:var(--muted); }
 
-/* commit: hero-width-200vw-to-170vw */
 /* HERO */
 .hero{
   position:relative;
@@ -158,54 +157,38 @@ main{
   left:50%;
   transform: translateX(-50%);
   z-index:1;
-  margin-top:0;   /* single source of truth = main’s -1px */
+  margin-top:-2px;          /* pull hero up to touch nav */
   border-top:0;
 }
 
-.hero-video {
-    position:absolute;
-    inset:0;
+.hero-video { position:absolute; inset:0; }
+
+.hero-video iframe{
+  position:absolute;
+  inset:0;                  /* top stays 0 */
+  width:170vw;              /* wide bleed */
+  height:100%;
+  left:50%;
+  transform:translateX(-50%);
+  border:0;
+  clip-path: inset(0 0 8% 0); /* crop bottom only */
 }
 
-.hero-video iframe {
-  position: absolute;
-  inset: 0;                      /* keep top fixed at 0 */
-  width: 170vw;                  /* keep wide bleed */
-  height: 100%;
-  left: 50%;
-  transform: translateX(-50%);   /* center horizontally */
-  border: 0;
-
-  /* crop ONLY the bottom (adjust %) */
-  clip-path: inset(0 0 8% 0);    /* hides bottom 8% without moving the top */
-}
-/* Optional: slightly more lift on small phones */
-@media (max-width:600px){
-  .hero-video iframe {
-    top: -10%;
-    height: 120%;
-  }
-}
-/* Optional: slightly more crop on small phones */
-@media (max-width:600px){
-  .hero-video iframe {
-    clip-path: inset(0 0 8% 0);
-  }
-}
-/* Guard: overfill by 1px to defeat device-pixel rounding */
+/* Anti-seam guard for device-pixel rounding */
 .hero-video iframe{
   top:-0.5px;
   height:calc(100% + 1px);
 }
-/* Black spacer under the hero with similar vertical length as before */
+
+/* Black spacer under the hero */
 .after-hero{
-  min-height: 900px;
-  background: #000;
-  border: 0;
-  margin: 0;  /* no extra left margin */
-  border-radius: 0;
-  padding: 0 0 0 calc(16px + env(safe-area-inset-left)); /* same inset as synopsis */
-  margin-top: -0px; /* pull pills closer to synopsis */
+  min-height:900px;
+  background:#000;
+  border:0;
+  margin:0;
+  border-radius:0;
+  padding:0 0 0 calc(16px + env(safe-area-inset-left));
+  margin-top:0; /* pull pills closer to synopsis */
 }
 
 /* Hero gradient: bottom → top, covers full hero */
