@@ -24,9 +24,9 @@ fro mnow on<!doctype html>
   right:0;
   z-index:100;
   background:#000;
-  height:calc(var(--nav-height) + env(safe-area-inset-top)); /* total bar height */
-  box-shadow:none;               /* stop anti-aliased sliver */
-  border-bottom:1px solid #111;  /* true 1px hairline */
+  height:calc(var(--nav-height) + env(safe-area-inset-top));
+  box-shadow:none;
+border-bottom:0;
 }
 
 /* Content sits below the notch area */
@@ -154,10 +154,11 @@ main{
   overflow:hidden;
   background:#000;
   width:170vw;                 /* midpoint bleed */
-  left:50%;                    /* center wider box */
-  transform: translateX(-50%); /* center horizontally only */
+  left:50%;
+  transform: translateX(-50%);
   z-index:1;
-  margin-top:0;                /* sit flush under nav */
+  margin-top:0;
+  border-top:1px solid #111;   /* hairline lives on hero, not nav */
 }
 
 .hero-video {
