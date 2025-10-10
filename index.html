@@ -17,26 +17,27 @@ fro mnow on<!doctype html>
   body { margin:0; font-family:var(--font-ui); background:var(--bg); color:var(--fg); line-height:1.5; overflow-x:hidden; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 
   /* Fixed black nav */
-  .nav-bar {
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    z-index:100;
-    background:#000;
-height: var(--nav-height);
-padding-top: env(safe-area-inset-top);
-    box-shadow: inset 0 -1px 0 #111;
-  }
-  .nav-inner {
-    max-width:960px;
-    margin:0 auto;
-    height:var(--nav-height);
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 16px;
-  }
+.nav-bar {
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:100;
+  background:#000;
+  height:calc(var(--nav-height) + env(safe-area-inset-top)); /* total bar height */
+  box-shadow: inset 0 -1px 0 #111; /* keep the hairline, we'll offset it below */
+}
+
+/* Content sits below the notch area */
+.nav-inner {
+  max-width:960px;
+  margin:0 auto;
+  height:var(--nav-height);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:env(safe-area-inset-top) 16px 0 16px; /* <-- moved from .nav-bar */
+}
 .brand {
     color:var(--brand);
     font-weight:800;
@@ -102,9 +103,9 @@ padding-top: env(safe-area-inset-top);
 }
 
 /* Layout helpers used by the page */
-/* Keep hero flush under fixed nav */
+/* Keep hero flush under fixed nav (compensate the 1px inset line) */
 main {
-  padding-top: calc(var(--nav-height) + env(safe-area-inset-top));
+  padding-top:calc(var(--nav-height) + env(safe-area-inset-top) - 1px);
 }
 .wrap {
   max-width:960px;
