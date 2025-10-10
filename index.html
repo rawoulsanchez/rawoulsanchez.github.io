@@ -24,8 +24,8 @@ fro mnow on<!doctype html>
     right:0;
     z-index:100;
     background:#000;
-    height:calc(var(--nav-height) + env(safe-area-inset-top));
-    padding-top:env(safe-area-inset-top);
+height: var(--nav-height);
+padding-top: env(safe-area-inset-top);
     box-shadow: inset 0 -1px 0 #111;
   }
   .nav-inner {
@@ -101,12 +101,10 @@ fro mnow on<!doctype html>
   .title-chip-text{ font-size:1.35rem; } /* matches clamp’s max */
 }
 
-  /* Layout helpers used by the page */
+/* Layout helpers used by the page */
 /* Keep hero flush under fixed nav */
 main {
-  padding-top: var(--nav-height);
-  /* If you still see a tiny line from the nav’s inset shadow, use this instead:
-     padding-top: calc(var(--nav-height) - 1px); */
+  padding-top: calc(var(--nav-height) + env(safe-area-inset-top));
 }
 .wrap {
   max-width:960px;
