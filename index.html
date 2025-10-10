@@ -153,12 +153,12 @@ main{
   aspect-ratio:16 / 9;
   overflow:hidden;
   background:#000;
-  width:170vw;                 /* midpoint bleed */
+  width:170vw;
   left:50%;
   transform: translateX(-50%);
   z-index:1;
-  margin-top:0;
-  border-top:1px solid #111;   /* hairline lives on hero, not nav */
+  margin-top:-1px;  /* overlap by 1px to kill sub-pixel seam */
+  border-top:0;     /* no hairline that looks like a gap */
 }
 
 .hero-video {
@@ -325,8 +325,6 @@ html { overflow-x: hidden; }
 
 /* Smaller icons */
 .btn svg{ width:16px; height:16px; display:block; }
-  /* DEBUG: temporarily hide CTA area to test vertical offset */
-.after-hero { display:none !important; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
