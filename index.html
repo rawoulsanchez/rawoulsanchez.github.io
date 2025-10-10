@@ -313,6 +313,9 @@ html { overflow-x: hidden; }
 
 /* Smaller icons */
 .btn svg{ width:16px; height:16px; display:block; }
+  /* DEBUG: gap highlighter (pink shows only if a gap exists) */
+body.debug-gap { background:#ff00aa !important; }  /* page background */
+.debug-gap .hero { background:transparent !important; } /* keep hero transparent so gaps reveal pink */
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -445,6 +448,14 @@ html { overflow-x: hidden; }
     window.addEventListener('resize', alignCta);
     window.addEventListener('orientationchange', alignCta);
   })();
+</script>
+<script>
+  // Press "g" to toggle pink gap debug
+  document.addEventListener('keydown', e => {
+    if (e.key.toLowerCase() === 'g') document.body.classList.toggle('debug-gap');
+  });
+  // start enabled (optional)
+  document.body.classList.add('debug-gap');
 </script>
 </body>
 </html>
