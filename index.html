@@ -192,7 +192,11 @@ main{
     clip-path: inset(0 0 8% 0);
   }
 }
-
+/* Guard: overfill by 1px to defeat device-pixel rounding */
+.hero-video iframe{
+  top:-0.5px;
+  height:calc(100% + 1px);
+}
 /* Black spacer under the hero with similar vertical length as before */
 .after-hero{
   min-height: 900px;
