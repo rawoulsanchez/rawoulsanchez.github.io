@@ -151,33 +151,27 @@ main{
   position:relative;
   height:auto;
   aspect-ratio:16 / 9;
-  overflow:hidden;
+  overflow:hidden;             /* crops the overfill from the iframe */
   background:#000;
   width:170vw;
   left:50%;
   transform: translateX(-50%);
   z-index:1;
-  margin-top:-2px;          /* pull hero up to touch nav */
+  margin-top:-2px;             /* touch the nav */
   border-top:0;
 }
 
 .hero-video { position:absolute; inset:0; }
 
+/* Cover + crop bottom WITHOUT clip-path */
 .hero-video iframe{
   position:absolute;
-  inset:0;                  /* top stays 0 */
-  width:170vw;              /* wide bleed */
-  height:100%;
+  inset:0;
+  width:170vw;
+  height:112%;                 /* overfill vertically */
   left:50%;
-  transform:translateX(-50%);
+  transform:translate(-50%, -6%); /* shift up to crop bottom */
   border:0;
-  clip-path: inset(0 0 8% 0); /* crop bottom only */
-}
-
-/* Anti-seam guard for device-pixel rounding */
-.hero-video iframe{
-  top:-0.5px;
-  height:calc(100% + 1px);
 }
 
 /* Black spacer under the hero */
@@ -313,9 +307,9 @@ html { overflow-x: hidden; }
 
 /* Smaller icons */
 .btn svg{ width:16px; height:16px; display:block; }
-  /* DEBUG: gap highlighter (pink shows only if a gap exists) */
-body.debug-gap { background:#ff00aa !important; }  /* page background */
-.debug-gap .hero { background:transparent !important; } /* keep hero transparent so gaps reveal pink */
+/* Scoped gap highlighter: only the hero shows pink if uncovered */
+body.debug-gap { background:#000 !important; }          /* keep page black */
+body.debug-gap .hero { background:#ff00aa !important; } /* only hero background is pink */
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
