@@ -1,317 +1,80 @@
-fro mnow on<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Rawoul — Starter</title>
 <style>
-  /* commit: hero-overlay-inline-v1 */
   /* Design tokens */
-/* commit: cleanup-remove-unused-hero-shift */
-:root { --bg:#000; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; --brand:#e31b23; }
   :root{
-  --font-ui: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-  --font-display: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-}
-  * { box-sizing:border-box; }
-  body { margin:0; font-family:var(--font-ui); background:var(--bg); color:var(--fg); line-height:1.5; overflow-x:hidden; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-
-  /* Fixed black nav */
-.nav-bar{
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  z-index:100;
-  background:#000;
-  height:calc(var(--nav-height) + env(safe-area-inset-top));
-  box-shadow:none;
-border-bottom:0;
-}
-
-/* Content sits below the notch area */
-.nav-inner {
-  max-width:960px;
-  margin:0 auto;
-  height:var(--nav-height);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:env(safe-area-inset-top) 16px 0 16px; /* <-- moved from .nav-bar */
-}
-.brand {
-    color:var(--brand);
-    font-weight:800;
-    font-size:24px;
-    letter-spacing:.2px;
-    text-decoration:none;
-}
-  .nav-actions {
-    display:flex;
-    gap:12px;
-    align-items:center;
+    --brand:#e31b23;
+    --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px;
+    --bg-pink:#ff69b4; /* bottom layer for gap detection */
   }
-  .icon-btn {
-    position:relative;
-    display:inline-grid;
-    place-items:center;
-    width:36px;
-    height:36px;
-    border-radius:999px;
-    background:#121212;
-    border:1px solid #222;
-    cursor:pointer;
-    color:#eaeaf0;
+  :root{
+    --font-ui: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+    --font-display: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
   }
-  .icon-btn:hover { background:#161616; }
-  .icon-btn svg { fill:currentColor; }
-.icon-btn .dot {
-    position:absolute;
-    top:4px;
-    right:4px;
-    width:9px;
-    height:9px;
-    background:var(--brand);
-    border-radius:999px;
-    box-shadow:0 0 0 2px #000;
-}
-  .title-chip{
-  display:inline-flex; align-items:center; justify-content:center;
-  padding:.5rem .875rem;
-  background:rgba(17,17,17,.85);
-  border-radius:.75rem;
-  /* keep same visual weight and red border using token */
-  box-shadow:
-    0 6px 20px rgba(0,0,0,.45),
-    inset 0 0 0 2px color-mix(in srgb, var(--brand) 65%, transparent);
-  margin-bottom:.5rem;         /* preserves your current spacing */
-}
-.title-chip-text{
-  font-family: var(--font-display);
-  font-weight:800;
-  letter-spacing:.08em;
-  color:#fff;
-  font-size:clamp(1rem,2.6vw,1.35rem);
-}
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{ margin:0; font-family:var(--font-ui); background:var(--bg-pink); color:var(--fg); line-height:1.5; overflow-x:hidden; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 
-/* Optional responsive tweak, mirrors your sample without Tailwind */
-@media (max-width:768px){
-  .title-chip{ padding:.4rem .75rem; }
-  .title-chip-text{ letter-spacing:.09em; }
-}
-@media (min-width:768px){
-  .title-chip-text{ font-size:1.35rem; } /* matches clamp’s max */
-}
+  /* Fixed top nav must be black */
+  .nav-bar{ position:fixed; top:0; left:0; right:0; z-index:100; background:#000; height:calc(var(--nav-height) + env(safe-area-inset-top)); border-bottom:0; }
+  .nav-inner{ max-width:960px; margin:0 auto; height:var(--nav-height); display:flex; align-items:center; justify-content:space-between; padding:env(safe-area-inset-top) 16px 0 16px; }
+  .brand{ color:var(--brand); font-weight:800; font-size:24px; letter-spacing:.2px; text-decoration:none; }
+  .nav-actions{ display:flex; gap:12px; align-items:center; }
+  .icon-btn{ position:relative; display:inline-grid; place-items:center; width:36px; height:36px; border-radius:999px; background:#121212; border:1px solid #222; cursor:pointer; color:#eaeaf0; }
+  .icon-btn:hover{ background:#161616; }
+  .icon-btn svg{ fill:currentColor; }
+  .icon-btn .dot{ position:absolute; top:4px; right:4px; width:9px; height:9px; background:var(--brand); border-radius:999px; box-shadow:0 0 0 2px #000; }
 
-/* Layout helpers used by the page */
-/* Keep hero flush under fixed nav (hide the 1px inset line) */
-main{
-  /* 1px upward overlap to kill rounding sliver on DPR 2/3 */
-  padding-top: calc(var(--nav-height) + env(safe-area-inset-top) - 1px);
-}
-.wrap {
-  max-width:960px;
-  margin:0 auto;
-  padding:16px;
-}
-/* flush wrapper under hero: tiny top pad, keep right/bottom, no left */
-.wrap--flush { padding:0 16px 16px 0; }
-.card {
-  background:#14161c;
-  border:1px solid #222;
-  border-radius:12px;
-  padding:16px;
-  margin:16px;
-}
-  footer {
-    color:var(--muted);
-    text-align:center;
-    padding:24px;
-    border-top:1px solid #222;
+  main{ padding-top: calc(var(--nav-height) + env(safe-area-inset-top) - 1px); }
+  .wrap{ max-width:960px; margin:0 auto; padding:16px; }
+  .card{ background:#14161c; border:1px solid #222; border-radius:12px; padding:16px; margin:16px; }
+  footer{ color:var(--muted); text-align:center; padding:24px; border-top:1px solid #222; background:#000; }
+  h1{ font-size:clamp(28px,4vw,40px); margin:0 0 8px; }
+  h2{ font-size:clamp(18px,4.5vw,24px); margin:12px 0 8px; }
+  p{ margin:8px 0; color:#9aa0a6; }
+
+  /* HERO must be black to expose any gaps as pink */
+  .hero{ position:relative; height:auto; aspect-ratio:16 / 9; overflow:hidden; background:#000; width:170vw; left:50%; transform: translateX(-50%); z-index:1; margin-top:-2px; border-top:0; 
+    /* PATCH: 1px overlap to kill sub-pixel seam */
+    margin-bottom:-1px;
   }
-  button.cta {
-    background:var(--accent);
-    color:#0b1020;
-    border:0;
-    padding:10px 14px;
-    border-radius:10px;
-    font-weight:600;
-    cursor:pointer;
-  }
-  button.cta:focus {
-    outline:2px solid #fff4;
-    outline-offset:2px;
-  }
-  h1 { font-size:clamp(28px,4vw,40px); margin:0 0 8px; }
-  h2 { font-size:clamp(18px,4.5vw,24px); margin:12px 0 8px; }
-  p  { margin:8px 0; color:var(--muted); }
+  .hero-video{ position:absolute; inset:0; }
+  .hero-video iframe{ position:absolute; inset:0; width:170vw; height:112%; left:50%; transform:translate(-50%, -6%); border:0; }
 
-/* HERO */
-.hero{
-  position:relative;
-  height:auto;
-  aspect-ratio:16 / 9;
-  overflow:hidden;             /* crops the overfill from the iframe */
-  background:#000;
-  width:170vw;
-  left:50%;
-  transform: translateX(-50%);
-  z-index:1;
-  margin-top:-2px;             /* touch the nav */
-  border-top:0;
-}
+  /* Section below hero stays black (pink shows only where a gap exists) */
+  .after-hero{ min-height:900px; background:#000; border:0; margin:0; border-radius:0; padding:0; margin-top:0; }
+  .content-pad{ max-width:960px; margin:0 auto; padding: 0 calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left)); }
 
-.hero-video { position:absolute; inset:0; }
+  .hero-gradient{ position:absolute; inset:0; z-index:1; pointer-events:none; transform:translateZ(0); backface-visibility:hidden; background:linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.76) 10%, rgba(0,0,0,0.60) 22%, rgba(0,0,0,0.42) 36%, rgba(0,0,0,0.26) 52%, rgba(0,0,0,0.14) 68%, rgba(0,0,0,0.00) 100%); }
+  @media (max-width:600px){ .hero-gradient{ background:linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.80) 12%, rgba(0,0,0,0.64) 26%, rgba(0,0,0,0.46) 40%, rgba(0,0,0,0.28) 56%, rgba(0,0,0,0.14) 72%, rgba(0,0,0,0.00) 100%); } }
 
-/* Cover + crop bottom WITHOUT clip-path */
-.hero-video iframe{
-  position:absolute;
-  inset:0;
-  width:170vw;
-  height:112%;                 /* overfill vertically */
-  left:50%;
-  transform:translate(-50%, -6%); /* shift up to crop bottom */
-  border:0;
-}
+  .title-chip{ display:inline-flex; align-items:center; justify-content:center; padding:.5rem .875rem; background:rgba(17,17,17,.85); border-radius:.75rem; box-shadow:0 6px 20px rgba(0,0,0,.45), inset 0 0 0 2px color-mix(in srgb, var(--brand) 65%, transparent); margin-bottom:.5rem; }
+  .title-chip-text{ font-family: var(--font-display); font-weight:800; letter-spacing:.08em; color:#fff; font-size:clamp(1rem,2.6vw,1.35rem); }
 
-/* Black spacer under the hero */
-.after-hero{
-  min-height:900px;
-  background:#000;
-  border:0;
-  margin:0;
-  border-radius:0;
-  padding:0 0 0 calc(16px + env(safe-area-inset-left));
-  margin-top:0; /* pull pills closer to synopsis */
-}
+  .hero-overlay-inline, .hero-overlay-inline *{ text-shadow: 0 1px 3px rgba(0,0,0,0.70); }
+  .hero-overlay-inline .hero-synopsis{ text-shadow: 0 2px 6px rgba(0,0,0,0.85); }
 
-/* Hero gradient: bottom → top, covers full hero */
-.hero-gradient{
-  position:absolute;
-  inset:0;                    /* cover full hero box */
-  z-index:1;                  /* video (0) < gradient (1) < overlay (2) */
-  pointer-events:none;
-  transform:translateZ(0);
-  backface-visibility:hidden;
-  background:linear-gradient(
-    to top,
-    rgba(0,0,0,0.88) 0%,
-    rgba(0,0,0,0.76) 10%,
-    rgba(0,0,0,0.60) 22%,
-    rgba(0,0,0,0.42) 36%,
-    rgba(0,0,0,0.26) 52%,
-    rgba(0,0,0,0.14) 68%,
-    rgba(0,0,0,0.00) 100%
-  );
-}
+  .mute-btn{ position:absolute; right:12px; bottom:12px; width:40px; height:40px; border-radius:999px; border:1px solid #222; background:#121212; color:#eaeaf0; display:grid; place-items:center; font-size:18px; cursor:pointer; }
+  .mute-btn:focus{ outline:2px solid #fff4; outline-offset:2px; }
 
-@media (max-width:600px){
-  .hero-gradient{
-    background:linear-gradient(
-      to top,
-      rgba(0,0,0,0.92) 0%,
-      rgba(0,0,0,0.80) 12%,
-      rgba(0,0,0,0.64) 26%,
-      rgba(0,0,0,0.46) 40%,
-      rgba(0,0,0,0.28) 56%,
-      rgba(0,0,0,0.14) 72%,
-      rgba(0,0,0,0.00) 100%
-    );
-  }
-}
+  html{ overflow-x:hidden; }
 
-.hero-text {
-  padding:64px 0;
-  display:grid;
-  gap:16px;
-}
-@media (max-width:600px) {
-  .hero-text { padding:48px 0; }
-}
+  .hero-cta{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; width:100%; max-width:340px; margin: calc(8px + .125rem) 0 0 0; }
+  .btn{ appearance:none; border:0; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:.35rem; padding:.42rem .56rem; border-radius:999px; font:700 .80rem/1 var(--font-ui); transition:transform .12s ease, opacity .12s ease, box-shadow .12s ease, background .12s ease; width:100%; box-shadow: 0 6px 14px rgba(0,0,0,.18); }
+  .btn:focus{ outline:2px solid #ffffff33; outline-offset:2px; }
+  .btn:active{ transform: translateY(1px); }
+  .btn--solid{ background:#fff; color:#000; }
+  .btn--solid:hover{ background:#e6e6e6; }
+  .btn--ghost{ background: rgba(255,255,255,0.10); color:#fff; box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.28); }
+  .btn--ghost:hover{ box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.5); }
+  .btn svg{ width:16px; height:16px; display:block; }
 
-  /* Apply drop shadow to all overlay text */
-.hero-overlay-inline,
-.hero-overlay-inline * {
-  text-shadow: 0 1px 3px rgba(0,0,0,0.70);
-}
-
-/* Stronger shadow for the synopsis for readability */
-.hero-overlay-inline .hero-synopsis {
-  text-shadow: 0 2px 6px rgba(0,0,0,0.85);
-}
-
-/* Mute button */
-  .mute-btn {
-    position:absolute;
-    right:12px;
-    bottom:12px;
-    width:40px;
-    height:40px;
-    border-radius:999px;
-    border:1px solid #222;
-    background:#121212;
-    color:#eaeaf0;
-    display:grid;
-    place-items:center;
-    font-size:18px;
-    cursor:pointer;
-  }
-  .mute-btn:focus {
-    outline:2px solid #fff4;
-    outline-offset:2px;
-  }
-  /* commit: no-horizontal-scroll */
-html { overflow-x: hidden; }
-/* commit: hero-gradient-styles */
-/* CTA row under the hero video */
-.hero-cta{
-  display:grid;
-  grid-template-columns: 1fr 1fr;   /* always two columns */
-  gap:8px;
-  width:100%;
-  max-width:340px;                   /* keep pills on one line */
-  margin: calc(8px + .125rem) 0 0 0; /* FIXED gap below synopsis */
-}
-
-/* Smaller buttons */
-.btn{
-  appearance:none; border:0; cursor:pointer;
-  display:inline-flex; align-items:center; justify-content:center;
-  gap:.35rem; padding:.42rem .56rem; border-radius:999px; /* same height, narrower */
-  font:700 .80rem/1 var(--font-ui);
-  transition:transform .12s ease, opacity .12s ease, box-shadow .12s ease, background .12s ease;
-  width:100%;
-  box-shadow: 0 6px 14px rgba(0,0,0,.18);
-}
-.btn:focus{ outline:2px solid #ffffff33; outline-offset:2px; }
-.btn:active{ transform: translateY(1px); }
-
-.btn--solid{ background:#fff; color:#000; }
-.btn--solid:hover{ background:#e6e6e6; }
-
-.btn--ghost{
-  background: rgba(255,255,255,0.10); color:#fff;
-  box-shadow: inset 0 0 0 1.1px rgba(255,255,255,0.28);
-}
-.btn--ghost:hover{ box-shadow: inset 0 0 0 1.1px rgba(255,255,255,0.5); }
-
-/* Smaller icons */
-.btn svg{ width:14px; height:14px; display:block; } /* matches reduced height */
-.btn--solid:hover{ background:#e6e6e6; }
-
-.btn--ghost{
-  background: rgba(255,255,255,0.10); color:#fff;
-  box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.28);
-}
-.btn--ghost:hover{ box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.5); }
-
-/* Smaller icons */
-.btn svg{ width:16px; height:16px; display:block; }
-
-/* ALWAYS-ON GAP CHECK BACKGROUND */
-body { background:#ff00aa !important; }        /* page background stays pink */
-.hero { background:#ff00aa !important; }       /* hero box pink to reveal any uncovered area */
-.after-hero { background:#000 !important; }    /* keep content section black for contrast */
+  /* Debug: reveal pink baseline on demand */
+  body.debug-gap .after-hero{ background:transparent; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -335,75 +98,34 @@ body { background:#ff00aa !important; }        /* page background stays pink */
   <main>
 <section class="hero" id="hero">
   <div class="hero-video">
-    <iframe
-      id="hero-yt"
-      title="Hero trailer"
-      src="https://www.youtube.com/embed/VBdaOkpLe_o?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o"
-      allow="autoplay; encrypted-media"
-      allowfullscreen
-    ></iframe>
+    <iframe id="hero-yt" title="Hero trailer" src="https://www.youtube.com/embed/VBdaOkpLe_o?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
-
-  <!-- Hero gradient: bottom → top -->
   <div class="hero-gradient" aria-hidden="true"></div>
-
-  <!-- Overlay area locked to viewport edges -->
-  <div class="hero-overlay-wrap"
-       style="position:absolute;top:0;bottom:0;
-              left:calc((100% - 100vw)/2);
-              right:calc((100% - 100vw)/2);
-              z-index:2;display:flex;flex-direction:column;
-              justify-content:flex-end;pointer-events:none;overflow:hidden;">
-    <div class="hero-overlay-inline"
-         style="pointer-events:auto;position:absolute;bottom:0;left:0;
-                max-width:720px;color:#fff;text-align:left;
-                padding:12px calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left));
-                text-shadow:0 1px 3px rgba(0,0,0,.5);
-                background:transparent;border-radius:12px 12px 0 0;">
-<div class="title-chip" role="heading" aria-level="1">
-  <span class="title-chip-text">Sanchez Ninjah</span>
-</div>
-
-<p id="meta-line" style="margin:0 0 .14rem;color:var(--brand);
-                font-size:clamp(.78rem,1.6vw,.95rem);
-                font-weight:700;letter-spacing:.08em;text-transform:uppercase;">
-  New Release | Thriller, Sci-Fi | 2024
-</p>
-
-      <p class="hero-synopsis" style="margin:0;color:#e5e7eb;
-                font-size:clamp(.95rem,2.2vw,1.15rem);line-height:1.55;
-                display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;
-                overflow:hidden;">
-        As a rogue AI network threatens global collapse, a disgraced former agent is called
-        back into the field for one last, impossible mission to save humanity.
-      </p>
+  <div class="hero-overlay-wrap" style="position:absolute;top:0;bottom:0; left:calc((100% - 100vw)/2); right:calc((100% - 100vw)/2); z-index:2;display:flex;flex-direction:column; justify-content:flex-end;pointer-events:none;overflow:hidden;">
+    <div class="hero-overlay-inline" style="pointer-events:auto;position:absolute;bottom:0;left:0; max-width:720px;color:#fff;text-align:left; padding:12px calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left)); text-shadow:0 1px 3px rgba(0,0,0,.5); background:transparent;border-radius:12px 12px 0 0;">
+      <div class="title-chip" role="heading" aria-level="1"><span class="title-chip-text">Sanchez Ninjah</span></div>
+      <p id="meta-line" style="margin:0 0 .14rem;color:var(--brand); font-size:clamp(.78rem,1.6vw,.95rem); font-weight:700;letter-spacing:.08em;text-transform:uppercase;">New Release | Thriller, Sci-Fi | 2024</p>
+      <p class="hero-synopsis" style="margin:0;color:#e5e7eb; font-size:clamp(.95rem,2.2vw,1.15rem);line-height:1.55; display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical; overflow:hidden;">As a rogue AI network threatens global collapse, a disgraced former agent is called back into the field for one last, impossible mission to save humanity.</p>
     </div>
   </div>
-
   <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
 </section>
-<div class="wrap wrap--flush">
-  <section class="after-hero" aria-label="Actions">
+
+<section class="after-hero" aria-label="Actions">
+  <div class="content-pad">
     <div class="hero-cta">
-      <!-- Play Now -->
-      <button type="button" class="btn btn--solid" onclick="alert('Play trailer')">
-        <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M6 4l10 6-10 6V4z"/>
-        </svg>
+      <button type="button" class="btn btn--solid" onclick="console.log('Play trailer')">
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg>
         <span>Play Now</span>
       </button>
-
-      <!-- Details -->
-      <button type="button" class="btn btn--ghost" onclick="alert('More info')">
-        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M13 16h-1v-4h-1m1-4h.01"/>
-          <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
+      <button type="button" class="btn btn--ghost" onclick="console.log('More info')">
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 16h-1v-4h-1m1-4h.01"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         <span>Details</span>
       </button>
     </div>
-  </section>
-</div>
+  </div>
+</section>
+
   </main>
 
   <footer>© <span id="y"></span> Rawoul</footer>
@@ -411,47 +133,15 @@ body { background:#ff00aa !important; }        /* page background stays pink */
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
   let ytPlayer, isMuted = true;
-  function onYouTubeIframeAPIReady(){
-    ytPlayer = new YT.Player('hero-yt', {
-      events: { onReady: e => { e.target.mute(); e.target.playVideo(); } }
-    });
-  }
-  function toggleMute(){
-    if(!ytPlayer) return;
-    if(isMuted){ ytPlayer.unMute(); isMuted=false; document.querySelector('.mute-btn').textContent='🔊'; document.querySelector('.mute-btn').setAttribute('aria-pressed','false'); }
-    else{ ytPlayer.mute(); isMuted=true; document.querySelector('.mute-btn').textContent='🔇'; document.querySelector('.mute-btn').setAttribute('aria-pressed','true'); }
-  }
+  function onYouTubeIframeAPIReady(){ ytPlayer = new YT.Player('hero-yt', { events: { onReady: e => { e.target.mute(); e.target.playVideo(); } } }); }
+  function toggleMute(){ if(!ytPlayer) return; if(isMuted){ ytPlayer.unMute(); isMuted=false; document.querySelector('.mute-btn').textContent='🔊'; document.querySelector('.mute-btn').setAttribute('aria-pressed','false'); } else { ytPlayer.mute(); isMuted=true; document.querySelector('.mute-btn').textContent='🔇'; document.querySelector('.mute-btn').setAttribute('aria-pressed','true'); } }
 </script>
 <script>
-  // Make the CTA row 1/3 shorter than its own available width
-  (function(){
-    function alignCta(){
-      const cta = document.querySelector('.hero-cta');
-      if(!cta || !cta.parentElement) return;
-
-      // Use the parent’s current width as the stable base
-      const base = cta.parentElement.getBoundingClientRect().width;
-
-      // Target = 67% of that base (i.e., 1/3 shorter)
-      const target = Math.round(base * 0.67);
-
-      // Clamp to keep both pills on one line
-      const clamped = Math.max(200, Math.min(target, 420));
-
-      cta.style.width = clamped + 'px';
-    }
-    window.addEventListener('load', alignCta);
-    window.addEventListener('resize', alignCta);
-    window.addEventListener('orientationchange', alignCta);
-  })();
+  (function(){ function alignCta(){ const cta=document.querySelector('.hero-cta'); if(!cta||!cta.parentElement) return; const base=cta.parentElement.getBoundingClientRect().width; const target=Math.round(base*0.67); const clamped=Math.max(200, Math.min(target, 420)); cta.style.width=clamped+'px'; } window.addEventListener('load', alignCta); window.addEventListener('resize', alignCta); window.addEventListener('orientationchange', alignCta); })();
 </script>
 <script>
-  // Press "g" to toggle pink gap debug
-  document.addEventListener('keydown', e => {
-    if (e.key.toLowerCase() === 'g') document.body.classList.toggle('debug-gap');
-  });
-  // start enabled (optional)
-  document.body.classList.add('debug-gap');
+  // Toggle pink gap debug on 'g'
+  document.addEventListener('keydown', e => { if (e.key.toLowerCase() === 'g') document.body.classList.toggle('debug-gap'); });
 </script>
 </body>
 </html>
