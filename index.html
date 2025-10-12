@@ -81,21 +81,24 @@ html{ overflow-x:hidden; }
 .shelf--tight{ margin-top:8px; }
 .shelf-title{ font:700 1rem/1.3 var(--font-ui); color:var(--fg); margin:0 0 6px; }
 .shelf-divider{ height:2px; background:#3a3f46; opacity:.9; border-radius:2px; }
-.shelf-outer{ position:relative; width:100vw; left:50%; transform:translateX(-50%); }
-.shelf-outer::before, .shelf-outer::after{ content:""; position:absolute; top:0; bottom:0; width:48px; pointer-events:none; z-index:1; }
-.shelf-outer::before{ left:0; background:linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0)); }
-.shelf-outer::after{ right:0; background:linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0)); }
-.shelf-track{ display:grid; grid-auto-flow:column; gap:var(--shelf-gap); overflow-x:auto; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch; padding:10px calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left)); touch-action: pan-x pan-y pinch-zoom; scrollbar-width:none; cursor:grab; user-select:none; scroll-snap-type:x mandatory; scroll-snap-stop:always; }
-.shelf-track::-webkit-scrollbar{ display:none; }
+/* Embla viewport */
+.shelf-outer{ position:relative; width:100vw; left:50%; transform:translateX(-50%); overflow:hidden; touch-action: pan-y pinch-zoom; }
+/* Embla container */
+.shelf-track{ display:flex; gap:var(--shelf-gap); will-change:transform; padding:10px calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left)); cursor:grab; user-select:none; }
 .shelf-track.dragging{ cursor:grabbing; }
 .shelf-track[role="list"]{ list-style:none; }
-.poster{ position:relative; display:block; background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius); aspect-ratio:2/3; width:calc((100vw - (16px*2) - (var(--shelf-gap)*2)) / 3); scroll-snap-align:center; transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease; transform-origin:center; }
+.poster{ position:relative; display:block; background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius); aspect-ratio:2/3; flex:0 0 auto; width:calc((100vw - (16px*2) - (var(--shelf-gap)*2)) / 3); transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease; transform-origin:center; }
 .poster.is-center{ transform:scale(1.12); box-shadow:0 12px 24px rgba(0,0,0,.45); z-index:2; }
 .poster:not(.is-center){ opacity:.92; filter:blur(1.2px) saturate(.96) brightness(.94); }
 .poster::after{ content:attr(data-label); position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); color:#eaeaf0; font:800 1.1rem/1 var(--font-ui); letter-spacing:.04em; text-shadow:0 1px 2px rgba(0,0,0,.45); opacity:.85; }
 .poster.is-center::after{ font-size:1.35rem; opacity:1; text-shadow:0 2px 4px rgba(0,0,0,.6); }
 @media (min-width:768px){ .poster{ width:140px; } }
 @media (prefers-reduced-motion: reduce){ .poster{ transition:none; } .poster.is-center{ transform:none; box-shadow:none; } .poster:not(.is-center){ filter:none; opacity:1; } }
+/* Edge fades */
+.shelf-outer::before, .shelf-outer::after{ content:""; position:absolute; top:0; bottom:0; width:48px; pointer-events:none; z-index:1; }
+.shelf-outer::before{ left:0; background:linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0)); }
+.shelf-outer::after{ right:0; background:linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0)); }
+
 /* Bottom spacer to help center Row C on mobile */
 .page-bottom-spacer{ height: calc(20vh + env(safe-area-inset-bottom)); }
 </style>
@@ -121,7 +124,7 @@ html{ overflow-x:hidden; }
   <main>
 <section class="hero" id="hero">
   <div class="hero-video">
-    <iframe id="hero-yt" title="Hero trailer" src="https://www.youtube.com/embed/VBdaOkpLe_o?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe id="hero-yt" title="Hero trailer" src="https://www.youtube.com/embed/VBdaOkpLe_o?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
   </div>
   <div class="hero-gradient" aria-hidden="true"></div>
   <div class="hero-overlay-wrap" style="position:absolute;top:0;bottom:0;left:calc((100% - 100vw)/2);right:calc((100% - 100vw)/2);z-index:2;display:flex;flex-direction:column;justify-content:flex-end;pointer-events:none;overflow:hidden;">
@@ -220,10 +223,23 @@ html{ overflow-x:hidden; }
   <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
-    // YouTube API glue
+    // YouTube API: robust mobile autoplay (muted + inline). If blocked, retry on first gesture.
     let ytPlayer, isMuted = true;
     function onYouTubeIframeAPIReady(){
-      ytPlayer = new YT.Player('hero-yt', { events: { onReady: e => { e.target.mute(); e.target.playVideo(); } } });
+      ytPlayer = new YT.Player('hero-yt', {
+        playerVars: { autoplay: 1, controls: 0, rel: 0, playsinline: 1, mute: 1, loop: 1, playlist: 'VBdaOkpLe_o', modestbranding: 1 },
+        events: {
+          onReady: e => { try{ e.target.mute(); }catch{} try{ e.target.playVideo(); }catch{} },
+          onStateChange: e => {
+            if(e.data === YT.PlayerState.UNSTARTED || e.data === YT.PlayerState.PAUSED){
+              const resume = () => { try{ ytPlayer.playVideo(); }catch{} window.removeEventListener('touchstart', resume); window.removeEventListener('click', resume); window.removeEventListener('scroll', resume); };
+              window.addEventListener('touchstart', resume, { once:true });
+              window.addEventListener('click', resume, { once:true });
+              window.addEventListener('scroll', resume, { once:true });
+            }
+          }
+        }
+      });
     }
     function toggleMute(){
       if(!ytPlayer) return;
@@ -231,237 +247,44 @@ html{ overflow-x:hidden; }
       else{ ytPlayer.mute(); isMuted=true; document.querySelector('.mute-btn').textContent='🔇'; document.querySelector('.mute-btn').setAttribute('aria-pressed','true'); }
     }
   </script>
-  <script>
-    // CTA width alignment
-    (function(){
-      function alignCta(){
-        const cta = document.querySelector('.hero-cta');
-        if(!cta || !cta.parentElement) return;
-        const base = cta.parentElement.getBoundingClientRect().width;
-        const target = Math.round(base * 0.67);
-        const clamped = Math.max(200, Math.min(target, 420));
-        cta.style.width = clamped + 'px';
-      }
-      window.addEventListener('load', alignCta);
-      window.addEventListener('resize', alignCta);
-      window.addEventListener('orientationchange', alignCta);
-    })();
-  </script>
-  <script>
-    // Gap debug toggle
-    document.addEventListener('keydown', e => {
-      if (e.key.toLowerCase() === 'g') document.body.classList.toggle('debug-gap');
-    });
-  </script>
+  <!-- Embla Carousel -->
+  <script src="https://unpkg.com/embla-carousel/embla-carousel.umd.js"></script>
   <script>
   // ─────────────────────────────────────────────────────────
-  // Shelves: snap, highlight, infinite loop, gestures
+  // Shelves with Embla: loop + center align + highlight
   // ─────────────────────────────────────────────────────────
   (function(){
     'use strict';
-    const CLONES_PER_SIDE = 3;
-    const rows = document.querySelectorAll('.shelf-track');
-
-    function centerOf(el, scroller){
-      const r = el.getBoundingClientRect();
-      const cr = scroller.getBoundingClientRect();
-      return r.left + r.width/2 - cr.left + scroller.scrollLeft;
-    }
-    function centerScrollLeftFor(el, scroller){
-      const mid = scroller.clientWidth/2;
-      return centerOf(el, scroller) - mid;
-    }
-    function updateCenter(scroller){
-      const kids = Array.from(scroller.children);
-      if(!kids.length) return null;
-      const mid = scroller.scrollLeft + scroller.clientWidth/2;
-      let best = null, bestDist = Infinity;
-      for(const k of kids){
-        const c = centerOf(k, scroller);
-        const d = Math.abs(c - mid);
-        if(d < bestDist){ bestDist = d; best = k; }
-      }
-      kids.forEach(k => k.classList.toggle('is-center', k === best));
-      return best;
-    }
-    function makeClones(scroller){
-      const items = Array.from(scroller.children).filter(n => !n.dataset.clone);
-      if(items.length < 2) return;
-      const head = items.slice(0, CLONES_PER_SIDE).map(n => { const c=n.cloneNode(true); c.dataset.clone='true'; c.setAttribute('aria-hidden','true'); c.tabIndex=-1; return c; });
-      const tail = items.slice(-CLONES_PER_SIDE).map(n => { const c=n.cloneNode(true); c.dataset.clone='true'; c.setAttribute('aria-hidden','true'); c.tabIndex=-1; return c; });
-      tail.forEach(n => scroller.insertBefore(n, scroller.firstChild));
-      head.forEach(n => scroller.appendChild(n));
-      requestAnimationFrame(() => {
-        const firstReal = items[0];
-        scroller.scrollLeft = centerScrollLeftFor(firstReal, scroller);
-        updateCenter(scroller);
-      });
-    }
-    function onScroll(scroller){
-      if(scroller._raf) cancelAnimationFrame(scroller._raf);
-      scroller._raf = requestAnimationFrame(() => { updateCenter(scroller); });
-      if(scroller._timer) clearTimeout(scroller._timer);
-      scroller._timer = setTimeout(() => onScrollEnd(scroller), 120);
-    }
-    function onScrollEnd(scroller){
-      const active = updateCenter(scroller);
-      if(!active) return;
-      const label = active.getAttribute('aria-label');
-      if(active.dataset.clone && label){
-        const real = Array.from(scroller.children).find(n => n.getAttribute('aria-label')===label && !n.dataset.clone);
-        if(real){
-          scroller.scrollLeft = centerScrollLeftFor(real, scroller);
-          updateCenter(scroller);
-          console.log('loop-jump →', label);
-          return;
-        }
-      }
-      scroller.scrollLeft = centerScrollLeftFor(active, scroller);
-      updateCenter(scroller);
-      if(label) console.log('center →', label);
-    }
-
-    // Touch fallback for browsers without Pointer Events (older iOS)
-    function attachTouchFallback(scroller){
-      let dragging=false, mode=null, startX=0, startY=0, lastX=0, lastT=0, vx=0;
-      scroller.addEventListener('touchstart', ev => {
-        if(ev.touches.length!==1) return;
-        dragging=true; mode=null;
-        const t=ev.touches[0]; startX=lastX=t.clientX; startY=t.clientY; lastT=performance.now();
-      }, {passive:true});
-      scroller.addEventListener('touchmove', ev => {
-        if(!dragging) return;
-        const t=ev.touches[0]; const dx=t.clientX-startX; const dy=t.clientY-startY; const now=performance.now();
-        if(!mode){
-          if(Math.hypot(dx,dy) < 8) return;
-          mode = (Math.abs(dx) > Math.abs(dy) * 1.15) ? 'h' : 'v';
-          if(mode==='h'){ scroller.style.scrollSnapType='none'; }
-        }
-        if(mode==='h'){
-          const delta=t.clientX-lastX;
-          scroller.scrollLeft -= delta;
-          vx = delta/Math.max(1,(now-lastT));
-          lastX=t.clientX; lastT=now;
-          ev.preventDefault();
-        }
-      }, {passive:false});
-      function end(){
-        if(!dragging) return; dragging=false;
-        scroller.style.scrollSnapType='x mandatory';
-        if(mode==='h'){
-          const momentum = -vx * 180;
-          if(Math.abs(momentum) > 2){ scroller.scrollTo({ left: scroller.scrollLeft + momentum, behavior:'smooth' }); }
-          setTimeout(()=>onScrollEnd(scroller), 160);
-        }
-        mode=null;
-      }
-      scroller.addEventListener('touchend', end, {passive:true});
-      scroller.addEventListener('touchcancel', end, {passive:true});
-    }
-
-    rows.forEach(scroller => {
-      makeClones(scroller);
-      if(!window.PointerEvent){ attachTouchFallback(scroller); }
-      scroller.addEventListener('scroll', () => onScroll(scroller), {passive:true});
-
-      // Pointer drag-to-swipe with gesture gating
-      let isDown=false, startX=0, startY=0, lastX=0, lastT=0, vx=0, mode=null;
-      scroller.addEventListener('pointerdown', e => {
-        if(e.pointerType==='mouse' && e.button !== 0) return;
-        isDown = true; mode = null;
-        startX = lastX = e.clientX; startY = e.clientY; lastT = performance.now();
-        scroller.setPointerCapture(e.pointerId);
-      });
-      scroller.addEventListener('pointermove', e => {
-        if(!isDown) return;
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-        const now = performance.now();
-        if(!mode){
-          if(Math.hypot(dx,dy) < 6) return;
-          mode = (Math.abs(dx) > Math.abs(dy) * 1.15) ? 'h' : 'v';
-          if(mode === 'h'){
-            scroller.classList.add('dragging');
-            scroller.style.scrollSnapType = 'none';
-            e.preventDefault();
-          }else{
-            try{ scroller.releasePointerCapture(e.pointerId); }catch{}
-            isDown = false; mode = null; return;
-          }
-        }
-        if(mode === 'h'){
-          const delta = e.clientX - lastX;
-          scroller.scrollLeft -= delta;
-          vx = delta / Math.max(1, (now - lastT));
-          lastX = e.clientX; lastT = now;
-          e.preventDefault();
-        }
-      });
-      function endDrag(){
-        if(!isDown) return;
-        isDown = false;
-        scroller.classList.remove('dragging');
-        scroller.style.scrollSnapType = 'x mandatory';
-        if(mode === 'h'){
-          const momentum = -vx * 180;
-          if(Math.abs(momentum) > 2){ scroller.scrollTo({ left: scroller.scrollLeft + momentum, behavior: 'smooth' }); }
-          setTimeout(() => onScrollEnd(scroller), 160);
-        }
-        mode = null;
-      }
-      scroller.addEventListener('pointerup', endDrag);
-      scroller.addEventListener('pointercancel', endDrag);
-
-      // Wheel routing: horizontal deltas move the row; vertical deltas move the page
-      scroller.addEventListener('wheel', e => {
-        const ax = Math.abs(e.deltaX), ay = Math.abs(e.deltaY);
-        const horizontalIntent = e.shiftKey || ax > ay * 1.1;
-        if(horizontalIntent){
-          const step = ax ? e.deltaX : e.deltaY;
-          scroller.scrollLeft += step;
-          e.preventDefault();
-          onScroll(scroller);
-          clearTimeout(scroller._wheelTimer);
-          scroller._wheelTimer = setTimeout(() => onScrollEnd(scroller), 140);
-        }
-      }, {passive:false});
-
-      // Keep active centered on resize
-      window.addEventListener('resize', () => {
-        const active = updateCenter(scroller);
-        if(active) scroller.scrollLeft = centerScrollLeftFor(active, scroller);
-      });
+    const viewports = document.querySelectorAll('.shelf-outer');
+    viewports.forEach((viewport) => {
+      const embla = EmblaCarousel(viewport, { loop:true, align:'center', skipSnaps:false, dragFree:false, containScroll:'trimSnaps' });
+      viewport._embla = embla; // expose for tests
+      const slides = Array.from(viewport.querySelectorAll('.poster'));
+      const setSelected = () => {
+        const i = embla.selectedScrollSnap();
+        slides.forEach((s, idx) => s.classList.toggle('is-center', idx === i));
+      };
+      embla.on('select', setSelected);
+      embla.on('reInit', setSelected);
+      setSelected();
     });
 
     // ──────────────── Runtime tests (console) ────────────────
     window.addEventListener('load', () => {
       function t(name, fn){ try{ fn(); console.log('%cPASS','color:#0f0', name); } catch(err){ console.error('FAIL', name, err); } }
-      const rowsArr = Array.from(document.querySelectorAll('.shelf-track'));
+      const rowsArr = Array.from(document.querySelectorAll('.shelf-outer'));
       t('3 rows present', () => { if(rowsArr.length!==3) throw new Error('expected 3, got '+rowsArr.length); });
-      rowsArr.forEach((r,i)=>{
-        t(`row ${i+1} has 10 real items`, () => {
-          const real = Array.from(r.children).filter(n=>!n.dataset.clone);
+      rowsArr.forEach((vp,i)=>{
+        t(`row ${i+1} has 10 items`, () => {
+          const real = Array.from(vp.querySelectorAll('.poster'));
           if(real.length!==10) throw new Error('got '+real.length);
         });
-        t(`row ${i+1} clones added (6)`, () => {
-          const clones = Array.from(r.children).filter(n=>n.dataset.clone);
-          if(clones.length!==CLONES_PER_SIDE*2) throw new Error('got '+clones.length);
-        });
-        t(`row ${i+1} center math + class`, () => {
-          const first = Array.from(r.children).find(n=>n.getAttribute('aria-label')?.endsWith('1') && !n.dataset.clone);
-          if(!first) throw new Error('no first real');
-          r.scrollLeft = centerScrollLeftFor(first, r);
-          const active = updateCenter(r);
-          if(active !== first || !first.classList.contains('is-center')) throw new Error('center mismatch');
-        });
-        t(`row ${i+1} clones aria-hidden + tabIndex`, () => {
-          const clones = Array.from(r.children).filter(n=>n.dataset.clone);
-          const bad = clones.find(n=>n.getAttribute('aria-hidden')!=='true' || n.tabIndex!==-1);
-          if(bad) throw new Error('clone a11y issue');
+        t(`row ${i+1} Embla instance`, () => {
+          if(!vp._embla) throw new Error('Embla missing');
         });
         t(`row ${i+1} ~3 cards visible`, () => {
-          const w = r.getBoundingClientRect().width;
-          const card = r.querySelector('.poster');
+          const w = vp.getBoundingClientRect().width;
+          const card = vp.querySelector('.poster');
           const cw = card ? card.getBoundingClientRect().width : 0;
           if(!cw) throw new Error('no card width');
           const visible = w / cw;
