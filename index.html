@@ -5,76 +5,98 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Rawoul — Starter</title>
 <style>
-  /* Design tokens */
-  :root{
-    --brand:#e31b23;
-    --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px;
-    --bg-pink:#ff69b4; /* bottom layer for gap detection */
-  }
-  :root{
-    --font-ui: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-    --font-display: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-  }
-  *{ box-sizing:border-box; }
-  html,body{ height:100%; }
-  body{ margin:0; font-family:var(--font-ui); background:var(--bg-pink); color:var(--fg); line-height:1.5; overflow-x:hidden; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+/* ───────────────────────────────────────────────────────────
+   Design tokens
+   ─────────────────────────────────────────────────────────── */
+:root{
+  --bg:#000; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; --brand:#e31b23;
+  --font-ui:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+  --font-display:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+  --shelf-gap:8px; --shelf-radius:14px;
+}
+*{ box-sizing:border-box; }
+body{ margin:0; font-family:var(--font-ui); background:var(--bg); color:var(--fg); line-height:1.5; overflow-x:hidden; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 
-  /* Fixed top nav must be black */
-  .nav-bar{ position:fixed; top:0; left:0; right:0; z-index:100; background:#000; height:calc(var(--nav-height) + env(safe-area-inset-top)); border-bottom:0; }
-  .nav-inner{ max-width:960px; margin:0 auto; height:var(--nav-height); display:flex; align-items:center; justify-content:space-between; padding:env(safe-area-inset-top) 16px 0 16px; }
-  .brand{ color:var(--brand); font-weight:800; font-size:24px; letter-spacing:.2px; text-decoration:none; }
-  .nav-actions{ display:flex; gap:12px; align-items:center; }
-  .icon-btn{ position:relative; display:inline-grid; place-items:center; width:36px; height:36px; border-radius:999px; background:#121212; border:1px solid #222; cursor:pointer; color:#eaeaf0; }
-  .icon-btn:hover{ background:#161616; }
-  .icon-btn svg{ fill:currentColor; }
-  .icon-btn .dot{ position:absolute; top:4px; right:4px; width:9px; height:9px; background:var(--brand); border-radius:999px; box-shadow:0 0 0 2px #000; }
+/* ───────────────────────────────────────────────────────────
+   Nav
+   ─────────────────────────────────────────────────────────── */
+.nav-bar{ position:fixed; inset:0 0 auto 0; z-index:100; background:#000; height:calc(var(--nav-height) + env(safe-area-inset-top)); border-bottom:0; box-shadow:none; }
+.nav-inner{ max-width:960px; margin:0 auto; height:var(--nav-height); display:flex; align-items:center; justify-content:space-between; padding:env(safe-area-inset-top) 16px 0 16px; }
+.brand{ color:var(--brand); font-weight:800; font-size:24px; letter-spacing:.2px; text-decoration:none; }
+.nav-actions{ display:flex; gap:12px; align-items:center; }
+.icon-btn{ position:relative; display:inline-grid; place-items:center; width:36px; height:36px; border-radius:999px; background:#121212; border:1px solid #222; cursor:pointer; color:#eaeaf0; }
+.icon-btn:hover{ background:#161616; }
+.icon-btn svg{ fill:currentColor; }
+.icon-btn .dot{ position:absolute; top:4px; right:4px; width:9px; height:9px; background:var(--brand); border-radius:999px; box-shadow:0 0 0 2px #000; }
 
-  main{ padding-top: calc(var(--nav-height) + env(safe-area-inset-top) - 1px); }
-  .wrap{ max-width:960px; margin:0 auto; padding:16px; }
-  .card{ background:#14161c; border:1px solid #222; border-radius:12px; padding:16px; margin:16px; }
-  footer{ color:var(--muted); text-align:center; padding:24px; border-top:1px solid #222; background:#000; }
-  h1{ font-size:clamp(28px,4vw,40px); margin:0 0 8px; }
-  h2{ font-size:clamp(18px,4.5vw,24px); margin:12px 0 8px; }
-  p{ margin:8px 0; color:#9aa0a6; }
+/* ───────────────────────────────────────────────────────────
+   Layout helpers
+   ─────────────────────────────────────────────────────────── */
+main{ padding-top: calc(var(--nav-height) + env(safe-area-inset-top) - 1px); }
+.wrap{ max-width:960px; margin:0 auto; padding:16px; }
+.card{ background:#14161c; border:1px solid #222; border-radius:12px; padding:16px; margin:16px; }
+footer{ color:var(--muted); text-align:center; padding:24px; border-top:1px solid #222; }
+button.cta{ background:var(--accent); color:#0b1020; border:0; padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer; }
+button.cta:focus{ outline:2px solid #fff4; outline-offset:2px; }
+h1{ font-size:clamp(28px,4vw,40px); margin:0 0 8px; }
+h2{ font-size:clamp(18px,4.5vw,24px); margin:12px 0 8px; }
+p{ margin:8px 0; color:var(--muted); }
 
-  /* HERO must be black to expose any gaps as pink */
-  .hero{ position:relative; height:auto; aspect-ratio:16 / 9; overflow:hidden; background:#000; width:170vw; left:50%; transform: translateX(-50%); z-index:1; margin-top:-2px; border-top:0; 
-    /* PATCH: 1px overlap to kill sub-pixel seam */
-    margin-bottom:-1px;
-  }
-  .hero-video{ position:absolute; inset:0; }
-  .hero-video iframe{ position:absolute; inset:0; width:170vw; height:112%; left:50%; transform:translate(-50%, -6%); border:0; }
+/* ───────────────────────────────────────────────────────────
+   Hero
+   ─────────────────────────────────────────────────────────── */
+.hero{ position:relative; height:auto; aspect-ratio:16/9; overflow:hidden; background:#000; width:170vw; left:50%; transform:translateX(-50%); z-index:1; margin-top:-2px; border-top:0; }
+.hero-video{ position:absolute; inset:0; }
+.hero-video iframe{ position:absolute; inset:0; width:170vw; height:112%; left:50%; transform:translate(-50%, -6%); border:0; }
+.hero-gradient{ position:absolute; inset:0; z-index:1; pointer-events:none; transform:translateZ(0); backface-visibility:hidden; background:linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.76) 10%, rgba(0,0,0,.60) 22%, rgba(0,0,0,.42) 36%, rgba(0,0,0,.26) 52%, rgba(0,0,0,.14) 68%, rgba(0,0,0,0) 100%); }
+@media (max-width:600px){ .hero-gradient{ background:linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.80) 12%, rgba(0,0,0,.64) 26%, rgba(0,0,0,.46) 40%, rgba(0,0,0,.28) 56%, rgba(0,0,0,.14) 72%, rgba(0,0,0,0) 100%); } }
+.hero-text{ padding:64px 0; display:grid; gap:16px; }
+@media (max-width:600px){ .hero-text{ padding:48px 0; } }
+.hero-overlay-inline, .hero-overlay-inline *{ text-shadow:0 1px 3px rgba(0,0,0,.70); }
+.hero-overlay-inline .hero-synopsis{ text-shadow:0 2px 6px rgba(0,0,0,.85); }
+.mute-btn{ position:absolute; right:12px; bottom:12px; width:40px; height:40px; border-radius:999px; border:1px solid #222; background:#121212; color:#eaeaf0; display:grid; place-items:center; font-size:18px; cursor:pointer; }
+.mute-btn:focus{ outline:2px solid #fff4; outline-offset:2px; }
+html{ overflow-x:hidden; }
 
-  /* Section below hero stays black (pink shows only where a gap exists) */
-  .after-hero{ min-height:900px; background:#000; border:0; margin:0; border-radius:0; padding:0; margin-top:0; }
-  .content-pad{ max-width:960px; margin:0 auto; padding: 0 calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left)); }
+/* CTA row */
+.hero-cta{ display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; max-width:340px; margin: calc(8px + .125rem) 0 0 0; }
+.btn{ appearance:none; border:0; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:.35rem; padding:.42rem .56rem; border-radius:999px; font:700 .80rem/1 var(--font-ui); transition:transform .12s ease, opacity .12s ease, box-shadow .12s ease, background .12s ease; width:100%; box-shadow:0 6px 14px rgba(0,0,0,.18); }
+.btn:focus{ outline:2px solid #ffffff33; outline-offset:2px; }
+.btn:active{ transform:translateY(1px); }
+.btn--solid{ background:#fff; color:#000; }
+.btn--solid:hover{ background:#e6e6e6; }
+.btn--ghost{ background:rgba(255,255,255,.10); color:#fff; box-shadow:inset 0 0 0 1.25px rgba(255,255,255,.28); }
+.btn--ghost:hover{ box-shadow:inset 0 0 0 1.25px rgba(255,255,255,.5); }
+.btn svg{ width:16px; height:16px; display:block; }
 
-  .hero-gradient{ position:absolute; inset:0; z-index:1; pointer-events:none; transform:translateZ(0); backface-visibility:hidden; background:linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.76) 10%, rgba(0,0,0,0.60) 22%, rgba(0,0,0,0.42) 36%, rgba(0,0,0,0.26) 52%, rgba(0,0,0,0.14) 68%, rgba(0,0,0,0.00) 100%); }
-  @media (max-width:600px){ .hero-gradient{ background:linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.80) 12%, rgba(0,0,0,0.64) 26%, rgba(0,0,0,0.46) 40%, rgba(0,0,0,0.28) 56%, rgba(0,0,0,0.14) 72%, rgba(0,0,0,0.00) 100%); } }
+/* After-hero container */
+.after-hero{ min-height:0; background:#000; border:0; margin:0; border-radius:0; padding:0; margin-top:0; }
+.content-pad{ max-width:960px; margin:0 auto; padding: 0 calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left)); }
+.content-pad--tight{ padding-bottom:8px; }
 
-  .title-chip{ display:inline-flex; align-items:center; justify-content:center; padding:.5rem .875rem; background:rgba(17,17,17,.85); border-radius:.75rem; box-shadow:0 6px 20px rgba(0,0,0,.45), inset 0 0 0 2px color-mix(in srgb, var(--brand) 65%, transparent); margin-bottom:.5rem; }
-  .title-chip-text{ font-family: var(--font-display); font-weight:800; letter-spacing:.08em; color:#fff; font-size:clamp(1rem,2.6vw,1.35rem); }
-
-  .hero-overlay-inline, .hero-overlay-inline *{ text-shadow: 0 1px 3px rgba(0,0,0,0.70); }
-  .hero-overlay-inline .hero-synopsis{ text-shadow: 0 2px 6px rgba(0,0,0,0.85); }
-
-  .mute-btn{ position:absolute; right:12px; bottom:12px; width:40px; height:40px; border-radius:999px; border:1px solid #222; background:#121212; color:#eaeaf0; display:grid; place-items:center; font-size:18px; cursor:pointer; }
-  .mute-btn:focus{ outline:2px solid #fff4; outline-offset:2px; }
-
-  html{ overflow-x:hidden; }
-
-  .hero-cta{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; width:100%; max-width:340px; margin: calc(8px + .125rem) 0 0 0; }
-  .btn{ appearance:none; border:0; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:.35rem; padding:.42rem .56rem; border-radius:999px; font:700 .80rem/1 var(--font-ui); transition:transform .12s ease, opacity .12s ease, box-shadow .12s ease, background .12s ease; width:100%; box-shadow: 0 6px 14px rgba(0,0,0,.18); }
-  .btn:focus{ outline:2px solid #ffffff33; outline-offset:2px; }
-  .btn:active{ transform: translateY(1px); }
-  .btn--solid{ background:#fff; color:#000; }
-  .btn--solid:hover{ background:#e6e6e6; }
-  .btn--ghost{ background: rgba(255,255,255,0.10); color:#fff; box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.28); }
-  .btn--ghost:hover{ box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.5); }
-  .btn svg{ width:16px; height:16px; display:block; }
-
-  /* Debug: reveal pink baseline on demand */
-  body.debug-gap .after-hero{ background:transparent; }
+/* ───────────────────────────────────────────────────────────
+   Shelves (Rows A/B/C)
+   ─────────────────────────────────────────────────────────── */
+.shelf{ margin:24px 0 32px; }
+.shelf--tight{ margin-top:8px; }
+.shelf-title{ font:700 1rem/1.3 var(--font-ui); color:var(--fg); margin:0 0 6px; }
+.shelf-divider{ height:2px; background:#3a3f46; opacity:.9; border-radius:2px; }
+.shelf-outer{ position:relative; width:100vw; left:50%; transform:translateX(-50%); }
+.shelf-outer::before, .shelf-outer::after{ content:""; position:absolute; top:0; bottom:0; width:48px; pointer-events:none; z-index:1; }
+.shelf-outer::before{ left:0; background:linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0)); }
+.shelf-outer::after{ right:0; background:linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0)); }
+.shelf-track{ display:grid; grid-auto-flow:column; gap:var(--shelf-gap); overflow-x:auto; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch; padding:10px calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left)); touch-action:pan-y pinch-zoom; scrollbar-width:none; cursor:grab; user-select:none; scroll-snap-type:x mandatory; scroll-snap-stop:always; }
+.shelf-track::-webkit-scrollbar{ display:none; }
+.shelf-track.dragging{ cursor:grabbing; }
+.shelf-track[role="list"]{ list-style:none; }
+.poster{ position:relative; display:block; background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius); aspect-ratio:2/3; width:calc((100vw - (16px*2) - (var(--shelf-gap)*2)) / 3); scroll-snap-align:center; transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease; transform-origin:center; }
+.poster.is-center{ transform:scale(1.12); box-shadow:0 12px 24px rgba(0,0,0,.45); z-index:2; }
+.poster:not(.is-center){ opacity:.92; filter:blur(1.2px) saturate(.96) brightness(.94); }
+.poster::after{ content:attr(data-label); position:absolute; inset:auto 6px 6px 6px; color:transparent; font:600 .8rem/1 var(--font-ui); }
+@media (min-width:768px){ .poster{ width:140px; } }
+@media (prefers-reduced-motion: reduce){ .poster{ transition:none; } .poster.is-center{ transform:none; box-shadow:none; } .poster:not(.is-center){ filter:none; opacity:1; } }
+/* Bottom spacer to help center Row C on mobile */
+.page-bottom-spacer{ height: calc(20vh + env(safe-area-inset-bottom)); }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -101,18 +123,18 @@
     <iframe id="hero-yt" title="Hero trailer" src="https://www.youtube.com/embed/VBdaOkpLe_o?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
   <div class="hero-gradient" aria-hidden="true"></div>
-  <div class="hero-overlay-wrap" style="position:absolute;top:0;bottom:0; left:calc((100% - 100vw)/2); right:calc((100% - 100vw)/2); z-index:2;display:flex;flex-direction:column; justify-content:flex-end;pointer-events:none;overflow:hidden;">
-    <div class="hero-overlay-inline" style="pointer-events:auto;position:absolute;bottom:0;left:0; max-width:720px;color:#fff;text-align:left; padding:12px calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left)); text-shadow:0 1px 3px rgba(0,0,0,.5); background:transparent;border-radius:12px 12px 0 0;">
+  <div class="hero-overlay-wrap" style="position:absolute;top:0;bottom:0;left:calc((100% - 100vw)/2);right:calc((100% - 100vw)/2);z-index:2;display:flex;flex-direction:column;justify-content:flex-end;pointer-events:none;overflow:hidden;">
+    <div class="hero-overlay-inline" style="pointer-events:auto;position:absolute;bottom:0;left:0;max-width:720px;color:#fff;text-align:left;padding:12px calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left));text-shadow:0 1px 3px rgba(0,0,0,.5);background:transparent;border-radius:12px 12px 0 0;">
       <div class="title-chip" role="heading" aria-level="1"><span class="title-chip-text">Sanchez Ninjah</span></div>
-      <p id="meta-line" style="margin:0 0 .14rem;color:var(--brand); font-size:clamp(.78rem,1.6vw,.95rem); font-weight:700;letter-spacing:.08em;text-transform:uppercase;">New Release | Thriller, Sci-Fi | 2024</p>
-      <p class="hero-synopsis" style="margin:0;color:#e5e7eb; font-size:clamp(.95rem,2.2vw,1.15rem);line-height:1.55; display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical; overflow:hidden;">As a rogue AI network threatens global collapse, a disgraced former agent is called back into the field for one last, impossible mission to save humanity.</p>
+      <p id="meta-line" style="margin:0 0 .14rem;color:var(--brand);font-size:clamp(.78rem,1.6vw,.95rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase;">New Release | Thriller, Sci-Fi | 2024</p>
+      <p class="hero-synopsis" style="margin:0;color:#e5e7eb;font-size:clamp(.95rem,2.2vw,1.15rem);line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">As a rogue AI network threatens global collapse, a disgraced former agent is called back into the field for one last, impossible mission to save humanity.</p>
     </div>
   </div>
   <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
 </section>
 
 <section class="after-hero" aria-label="Actions">
-  <div class="content-pad">
+  <div class="content-pad content-pad--tight">
     <div class="hero-cta">
       <button type="button" class="btn btn--solid" onclick="console.log('Play trailer')">
         <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg>
@@ -124,24 +146,269 @@
       </button>
     </div>
   </div>
+
+  <!-- Row A inside after-hero -->
+  <section class="shelf shelf--tight" aria-labelledby="row-a-title">
+    <div class="content-pad">
+      <h2 id="row-a-title" class="shelf-title">Row A</h2>
+      <div class="shelf-divider" aria-hidden="true"></div>
+    </div>
+    <div class="shelf-outer">
+      <div class="shelf-track" data-row="A" role="list" aria-label="Row A posters" data-testid="row-A">
+        <a class="poster" role="listitem" aria-label="A1" data-label="A1"></a>
+        <a class="poster" role="listitem" aria-label="A2" data-label="A2"></a>
+        <a class="poster" role="listitem" aria-label="A3" data-label="A3"></a>
+        <a class="poster" role="listitem" aria-label="A4" data-label="A4"></a>
+        <a class="poster" role="listitem" aria-label="A5" data-label="A5"></a>
+        <a class="poster" role="listitem" aria-label="A6" data-label="A6"></a>
+        <a class="poster" role="listitem" aria-label="A7" data-label="A7"></a>
+        <a class="poster" role="listitem" aria-label="A8" data-label="A8"></a>
+        <a class="poster" role="listitem" aria-label="A9" data-label="A9"></a>
+        <a class="poster" role="listitem" aria-label="A10" data-label="A10"></a>
+      </div>
+    </div>
+  </section>
 </section>
 
-  </main>
+<!-- Shelves: titles in container, cards full-bleed -->
+<section class="shelf" aria-labelledby="row-b-title">
+  <div class="content-pad">
+    <h2 id="row-b-title" class="shelf-title">Row B</h2>
+    <div class="shelf-divider" aria-hidden="true"></div>
+  </div>
+  <div class="shelf-outer">
+    <div class="shelf-track" data-row="B" role="list" aria-label="Row B posters" data-testid="row-B">
+      <a class="poster" role="listitem" aria-label="B1" data-label="B1"></a>
+      <a class="poster" role="listitem" aria-label="B2" data-label="B2"></a>
+      <a class="poster" role="listitem" aria-label="B3" data-label="B3"></a>
+      <a class="poster" role="listitem" aria-label="B4" data-label="B4"></a>
+      <a class="poster" role="listitem" aria-label="B5" data-label="B5"></a>
+      <a class="poster" role="listitem" aria-label="B6" data-label="B6"></a>
+      <a class="poster" role="listitem" aria-label="B7" data-label="B7"></a>
+      <a class="poster" role="listitem" aria-label="B8" data-label="B8"></a>
+      <a class="poster" role="listitem" aria-label="B9" data-label="B9"></a>
+      <a class="poster" role="listitem" aria-label="B10" data-label="B10"></a>
+    </div>
+  </div>
+</section>
 
+<section class="shelf" aria-labelledby="row-c-title">
+  <div class="content-pad">
+    <h2 id="row-c-title" class="shelf-title">Row C</h2>
+    <div class="shelf-divider" aria-hidden="true"></div>
+  </div>
+  <div class="shelf-outer">
+    <div class="shelf-track" data-row="C" role="list" aria-label="Row C posters" data-testid="row-C">
+      <a class="poster" role="listitem" aria-label="C1" data-label="C1"></a>
+      <a class="poster" role="listitem" aria-label="C2" data-label="C2"></a>
+      <a class="poster" role="listitem" aria-label="C3" data-label="C3"></a>
+      <a class="poster" role="listitem" aria-label="C4" data-label="C4"></a>
+      <a class="poster" role="listitem" aria-label="C5" data-label="C5"></a>
+      <a class="poster" role="listitem" aria-label="C6" data-label="C6"></a>
+      <a class="poster" role="listitem" aria-label="C7" data-label="C7"></a>
+      <a class="poster" role="listitem" aria-label="C8" data-label="C8"></a>
+      <a class="poster" role="listitem" aria-label="C9" data-label="C9"></a>
+      <a class="poster" role="listitem" aria-label="C10" data-label="C10"></a>
+    </div>
+  </div>
+</section>
+
+    <div class="page-bottom-spacer" aria-hidden="true"></div>
+  </main>
   <footer>© <span id="y"></span> Rawoul</footer>
   <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
-<script src="https://www.youtube.com/iframe_api"></script>
-<script>
-  let ytPlayer, isMuted = true;
-  function onYouTubeIframeAPIReady(){ ytPlayer = new YT.Player('hero-yt', { events: { onReady: e => { e.target.mute(); e.target.playVideo(); } } }); }
-  function toggleMute(){ if(!ytPlayer) return; if(isMuted){ ytPlayer.unMute(); isMuted=false; document.querySelector('.mute-btn').textContent='🔊'; document.querySelector('.mute-btn').setAttribute('aria-pressed','false'); } else { ytPlayer.mute(); isMuted=true; document.querySelector('.mute-btn').textContent='🔇'; document.querySelector('.mute-btn').setAttribute('aria-pressed','true'); } }
-</script>
-<script>
-  (function(){ function alignCta(){ const cta=document.querySelector('.hero-cta'); if(!cta||!cta.parentElement) return; const base=cta.parentElement.getBoundingClientRect().width; const target=Math.round(base*0.67); const clamped=Math.max(200, Math.min(target, 420)); cta.style.width=clamped+'px'; } window.addEventListener('load', alignCta); window.addEventListener('resize', alignCta); window.addEventListener('orientationchange', alignCta); })();
-</script>
-<script>
-  // Toggle pink gap debug on 'g'
-  document.addEventListener('keydown', e => { if (e.key.toLowerCase() === 'g') document.body.classList.toggle('debug-gap'); });
-</script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    // YouTube API glue
+    let ytPlayer, isMuted = true;
+    function onYouTubeIframeAPIReady(){
+      ytPlayer = new YT.Player('hero-yt', { events: { onReady: e => { e.target.mute(); e.target.playVideo(); } } });
+    }
+    function toggleMute(){
+      if(!ytPlayer) return;
+      if(isMuted){ ytPlayer.unMute(); isMuted=false; document.querySelector('.mute-btn').textContent='🔊'; document.querySelector('.mute-btn').setAttribute('aria-pressed','false'); }
+      else{ ytPlayer.mute(); isMuted=true; document.querySelector('.mute-btn').textContent='🔇'; document.querySelector('.mute-btn').setAttribute('aria-pressed','true'); }
+    }
+  </script>
+  <script>
+    // CTA width alignment
+    (function(){
+      function alignCta(){
+        const cta = document.querySelector('.hero-cta');
+        if(!cta || !cta.parentElement) return;
+        const base = cta.parentElement.getBoundingClientRect().width;
+        const target = Math.round(base * 0.67);
+        const clamped = Math.max(200, Math.min(target, 420));
+        cta.style.width = clamped + 'px';
+      }
+      window.addEventListener('load', alignCta);
+      window.addEventListener('resize', alignCta);
+      window.addEventListener('orientationchange', alignCta);
+    })();
+  </script>
+  <script>
+    // Gap debug toggle
+    document.addEventListener('keydown', e => {
+      if (e.key.toLowerCase() === 'g') document.body.classList.toggle('debug-gap');
+    });
+  </script>
+  <script>
+  // ─────────────────────────────────────────────────────────
+  // Shelves: snap, highlight, infinite loop, gestures
+  // ─────────────────────────────────────────────────────────
+  (function(){
+    'use strict';
+    const CLONES_PER_SIDE = 3;
+    const rows = document.querySelectorAll('.shelf-track');
+
+    function centerOf(el, scroller){
+      const r = el.getBoundingClientRect();
+      const cr = scroller.getBoundingClientRect();
+      return r.left + r.width/2 - cr.left + scroller.scrollLeft;
+    }
+    function centerScrollLeftFor(el, scroller){
+      const mid = scroller.clientWidth/2;
+      return centerOf(el, scroller) - mid;
+    }
+    function updateCenter(scroller){
+      const kids = Array.from(scroller.children);
+      if(!kids.length) return null;
+      const mid = scroller.scrollLeft + scroller.clientWidth/2;
+      let best = null, bestDist = Infinity;
+      for(const k of kids){
+        const c = centerOf(k, scroller);
+        const d = Math.abs(c - mid);
+        if(d < bestDist){ bestDist = d; best = k; }
+      }
+      kids.forEach(k => k.classList.toggle('is-center', k === best));
+      return best;
+    }
+    function makeClones(scroller){
+      const items = Array.from(scroller.children).filter(n => !n.dataset.clone);
+      if(items.length < 2) return;
+      const head = items.slice(0, CLONES_PER_SIDE).map(n => { const c=n.cloneNode(true); c.dataset.clone='true'; c.setAttribute('aria-hidden','true'); c.tabIndex=-1; return c; });
+      const tail = items.slice(-CLONES_PER_SIDE).map(n => { const c=n.cloneNode(true); c.dataset.clone='true'; c.setAttribute('aria-hidden','true'); c.tabIndex=-1; return c; });
+      tail.forEach(n => scroller.insertBefore(n, scroller.firstChild));
+      head.forEach(n => scroller.appendChild(n));
+      requestAnimationFrame(() => {
+        const firstReal = items[0];
+        scroller.scrollLeft = centerScrollLeftFor(firstReal, scroller);
+        updateCenter(scroller);
+      });
+    }
+    function onScroll(scroller){
+      if(scroller._raf) cancelAnimationFrame(scroller._raf);
+      scroller._raf = requestAnimationFrame(() => { updateCenter(scroller); });
+      if(scroller._timer) clearTimeout(scroller._timer);
+      scroller._timer = setTimeout(() => onScrollEnd(scroller), 120);
+    }
+    function onScrollEnd(scroller){
+      const active = updateCenter(scroller);
+      if(!active) return;
+      const label = active.getAttribute('aria-label');
+      if(active.dataset.clone && label){
+        const real = Array.from(scroller.children).find(n => n.getAttribute('aria-label')===label && !n.dataset.clone);
+        if(real){
+          scroller.scrollLeft = centerScrollLeftFor(real, scroller);
+          updateCenter(scroller);
+          return;
+        }
+      }
+      scroller.scrollLeft = centerScrollLeftFor(active, scroller);
+      updateCenter(scroller);
+    }
+
+    rows.forEach(scroller => {
+      makeClones(scroller);
+      scroller.addEventListener('scroll', () => onScroll(scroller), {passive:true});
+
+      // Pointer drag-to-swipe with gesture gating
+      let isDown=false, startX=0, startY=0, lastX=0, lastT=0, vx=0, mode=null;
+      scroller.addEventListener('pointerdown', e => {
+        if(e.pointerType==='mouse' && e.button !== 0) return;
+        isDown = true; mode = null;
+        startX = lastX = e.clientX; startY = e.clientY; lastT = performance.now();
+        scroller.setPointerCapture(e.pointerId);
+      });
+      scroller.addEventListener('pointermove', e => {
+        if(!isDown) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        const now = performance.now();
+        if(!mode){
+          if(Math.hypot(dx,dy) < 6) return;
+          mode = (Math.abs(dx) > Math.abs(dy) * 1.15) ? 'h' : 'v';
+          if(mode === 'h'){
+            scroller.classList.add('dragging');
+            scroller.style.scrollSnapType = 'none';
+            e.preventDefault();
+          }else{
+            try{ scroller.releasePointerCapture(e.pointerId); }catch{}
+            isDown = false; mode = null; return;
+          }
+        }
+        if(mode === 'h'){
+          const delta = e.clientX - lastX;
+          scroller.scrollLeft -= delta;
+          vx = delta / Math.max(1, (now - lastT));
+          lastX = e.clientX; lastT = now;
+          e.preventDefault();
+        }
+      });
+      function endDrag(){
+        if(!isDown) return;
+        isDown = false;
+        scroller.classList.remove('dragging');
+        scroller.style.scrollSnapType = 'x mandatory';
+        if(mode === 'h'){
+          const momentum = -vx * 180;
+          if(Math.abs(momentum) > 2){ scroller.scrollTo({ left: scroller.scrollLeft + momentum, behavior: 'smooth' }); }
+          setTimeout(() => onScrollEnd(scroller), 160);
+        }
+        mode = null;
+      }
+      scroller.addEventListener('pointerup', endDrag);
+      scroller.addEventListener('pointercancel', endDrag);
+
+      // Wheel routing: horizontal deltas move the row; vertical deltas move the page
+      scroller.addEventListener('wheel', e => {
+        const ax = Math.abs(e.deltaX), ay = Math.abs(e.deltaY);
+        const horizontalIntent = e.shiftKey || ax > ay * 1.1;
+        if(horizontalIntent){
+          const step = ax ? e.deltaX : e.deltaY; // support deltaY-only devices
+          scroller.scrollLeft += step;
+          e.preventDefault();
+          onScroll(scroller);
+          clearTimeout(scroller._wheelTimer);
+          scroller._wheelTimer = setTimeout(() => onScrollEnd(scroller), 140);
+        }
+      }, {passive:false});
+
+      // Keep active centered on resize
+      window.addEventListener('resize', () => {
+        const active = updateCenter(scroller);
+        if(active) scroller.scrollLeft = centerScrollLeftFor(active, scroller);
+      });
+    });
+
+    // ──────────────── Simple runtime tests (console) ────────────────
+    window.addEventListener('load', () => {
+      const tests = [];
+      function t(name, fn){ try{ fn(); console.log('%cPASS','color:#0f0', name); } catch(err){ console.error('FAIL', name, err); } }
+      const rowsArr = Array.from(document.querySelectorAll('.shelf-track'));
+      t('3 rows present', () => { if(rowsArr.length!==3) throw new Error('expected 3, got '+rowsArr.length); });
+      rowsArr.forEach((r,i)=>{
+        t(`row ${i+1} has 10 real items`, () => {
+          const real = Array.from(r.children).filter(n=>!n.dataset.clone);
+          if(real.length!==10) throw new Error('got '+real.length);
+        });
+        t(`row ${i+1} clones added`, () => {
+          const clones = Array.from(r.children).filter(n=>n.dataset.clone);
+          if(clones.length!==CLONES_PER_SIDE*2) throw new Error('got '+clones.length);
+        });
+      });
+    });
+  })();
+  </script>
 </body>
 </html>
