@@ -252,6 +252,7 @@ html{ overflow-x:hidden; }
   </script>
   <!-- Embla Carousel -->
   <script src="https://unpkg.com/embla-carousel/embla-carousel.umd.js"></script>
+  <script src="https://unpkg.com/embla-carousel-wheel-gestures/dist/embla-carousel-wheel-gestures.umd.js"></script>
   <script>
   (function(){
     'use strict';
@@ -260,16 +261,34 @@ html{ overflow-x:hidden; }
       const viewports = document.querySelectorAll('.shelf-outer');
 
       viewports.forEach((viewport) => {
-        const embla = EmblaCarousel(viewport, {
-          loop: true,
-          align: 'center',
-          dragFree: false,
-          containScroll: 'trimSnaps'
-        });
+        const embla = EmblaCarousel(
+          viewport,
+          {
+            align: 'center',
+            containScroll: 'trimSnaps',
+            dragFree: true,         // momentum + free drag
+            loop: false,            // natural ends
+            duration: 42            // softer programmatic landing
+          },
+          [ WheelGesturesPlugin({ forceWheelAxis: 'x' }) ] // smooth wheel/trackpad
+        );
         viewport._embla = embla;
 
         const slides = Array.from(viewport.querySelectorAll('.poster'));
         const track  = viewport.querySelector('.shelf-track');
+
+        // Soft "lay into" snap on release
+        const softSnap = () => {
+          // pick nearest snap based on progress
+          const snaps = embla.scrollSnapList();
+          const prog  = embla.scrollProgress();
+          let nearest = 0, best = Infinity;
+          for (let i = 0; i < snaps.length; i++){
+            const d = Math.abs(snaps[i] - prog);
+            if (d < best){ best = d; nearest = i; }
+          }
+          embla.scrollTo(nearest); // uses duration option
+        };
 
         const setSelected = () => {
           const i = embla.selectedScrollSnap();
@@ -277,7 +296,7 @@ html{ overflow-x:hidden; }
         };
 
         embla.on('pointerDown', () => track && track.classList.add('dragging'));
-        embla.on('pointerUp',   () => track && track.classList.remove('dragging'));
+        embla.on('pointerUp',   () => { if(track) track.classList.remove('dragging'); softSnap(); });
         embla.on('select', setSelected);
         embla.on('reInit', setSelected);
         setSelected();
