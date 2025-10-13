@@ -305,8 +305,11 @@ html{ overflow-x:hidden; }
       },
       events: {
         onReady: e => { 
-            try{ e.target.mute(); }catch{} 
-            try{ e.target.playVideo(); }catch{} 
+            // Aggressive initial mute and play, using a slight delay to help mobile browsers
+            setTimeout(() => {
+                try{ e.target.mute(); }catch{} 
+                try{ e.target.playVideo(); }catch{} 
+            }, 50);
         },
         // CRITICAL MOBILE FIX: Detect if play failed and attach temporary listeners
         onStateChange: e => {
