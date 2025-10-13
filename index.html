@@ -289,6 +289,7 @@ html{ overflow-x:hidden; }
   <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
   <script src="https://www.youtube.com/iframe_api"></script>
 <script>
+  // YouTube API: robust mobile autoplay (muted + inline). If blocked, retry on first gesture.
   let ytPlayer, isMuted = true;
   function onYouTubeIframeAPIReady(){
     ytPlayer = new YT.Player('hero-yt', {
@@ -303,7 +304,24 @@ html{ overflow-x:hidden; }
           modestbranding: 1 
       },
       events: {
-        onReady: e => { e.target.mute(); e.target.playVideo(); }
+        onReady: e => { 
+            try{ e.target.mute(); }catch{} 
+            try{ e.target.playVideo(); }catch{} 
+        },
+        // CRITICAL MOBILE FIX: Detect if play failed and attach temporary listeners
+        onStateChange: e => {
+          if(e.data === YT.PlayerState.UNSTARTED || e.data === YT.PlayerState.PAUSED){
+            const resume = () => { 
+                try{ ytPlayer.playVideo(); }catch{} 
+                window.removeEventListener('touchstart', resume); 
+                window.removeEventListener('click', resume); 
+                window.removeEventListener('scroll', resume); 
+            };
+            window.addEventListener('touchstart', resume, { once:true });
+            window.addEventListener('click', resume, { once:true });
+            window.addEventListener('scroll', resume, { once:true });
+          }
+        }
       }
     });
   }
