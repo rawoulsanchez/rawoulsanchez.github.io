@@ -188,7 +188,7 @@ html{ overflow-x:hidden; }
 <section class="hero" id="hero">
   <div class="hero-video">
 <iframe id="hero-yt" title="Hero trailer" playsinline
-  src="https://www.youtube.com/embed/VBdaOkpLe_o?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&origin=https://rawoulsanchez.github.io&playlist=VBdaOkpLe_o"
+  src="https://www.youtube.com/embed/VBdaOkpLe_o?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&origin=https://rawoulsanchez.github.io"
   allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
   allowfullscreen></iframe>
   </div>
@@ -288,28 +288,38 @@ html{ overflow-x:hidden; }
   <footer>© <span id="y"></span> Rawoul</footer>
   <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script>
-    let ytPlayer, isMuted = true;
-    function onYouTubeIframeAPIReady(){
-      ytPlayer = new YT.Player('hero-yt', {
-        events: {
-          onReady: e => { e.target.mute(); e.target.playVideo(); }
-        }
-      });
-    }
-    function toggleMute(){
-      if(!ytPlayer) return;
-      if(isMuted){
-        ytPlayer.unMute(); isMuted=false;
-        document.querySelector('.mute-btn').textContent='🔊';
-        document.querySelector('.mute-btn').setAttribute('aria-pressed','false');
-      } else {
-        ytPlayer.mute(); isMuted=true;
-        document.querySelector('.mute-btn').textContent='🔇';
-        document.querySelector('.mute-btn').setAttribute('aria-pressed','true');
+<script>
+  let ytPlayer, isMuted = true;
+  function onYouTubeIframeAPIReady(){
+    ytPlayer = new YT.Player('hero-yt', {
+      playerVars: { 
+          autoplay: 1, 
+          controls: 0, 
+          rel: 0, 
+          playsinline: 1, 
+          mute: 1, 
+          loop: 1, 
+          playlist: 'VBdaOkpLe_o', // CRITICAL for looping
+          modestbranding: 1 
+      },
+      events: {
+        onReady: e => { e.target.mute(); e.target.playVideo(); }
       }
+    });
+  }
+  function toggleMute(){
+    if(!ytPlayer) return;
+    if(isMuted){
+      ytPlayer.unMute(); isMuted=false;
+      document.querySelector('.mute-btn').textContent='🔊';
+      document.querySelector('.mute-btn').setAttribute('aria-pressed','false');
+    } else {
+      ytPlayer.mute(); isMuted=true;
+      document.querySelector('.mute-btn').textContent='🔇';
+      document.querySelector('.mute-btn').setAttribute('aria-pressed','true');
     }
-  </script>
+  }
+</script>
 <!-- Embla Carousel -->
 <script src="https://unpkg.com/embla-carousel/embla-carousel.umd.js"></script>
 <script src="https://unpkg.com/embla-carousel-class-names/embla-carousel-class-names.umd.js"></script>
