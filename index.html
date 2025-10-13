@@ -84,10 +84,10 @@ html{ overflow-x:hidden; }
 /* Embla viewport */
 .shelf-outer{ position:relative; width:100vw; left:50%; transform:translateX(-50%); overflow:hidden; touch-action: pan-y pinch-zoom; }
 /* Embla container */
-.shelf-track{ display:flex; gap:var(--shelf-gap); will-change:transform; padding:10px calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left)); cursor:grab; user-select:none; min-width:0; }
+.shelf-track{ display:flex; gap:var(--shelf-gap); will-change:transform; padding:10px 0 16px 0; cursor:grab; user-select:none; min-width:0; }
 .shelf-track.dragging{ cursor:grabbing; }
 .shelf-track[role="list"]{ list-style:none; }
-.poster{ position:relative; display:block; background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius); aspect-ratio:2/3; flex:0 0 auto; width:calc((100vw - (16px*2) - (var(--shelf-gap)*2)) / 3); transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease; transform-origin:center; }
+.poster{ position:relative; display:block; background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius); aspect-ratio:2/3; flex:0 0 calc((100% - (var(--shelf-gap)*2)) / 3); min-width:0; transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease; transform-origin:center; }
 .poster.is-snapped{ transform:scale(1.12); box-shadow:0 12px 24px rgba(0,0,0,.45); z-index:2; }
 .poster:not(.is-center){ opacity:1; filter:none; }
 .poster::after{ content:attr(data-label); position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); color:#eaeaf0; font:800 1.1rem/1 var(--font-ui); letter-spacing:.04em; text-shadow:0 1px 2px rgba(0,0,0,.45); opacity:.85; }
@@ -261,31 +261,25 @@ html{ overflow-x:hidden; }
   function initShelves(){
     const viewports = document.querySelectorAll('.shelf-outer');
 
-    const WheelPlugin =
-      window.WheelGesturesPlugin ||
-      (window.EmblaCarouselWheelGestures && window.EmblaCarouselWheelGestures.WheelGesturesPlugin) ||
-      null;
-    const ClassNamesPlugin = window.EmblaCarouselClassNames || null; // UMD global
-
     viewports.forEach((viewport) => {
       const plugins = [];
-      if (ClassNamesPlugin) plugins.push(ClassNamesPlugin({ snapped: 'is-snapped' })); // auto center class
-      if (WheelPlugin)      plugins.push(WheelPlugin({ forceWheelAxis: 'x' }));        // smooth wheel
+      if (window.EmblaCarouselClassNames) {
+        plugins.push(EmblaCarouselClassNames({ snapped: 'is-snapped' }));
+      }
+      if (window.EmblaCarouselWheelGestures && EmblaCarouselWheelGestures.WheelGesturesPlugin) {
+        plugins.push(EmblaCarouselWheelGestures.WheelGesturesPlugin({ forceWheelAxis: 'x' }));
+      }
 
-      const embla = EmblaCarousel(
-        viewport,
-        {
-          align: 'center',
-          loop: true,                 // seamless ring
-          dragFree: false,            // Embla snap physics
-          skipSnaps: true,            // allow quick flicks to skip
-          containScroll: 'keepSnaps', // keep all center snaps
-          duration: 40
-        },
-        plugins
-      );
-      viewport._embla = embla; // for tests/devtools
+      const embla = EmblaCarousel(viewport, {
+        loop: true,
+        align: 'center',
+        dragFree: false,          // snap to nearest
+        skipSnaps: false,
+        containScroll: 'trimSnaps',
+        duration: 30              // softer settle
+      }, plugins);
 
+      // Optional: change cursor class while dragging
       const track = viewport.querySelector('.shelf-track');
       embla.on('pointerDown', () => track && track.classList.add('dragging'));
       embla.on('pointerUp',   () => track && track.classList.remove('dragging'));
