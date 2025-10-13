@@ -82,7 +82,14 @@ html{ overflow-x:hidden; }
 .shelf-title{ font:700 1rem/1.3 var(--font-ui); color:var(--fg); margin:0 0 6px; }
 .shelf-divider{ height:2px; background:#3a3f46; opacity:.9; border-radius:2px; }
 /* Embla viewport */
-.shelf-outer{ position:relative; width:100vw; left:50%; transform:translateX(-50%); overflow:hidden; touch-action: pan-y pinch-zoom; }
+.shelf-outer{
+  position:relative;
+  width:100vw;
+  margin-left:calc(50% - 50vw);
+  margin-right:calc(50% - 50vw);
+  overflow:hidden;
+  touch-action: pan-y pinch-zoom;
+}
 /* Embla container */
 .shelf-track{ display:flex; gap:var(--shelf-gap); will-change:transform; padding:10px 0 16px 0; cursor:grab; user-select:none; min-width:0; }
 .shelf-track.dragging{ cursor:grabbing; }
@@ -143,7 +150,7 @@ html{ overflow-x:hidden; }
 <section class="hero" id="hero">
   <div class="hero-video">
 <iframe id="hero-yt" title="Hero trailer"
-  src="https://www.youtube.com/embed/VBdaOkpLe_o?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o&origin=https://rawoulsanchez.github.io"
+  src="https://www.youtube.com/embed/VBdaOkpLe_o?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o"
   allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
   allowfullscreen></iframe>
   </div>
