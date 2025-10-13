@@ -108,24 +108,25 @@ html{ overflow-x:hidden; }
 
 /* Slides */
 .poster{
-  position:relative; display:block;
-  background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius);
-  aspect-ratio:2/3;
-  flex:0 0 calc((100% - (var(--shelf-gap)*2)) / 3); /* ~3 visible */
-  min-width:0;
-  transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease;
-  transform-origin:center;
+  position:relative; display:block;
+  background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius);
+  aspect-ratio:2/3;
+  flex:0 0 calc((100% - (var(--shelf-gap)*2)) / 3); /* ~3 visible */
+  min-width:0;
+  /* Reverting to original sizing, removing centering effects */
+  transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease;
 }
 
 /* highlight the snapped (center) slide from Class Names plugin */
+/* Disabled: Restoring original multi-card view */
 .poster.is-snapped{
-  transform:scale(1.12);
-  box-shadow:0 12px 24px rgba(0,0,0,.45);
-  z-index:2;
+  /* No visual change */
 }
 
 /* non-center stays normal (no blur) */
-.poster:not(.is-snapped){ opacity:1; filter:none; }
+.poster:not(.is-snapped){
+  /* No visual change */
+}
 
 .poster::after{
   content:attr(data-label);
@@ -350,33 +351,31 @@ html{ overflow-x:hidden; }
 (function(){
   'use strict';
 
-  function initShelves(){
-    const viewports = document.querySelectorAll('.shelf-outer');
+function initShelves(){
+    const viewports = document.querySelectorAll('.shelf-outer');
 
-    viewports.forEach((viewport) => {
-      const plugins = [];
-      if (window.EmblaCarouselClassNames) {
-        plugins.push(EmblaCarouselClassNames({ snapped: 'is-snapped' }));
-      }
-      if (window.EmblaCarouselWheelGestures && EmblaCarouselWheelGestures.WheelGesturesPlugin) {
-        plugins.push(EmblaCarouselWheelGestures.WheelGesturesPlugin({ forceWheelAxis: 'x' }));
-      }
+    viewports.forEach((viewport) => {
+      const plugins = [];
+      // NOTE: EmblaCarouselClassNames plugin is REMOVED as it was causing single-item display/scaling.
+      if (window.EmblaCarouselWheelGestures && EmblaCarouselWheelGestures.WheelGesturesPlugin) {
+        plugins.push(EmblaCarouselWheelGestures.WheelGesturesPlugin({ forceWheelAxis: 'x' }));
+      }
 
-const embla = EmblaCarousel(viewport, {
+      const embla = EmblaCarousel(viewport, {
         loop: true,
-        align: 'center',
-        dragFree: false,          // snap to nearest
+        align: 'start',          // CRITICAL: Aligns slides to the start, restoring multi-card view
+        dragFree: false,
         skipSnaps: false,
-        containScroll: 'keepSnaps',
-        duration: 250              // Increased duration for smoother loop jump concealment
+        containScroll: 'none',  // CRITICAL: Allows looping to work seamlessly for this multi-card setup
+        duration: 250            // Increased duration for smoother loop jump concealment
       }, plugins);
 
-      // Optional: change cursor class while dragging
-      const track = viewport.querySelector('.shelf-track');
-      embla.on('pointerDown', () => track && track.classList.add('dragging'));
-      embla.on('pointerUp',   () => track && track.classList.remove('dragging'));
-    });
-  }
+      // Optional: change cursor class while dragging
+      const track = viewport.querySelector('.shelf-track');
+      embla.on('pointerDown', () => track && track.classList.add('dragging'));
+      embla.on('pointerUp',   () => track && track.classList.remove('dragging'));
+    });
+  }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initShelves);
