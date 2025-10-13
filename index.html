@@ -87,13 +87,31 @@ html{ overflow-x:hidden; }
 .shelf-track{ display:flex; gap:var(--shelf-gap); will-change:transform; padding:10px 0 16px 0; cursor:grab; user-select:none; min-width:0; }
 .shelf-track.dragging{ cursor:grabbing; }
 .shelf-track[role="list"]{ list-style:none; }
-.poster{ position:relative; display:block; background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius); aspect-ratio:2/3; flex:0 0 calc((100% - (var(--shelf-gap)*2)) / 3); min-width:0; transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease; transform-origin:center; }
+.poster{
+  position:relative; display:block;
+  background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius);
+  aspect-ratio:2/3;
+  flex:0 0 calc((100% - (var(--shelf-gap)*2)) / 3); /* ~3 visible */
+  min-width:0;
+  transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease;
+  transform-origin:center;
+}
+/* highlight the snapped (center) slide from Class Names plugin */
 .poster.is-snapped{ transform:scale(1.12); box-shadow:0 12px 24px rgba(0,0,0,.45); z-index:2; }
-.poster:not(.is-center){ opacity:1; filter:none; }
-.poster::after{ content:attr(data-label); position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); color:#eaeaf0; font:800 1.1rem/1 var(--font-ui); letter-spacing:.04em; text-shadow:0 1px 2px rgba(0,0,0,.45); opacity:.85; }
-.poster.is-center::after{ font-size:1.35rem; opacity:1; text-shadow:0 2px 4px rgba(0,0,0,.6); }
-@media (min-width:768px){ .poster{ width:140px; } }
-@media (prefers-reduced-motion: reduce){ .poster{ transition:none; } .poster.is-center{ transform:none; box-shadow:none; } .poster:not(.is-center){ filter:none; opacity:1; } }
+/* non-center stays normal (no blur) */
+.poster:not(.is-snapped){ opacity:1; filter:none; }
+.poster::after{
+  content:attr(data-label); position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  color:#eaeaf0; font:800 1.1rem/1 var(--font-ui); letter-spacing:.04em; text-shadow:0 1px 2px rgba(0,0,0,.45); opacity:.85;
+}
+.poster.is-snapped::after{ font-size:1.35rem; opacity:1; text-shadow:0 2px 4px rgba(0,0,0,.6); }
+/* remove the width override that can fight flex-basis sizing */
+/* @media (min-width:768px){ .poster{ width:140px; } } */
+@media (prefers-reduced-motion: reduce){
+  .poster{ transition:none; }
+  .poster.is-snapped{ transform:none; box-shadow:none; }
+  .poster:not(.is-snapped){ filter:none; opacity:1; }
+}
 /* Edge fades */
 .shelf-outer::before, .shelf-outer::after{ content:""; position:absolute; top:0; bottom:0; width:48px; pointer-events:none; z-index:1; }
 .shelf-outer::before{ left:0; background:linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0)); }
@@ -275,7 +293,7 @@ html{ overflow-x:hidden; }
         align: 'center',
         dragFree: false,          // snap to nearest
         skipSnaps: false,
-        containScroll: 'trimSnaps',
+        containScroll: 'keepSnaps',
         duration: 30              // softer settle
       }, plugins);
 
