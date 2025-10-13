@@ -289,28 +289,25 @@ html{ overflow-x:hidden; }
   <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
-    // YouTube API: robust mobile autoplay (muted + inline). If blocked, retry on first gesture.
     let ytPlayer, isMuted = true;
     function onYouTubeIframeAPIReady(){
       ytPlayer = new YT.Player('hero-yt', {
-        playerVars: { autoplay: 1, controls: 0, rel: 0, playsinline: 1, mute: 1, loop: 1, playlist: 'VBdaOkpLe_o', modestbranding: 1 },
         events: {
-          onReady: e => { try{ e.target.mute(); }catch{} try{ e.target.playVideo(); }catch{} },
-          onStateChange: e => {
-            if(e.data === YT.PlayerState.UNSTARTED || e.data === YT.PlayerState.PAUSED){
-              const resume = () => { try{ ytPlayer.playVideo(); }catch{} window.removeEventListener('touchstart', resume); window.removeEventListener('click', resume); window.removeEventListener('scroll', resume); };
-              window.addEventListener('touchstart', resume, { once:true });
-              window.addEventListener('click', resume, { once:true });
-              window.addEventListener('scroll', resume, { once:true });
-            }
-          }
+          onReady: e => { e.target.mute(); e.target.playVideo(); }
         }
       });
     }
     function toggleMute(){
       if(!ytPlayer) return;
-      if(isMuted){ ytPlayer.unMute(); isMuted=false; document.querySelector('.mute-btn').textContent='🔊'; document.querySelector('.mute-btn').setAttribute('aria-pressed','false'); }
-      else{ ytPlayer.mute(); isMuted=true; document.querySelector('.mute-btn').textContent='🔇'; document.querySelector('.mute-btn').setAttribute('aria-pressed','true'); }
+      if(isMuted){
+        ytPlayer.unMute(); isMuted=false;
+        document.querySelector('.mute-btn').textContent='🔊';
+        document.querySelector('.mute-btn').setAttribute('aria-pressed','false');
+      } else {
+        ytPlayer.mute(); isMuted=true;
+        document.querySelector('.mute-btn').textContent='🔇';
+        document.querySelector('.mute-btn').setAttribute('aria-pressed','true');
+      }
     }
   </script>
 <!-- Embla Carousel -->
