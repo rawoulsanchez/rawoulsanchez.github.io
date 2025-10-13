@@ -254,14 +254,15 @@ html{ overflow-x:hidden; }
   <script src="https://unpkg.com/embla-carousel/embla-carousel.umd.js"></script>
   <script src="https://unpkg.com/embla-carousel-wheel-gestures/dist/embla-carousel-wheel-gestures.umd.js"></script>
   <script>
-  // Smooth horizontal rows with “soft” center snap and safe wheel plugin fallback.
+  // Always highlight the slide closest to viewport center.
+  // Uses Embla 'scroll' and 'settle' events for continuous and final updates. :contentReference[oaicite:1]{index=1}
   (function(){
     'use strict';
 
     function initShelves(){
       const viewports = document.querySelectorAll('.shelf-outer');
 
-      // UMD safety: resolve plugin global if present, else no plugins.
+      // Resolve wheel plugin safely for UMD builds.
       const WheelPlugin =
         window.WheelGesturesPlugin ||
         (window.EmblaCarouselWheelGestures && window.EmblaCarouselWheelGestures.WheelGesturesPlugin) ||
@@ -269,15 +270,14 @@ html{ overflow-x:hidden; }
 
       viewports.forEach((viewport) => {
         const plugins = WheelPlugin ? [WheelPlugin({ forceWheelAxis: 'x' })] : [];
-
         const embla = EmblaCarousel(
           viewport,
           {
             align: 'center',
             containScroll: 'trimSnaps',
-            dragFree: true,          // momentum + free drag
-            loop: false,             // natural ends
-            duration: 40             // softer programmatic landing
+            dragFree: true,
+            loop: false,
+            duration: 40
           },
           plugins
         );
@@ -286,29 +286,43 @@ html{ overflow-x:hidden; }
         const slides = Array.from(viewport.querySelectorAll('.poster'));
         const track  = viewport.querySelector('.shelf-track');
 
-        // Soft “lay into center” after momentum stops.
-        const softSnap = () => {
-          const snaps = embla.scrollSnapList();   // 0..1 positions
-          const prog  = embla.scrollProgress();   // current 0..1
-          let nearest = 0, best = Infinity;
-          for (let i = 0; i < snaps.length; i++){
-            const d = Math.abs(snaps[i] - prog);
-            if (d < best){ best = d; nearest = i; }
+        // Find index of slide whose center is nearest viewport center.
+        function nearestCenterIndex(){
+          const vRect = viewport.getBoundingClientRect();
+          const vCx = vRect.left + vRect.width / 2;
+          let bestIdx = 0, bestDist = Infinity;
+          for (let i = 0; i < slides.length; i++){
+            const r = slides[i].getBoundingClientRect();
+            const cx = r.left + r.width / 2;
+            const d = Math.abs(cx - vCx);
+            if (d < bestDist){ bestDist = d; bestIdx = i; }
           }
-          embla.scrollTo(nearest); // honors duration
-        };
+          return bestIdx;
+        }
 
-        const setSelected = () => {
-          const i = embla.selectedScrollSnap();
-          slides.forEach((s, idx) => s.classList.toggle('is-center', idx === i));
-        };
+        function applyCenter(){
+          const idx = nearestCenterIndex();
+          for (let i = 0; i < slides.length; i++){
+            slides[i].classList.toggle('is-center', i === idx);
+          }
+        }
 
+        // Throttle continuous updates with rAF.
+        let ticking = false;
+        function onScroll(){
+          if (ticking) return;
+          ticking = true;
+          requestAnimationFrame(() => { applyCenter(); ticking = false; });
+        }
+
+        // UI sugar.
+        embla.on('init', applyCenter);
+        embla.on('reInit', applyCenter);
+        embla.on('scroll', onScroll);   // update while moving. :contentReference[oaicite:2]{index=2}
+        embla.on('settle', applyCenter); // final correction after momentum. :contentReference[oaicite:3]{index=3}
         embla.on('pointerDown', () => track && track.classList.add('dragging'));
-        embla.on('pointerUp',   () => { if(track) track.classList.remove('dragging'); });
-        embla.on('settle', softSnap);  // fire when momentum finishes
-        embla.on('select', setSelected);
-        embla.on('reInit', setSelected);
-        setSelected();
+        embla.on('pointerUp',   () => track && track.classList.remove('dragging'));
+        applyCenter();
       });
     }
 
