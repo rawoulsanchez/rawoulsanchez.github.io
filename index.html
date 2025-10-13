@@ -94,13 +94,14 @@ html{ overflow-x:hidden; }
 
 /* Embla container */
 .shelf-track{
-  display:flex;
-  gap:var(--shelf-gap);
-  will-change:transform;
-  padding:10px 0 16px 0;  /* no horizontal padding to avoid loop seam */
-  cursor:grab;
-  user-select:none;
-  min-width:0;
+  display:flex;
+  gap:var(--shelf-gap);
+  will-change:transform;
+  padding:10px 0 16px 0;
+  cursor:grab;
+  user-select:none;
+  min-width:0;
+  position:relative; /* Added for positioning children, might be needed later */
 }
 .shelf-track.dragging{ cursor:grabbing; }
 .shelf-track[role="list"]{ list-style:none; }
@@ -361,14 +362,14 @@ html{ overflow-x:hidden; }
         plugins.push(EmblaCarouselWheelGestures.WheelGesturesPlugin({ forceWheelAxis: 'x' }));
       }
 
-      const embla = EmblaCarousel(viewport, {
-        loop: true,
-        align: 'center',
-        dragFree: false,          // snap to nearest
-        skipSnaps: false,
-        containScroll: 'keepSnaps',
-        duration: 30              // softer settle
-      }, plugins);
+const embla = EmblaCarousel(viewport, {
+        loop: true,
+        align: 'center',
+        dragFree: false,          // snap to nearest
+        skipSnaps: false,
+        containScroll: 'keepSnaps',
+        duration: 250              // Increased duration for smoother loop jump concealment
+      }, plugins);
 
       // Optional: change cursor class while dragging
       const track = viewport.querySelector('.shelf-track');
