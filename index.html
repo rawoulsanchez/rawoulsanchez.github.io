@@ -84,7 +84,7 @@ html{ overflow-x:hidden; }
 /* Embla viewport */
 .shelf-outer{ position:relative; width:100vw; left:50%; transform:translateX(-50%); overflow:hidden; touch-action: pan-y pinch-zoom; }
 /* Embla container */
-.shelf-track{ display:flex; gap:var(--shelf-gap); will-change:transform; padding:10px calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left)); cursor:grab; user-select:none; }
+.shelf-track{ display:flex; gap:var(--shelf-gap); will-change:transform; padding:10px calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left)); cursor:grab; user-select:none; min-width:0; }
 .shelf-track.dragging{ cursor:grabbing; }
 .shelf-track[role="list"]{ list-style:none; }
 .poster{ position:relative; display:block; background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius); aspect-ratio:2/3; flex:0 0 auto; width:calc((100vw - (16px*2) - (var(--shelf-gap)*2)) / 3); transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease; transform-origin:center; }
@@ -263,21 +263,41 @@ html{ overflow-x:hidden; }
       const viewports = document.querySelectorAll('.shelf-outer');
 
       viewports.forEach((viewport) => {
-        const embla = EmblaCarousel(viewport, {
-          loop: true,
-          align: 'center',
-          skipSnaps: false,
-          dragFree: false,
-          containScroll: 'trimSnaps'
-          // By default Embla uses the first direct child as container. Keep .shelf-track first. :contentReference[oaicite:0]{index=0}
-        });
+        const embla = EmblaCarousel(
+          viewport,
+          {
+            loop: true,
+            align: 'center',
+            skipSnaps: false,
+            dragFree: false,
+            containScroll: 'trimSnaps',
+            container: '.shelf-track'  // use your track as container
+          }
+        );
         viewport._embla = embla;
 
         const slides = Array.from(viewport.querySelectorAll('.poster'));
+        const track  = viewport.querySelector('.shelf-track');
+
         const setSelected = () => {
           const i = embla.selectedScrollSnap();
           slides.forEach((s, idx) => s.classList.toggle('is-center', idx === i));
         };
+
+        embla.on('pointerDown', () => track && track.classList.add('dragging'));
+        embla.on('pointerUp',   () => track && track.classList.remove('dragging'));
+        embla.on('select', setSelected);
+        embla.on('reInit', setSelected);
+        setSelected();
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initShelves);
+    } else {
+      initShelves();
+    }
+  })();
 
         setSelected();
         embla.on('select', setSelected);
