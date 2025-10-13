@@ -254,15 +254,16 @@ html{ overflow-x:hidden; }
   <script src="https://unpkg.com/embla-carousel/embla-carousel.umd.js"></script>
   <script src="https://unpkg.com/embla-carousel-wheel-gestures/dist/embla-carousel-wheel-gestures.umd.js"></script>
   <script>
-  // Always highlight the slide closest to viewport center.
-  // Uses Embla 'scroll' and 'settle' events for continuous and final updates. :contentReference[oaicite:1]{index=1}
+  // Infinite “ring” feel: Embla repositions slides with loop:true.
+  // Center highlight always follows the visual center. Wheel fallback is safe. 
+  // Docs: loop, events, methods, wheel plugin. 
   (function(){
     'use strict';
 
     function initShelves(){
       const viewports = document.querySelectorAll('.shelf-outer');
 
-      // Resolve wheel plugin safely for UMD builds.
+      // UMD-safe plugin resolve.
       const WheelPlugin =
         window.WheelGesturesPlugin ||
         (window.EmblaCarouselWheelGestures && window.EmblaCarouselWheelGestures.WheelGesturesPlugin) ||
@@ -270,14 +271,15 @@ html{ overflow-x:hidden; }
 
       viewports.forEach((viewport) => {
         const plugins = WheelPlugin ? [WheelPlugin({ forceWheelAxis: 'x' })] : [];
+
         const embla = EmblaCarousel(
           viewport,
           {
             align: 'center',
-            containScroll: 'trimSnaps',
-            dragFree: true,
-            loop: false,
-            duration: 40
+            dragFree: true,              // momentum feel
+            loop: true,                  // seamless ring
+            containScroll: 'trimSnaps',  // tidy edges when loop falls back
+            duration: 44                 // gentle programmatic land
           },
           plugins
         );
@@ -286,7 +288,19 @@ html{ overflow-x:hidden; }
         const slides = Array.from(viewport.querySelectorAll('.poster'));
         const track  = viewport.querySelector('.shelf-track');
 
-        // Find index of slide whose center is nearest viewport center.
+        // Soft “lay into” the nearest snap when momentum finishes.
+        function softSnap(){
+          const snaps = embla.scrollSnapList();
+          const prog  = embla.scrollProgress();
+          let nearest = 0, best = Infinity;
+          for (let i = 0; i < snaps.length; i++){
+            const d = Math.abs(snaps[i] - prog);
+            if (d < best){ best = d; nearest = i; }
+          }
+          embla.scrollTo(nearest); // uses duration above
+        }
+
+        // Pick slide whose visual center is nearest viewport center.
         function nearestCenterIndex(){
           const vRect = viewport.getBoundingClientRect();
           const vCx = vRect.left + vRect.width / 2;
@@ -307,7 +321,7 @@ html{ overflow-x:hidden; }
           }
         }
 
-        // Throttle continuous updates with rAF.
+        // rAF throttle during scroll.
         let ticking = false;
         function onScroll(){
           if (ticking) return;
@@ -315,11 +329,10 @@ html{ overflow-x:hidden; }
           requestAnimationFrame(() => { applyCenter(); ticking = false; });
         }
 
-        // UI sugar.
         embla.on('init', applyCenter);
         embla.on('reInit', applyCenter);
-        embla.on('scroll', onScroll);   // update while moving. :contentReference[oaicite:2]{index=2}
-        embla.on('settle', applyCenter); // final correction after momentum. :contentReference[oaicite:3]{index=3}
+        embla.on('scroll', onScroll);   // follow finger/drag continuously
+        embla.on('settle', () => { applyCenter(); softSnap(); }); // final lay + highlight
         embla.on('pointerDown', () => track && track.classList.add('dragging'));
         embla.on('pointerUp',   () => track && track.classList.remove('dragging'));
         applyCenter();
