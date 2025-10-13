@@ -254,40 +254,48 @@ html{ overflow-x:hidden; }
   <script src="https://unpkg.com/embla-carousel/embla-carousel.umd.js"></script>
   <script src="https://unpkg.com/embla-carousel-wheel-gestures/dist/embla-carousel-wheel-gestures.umd.js"></script>
   <script>
+  // Smooth horizontal rows with “soft” center snap and safe wheel plugin fallback.
   (function(){
     'use strict';
 
     function initShelves(){
       const viewports = document.querySelectorAll('.shelf-outer');
 
+      // UMD safety: resolve plugin global if present, else no plugins.
+      const WheelPlugin =
+        window.WheelGesturesPlugin ||
+        (window.EmblaCarouselWheelGestures && window.EmblaCarouselWheelGestures.WheelGesturesPlugin) ||
+        null;
+
       viewports.forEach((viewport) => {
+        const plugins = WheelPlugin ? [WheelPlugin({ forceWheelAxis: 'x' })] : [];
+
         const embla = EmblaCarousel(
           viewport,
           {
             align: 'center',
             containScroll: 'trimSnaps',
-            dragFree: true,         // momentum + free drag
-            loop: false,            // natural ends
-            duration: 42            // softer programmatic landing
+            dragFree: true,          // momentum + free drag
+            loop: false,             // natural ends
+            duration: 40             // softer programmatic landing
           },
-          [ WheelGesturesPlugin({ forceWheelAxis: 'x' }) ] // smooth wheel/trackpad
+          plugins
         );
         viewport._embla = embla;
 
         const slides = Array.from(viewport.querySelectorAll('.poster'));
         const track  = viewport.querySelector('.shelf-track');
 
-        // Soft "lay into" snap on release
+        // Soft “lay into center” after momentum stops.
         const softSnap = () => {
-          // pick nearest snap based on progress
-          const snaps = embla.scrollSnapList();
-          const prog  = embla.scrollProgress();
+          const snaps = embla.scrollSnapList();   // 0..1 positions
+          const prog  = embla.scrollProgress();   // current 0..1
           let nearest = 0, best = Infinity;
           for (let i = 0; i < snaps.length; i++){
             const d = Math.abs(snaps[i] - prog);
             if (d < best){ best = d; nearest = i; }
           }
-          embla.scrollTo(nearest); // uses duration option
+          embla.scrollTo(nearest); // honors duration
         };
 
         const setSelected = () => {
@@ -296,7 +304,8 @@ html{ overflow-x:hidden; }
         };
 
         embla.on('pointerDown', () => track && track.classList.add('dragging'));
-        embla.on('pointerUp',   () => { if(track) track.classList.remove('dragging'); softSnap(); });
+        embla.on('pointerUp',   () => { if(track) track.classList.remove('dragging'); });
+        embla.on('settle', softSnap);  // fire when momentum finishes
         embla.on('select', setSelected);
         embla.on('reInit', setSelected);
         setSelected();
