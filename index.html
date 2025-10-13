@@ -254,16 +254,15 @@ html{ overflow-x:hidden; }
   <script src="https://unpkg.com/embla-carousel/embla-carousel.umd.js"></script>
   <script src="https://unpkg.com/embla-carousel-wheel-gestures/dist/embla-carousel-wheel-gestures.umd.js"></script>
   <script>
-  // Infinite “ring” feel: Embla repositions slides with loop:true.
-  // Center highlight always follows the visual center. Wheel fallback is safe. 
-  // Docs: loop, events, methods, wheel plugin. 
+  // Infinite, natural center snap.
+  // Uses Embla snap physics instead of custom “soft snap”.
   (function(){
     'use strict';
 
     function initShelves(){
       const viewports = document.querySelectorAll('.shelf-outer');
 
-      // UMD-safe plugin resolve.
+      // UMD-safe resolve of the wheel plugin
       const WheelPlugin =
         window.WheelGesturesPlugin ||
         (window.EmblaCarouselWheelGestures && window.EmblaCarouselWheelGestures.WheelGesturesPlugin) ||
@@ -276,66 +275,36 @@ html{ overflow-x:hidden; }
           viewport,
           {
             align: 'center',
-            dragFree: true,              // momentum feel
-            loop: true,                  // seamless ring
-            containScroll: 'trimSnaps',  // tidy edges when loop falls back
-            duration: 44                 // gentle programmatic land
+            loop: true,                 // seamless ring
+            dragFree: false,            // let Embla snap physics take over
+            skipSnaps: true,            // allow fast throws to skip multiple snaps
+            containScroll: 'keepSnaps', // keep all snaps so each card can center
+            duration: 40                // gentle programmatic moves (API-triggered)
           },
           plugins
         );
         viewport._embla = embla;
 
-        const slides = Array.from(viewport.querySelectorAll('.poster'));
-        const track  = viewport.querySelector('.shelf-track');
+        const slides = embla.slideNodes(); // reliable mapping to snaps
 
-        // Soft “lay into” the nearest snap when momentum finishes.
-        function softSnap(){
-          const snaps = embla.scrollSnapList();
-          const prog  = embla.scrollProgress();
-          let nearest = 0, best = Infinity;
-          for (let i = 0; i < snaps.length; i++){
-            const d = Math.abs(snaps[i] - prog);
-            if (d < best){ best = d; nearest = i; }
-          }
-          embla.scrollTo(nearest); // uses duration above
-        }
-
-        // Pick slide whose visual center is nearest viewport center.
-        function nearestCenterIndex(){
-          const vRect = viewport.getBoundingClientRect();
-          const vCx = vRect.left + vRect.width / 2;
-          let bestIdx = 0, bestDist = Infinity;
-          for (let i = 0; i < slides.length; i++){
-            const r = slides[i].getBoundingClientRect();
-            const cx = r.left + r.width / 2;
-            const d = Math.abs(cx - vCx);
-            if (d < bestDist){ bestDist = d; bestIdx = i; }
-          }
-          return bestIdx;
-        }
-
-        function applyCenter(){
-          const idx = nearestCenterIndex();
+        function setSelected(){
+          const idx = embla.selectedScrollSnap();
+          // Clear + set highlight
           for (let i = 0; i < slides.length; i++){
             slides[i].classList.toggle('is-center', i === idx);
           }
         }
 
-        // rAF throttle during scroll.
-        let ticking = false;
-        function onScroll(){
-          if (ticking) return;
-          ticking = true;
-          requestAnimationFrame(() => { applyCenter(); ticking = false; });
-        }
-
-        embla.on('init', applyCenter);
-        embla.on('reInit', applyCenter);
-        embla.on('scroll', onScroll);   // follow finger/drag continuously
-        embla.on('settle', () => { applyCenter(); softSnap(); }); // final lay + highlight
+        const track = viewport.querySelector('.shelf-track');
         embla.on('pointerDown', () => track && track.classList.add('dragging'));
         embla.on('pointerUp',   () => track && track.classList.remove('dragging'));
-        applyCenter();
+
+        // Highlight updates when the selected snap changes or after re-init
+        embla.on('init', setSelected);
+        embla.on('select', setSelected);
+        embla.on('reInit', setSelected);
+
+        setSelected();
       });
     }
 
