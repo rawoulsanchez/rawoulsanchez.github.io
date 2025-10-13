@@ -258,15 +258,40 @@ html{ overflow-x:hidden; }
   // ─────────────────────────────────────────────────────────
   (function(){
     'use strict';
-    const viewports = document.querySelectorAll('.shelf-outer');
-    viewports.forEach((viewport) => {
-      const embla = EmblaCarousel(viewport, { loop:true, align:'center', skipSnaps:false, dragFree:false, containScroll:'trimSnaps' });
-      viewport._embla = embla; // expose for tests
-      const slides = Array.from(viewport.querySelectorAll('.poster'));
-      const setSelected = () => {
-        const i = embla.selectedScrollSnap();
-        slides.forEach((s, idx) => s.classList.toggle('is-center', idx === i));
-      };
+
+    function initShelves(){
+      const viewports = document.querySelectorAll('.shelf-outer');
+
+      viewports.forEach((viewport) => {
+        const embla = EmblaCarousel(viewport, {
+          loop: true,
+          align: 'center',
+          skipSnaps: false,
+          dragFree: false,
+          containScroll: 'trimSnaps'
+          // By default Embla uses the first direct child as container. Keep .shelf-track first. :contentReference[oaicite:0]{index=0}
+        });
+        viewport._embla = embla;
+
+        const slides = Array.from(viewport.querySelectorAll('.poster'));
+        const setSelected = () => {
+          const i = embla.selectedScrollSnap();
+          slides.forEach((s, idx) => s.classList.toggle('is-center', idx === i));
+        };
+
+        setSelected();
+        embla.on('select', setSelected);
+        embla.on('reInit', setSelected);
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initShelves);
+    } else {
+      initShelves();
+    }
+  })();
+  </script>
       embla.on('select', setSelected);
       embla.on('reInit', setSelected);
       setSelected();
