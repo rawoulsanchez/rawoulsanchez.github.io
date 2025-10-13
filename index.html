@@ -92,6 +92,23 @@ html{ overflow-x:hidden; }
   touch-action: pan-y pinch-zoom;
 }
 
+/* Smooth looping variant for Row A only */
+.shelf-outer.smooth-loop{
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  touch-action: pan-x pinch-zoom;
+  scroll-behavior: smooth;
+}
+.shelf-outer.smooth-loop::-webkit-scrollbar{ display: none; }
+
+/* Track must size to content so the container can scroll it */
+.shelf-outer.smooth-loop .shelf-track{ display: inline-flex; }
+
+/* Disable smooth behavior only during invisible teleports */
+.no-smooth{ scroll-behavior: auto !important; }
+
 /* Embla container */
 .shelf-track{
   display:flex;
@@ -225,7 +242,7 @@ html{ overflow-x:hidden; }
       <h2 id="row-a-title" class="shelf-title">Row A</h2>
       <div class="shelf-divider" aria-hidden="true"></div>
     </div>
-    <div class="shelf-outer">
+<div class="shelf-outer smooth-loop" id="rowA">
       <div class="shelf-track" data-row="A" role="list" aria-label="Row A posters" data-testid="row-A">
         <a class="poster" role="listitem" aria-label="A1" data-label="A1"></a>
         <a class="poster" role="listitem" aria-label="A2" data-label="A2"></a>
@@ -352,7 +369,7 @@ html{ overflow-x:hidden; }
   'use strict';
 
 function initShelves(){
-    const viewports = document.querySelectorAll('.shelf-outer');
+const viewports = document.querySelectorAll('.shelf-outer:not(.smooth-loop)');
 
     viewports.forEach((viewport) => {
       const plugins = [];
@@ -382,6 +399,100 @@ function initShelves(){
   } else {
     initShelves();
   }
+})();
+</script>
+<script>
+/* Row A: seamless “horse carousel” using clones + middle-third recenter */
+(function(){
+  'use strict';
+  const container = document.getElementById('rowA');
+  if(!container) return;
+  const track = container.querySelector('.shelf-track[data-row="A"]');
+  if(!track) return;
+
+  function buildClones(){
+    // Remove old clones
+    track.querySelectorAll('[data-clone]').forEach(n => n.remove());
+    const originals = Array.from(track.querySelectorAll('.poster:not([data-clone])'));
+    if(!originals.length) return;
+
+    // Clone helpers
+    const mk = (el) => {
+      const c = el.cloneNode(true);
+      c.dataset.clone = 'true';
+      c.setAttribute('aria-hidden','true');
+      c.removeAttribute('role');
+      c.tabIndex = -1;
+      return c;
+    };
+
+    const leftFrag = document.createDocumentFragment();
+    const rightFrag = document.createDocumentFragment();
+    originals.forEach(el => leftFrag.appendChild(mk(el)));
+    originals.forEach(el => rightFrag.appendChild(mk(el)));
+    track.prepend(leftFrag);
+    track.appendChild(rightFrag);
+  }
+
+  function setToMiddle(){
+    container.classList.add('no-smooth');
+    const segment = track.scrollWidth / 3; // left clones | originals | right clones
+    container.scrollLeft = segment;
+    container.classList.remove('no-smooth');
+  }
+
+  function onScroll(){
+    if(onScroll.ticking) return;
+    onScroll.ticking = true;
+    requestAnimationFrame(() => {
+      const segment = track.scrollWidth / 3;
+      const leftEdge  = segment * 0.5;
+      const rightEdge = segment * 1.5;
+      if(container.scrollLeft < leftEdge){
+        container.classList.add('no-smooth');
+        container.scrollLeft += segment;
+        container.classList.remove('no-smooth');
+      } else if(container.scrollLeft > rightEdge){
+        container.classList.add('no-smooth');
+        container.scrollLeft -= segment;
+        container.classList.remove('no-smooth');
+      }
+      onScroll.ticking = false;
+    });
+  }
+  onScroll.ticking = false;
+
+  // Pointer-drag to scroll
+  let isDown=false, startX=0, startLeft=0;
+  container.addEventListener('pointerdown', (e) => {
+    isDown = true;
+    container.setPointerCapture(e.pointerId);
+    container.classList.add('no-smooth');
+    startX = e.clientX;
+    startLeft = container.scrollLeft;
+  });
+  container.addEventListener('pointermove', (e) => {
+    if(!isDown) return;
+    const dx = e.clientX - startX;
+    container.scrollLeft = startLeft - dx;
+  });
+  window.addEventListener('pointerup', () => {
+    isDown = false;
+    container.classList.remove('no-smooth');
+  });
+
+  // Init
+  buildClones();
+  container.addEventListener('scroll', onScroll, { passive:true });
+  if (document.readyState === 'complete') setToMiddle();
+  else window.addEventListener('load', setToMiddle);
+
+  // Recenter on resize
+  let t=0;
+  window.addEventListener('resize', () => {
+    clearTimeout(t);
+    t = setTimeout(setToMiddle, 120);
+  });
 })();
 </script>
 </body>
