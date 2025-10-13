@@ -92,58 +92,39 @@ html{ overflow-x:hidden; }
   touch-action: pan-y pinch-zoom;
 }
 
-/* Smooth looping variant for Row A only */
-.shelf-outer.smooth-loop{
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  touch-action: pan-x pinch-zoom;
-  scroll-behavior: smooth;
-}
-.shelf-outer.smooth-loop::-webkit-scrollbar{ display: none; }
-
-/* Track must size to content so the container can scroll it */
-.shelf-outer.smooth-loop .shelf-track{ display: inline-flex; }
-
-/* Disable smooth behavior only during invisible teleports */
-.no-smooth{ scroll-behavior: auto !important; }
-
 /* Embla container */
 .shelf-track{
-  display:flex;
-  gap:var(--shelf-gap);
-  will-change:transform;
-  padding:10px 0 16px 0;
-  cursor:grab;
-  user-select:none;
-  min-width:0;
-  position:relative; /* Added for positioning children, might be needed later */
+  display:flex;
+  gap:var(--shelf-gap);
+  will-change:transform;
+  padding:10px 0 16px 0;  /* no horizontal padding to avoid loop seam */
+  cursor:grab;
+  user-select:none;
+  min-width:0;
 }
 .shelf-track.dragging{ cursor:grabbing; }
 .shelf-track[role="list"]{ list-style:none; }
 
 /* Slides */
 .poster{
-  position:relative; display:block;
-  background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius);
-  aspect-ratio:2/3;
-  flex:0 0 calc((100% - (var(--shelf-gap)*2)) / 3); /* ~3 visible */
-  min-width:0;
-  /* Reverting to original sizing, removing centering effects */
-  transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease;
+  position:relative; display:block;
+  background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius);
+  aspect-ratio:2/3;
+  flex:0 0 calc((100% - (var(--shelf-gap)*2)) / 3); /* ~3 visible */
+  min-width:0;
+  transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease;
+  transform-origin:center;
 }
 
 /* highlight the snapped (center) slide from Class Names plugin */
-/* Disabled: Restoring original multi-card view */
 .poster.is-snapped{
-  /* No visual change */
+  transform:scale(1.12);
+  box-shadow:0 12px 24px rgba(0,0,0,.45);
+  z-index:2;
 }
 
 /* non-center stays normal (no blur) */
-.poster:not(.is-snapped){
-  /* No visual change */
-}
+.poster:not(.is-snapped){ opacity:1; filter:none; }
 
 .poster::after{
   content:attr(data-label);
@@ -242,7 +223,7 @@ html{ overflow-x:hidden; }
       <h2 id="row-a-title" class="shelf-title">Row A</h2>
       <div class="shelf-divider" aria-hidden="true"></div>
     </div>
-<div class="shelf-outer smooth-loop" id="rowA">
+<div class="shelf-outer">
       <div class="shelf-track" data-row="A" role="list" aria-label="Row A posters" data-testid="row-A">
         <a class="poster" role="listitem" aria-label="A1" data-label="A1"></a>
         <a class="poster" role="listitem" aria-label="A2" data-label="A2"></a>
@@ -368,131 +349,39 @@ html{ overflow-x:hidden; }
 (function(){
   'use strict';
 
-function initShelves(){
-const viewports = document.querySelectorAll('.shelf-outer:not(.smooth-loop)');
+  function initShelves(){
+    const viewports = document.querySelectorAll('.shelf-outer');
 
-    viewports.forEach((viewport) => {
-      const plugins = [];
-      // NOTE: EmblaCarouselClassNames plugin is REMOVED as it was causing single-item display/scaling.
-      if (window.EmblaCarouselWheelGestures && EmblaCarouselWheelGestures.WheelGesturesPlugin) {
-        plugins.push(EmblaCarouselWheelGestures.WheelGesturesPlugin({ forceWheelAxis: 'x' }));
-      }
+    viewports.forEach((viewport) => {
+      const plugins = [];
+      if (window.EmblaCarouselClassNames) {
+        plugins.push(EmblaCarouselClassNames({ snapped: 'is-snapped' }));
+      }
+      if (window.EmblaCarouselWheelGestures && EmblaCarouselWheelGestures.WheelGesturesPlugin) {
+        plugins.push(EmblaCarouselWheelGestures.WheelGesturesPlugin({ forceWheelAxis: 'x' }));
+      }
 
-      const embla = EmblaCarousel(viewport, {
-        loop: true,
-        align: 'start',          // CRITICAL: Aligns slides to the start, restoring multi-card view
-        dragFree: false,
-        skipSnaps: false,
-        containScroll: 'none',  // CRITICAL: Allows looping to work seamlessly for this multi-card setup
-        duration: 250            // Increased duration for smoother loop jump concealment
-      }, plugins);
+      const embla = EmblaCarousel(viewport, {
+        loop: true,
+        align: 'center',
+        dragFree: false,          // snap to nearest
+        skipSnaps: false,
+        containScroll: 'keepSnaps',
+        duration: 30              // softer settle
+      }, plugins);
 
-      // Optional: change cursor class while dragging
-      const track = viewport.querySelector('.shelf-track');
-      embla.on('pointerDown', () => track && track.classList.add('dragging'));
-      embla.on('pointerUp',   () => track && track.classList.remove('dragging'));
-    });
-  }
+      // Optional: change cursor class while dragging
+      const track = viewport.querySelector('.shelf-track');
+      embla.on('pointerDown', () => track && track.classList.add('dragging'));
+      embla.on('pointerUp',   () => track && track.classList.remove('dragging'));
+    });
+  }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initShelves);
   } else {
     initShelves();
   }
-})();
-</script>
-<script>
-/* Row A: seamless “horse carousel” using clones + middle-third recenter */
-(function(){
-  'use strict';
-  const container = document.getElementById('rowA');
-  if(!container) return;
-  const track = container.querySelector('.shelf-track[data-row="A"]');
-  if(!track) return;
-
-  function buildClones(){
-    // Remove old clones
-    track.querySelectorAll('[data-clone]').forEach(n => n.remove());
-    const originals = Array.from(track.querySelectorAll('.poster:not([data-clone])'));
-    if(!originals.length) return;
-
-    // Clone helpers
-    const mk = (el) => {
-      const c = el.cloneNode(true);
-      c.dataset.clone = 'true';
-      c.setAttribute('aria-hidden','true');
-      c.removeAttribute('role');
-      c.tabIndex = -1;
-      return c;
-    };
-
-    const leftFrag = document.createDocumentFragment();
-    const rightFrag = document.createDocumentFragment();
-    originals.forEach(el => leftFrag.appendChild(mk(el)));
-    originals.forEach(el => rightFrag.appendChild(mk(el)));
-    track.prepend(leftFrag);
-    track.appendChild(rightFrag);
-  }
-
-  function setToMiddle(){
-    container.classList.add('no-smooth');
-    const segment = track.scrollWidth / 3; // left clones | originals | right clones
-    container.scrollLeft = segment;
-    container.classList.remove('no-smooth');
-  }
-
-  function onScroll(){
-    if(onScroll.ticking) return;
-    onScroll.ticking = true;
-    requestAnimationFrame(() => {
-      const segment = track.scrollWidth / 3;
-      const leftEdge  = segment * 0.5;
-      const rightEdge = segment * 1.5;
-      if(container.scrollLeft < leftEdge){
-        container.classList.add('no-smooth');
-        container.scrollLeft += segment;
-        container.classList.remove('no-smooth');
-      } else if(container.scrollLeft > rightEdge){
-        container.classList.add('no-smooth');
-        container.scrollLeft -= segment;
-        container.classList.remove('no-smooth');
-      }
-      onScroll.ticking = false;
-    });
-  }
-  onScroll.ticking = false;
-
-  // Pointer-drag to scroll
-  let isDown=false, startX=0, startLeft=0;
-  container.addEventListener('pointerdown', (e) => {
-    isDown = true;
-    container.setPointerCapture(e.pointerId);
-    container.classList.add('no-smooth');
-    startX = e.clientX;
-    startLeft = container.scrollLeft;
-  });
-  container.addEventListener('pointermove', (e) => {
-    if(!isDown) return;
-    const dx = e.clientX - startX;
-    container.scrollLeft = startLeft - dx;
-  });
-  window.addEventListener('pointerup', () => {
-    isDown = false;
-    container.classList.remove('no-smooth');
-  });
-
-  // Init
-  buildClones();
-  container.addEventListener('scroll', onScroll, { passive:true });
-  if (document.readyState === 'complete') setToMiddle();
-  else window.addEventListener('load', setToMiddle);
-
-  // Recenter on resize
-  let t=0;
-  window.addEventListener('resize', () => {
-    clearTimeout(t);
-    t = setTimeout(setToMiddle, 120);
-  });
 })();
 </script>
 </body>
