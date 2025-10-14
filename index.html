@@ -609,67 +609,73 @@ html { overflow-x: hidden; }
 </script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const shelves = document.querySelectorAll('.shelf-track');
-    // This creates 4 copies before and 4 after the original set.
-    // Total sets = 9 (e.g., 90 cards per row), which creates a seamless infinite illusion.
+    // Number of original sets to clone on each side for the infinite effect
     const CLONE_COUNT = 4;
 
-    shelves.forEach(track => {
+    document.querySelectorAll('.shelf-track').forEach(track => {
       const originalPosters = Array.from(track.children);
-      const originalPosterCount = originalPosters.length;
-      if (originalPosterCount === 0) return;
+      if (originalPosters.length === 0) return;
 
-      // 1. CLONE POSTERS FOR THE "INFINITE" ILLUSION
-      const fragmentBefore = document.createDocumentFragment();
-      const fragmentAfter = document.createDocumentFragment();
+      // --- 1. CLONE POSTERS for infinite effect ---
+      const fragment = document.createDocumentFragment();
+      originalPosters.forEach(poster => fragment.appendChild(poster.cloneNode(true)));
+
       for (let i = 0; i < CLONE_COUNT; i++) {
-        originalPosters.forEach(poster => {
-          fragmentBefore.appendChild(poster.cloneNode(true));
-          fragmentAfter.appendChild(poster.cloneNode(true));
-        });
+        track.prepend(fragment.cloneNode(true));
+        track.append(fragment.cloneNode(true));
       }
-      track.prepend(fragmentBefore);
-      track.append(fragmentAfter);
 
-      // 2. SET INITIAL SCROLL POSITION
-      // We start the view at the beginning of the *original* set of posters.
-      const initialPosterIndex = originalPosterCount * CLONE_COUNT;
+      // --- 2. SET INITIAL SCROLL POSITION ---
+      // We want to start at the first "real" card, not the clones.
+      const initialPosterIndex = originalPosters.length * CLONE_COUNT;
       const initialPoster = track.children[initialPosterIndex];
       if (!initialPoster) return;
-      
-      // Calculate the correct scroll position to perfectly center the first original poster.
-      const trackWidth = track.getBoundingClientRect().width;
-      const posterWidth = initialPoster.getBoundingClientRect().width;
-      const initialScrollLeft = initialPoster.offsetLeft - (trackWidth / 2) + (posterWidth / 2);
-      track.scrollLeft = initialScrollLeft;
 
-      // 3. USE INTERSECTION OBSERVER FOR EFFICIENTLY SCALING THE CENTERED CARD
+      // Calculate the position to perfectly center the first real poster on load
+      const trackRect = track.getBoundingClientRect();
+      const initialPosterRect = initialPoster.getBoundingClientRect();
+      track.scrollLeft = initialPoster.offsetLeft - (trackRect.width / 2) + (initialPosterRect.width / 2);
+
+      // --- 3. THIS IS THE NEW, RELIABLE METHOD ---
+      // This function finds which poster is physically closest to the center of the shelf.
       let activePoster = null;
-      const observerCallback = (entries) => {
-        entries.forEach(entry => {
-          // When a poster enters the central "activation zone"...
-          if (entry.isIntersecting) {
-            // Un-style the previously active poster
-            if (activePoster) activePoster.classList.remove('is-active');
-            // Style the new active poster
-            entry.target.classList.add('is-active');
-            activePoster = entry.target;
+      let scrollTimeout; // Used to prevent the code from running too frequently
+
+      function updateActivePoster() {
+        const trackCenterX = track.getBoundingClientRect().left + track.getBoundingClientRect().width / 2;
+        let closestPoster = null;
+        let smallestDistance = Infinity;
+
+        // Loop through all posters to find the closest one to the center
+        for (const poster of track.children) {
+          const posterCenterX = poster.getBoundingClientRect().left + poster.getBoundingClientRect().width / 2;
+          const distance = Math.abs(trackCenterX - posterCenterX);
+
+          if (distance < smallestDistance) {
+            smallestDistance = distance;
+            closestPoster = poster;
           }
-        });
-      };
-      
-      // This observer's "root" is the track itself. The 'rootMargin' creates a
-      // zero-width vertical line down the exact center of the track. A poster
-      // only "intersects" when it crosses this line. This is far more
-      // performant than using a scroll event listener.
-      const observer = new IntersectionObserver(observerCallback, {
-        root: track,
-        rootMargin: '0px -50% 0px -50%',
-        threshold: 0.5
+        }
+
+        // If the closest poster has changed, update the styling
+        if (closestPoster && closestPoster !== activePoster) {
+          if (activePoster) {
+            activePoster.classList.remove('is-active');
+          }
+          closestPoster.classList.add('is-active');
+          activePoster = closestPoster;
+        }
+      }
+
+      // Run the check whenever the user scrolls the shelf
+      track.addEventListener('scroll', () => {
+        // We add a tiny delay (debounce) so this doesn't fire too aggressively
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(updateActivePoster, 50);
       });
 
-      // Tell the observer to watch every poster in the track.
-      Array.from(track.children).forEach(poster => observer.observe(poster));
+      // Run it once right after the page loads
+      updateActivePoster();
     });
   });
 </script>
