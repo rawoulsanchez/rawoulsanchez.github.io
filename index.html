@@ -95,9 +95,10 @@ html{ overflow-x:hidden; }
 /* Embla container */
 .shelf-track{
   display:flex;
-  gap:var(--shelf-gap);
+  gap:0;                          /* IMPORTANT: no gap to avoid loop seam */
   will-change:transform;
-  padding:10px 0 16px 0;  /* no horizontal padding to avoid loop seam */
+  transform:translateZ(0);         /* stabilize GPU rounding */
+  padding:10px 0 16px 0;          /* vertical padding only */
   cursor:grab;
   user-select:none;
   min-width:0;
@@ -110,11 +111,15 @@ html{ overflow-x:hidden; }
   position:relative; display:block;
   background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius);
   aspect-ratio:2/3;
-  flex:0 0 calc((100% - (var(--shelf-gap)*2)) / 3); /* ~3 visible */
+  /* 3 visible items: width accounts for two gaps we add via margins */
+  flex:0 0 calc((100% - (var(--shelf-gap)*2)) / 3);
   min-width:0;
   transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease;
   transform-origin:center;
 }
+/* Seam-safe spacing: use margins on slides, not gap on track */
+.shelf-track > .poster{ margin-right:var(--shelf-gap); }
+.shelf-track > .poster:last-child{ margin-right:0; }
 
 /* highlight the snapped (center) slide from Class Names plugin */
 .poster.is-snapped{
@@ -366,8 +371,8 @@ html{ overflow-x:hidden; }
         align: 'center',
         dragFree: false,          // snap to nearest
         skipSnaps: false,
-        containScroll: 'keepSnaps',
-        duration: 30              // softer settle
+        duration: 30,             // softer settle
+        loopAdditionalSlides: 2   // extra clones to mask wrap
       }, plugins);
 
       // Optional: change cursor class while dragging
