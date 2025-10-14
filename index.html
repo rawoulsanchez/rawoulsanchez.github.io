@@ -111,8 +111,8 @@ html{ overflow-x:hidden; }
   position:relative; display:block;
   background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius);
   aspect-ratio:2/3;
-  /* fixed whole-pixel slide width to prevent rounding glitches */
-  flex:0 0 300px;
+  /* ~3 visible: spacing handled by margins, not gap */
+  flex:0 0 calc((100% - (var(--shelf-gap)*2)) / 3);
   min-width:0;
   transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease;
   transform-origin:center;
@@ -365,11 +365,11 @@ html{ overflow-x:hidden; }
 
       const embla = EmblaCarousel(viewport, {
         loop: true,
-        align: 'start',            // start = cleaner wrap
-        dragFree: false,           // snap to nearest
+        align: 'start',
+        dragFree: false,
         skipSnaps: false,
         duration: 30,
-        loopAdditionalSlides: 2    // extra clones for smooth wrap
+        loopAdditionalSlides: 4
       }, plugins);
 
       // Optional: change cursor class while dragging
