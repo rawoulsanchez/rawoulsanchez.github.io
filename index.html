@@ -92,61 +92,55 @@ html{ overflow-x:hidden; }
   touch-action: pan-y pinch-zoom;
 }
 
-/* Embla container */
+/* Embla container (Now an auto-scrolling track) */
 .shelf-track{
-  display:flex;
-  gap:0;                          /* no gap: prevents loop seam */
-  will-change:transform;
-  transform:translateZ(0);         /* stabilize rounding */
-  padding:10px 0 16px 0;          /* vertical padding only */
-  cursor:grab;
-  user-select:none;
-  min-width:0;
+  display:flex;
+  gap:0;
+  will-change:transform;
+  transform:translateZ(0);
+  padding:10px 0 16px 0;
+  user-select:none;
+  min-width:0;
+  /* New styles for infinite scroll: */
+  width: max-content; /* Allow track to grow for duplicated content */
+  pointer-events: none; /* Disable interaction on the track */
+  animation: scroll 60s linear infinite; /* Apply the scroll animation */
 }
-.shelf-track.dragging{ cursor:grabbing; }
+/* Pause animation on hover */
+.shelf-track:hover{ animation-play-state: paused; }
 .shelf-track[role="list"]{ list-style:none; }
 
 /* Slides */
 .poster{
-  position:relative; display:block;
-  background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius);
-  aspect-ratio:2/3;
-  /* ~3 visible: spacing handled by margins, not gap */
-  flex:0 0 calc((100% - (var(--shelf-gap)*2)) / 3);
-  min-width:0;
-  transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease;
-  transform-origin:center;
+  position:relative; display:block;
+  background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius);
+  aspect-ratio:2/3;
+  /* Set to show exactly 3 posters plus spacing on a standard screen */
+  flex:0 0 calc((100vw - (var(--shelf-gap)*4)) / 3);
+  min-width:0;
+  transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease;
+  transform-origin:center;
 }
 /* Spacing via margins (seam-safe) */
 .shelf-track > .poster{ margin-right:var(--shelf-gap); }
 .shelf-track > .poster:last-child{ margin-right:0; }
 
-/* highlight the snapped (center) slide from Class Names plugin */
-.poster.is-snapped{
-  transform:none; /* no scale to avoid wrap jump */
-  box-shadow:0 12px 24px rgba(0,0,0,.45);
-  z-index:2;
-}
-
-/* non-center stays normal (no blur) */
-.poster:not(.is-snapped){ opacity:1; filter:none; }
-
+/* Poster label (keep this, removed the Embla-specific parts) */
 .poster::after{
-  content:attr(data-label);
-  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-  color:#eaeaf0; font:800 1.1rem/1 var(--font-ui); letter-spacing:.04em;
-  text-shadow:0 1px 2px rgba(0,0,0,.45); opacity:.85;
-}
-.poster.is-snapped::after{
-  font-size:1.35rem; opacity:1; text-shadow:0 2px 4px rgba(0,0,0,.6);
+  content:attr(data-label);
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  color:#eaeaf0; font:800 1.1rem/1 var(--font-ui); letter-spacing:.04em;
+  text-shadow:0 1px 2px rgba(0,0,0,.45); opacity:.85;
 }
 
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce){
-  .poster{ transition:none; }
-  .poster.is-snapped{ transform:none; box-shadow:none; }
-  .poster:not(.is-snapped){ filter:none; opacity:1; }
+/* Keyframe for the infinite scroll movement */
+@keyframes scroll {
+  from { transform: translateX(0); }
+  /* Scroll the exact width of the original content block to loop seamlessly */
+  to { transform: translateX(calc(-50% - (var(--shelf-gap) / 2))); }
 }
+/* NOTE: The calc(-50% ...) in 'to' is a simplified way to cover the original content's width, assuming
+         the duplication script (below) makes the track 2x size. */
 
 /* Edge fades */
 .shelf-outer::before,
@@ -347,81 +341,33 @@ html{ overflow-x:hidden; }
   }
 </script>
 <!-- Embla Carousel -->
-<script src="https://unpkg.com/embla-carousel/embla-carousel.umd.js"></script>
-<script src="https://unpkg.com/embla-carousel-class-names/embla-carousel-class-names.umd.js"></script>
-<script src="https://unpkg.com/embla-carousel-wheel-gestures/dist/embla-carousel-wheel-gestures.umd.js"></script>
 <script>
 (function(){
-  'use strict';
+  'use strict';
 
-(function(){
-  'use strict';
+  function setupInfiniteScroll(){
+    const tracks = document.querySelectorAll('.shelf-track');
+    
+    tracks.forEach((track) => {
+      // Duplicate the content once to allow the CSS animation to loop seamlessly
+      const content = Array.from(track.children);
+      content.forEach(node => {
+        // Clone the node and append it to the track
+        track.appendChild(node.cloneNode(true));
+      });
+      
+      // This style adjustment ensures the animation starts on the new content width
+      // and is applied immediately after duplication.
+      track.style.animationName = 'scroll';
+    });
+  }
 
-  function initShelves(){
-    const viewports = document.querySelectorAll('.shelf-outer');
-
-    viewports.forEach((viewport) => {
-      const track = viewport.querySelector('.shelf-track');
-      if (!track) return;
-
-      // === 1. Clone slides both sides for true infinite feel ===
-      const slides = Array.from(track.children);
-      const clonesBefore = slides.map(slide => slide.cloneNode(true));
-      const clonesAfter  = slides.map(slide => slide.cloneNode(true));
-
-      clonesBefore.forEach(clone => track.insertBefore(clone, track.firstChild));
-      clonesAfter.forEach(clone => track.appendChild(clone));
-
-      // === 2. Initialize Embla centered snapping ===
-      const plugins = [];
-      if (window.EmblaCarouselClassNames) {
-        plugins.push(EmblaCarouselClassNames({ snapped: 'is-snapped' }));
-      }
-
-      const embla = EmblaCarousel(viewport, {
-        loop: false,          // handled manually
-        align: 'center',      // center snap
-        skipSnaps: false,
-        dragFree: false,
-        duration: 30
-      }, plugins);
-
-      // === 3. Start on the middle copy (real set) ===
-      const slideCount = slides.length;
-      embla.scrollTo(slideCount, 0); // move to the first "real" A1
-
-      // === 4. Manual seamless wrap ===
-      embla.on('select', () => {
-        const index = embla.selectedScrollSnap();
-        if (index < slideCount) {
-          // Scrolled too far left: jump to same index in center copy
-          embla.scrollTo(index + slideCount, 0);
-        } else if (index >= slideCount * 2) {
-          // Scrolled too far right: jump to same index in center copy
-          embla.scrollTo(index - slideCount, 0);
-        }
-      });
-
-      // === 5. Cursor feedback ===
-      const trackEl = track;
-      embla.on('pointerDown', () => trackEl.classList.add('dragging'));
-      embla.on('pointerUp',   () => trackEl.classList.remove('dragging'));
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initShelves);
-  } else {
-    initShelves();
-  }
-})();
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initShelves);
-  } else {
-    initShelves();
-  }
+  // Run the setup when the DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupInfiniteScroll);
+  } else {
+    setupInfiniteScroll();
+  }
 })();
 </script>
 </body>
