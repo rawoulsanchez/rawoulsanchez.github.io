@@ -115,10 +115,9 @@ html{ overflow-x:hidden; }
   position:relative; display:block;
   background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius);
   aspect-ratio:2/3;
-  /* FIX: Calculate size relative to the viewport (100vw) to match original 3-per-row look. 
-     We subtract the total padding (16px left + 16px right = 32px) from 100vw 
-     and then distribute the gaps. */
-  flex:0 0 calc((100vw - 32px - (var(--shelf-gap) * 3)) / 3);
+  /* NEW ROBUST SIZING: The posters take up 10% of the *original* track width. 
+     We compensate for the gap outside this flex basis. */
+  flex:0 0 10%; 
   min-width:0;
   transition: none; /* Disable transitions for smooth ticker */
   transform-origin:center;
@@ -138,15 +137,9 @@ html{ overflow-x:hidden; }
 @keyframes scroll {
   from { transform: translateX(0); }
   to { 
-    /* SCROLL DISTANCE: Calculate the exact width of one set of 10 posters plus their gaps. */
-    transform: translateX(
-      calc(
-        /* -10 * poster width */
-        -10 * ((100vw - 32px - (var(--shelf-gap) * 3)) / 3) 
-        /* -9 * spacing between them */
-        -9 * var(--shelf-gap)
-      )
-    );
+    /* SCROLL DISTANCE: Since the track is doubled in JS and each poster is 10% width, 
+        scrolling -50% takes us exactly one cycle. This is the simplest, most reliable keyframe. */
+    transform: translateX(-50%); 
   }
 }
 
@@ -171,6 +164,14 @@ html{ overflow-x:hidden; }
 
 /* Bottom spacer to help center Row C on mobile */
 .page-bottom-spacer{ height: calc(20vh + env(safe-area-inset-bottom)); }
+/* Media query to force the width of the posters to the desired size, compensating for the 10% flex-basis used for stable animation. */
+@media (min-width: 0px) {
+  .shelf-track > .poster {
+    /* Re-apply the desired visible width here, using !important to override the 10% flex-basis 
+       only for the *rendered* width, not the flex calculation. */
+    width: calc((100vw - (var(--shelf-gap) * 4)) / 3) !important;
+  }
+}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
