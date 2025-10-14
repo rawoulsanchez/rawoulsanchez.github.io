@@ -111,8 +111,8 @@ html{ overflow-x:hidden; }
   position:relative; display:block;
   background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius);
   aspect-ratio:2/3;
-  /* 3 visible items: width accounts for two gaps added via margins */
-  flex:0 0 calc((100% - (var(--shelf-gap)*2)) / 3);
+  /* fixed whole-pixel slide width to prevent rounding glitches */
+  flex:0 0 300px;
   min-width:0;
   transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease;
   transform-origin:center;
@@ -123,7 +123,7 @@ html{ overflow-x:hidden; }
 
 /* highlight the snapped (center) slide from Class Names plugin */
 .poster.is-snapped{
-  transform:scale(1.12);
+  transform:none; /* no scale to avoid wrap jump */
   box-shadow:0 12px 24px rgba(0,0,0,.45);
   z-index:2;
 }
@@ -361,9 +361,6 @@ html{ overflow-x:hidden; }
       const plugins = [];
       if (window.EmblaCarouselClassNames) {
         plugins.push(EmblaCarouselClassNames({ snapped: 'is-snapped' }));
-      }
-      if (window.EmblaCarouselWheelGestures && EmblaCarouselWheelGestures.WheelGesturesPlugin) {
-        plugins.push(EmblaCarouselWheelGestures.WheelGesturesPlugin({ forceWheelAxis: 'x' }));
       }
 
       const embla = EmblaCarousel(viewport, {
