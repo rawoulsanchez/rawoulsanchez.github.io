@@ -110,22 +110,25 @@ html{ overflow-x:hidden; }
 .shelf-track:hover{ animation-play-state: paused; }
 .shelf-track[role="list"]{ list-style:none; }
 
-/* Slides */
+/* Slides (Corrected for Infinite Scroll) */
 .poster{
   position:relative; display:block;
   background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius);
   aspect-ratio:2/3;
-  /* Set to show exactly 3 posters plus spacing on a standard screen */
-  flex:0 0 calc((100vw - (var(--shelf-gap)*4)) / 3);
+  /* Use a fixed percentage based on total slide count for the seamless effect */
+  /* 10 posters * 2 (duplicated) = 20 total. 100% / 10 = 10% per slide (plus gap) */
+  flex:0 0 10%; 
   min-width:0;
-  transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease;
+  transition: none; /* Disable transition on posters for smooth ticker */
   transform-origin:center;
 }
 /* Spacing via margins (seam-safe) */
 .shelf-track > .poster{ margin-right:var(--shelf-gap); }
-.shelf-track > .poster:last-child{ margin-right:0; }
+.shelf-track > .poster:nth-child(10n + 0) { margin-right: 0; } /* Remove margin on the last poster of the original set (A10, B10, C10) */
+.shelf-track > .poster:nth-child(10n + 1) { margin-left: calc(var(--shelf-gap) / 2); } /* Add margin to the start of the first slide of each set (A1, A11) to balance space */
 
-/* Poster label (keep this, removed the Embla-specific parts) */
+
+/* Poster label (keeping for content visibility) */
 .poster::after{
   content:attr(data-label);
   position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
@@ -133,14 +136,11 @@ html{ overflow-x:hidden; }
   text-shadow:0 1px 2px rgba(0,0,0,.45); opacity:.85;
 }
 
-/* Keyframe for the infinite scroll movement */
+/* Keyframe for the infinite scroll movement (Corrected to shift exactly 50% of the total track width) */
 @keyframes scroll {
   from { transform: translateX(0); }
-  /* Scroll the exact width of the original content block to loop seamlessly */
-  to { transform: translateX(calc(-50% - (var(--shelf-gap) / 2))); }
+  to { transform: translateX(-50%); }
 }
-/* NOTE: The calc(-50% ...) in 'to' is a simplified way to cover the original content's width, assuming
-         the duplication script (below) makes the track 2x size. */
 
 /* Edge fades */
 .shelf-outer::before,
@@ -351,14 +351,13 @@ html{ overflow-x:hidden; }
     tracks.forEach((track) => {
       // Duplicate the content once to allow the CSS animation to loop seamlessly
       const content = Array.from(track.children);
+      // We only need one copy appended to the end for the seamless loop
       content.forEach(node => {
-        // Clone the node and append it to the track
         track.appendChild(node.cloneNode(true));
       });
       
-      // This style adjustment ensures the animation starts on the new content width
-      // and is applied immediately after duplication.
-      track.style.animationName = 'scroll';
+      // Ensures the animation is active after duplication
+      track.style.animationPlayState = 'running';
     });
   }
 
