@@ -360,14 +360,20 @@ html { overflow-x: hidden; }
   aspect-ratio: 2 / 3;
   width: calc((100vw - (16px * 2) - (var(--shelf-gap) * 2)) / 3); /* ~3.0 visible on mobile */
   scroll-snap-align: center; /* Snap posters to the center */
-  transition: transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
   transform-origin: center center;
+  /* Animate all the properties we change on the active state */
+  transition: transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1),
+              box-shadow 0.35s cubic-bezier(0.25, 0.1, 0.25, 1),
+              border-color 0.35s ease;
+  z-index: 1; /* Default stacking level */
 }
 
-/* New class for the active/centered poster */
+/* Style the active/centered poster to give it scale and depth */
 .poster.is-active {
-  transform: scale(1.12); /* Increase size by 12% */
-  border-color: #5a5f66;
+  transform: scale(1.12); /* Makes the card 12% bigger */
+  border-color: #777c83;  /* A slightly brighter border to highlight */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Adds a "lifted" shadow for depth */
+  z-index: 2; /* Ensures the active card renders on top of its neighbors */
 }
 
 /* Make the poster label visible and styled */
