@@ -76,7 +76,7 @@ html{ overflow-x:hidden; }
 
 /* ───────────────────────────────────────────────────────────
    Shelves (Rows A/B/C)
-   ─────────────────────────────────────────────────────────── */
+   ─────────────────────────────────────────── */
 .shelf{ margin:24px 0 32px; }
 .shelf--tight{ margin-top:8px; }
 .shelf-title{ font:700 1rem/1.3 var(--font-ui); color:var(--fg); margin:0 0 6px; }
@@ -95,9 +95,9 @@ html{ overflow-x:hidden; }
 /* Embla container */
 .shelf-track{
   display:flex;
-  gap:0;                          /* IMPORTANT: no gap to avoid loop seam */
+  gap:0;                          /* no gap: prevents loop seam */
   will-change:transform;
-  transform:translateZ(0);         /* stabilize GPU rounding */
+  transform:translateZ(0);         /* stabilize rounding */
   padding:10px 0 16px 0;          /* vertical padding only */
   cursor:grab;
   user-select:none;
@@ -111,13 +111,13 @@ html{ overflow-x:hidden; }
   position:relative; display:block;
   background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius);
   aspect-ratio:2/3;
-  /* 3 visible items: width accounts for two gaps we add via margins */
+  /* 3 visible items: width accounts for two gaps added via margins */
   flex:0 0 calc((100% - (var(--shelf-gap)*2)) / 3);
   min-width:0;
   transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease;
   transform-origin:center;
 }
-/* Seam-safe spacing: use margins on slides, not gap on track */
+/* Spacing via margins (seam-safe) */
 .shelf-track > .poster{ margin-right:var(--shelf-gap); }
 .shelf-track > .poster:last-child{ margin-right:0; }
 
@@ -368,11 +368,11 @@ html{ overflow-x:hidden; }
 
       const embla = EmblaCarousel(viewport, {
         loop: true,
-        align: 'center',
-        dragFree: false,          // snap to nearest
+        align: 'start',            // start = cleaner wrap
+        dragFree: false,           // snap to nearest
         skipSnaps: false,
-        duration: 30,             // softer settle
-        loopAdditionalSlides: 2   // extra clones to mask wrap
+        duration: 30,
+        loopAdditionalSlides: 2    // extra clones for smooth wrap
       }, plugins);
 
       // Optional: change cursor class while dragging
