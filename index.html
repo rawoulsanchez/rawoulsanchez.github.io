@@ -354,28 +354,45 @@ html{ overflow-x:hidden; }
 (function(){
   'use strict';
 
+(function(){
+  'use strict';
+
   function initShelves(){
     const viewports = document.querySelectorAll('.shelf-outer');
 
     viewports.forEach((viewport) => {
+      const track = viewport.querySelector('.shelf-track');
+      if (!track) return;
+
+      // --- Manual clone to fake infinity scroll ---
+      const slides = Array.from(track.children);
+      const cloneCount = slides.length; // clone once
+      const clones = slides.map(slide => slide.cloneNode(true));
+      clones.forEach(clone => track.appendChild(clone)); // append clones
+
+      // --- Initialize Embla without internal loop ---
       const plugins = [];
       if (window.EmblaCarouselClassNames) {
         plugins.push(EmblaCarouselClassNames({ snapped: 'is-snapped' }));
       }
 
       const embla = EmblaCarousel(viewport, {
-        loop: true,
+        loop: false,       // internal loop disabled
         align: 'start',
         dragFree: false,
         skipSnaps: false,
-        duration: 30,
-        loopAdditionalSlides: 4
+        duration: 30
       }, plugins);
 
-      // Optional: change cursor class while dragging
-      const track = viewport.querySelector('.shelf-track');
-      embla.on('pointerDown', () => track && track.classList.add('dragging'));
-      embla.on('pointerUp',   () => track && track.classList.remove('dragging'));
+      // --- Cursor visual feedback ---
+      embla.on('pointerDown', () => track.classList.add('dragging'));
+      embla.on('pointerUp',   () => track.classList.remove('dragging'));
+
+      // --- Reset scroll when reaching end (manual wrap) ---
+      embla.on('scroll', () => {
+        const scrollProgress = embla.scrollProgress();
+        if (scrollProgress > 0.98) embla.scrollTo(0, 0);
+      });
     });
   }
 
