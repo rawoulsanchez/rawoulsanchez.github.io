@@ -388,10 +388,12 @@ html{ overflow-x:hidden; }
       embla.on('pointerDown', () => track.classList.add('dragging'));
       embla.on('pointerUp',   () => track.classList.remove('dragging'));
 
-      // --- Reset scroll when reaching end (manual wrap) ---
-      embla.on('scroll', () => {
-        const scrollProgress = embla.scrollProgress();
-        if (scrollProgress > 0.98) embla.scrollTo(0, 0);
+      // --- Allow natural horizontal drag ---
+      // No manual reset. Users can swipe all slides without loop.
+      embla.reInit({
+        loop: false,
+        dragFree: true,
+        containScroll: "trimSnaps" // prevents empty space beyond last slide
       });
     });
   }
