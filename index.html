@@ -331,18 +331,56 @@ html { overflow-x: hidden; }
 .shelf-outer::before{ left:0; background:linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0)); }
 .shelf-outer::after{ right:0; background:linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0)); }
 /* Horizontal list of posters */
-.shelf-track{
-  display:grid; grid-auto-flow:column; gap:var(--shelf-gap);
-  overflow-x:auto; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch;
+/* --- SHELF TRACK --- */
+/* Add scroll-snapping and hide the scrollbar */
+.shelf-track {
+  display: grid;
+  grid-auto-flow: column;
+  gap: var(--shelf-gap);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 10px calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left));
+  scroll-snap-type: x mandatory; /* Snap horizontally */
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
 }
-.shelf-track[role="list"]{ list-style:none; }
-.poster{
-  position:relative; display:block; background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius);
-  aspect-ratio:2 / 3; width:calc((100vw - (16px*2) - (var(--shelf-gap)*2)) / 3); /* ~3.0 visible on mobile */
+.shelf-track::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome, Safari, Opera */
 }
-.poster::after{ /* dev-only label hidden visually */
-  content:attr(data-label); position:absolute; inset:auto 6px 6px 6px; color:transparent; font:600 .8rem/1 var(--font-ui);
+.shelf-track[role="list"] { list-style: none; }
+
+/* --- POSTER --- */
+/* Add snap alignment, transitions, and a transform origin */
+.poster {
+  position: relative;
+  display: block;
+  background: #1e2228;
+  border: 1px solid #2a2f36;
+  border-radius: var(--shelf-radius);
+  aspect-ratio: 2 / 3;
+  width: calc((100vw - (16px * 2) - (var(--shelf-gap) * 2)) / 3); /* ~3.0 visible on mobile */
+  scroll-snap-align: center; /* Snap posters to the center */
+  transition: transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transform-origin: center center;
+}
+
+/* New class for the active/centered poster */
+.poster.is-active {
+  transform: scale(1.12); /* Increase size by 12% */
+  border-color: #5a5f66;
+}
+
+/* Make the poster label visible and styled */
+.poster::after {
+  content: attr(data-label);
+  position: absolute;
+  inset: auto 0 10px 0; /* Center the text horizontally near the bottom */
+  color: #fff;
+  font: 700 1.25rem/1 var(--font-ui);
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  opacity: 0.8;
+  pointer-events: none; /* Ensure it doesn't interfere with clicks */
 }
 /* Desktop provisional */
 @media (min-width:768px){ .poster{ width:140px; } }
@@ -562,6 +600,72 @@ html { overflow-x: hidden; }
   });
   // start disabled
   // document.body.classList.add('debug-gap');
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const shelves = document.querySelectorAll('.shelf-track');
+    // This creates 4 copies before and 4 after the original set.
+    // Total sets = 9 (e.g., 90 cards per row), which creates a seamless infinite illusion.
+    const CLONE_COUNT = 4;
+
+    shelves.forEach(track => {
+      const originalPosters = Array.from(track.children);
+      const originalPosterCount = originalPosters.length;
+      if (originalPosterCount === 0) return;
+
+      // 1. CLONE POSTERS FOR THE "INFINITE" ILLUSION
+      const fragmentBefore = document.createDocumentFragment();
+      const fragmentAfter = document.createDocumentFragment();
+      for (let i = 0; i < CLONE_COUNT; i++) {
+        originalPosters.forEach(poster => {
+          fragmentBefore.appendChild(poster.cloneNode(true));
+          fragmentAfter.appendChild(poster.cloneNode(true));
+        });
+      }
+      track.prepend(fragmentBefore);
+      track.append(fragmentAfter);
+
+      // 2. SET INITIAL SCROLL POSITION
+      // We start the view at the beginning of the *original* set of posters.
+      const initialPosterIndex = originalPosterCount * CLONE_COUNT;
+      const initialPoster = track.children[initialPosterIndex];
+      if (!initialPoster) return;
+      
+      // Calculate the correct scroll position to perfectly center the first original poster.
+      const trackWidth = track.getBoundingClientRect().width;
+      const posterWidth = initialPoster.getBoundingClientRect().width;
+      const initialScrollLeft = initialPoster.offsetLeft - (trackWidth / 2) + (posterWidth / 2);
+      track.scrollLeft = initialScrollLeft;
+
+      // 3. USE INTERSECTION OBSERVER FOR EFFICIENTLY SCALING THE CENTERED CARD
+      let activePoster = null;
+      const observerCallback = (entries) => {
+        entries.forEach(entry => {
+          // When a poster enters the central "activation zone"...
+          if (entry.isIntersecting) {
+            // Un-style the previously active poster
+            if (activePoster) activePoster.classList.remove('is-active');
+            // Style the new active poster
+            entry.target.classList.add('is-active');
+            activePoster = entry.target;
+          }
+        });
+      };
+      
+      // This observer's "root" is the track itself. The 'rootMargin' creates a
+      // zero-width vertical line down the exact center of the track. A poster
+      // only "intersects" when it crosses this line. This is far more
+      // performant than using a scroll event listener.
+      const observer = new IntersectionObserver(observerCallback, {
+        root: track,
+        rootMargin: '0px -50% 0px -50%',
+        threshold: 0.5
+      });
+
+      // Tell the observer to watch every poster in the track.
+      Array.from(track.children).forEach(poster => observer.observe(poster));
+    });
+  });
 </script>
 </body>
 </html>
