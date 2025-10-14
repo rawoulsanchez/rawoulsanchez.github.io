@@ -115,7 +115,7 @@ html{ overflow-x:hidden; }
   position:relative; display:block;
   background:#1e2228; border:1px solid #2a2f36; border-radius:var(--shelf-radius);
   aspect-ratio:2/3;
-  /* Restoring original size: displays ~3 posters (100vw / 3 posters) */
+  /* RESTORED: This is the correct calculation for ~3 posters per row on any screen width */
   flex:0 0 calc((100vw - (var(--shelf-gap) * 4)) / 3);
   min-width:0;
   transition: none; /* Disable transitions for smooth ticker */
@@ -124,6 +124,14 @@ html{ overflow-x:hidden; }
 /* Spacing via margins (seam-safe) */
 .shelf-track > .poster{ margin-right:var(--shelf-gap); }
 
+/* Poster label */
+.poster::after{
+  content:attr(data-label);
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  color:#eaeaf0; font:800 1.1rem/1 var(--font-ui); letter-spacing:.04em;
+  text-shadow:0 1px 2px rgba(0,0,0,.45); opacity:.85;
+}
+
 /* Keyframe for the infinite scroll movement */
 @keyframes scroll {
   from { transform: translateX(0); }
@@ -131,21 +139,13 @@ html{ overflow-x:hidden; }
     transform: translateX(
       /* The distance to scroll is exactly the width of the first 10 posters (the original set). */
       calc(
-        /* -10 * poster width (which is approx 33vw) */
+        /* -10 * poster width */
         -10 * ((100vw - (var(--shelf-gap) * 4)) / 3) 
-        /* -9 * spacing between them */
+        /* -9 * spacing between them (10 posters have 9 gaps) */
         -9 * var(--shelf-gap)
       )
     );
   }
-}
-
-/* Poster label (keeping for content visibility) */
-.poster::after{
-  content:attr(data-label);
-  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-  color:#eaeaf0; font:800 1.1rem/1 var(--font-ui); letter-spacing:.04em;
-  text-shadow:0 1px 2px rgba(0,0,0,.45); opacity:.85;
 }
 
 /* Edge fades */
