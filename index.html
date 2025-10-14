@@ -364,38 +364,57 @@ html{ overflow-x:hidden; }
       const track = viewport.querySelector('.shelf-track');
       if (!track) return;
 
-      // --- Manual clone to fake infinity scroll ---
+      // === 1. Clone slides both sides for true infinite feel ===
       const slides = Array.from(track.children);
-      const cloneCount = slides.length; // clone once
-      const clones = slides.map(slide => slide.cloneNode(true));
-      clones.forEach(clone => track.appendChild(clone)); // append clones
+      const clonesBefore = slides.map(slide => slide.cloneNode(true));
+      const clonesAfter  = slides.map(slide => slide.cloneNode(true));
 
-      // --- Initialize Embla without internal loop ---
+      clonesBefore.forEach(clone => track.insertBefore(clone, track.firstChild));
+      clonesAfter.forEach(clone => track.appendChild(clone));
+
+      // === 2. Initialize Embla centered snapping ===
       const plugins = [];
       if (window.EmblaCarouselClassNames) {
         plugins.push(EmblaCarouselClassNames({ snapped: 'is-snapped' }));
       }
 
       const embla = EmblaCarousel(viewport, {
-        loop: false,       // internal loop disabled
-        align: 'start',
-        dragFree: false,
+        loop: false,          // handled manually
+        align: 'center',      // center snap
         skipSnaps: false,
+        dragFree: false,
         duration: 30
       }, plugins);
 
-      // --- Cursor visual feedback ---
-      embla.on('pointerDown', () => track.classList.add('dragging'));
-      embla.on('pointerUp',   () => track.classList.remove('dragging'));
+      // === 3. Start on the middle copy (real set) ===
+      const slideCount = slides.length;
+      embla.scrollTo(slideCount, 0); // move to the first "real" A1
 
-      // --- Allow natural horizontal drag ---
-      // No manual reset. Users can swipe all slides without loop.
-      embla.reInit({
-        loop: false,
-        dragFree: true,
-        containScroll: "trimSnaps" // prevents empty space beyond last slide
+      // === 4. Manual seamless wrap ===
+      embla.on('select', () => {
+        const index = embla.selectedScrollSnap();
+        if (index < slideCount) {
+          // Scrolled too far left: jump to same index in center copy
+          embla.scrollTo(index + slideCount, 0);
+        } else if (index >= slideCount * 2) {
+          // Scrolled too far right: jump to same index in center copy
+          embla.scrollTo(index - slideCount, 0);
+        }
       });
+
+      // === 5. Cursor feedback ===
+      const trackEl = track;
+      embla.on('pointerDown', () => trackEl.classList.add('dragging'));
+      embla.on('pointerUp',   () => trackEl.classList.remove('dragging'));
     });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initShelves);
+  } else {
+    initShelves();
+  }
+})();
   }
 
   if (document.readyState === 'loading') {
