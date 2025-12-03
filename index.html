@@ -1,683 +1,392 @@
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Rawoul — Starter</title>
-<style>
-  /* Design tokens */
-:root { --bg:#000; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; --brand:#e31b23; }
-  :root{
-  --font-ui: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-  --font-display: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-}
-  * { box-sizing:border-box; }
-  body { margin:0; font-family:var(--font-ui); background:var(--bg); color:var(--fg); line-height:1.5; overflow-x:hidden; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StreamVerse Dashboard</title>
 
-  /* Fixed black nav */
-.nav-bar{
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  z-index:100;
-  background:#000;
-  height:calc(var(--nav-height) + env(safe-area-inset-top));
-  box-shadow:none;
-border-bottom:0;
-}
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-/* Content sits below the notch area */
-.nav-inner {
-  max-width:960px;
-  margin:0 auto;
-  height:var(--nav-height);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:env(safe-area-inset-top) 16px 0 16px; /* <-- moved from .nav-bar */
-}
-.brand {
-    color:var(--brand);
-    font-weight:800;
-    font-size:24px;
-    letter-spacing:.2px;
-    text-decoration:none;
-}
-  .nav-actions {
-    display:flex;
-    gap:12px;
-    align-items:center;
-  }
-  .icon-btn {
-    position:relative;
-    display:inline-grid;
-    place-items:center;
-    width:36px;
-    height:36px;
-    border-radius:999px;
-    background:#121212;
-    border:1px solid #222;
-    cursor:pointer;
-    color:#eaeaf0;
-  }
-  .icon-btn:hover { background:#161616; }
-  .icon-btn svg { fill:currentColor; }
-.icon-btn .dot {
-    position:absolute;
-    top:4px;
-    right:4px;
-    width:9px;
-    height:9px;
-    background:var(--brand);
-    border-radius:999px;
-    box-shadow:0 0 0 2px #000;
-}
-  .title-chip{
-  display:inline-flex; align-items:center; justify-content:center;
-  padding:.5rem .875rem;
-  background:rgba(17,17,17,.85);
-  border-radius:.75rem;
-  /* keep same visual weight and red border using token */
-  box-shadow:
-    0 6px 20px rgba(0,0,0,.45),
-    inset 0 0 0 2px color-mix(in srgb, var(--brand) 65%, transparent);
-  margin-bottom:.5rem;         /* preserves your current spacing */
-}
-.title-chip-text{
-  font-family: var(--font-display);
-  font-weight:800;
-  letter-spacing:.08em;
-  color:#fff;
-  font-size:clamp(1rem,2.6vw,1.35rem);
-}
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-/* Optional responsive tweak, mirrors your sample without Tailwind */
-@media (max-width:768px){
-  .title-chip{ padding:.4rem .75rem; }
-  .title-chip-text{ letter-spacing:.09em; }
-}
-@media (min-width:768px){
-  .title-chip-text{ font-size:1.35rem; } /* matches clamp’s max */
-}
+  <style>
+    /* Base */
+    body { background:#0d0d0d; font-family:'Inter',sans-serif; color:#f5f5f5; }
+    .no-scrollbar::-webkit-scrollbar{display:none} .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none }
 
-/* Layout helpers used by the page */
-/* Keep hero flush under fixed nav (hide the 1px inset line) */
-main{
-  /* 1px upward overlap to kill rounding sliver on DPR 2/3 */
-  padding-top: calc(var(--nav-height) + env(safe-area-inset-top) - 1px);
-}
-.wrap {
-  max-width:960px;
-  margin:0 auto;
-  padding:16px;
-}
-/* REMOVED .wrap--flush to simplify structure. The horizontal gap fix requires this. */
-.card {
-  background:#14161c;
-  border:1px solid #222;
-  border-radius:12px;
-  padding:16px;
-  margin:16px;
-}
-  footer {
-    color:var(--muted);
-    text-align:center;
-    padding:24px;
-    border-top:1px solid #222;
-  }
-  button.cta {
-    background:var(--accent);
-    color:#0b1020;
-    border:0;
-    padding:10px 14px;
-    border-radius:10px;
-    font-weight:600;
-    cursor:pointer;
-  }
-  button.cta:focus {
-    outline:2px solid #fff4;
-    outline-offset:2px;
-  }
-  h1 { font-size:clamp(28px,4vw,40px); margin:0 0 8px; }
-  h2 { font-size:clamp(18px,4.5vw,24px); margin:12px 0 8px; }
-  p  { margin:8px 0; color:var(--muted); }
+    /* Cards */
+    .content-card{ transition:transform .3s cubic-bezier(.25,.8,.25,1), box-shadow .3s ease; transform-origin:center; z-index:1; will-change:transform }
+    .content-card:hover{ transform:scale(1.4); z-index:999; box-shadow:0 15px 30px -5px rgba(0,0,0,.9) }
 
-/* HERO */
-.hero{
-  position:relative;
-  height:auto;
-  aspect-ratio:16 / 9;
-  overflow:hidden;             /* crops the overfill from the iframe */
-  background:#000;
-  width:170vw;
-  left:50%;
-  transform: translateX(-50%);
-  z-index:1;
-  margin-top:-2px;             /* touch the nav */
-  border-top:0;
-}
+    /* Shelves */
+    .content-shelf{ padding-top:5rem; margin-bottom:-4.5rem } 
+    .content-shelf:last-of-type{ margin-bottom:0; padding-bottom:5rem }
 
-.hero-video { position:absolute; inset:0; }
+    /* Hero video */
+    .video-background-container{ position:absolute; inset:0; overflow:hidden; z-index:-2 }
+    .video-background-container iframe{ position:absolute; top:50%; left:50%; min-width:100vw; min-height:100vh; transform:translate(-50%,-50%); pointer-events:none }
+    @media (min-aspect-ratio:16/9){ .video-background-container iframe{ height:56.25vw; min-height:100vh } }
+    @media (max-aspect-ratio:16/9){ .video-background-container iframe{ width:177.78vh; min-width:100vw } }
 
-/* Cover + crop bottom WITHOUT clip-path */
-.hero-video iframe{
-  position:absolute;
-  inset:0;
-  width:170vw;
-  height:112%;                 /* overfill vertically */
-  left:50%;
-  transform:translate(-50%, -6%); /* shift up to crop bottom */
-  border:0;
-}
+    /* Edge resistance visuals */
+    .resist-first{ position:relative; z-index:auto; transition:transform 160ms cubic-bezier(.16,1,.3,1); will-change:transform }
+    .edge-active{ z-index:80 }
 
-/* Black spacer under the hero - NOW RESPONSIBLE FOR FULL WIDTH COVERAGE */
-.after-hero{
-  min-height:0; /* reduced to remove large gap below Row A */
-  background:#000;
-  border:0;
-  margin:0;
-  border-radius:0;
-  padding:0; /* Ensure no padding on the .after-hero so the black background is full width */
-  margin-top:0; /* pull pills closer to synopsis */
-}
-
-/* New wrapper to correctly apply padding and center content within the full-width black section */
-.content-pad {
-  max-width:960px;
-  margin:0 auto;
-  /* Apply responsive padding only to the content wrapper */
-  padding: 0 calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left));
-}
-
-
-/* Hero gradient: bottom → top, covers full hero */
-.hero-gradient{
-  position:absolute;
-  inset:0;                    /* cover full hero box */
-  z-index:1;                  /* video (0) < gradient (1) < overlay (2) */
-  pointer-events:none;
-  transform:translateZ(0);
-  backface-visibility:hidden;
-  background:linear-gradient(
-    to top,
-    rgba(0,0,0,0.88) 0%,
-    rgba(0,0,0,0.76) 10%,
-    rgba(0,0,0,0.60) 22%,
-    rgba(0,0,0,0.42) 36%,
-    rgba(0,0,0,0.26) 52%,
-    rgba(0,0,0,0.14) 68%,
-    rgba(0,0,0,0.00) 100%
-  );
-}
-
-@media (max-width:600px){
-  .hero-gradient{
-    background:linear-gradient(
-      to top,
-      rgba(0,0,0,0.92) 0%,
-      rgba(0,0,0,0.80) 12%,
-      rgba(0,0,0,0.64) 26%,
-      rgba(0,0,0,0.46) 40%,
-      rgba(0,0,0,0.28) 56%,
-      rgba(0,0,0,0.14) 72%,
-      rgba(0,0,0,0.00) 100%
-    );
-  }
-}
-
-.hero-text {
-  padding:64px 0;
-  display:grid;
-  gap:16px;
-}
-@media (max-width:600px) {
-  .hero-text { padding:48px 0; }
-}
-
-  /* Apply drop shadow to all overlay text */
-.hero-overlay-inline,
-.hero-overlay-inline * {
-  text-shadow: 0 1px 3px rgba(0,0,0,0.70);
-}
-
-/* Stronger shadow for the synopsis for readability */
-.hero-overlay-inline .hero-synopsis {
-  text-shadow: 0 2px 6px rgba(0,0,0,0.85);
-}
-
-/* Mute button */
-  .mute-btn {
-    position:absolute;
-    right:12px;
-    bottom:12px;
-    width:40px;
-    height:40px;
-    border-radius:999px;
-    border:1px solid #222;
-    background:#121212;
-    color:#eaeaf0;
-    display:grid;
-    place-items:center;
-    font-size:18px;
-    cursor:pointer;
-  }
-  .mute-btn:focus {
-    outline:2px solid #fff4;
-    outline-offset:2px;
-  }
-  /* commit: no-horizontal-scroll */
-html { overflow-x: hidden; }
-/* CTA row under the hero video */
-.hero-cta{
-  display:grid;
-  grid-template-columns: 1fr 1fr;   /* always two columns */
-  gap:8px;
-  width:100%;
-  max-width:340px;                   /* keep pills on one line */
-  margin: calc(8px + .125rem) 0 0 0; /* FIXED gap below synopsis */
-}
-
-/* Smaller buttons */
-.btn{
-  appearance:none; border:0; cursor:pointer;
-  display:inline-flex; align-items:center; justify-content:center;
-  gap:.35rem; padding:.42rem .56rem; border-radius:999px; /* same height, narrower */
-  font:700 .80rem/1 var(--font-ui);
-  transition:transform .12s ease, opacity .12s ease, box-shadow .12s ease, background .12s ease;
-  width:100%;
-  box-shadow: 0 6px 14px rgba(0,0,0,.18);
-}
-.btn:focus{ outline:2px solid #ffffff33; outline-offset:2px; }
-.btn:active{ transform: translateY(1px); }
-
-.btn--solid{ background:#fff; color:#000; }
-.btn--solid:hover{ background:#e6e6e6; }
-
-.btn--ghost{
-  background: rgba(255,255,255,0.10); color:#fff;
-  box-shadow: inset 0 0 0 1.1px rgba(255,255,255,0.28);
-}
-.btn--ghost:hover{ box-shadow: inset 0 0 0 1.1px rgba(255,255,255,0.5); }
-
-/* Smaller icons */
-.btn svg{ width:14px; height:14px; display:block; } /* matches reduced height */
-.btn--solid:hover{ background:#e6e6e6; }
-
-.btn--ghost{
-  background: rgba(255,255,255,0.10); color:#fff;
-  box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.28);
-}
-.btn--ghost:hover{ box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.5); }
-
-/* Smaller icons */
-.btn svg{ width:16px; height:16px; display:block; }
-
-/* REMOVED: ALWAYS-ON GAP CHECK BACKGROUND */
-/* =============================
-   Shelves (Rows A/B/C)
-   ============================= */
-:root{ --shelf-gap:8px; --shelf-radius:14px; }
-.shelf{ margin:24px 0 32px; }
-.shelf-title{ font:700 1rem/1.3 var(--font-ui); color:var(--fg); margin:0 0 6px; }
-.shelf-divider{ height:2px; background:#3a3f46; opacity:.9; border-radius:2px; }
-/* Full-bleed wrapper so the track can extend to viewport edges */
-.shelf-outer{ position:relative; width:100vw; left:50%; transform:translateX(-50%); }
-/* Edge fades (narrow 48px) */
-.shelf-outer::before, .shelf-outer::after{
-  content:""; position:absolute; top:0; bottom:0; width:48px; pointer-events:none; z-index:1;
-}
-.shelf-outer::before{ left:0; background:linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0)); }
-.shelf-outer::after{ right:0; background:linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0)); }
-/* Horizontal list of posters */
-/* --- SHELF TRACK --- */
-/* Add scroll-snapping and hide the scrollbar */
-.shelf-track {
-  display: grid;
-  grid-auto-flow: column;
-  gap: var(--shelf-gap);
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  padding: 10px calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left));
-  scroll-snap-type: x mandatory; /* Snap horizontally */
-  scrollbar-width: none; /* Hide scrollbar for Firefox */
-}
-.shelf-track::-webkit-scrollbar {
-  display: none; /* Hide scrollbar for Chrome, Safari, Opera */
-}
-.shelf-track[role="list"] { list-style: none; }
-
-/* --- POSTER --- */
-/* Add snap alignment, transitions, and a transform origin */
-.poster {
-  position: relative;
-  display: block;
-  background: #1e2228;
-  border: 1px solid #2a2f36;
-  border-radius: var(--shelf-radius);
-  aspect-ratio: 2 / 3;
-  width: calc((100vw - (16px * 2) - (var(--shelf-gap) * 2)) / 3); /* ~3.0 visible on mobile */
-  scroll-snap-align: center; /* Snap posters to the center */
-  transform-origin: center center;
-  /* Animate all the properties we change on the active state */
-  transition: transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1),
-              box-shadow 0.35s cubic-bezier(0.25, 0.1, 0.25, 1),
-              border-color 0.35s ease;
-  z-index: 1; /* Default stacking level */
-}
-
-/* Style the active/centered poster to give it scale and depth */
-.poster.is-active {
-  transform: scale(1.12); /* Makes the card 12% bigger */
-  border-color: #777c83;  /* A slightly brighter border to highlight */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Adds a "lifted" shadow for depth */
-  z-index: 2; /* Ensures the active card renders on top of its neighbors */
-}
-
-/* Make the poster label visible and styled */
-.poster::after {
-  content: attr(data-label);
-  position: absolute;
-  inset: auto 0 10px 0; /* Center the text horizontally near the bottom */
-  color: #fff;
-  font: 700 1.25rem/1 var(--font-ui);
-  text-align: center;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-  opacity: 0.8;
-  pointer-events: none; /* Ensure it doesn't interfere with clicks */
-}
-/* Desktop provisional */
-@media (min-width:768px){ .poster{ width:140px; } }
-/* Spacing tweaks */
-.shelf--tight{ margin-top:8px; }
-.content-pad--tight{ padding-bottom:8px; }
-/* First shelf sits tighter under CTA */
-.shelf--tight{ margin-top:8px; }
-</style>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    /* Netflix-like hover preview */
+    .hover-preview{ position:fixed; z-index:9999; pointer-events:none; min-width:520px; max-width:520px; border-radius:.75rem; overflow:hidden; box-shadow:0 25px 70px rgba(0,0,0,.6),0 10px 25px rgba(0,0,0,.45); background:#111; opacity:0; transform:translate(0,0) scale(.98); transform-origin:top left; transition:transform .18s cubic-bezier(.2,.8,.2,1), opacity .16s ease }
+    .hover-preview.show{ opacity:1; transform:scale(1) }
+    .hover-preview .hp-banner{ aspect-ratio:16/9; background-size:cover; background-position:center; position:relative }
+    .hover-preview .hp-banner::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.8), rgba(0,0,0,0) 55%) }
+    .hover-preview .hp-body{ background:#1a1a1a; padding:14px 16px; display:flex; flex-direction:column; gap:10px; pointer-events:auto }
+    .hp-title{ font-weight:800; font-size:1.25rem; letter-spacing:.02em }
+    .hp-meta{ display:flex; align-items:center; gap:10px; font-size:.85rem; color:#cbd5e1 }
+    .hp-chips{ display:flex; gap:12px; flex-wrap:wrap; font-size:.85rem; color:#e2e8f0 }
+    .hp-btns{ display:flex; gap:10px }
+    .hp-btn{ display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:9999px; background:#fff; color:#000 }
+    .hp-btn.secondary{ background:#2a2a2a; color:#fff }
+  
+    /* Drag cursors */
+    .drag-grab { cursor: grab; }
+    .drag-grabbing { cursor: grabbing; user-select: none; }
+  
+    /* Prevent page scroll hijack when interacting with a shelf */
+    .shelf-row { overscroll-behavior: contain; }
+  </style>
 </head>
-<body>
-  <header class="nav-bar" role="navigation" aria-label="Main">
-    <div class="nav-inner">
-      <a class="brand" href="/" aria-label="Home">SanchezNinjah</a>
-      <div class="nav-actions">
-        <button class="icon-btn" aria-label="Search">
-          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 015.92 12.2l3.69 3.69-1.42 1.42-3.69-3.69A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z"/></svg>
-        </button>
-        <button class="icon-btn" aria-label="Notifications">
-          <span class="dot" aria-hidden="true"></span>
-          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a4 4 0 00-4 4v1.1C6.2 8 5 9.7 5 11.6V17l-1.5 1.5v1h17v-1L19 17v-5.4c0-1.9-1.2-3.6-3-4.5V6a4 4 0 00-4-4zm0 20a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
-        </button>
-      </div>
+<body class="overflow-x-hidden">
+  <!-- Fixed Navigation Bar -->
+  <nav class="fixed top-0 left-0 right-0 bg-gradient-to-b from-black/90 to-transparent p-4 z-[100] flex items-center justify-between">
+    <div class="flex items-center space-x-8">
+      <h1 class="text-2xl font-extrabold text-red-600 tracking-wider">StreamVerse</h1>
+      <ul class="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-300">
+        <li><a class="text-white font-bold border-b-2 border-red-600 pb-1">Home</a></li>
+        <li><a class="hover:text-white">TV Shows</a></li>
+        <li><a class="hover:text-white">Movies</a></li>
+        <li><a class="hover:text-white">My List</a></li>
+      </ul>
     </div>
-  </header>
+    <div class="flex items-center space-x-4">
+      <svg class="w-6 h-6 text-gray-300 hover:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg class="w-6 h-6 text-gray-300 hover:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </div>
+  </nav>
+
   <main>
-<section class="hero" id="hero">
-  <div class="hero-video">
-    <iframe
-      id="hero-yt"
-      title="Hero trailer"
-      src="https://www.youtube.com/embed/VBdaOkpLe_o?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o"
-      allow="autoplay; encrypted-media"
-      allowfullscreen
-    ></iframe>
-  </div>
-
-  <!-- Hero gradient: bottom → top -->
-  <div class="hero-gradient" aria-hidden="true"></div>
-
-  <!-- Overlay area locked to viewport edges -->
-  <div class="hero-overlay-wrap"
-       style="position:absolute;top:0;bottom:0;
-              left:calc((100% - 100vw)/2);
-              right:calc((100% - 100vw)/2);
-              z-index:2;display:flex;flex-direction:column;
-              justify-content:flex-end;pointer-events:none;overflow:hidden;">
-    <div class="hero-overlay-inline"
-         style="pointer-events:auto;position:absolute;bottom:0;left:0;
-                max-width:720px;color:#fff;text-align:left;
-                padding:12px calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left));
-                text-shadow:0 1px 3px rgba(0,0,0,.5);
-                background:transparent;border-radius:12px 12px 0 0;">
-<div class="title-chip" role="heading" aria-level="1">
-  <span class="title-chip-text">Sanchez Ninjah</span>
-</div>
-
-<p id="meta-line" style="margin:0 0 .14rem;color:var(--brand);
-                font-size:clamp(.78rem,1.6vw,.95rem);
-                font-weight:700;letter-spacing:.08em;text-transform:uppercase;">
-  New Release | Thriller, Sci-Fi | 2024
-</p>
-
-      <p class="hero-synopsis" style="margin:0;color:#e5e7eb;
-                font-size:clamp(.95rem,2.2vw,1.15rem);line-height:1.55;
-                display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;
-                overflow:hidden;">
-        As a rogue AI network threatens global collapse, a disgraced former agent is called
-        back into the field for one last, impossible mission to save humanity.
-      </p>
-    </div>
-  </div>
-
-  <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
-</section>
-<!-- This wrapper div was limiting the width and causing the pink background to leak. -->
-<!-- OLD: <div class="wrap wrap--flush"> -->
-<section class="after-hero" aria-label="Actions">
-  <!-- Use a new inner wrapper to apply max-width and centering for content -->
-  <div class="content-pad content-pad--tight">
-    <div class="hero-cta">
-      <!-- Play Now -->
-      <button type="button" class="btn btn--solid" onclick="console.log('Play trailer')">
-        <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M6 4l10 6-10 6V4z"/>
-        </svg>
-        <span>Play Now</span>
-      </button>
-
-      <!-- Details -->
-      <button type="button" class="btn btn--ghost" onclick="console.log('More info')">
-        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M13 16h-1v-4h-1m1-4h.01"/>
-          <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <span>Details</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Row A moved inside after-hero -->
-  <section class="shelf shelf--tight" aria-labelledby="row-a-title">
-    <div class="content-pad">
-      <h2 id="row-a-title" class="shelf-title">Row A</h2>
-      <div class="shelf-divider" aria-hidden="true"></div>
-    </div>
-    <div class="shelf-outer">
-      <div class="shelf-track" data-row="A" role="list" aria-label="Row A posters">
-        <a class="poster" role="listitem" aria-label="A1" data-label="A1"></a>
-        <a class="poster" role="listitem" aria-label="A2" data-label="A2"></a>
-        <a class="poster" role="listitem" aria-label="A3" data-label="A3"></a>
-        <a class="poster" role="listitem" aria-label="A4" data-label="A4"></a>
-        <a class="poster" role="listitem" aria-label="A5" data-label="A5"></a>
-        <a class="poster" role="listitem" aria-label="A6" data-label="A6"></a>
-        <a class="poster" role="listitem" aria-label="A7" data-label="A7"></a>
-        <a class="poster" role="listitem" aria-label="A8" data-label="A8"></a>
-        <a class="poster" role="listitem" aria-label="A9" data-label="A9"></a>
-        <a class="poster" role="listitem" aria-label="A10" data-label="A10"></a>
+    <!-- Hero Section -->
+    <section class="relative h-screen flex items-end pb-24 md:pb-32 text-white">
+      <div class="video-background-container">
+        <iframe src="https://www.youtube.com/embed/6stlCkUDG_s?autoplay=1&mute=1&loop=1&playlist=6stlCkUDG_s&controls=0&showinfo=0&autohide=1&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
       </div>
-    </div>
-  </section>
-</section>
-<!-- Shelves: titles in container, cards full-bleed -->
+      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/10 z-0"></div>
+      <div class="z-10 text-left max-w-lg lg:max-w-3xl px-6 md:px-12">
+        <div class="mb-4"><img src="https://placehold.co/300x80/1d1d1d/e50914?text=TITAN+PROJECT" alt="Movie Title Logo" class="w-64 md:w-80 rounded-lg opacity-90"></div>
+        <p class="text-sm font-medium text-red-500 uppercase mb-2">New Release | Thriller, Sci‑Fi | 2024</p>
+        <p class="text-base md:text-xl text-gray-200 mb-8 font-light">As a rogue AI network threatens global collapse, a disgraced former agent is called back into the field for one last, impossible mission to save humanity.</p>
+        <div class="flex space-x-4">
+          <button class="bg-white hover:bg-gray-200 text-black font-bold py-3 px-8 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center space-x-2">
+            <svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg>
+            <span class="text-lg">Play Now</span>
+          </button>
+          <button class="bg-gray-700/70 hover:bg-gray-600/70 text-white font-bold py-3 px-8 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center space-x-2">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="text-lg">Details</span>
+          </button>
+        </div>
+      </div>
+    </section>
 
-<section class="shelf" aria-labelledby="row-b-title">
-  <div class="content-pad">
-    <h2 id="row-b-title" class="shelf-title">Row B</h2>
-    <div class="shelf-divider" aria-hidden="true"></div>
-  </div>
-  <div class="shelf-outer">
-    <div class="shelf-track" data-row="B" role="list" aria-label="Row B posters">
-      <a class="poster" role="listitem" aria-label="B1" data-label="B1"></a>
-      <a class="poster" role="listitem" aria-label="B2" data-label="B2"></a>
-      <a class="poster" role="listitem" aria-label="B3" data-label="B3"></a>
-      <a class="poster" role="listitem" aria-label="B4" data-label="B4"></a>
-      <a class="poster" role="listitem" aria-label="B5" data-label="B5"></a>
-      <a class="poster" role="listitem" aria-label="B6" data-label="B6"></a>
-      <a class="poster" role="listitem" aria-label="B7" data-label="B7"></a>
-      <a class="poster" role="listitem" aria-label="B8" data-label="B8"></a>
-      <a class="poster" role="listitem" aria-label="B9" data-label="B9"></a>
-      <a class="poster" role="listitem" aria-label="B10" data-label="B10"></a>
-    </div>
-  </div>
-</section>
-
-<section class="shelf" aria-labelledby="row-c-title">
-  <div class="content-pad">
-    <h2 id="row-c-title" class="shelf-title">Row C</h2>
-    <div class="shelf-divider" aria-hidden="true"></div>
-  </div>
-  <div class="shelf-outer">
-    <div class="shelf-track" data-row="C" role="list" aria-label="Row C posters">
-      <a class="poster" role="listitem" aria-label="C1" data-label="C1"></a>
-      <a class="poster" role="listitem" aria-label="C2" data-label="C2"></a>
-      <a class="poster" role="listitem" aria-label="C3" data-label="C3"></a>
-      <a class="poster" role="listitem" aria-label="C4" data-label="C4"></a>
-      <a class="poster" role="listitem" aria-label="C5" data-label="C5"></a>
-      <a class="poster" role="listitem" aria-label="C6" data-label="C6"></a>
-      <a class="poster" role="listitem" aria-label="C7" data-label="C7"></a>
-      <a class="poster" role="listitem" aria-label="C8" data-label="C8"></a>
-      <a class="poster" role="listitem" aria-label="C9" data-label="C9"></a>
-      <a class="poster" role="listitem" aria-label="C10" data-label="C10"></a>
-    </div>
-  </div>
-</section>
-<!-- OLD: </div> -->
-
+    <!-- Content Shelves Section -->
+    <section class="relative z-10 space-y-2 px-0 md:px-8 pb-12 -mt-40">
+      <div class="content-shelf px-6 md:px-4">
+        <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Popular on Stream (Scrolls Left)</h3>
+        <div class="shelf-row relative overflow-hidden py-4 group/shelf"></div>
+      </div>
+      <div class="content-shelf px-6 md:px-4">
+        <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Trending Now (Scrolls Right)</h3>
+        <div class="shelf-row relative overflow-hidden py-4 group/shelf"></div>
+      </div>
+      <div class="content-shelf px-6 md:px-4">
+        <h3 class="text-xl md:text-2xl font-bold mb-2 ml-2">Design Inspiration (Scrolls Left)</h3>
+        <div class="shelf-row relative overflow-hidden py-4 group/shelf"></div>
+      </div>
+    </section>
   </main>
 
-  <footer>© <span id="y"></span> Rawoul</footer>
-  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
-<script src="https://www.youtube.com/iframe_api"></script>
-<script>
-  // Changed alerts to console.log as alerts break the canvas environment.
-  let ytPlayer, isMuted = true;
-  function onYouTubeIframeAPIReady(){
-    ytPlayer = new YT.Player('hero-yt', {
-      events: { onReady: e => { e.target.mute(); e.target.playVideo(); } }
-    });
-  }
-  function toggleMute(){
-    if(!ytPlayer) return;
-    if(isMuted){ ytPlayer.unMute(); isMuted=false; document.querySelector('.mute-btn').textContent='🔊'; document.querySelector('.mute-btn').setAttribute('aria-pressed','false'); }
-    else{ ytPlayer.mute(); isMuted=true; document.querySelector('.mute-btn').textContent='🔇'; document.querySelector('.mute-btn').setAttribute('aria-pressed','true'); }
-  }
-</script>
-<script>
-  // Make the CTA row 1/3 shorter than its own available width
-  (function(){
-    function alignCta(){
-      const cta = document.querySelector('.hero-cta');
-      if(!cta || !cta.parentElement) return;
-
-      // Use the parent’s current width as the stable base
-      const base = cta.parentElement.getBoundingClientRect().width;
-
-      // Target = 67% of that base (i.e., 1/3 shorter)
-      const target = Math.round(base * 0.67);
-
-      // Clamp to keep both pills on one line
-      const clamped = Math.max(200, Math.min(target, 420));
-
-      cta.style.width = clamped + 'px';
-    }
-    window.addEventListener('load', alignCta);
-    window.addEventListener('resize', alignCta);
-    window.addEventListener('orientationchange', alignCta);
-  })();
-</script>
-<script>
-  // Press "g" to toggle pink gap debug
-  document.addEventListener('keydown', e => {
-    if (e.key.toLowerCase() === 'g') document.body.classList.toggle('debug-gap');
-  });
-  // start disabled
-  // document.body.classList.add('debug-gap');
-</script>
-<script>
+  <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // Number of original sets to clone on each side for the infinite effect
-    const CLONE_COUNT = 4;
+    // ---------- Constants ----------
+    const ITEMS_PER_ROW = 10;
+    const NUM_SETS = 3; // repeat for wrap buffer
+    const SCROLL_DISTANCE = 300;
 
-    document.querySelectorAll('.shelf-track').forEach(track => {
-      const originalPosters = Array.from(track.children);
-      if (originalPosters.length === 0) return;
+    // Preview sizing and timing
+    const PREVIEW_MIN_W = 520; // fixed
+    const PREVIEW_MAX_W = 520; // fixed
+    const PREVIEW_SCALE = 1.0; // ignored when min=max
+    const PREVIEW_BODY_EXTRA = 110; // body below 16/9 banner
+    const PREVIEW_DELAY = 1200; // ms to open
 
-      // --- 1. CLONE POSTERS for infinite effect ---
-      const fragment = document.createDocumentFragment();
-      originalPosters.forEach(poster => fragment.appendChild(poster.cloneNode(true)));
+    // Drag inertia
+    const DRAG_DECAY = 0.92;
+    const DRAG_MIN_VELOCITY = 0.8;
 
-      for (let i = 0; i < CLONE_COUNT; i++) {
-        track.prepend(fragment.cloneNode(true));
-        track.append(fragment.cloneNode(true));
+    // Edge resistance
+    const MAX_PULL = 180;
+    const PULL_FEEL = 0.6;
+    const MAX_SCALE = 1.12;
+
+    // ---------- Build or fetch hover preview ----------
+    function getHoverPreview() {
+      if (!window.__hoverPreview) {
+        const el = document.createElement('div');
+        el.className = 'hover-preview';
+        el.innerHTML = `
+          <div class="hp-banner"></div>
+          <div class="hp-body">
+            <div class="hp-title">Title</div>
+            <div class="hp-meta">98% Match • 95m • HD</div>
+            <div class="hp-btns">
+              <button class="hp-btn" title="Play"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l10 6-10 6V4z"/></svg></button>
+              <button class="hp-btn secondary" title="Add"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+            <div class="hp-chips"></div>
+          </div>`;
+        document.body.appendChild(el);
+        window.__hoverPreview = el;
       }
+      return window.__hoverPreview;
+    }
+    const hp = getHoverPreview();
 
-      // --- 2. SET INITIAL SCROLL POSITION ---
-      // We want to start at the first "real" card, not the clones.
-      const initialPosterIndex = originalPosters.length * CLONE_COUNT;
-      const initialPoster = track.children[initialPosterIndex];
-      if (!initialPoster) return;
+    // ---------- Data ----------
+    const shelves = document.querySelectorAll('.shelf-row');
+    const rowsLetters = ['A','B','C'];
+    const palette = ['bg-neutral-800','bg-blue-800','bg-green-800','bg-amber-800','bg-purple-800','bg-rose-700','bg-teal-800','bg-orange-600','bg-sky-700','bg-lime-700'];
+    const makeRowData = (L)=> Array.from({length:ITEMS_PER_ROW}, (_,i)=>({ key:`${L}${i+1}`, color:palette[i%palette.length] }));
 
-      // Calculate the position to perfectly center the first real poster on load
-      const trackRect = track.getBoundingClientRect();
-      const initialPosterRect = initialPoster.getBoundingClientRect();
-      track.scrollLeft = initialPoster.offsetLeft - (trackRect.width / 2) + (initialPosterRect.width / 2);
+    // ---------- Helpers ----------
+    const clamp = (x,min,max)=> Math.max(min, Math.min(max, x));
 
-      // --- 3. THIS IS THE NEW, RELIABLE METHOD ---
-      // This function finds which poster is physically closest to the center of the shelf.
-      let activePoster = null;
-      let scrollTimeout; // Used to prevent the code from running too frequently
+    // Preview control state
+    let hoverTimer = null;
+    let currentPreviewCard = null;
+    let lastActiveShelf = null;
 
-      function updateActivePoster() {
-        const trackCenterX = track.getBoundingClientRect().left + track.getBoundingClientRect().width / 2;
-        let closestPoster = null;
-        let smallestDistance = Infinity;
+    function hidePreviewImmediate(){
+      hp.classList.remove('show');
+      hp.style.pointerEvents = 'none';
+      currentPreviewCard = null;
+    }
 
-        // Loop through all posters to find the closest one to the center
-        for (const poster of track.children) {
-          const posterCenterX = poster.getBoundingClientRect().left + poster.getBoundingClientRect().width / 2;
-          const distance = Math.abs(trackCenterX - posterCenterX);
+    // Close when mouse leaves the preview box
+    hp.addEventListener('mouseleave', hidePreviewImmediate);
 
-          if (distance < smallestDistance) {
-            smallestDistance = distance;
-            closestPoster = poster;
-          }
-        }
+    // Hard guard #1: pointer lands anywhere outside the preview => hide
+    document.addEventListener('pointerover', (e) => {
+      if (!hp.classList.contains('show')) return;
+      if (!hp.contains(e.target)) hidePreviewImmediate();
+    }, true);
 
-        // If the closest poster has changed, update the styling
-        if (closestPoster && closestPoster !== activePoster) {
-          if (activePoster) {
-            activePoster.classList.remove('is-active');
-          }
-          closestPoster.classList.add('is-active');
-          activePoster = closestPoster;
-        }
-      }
+    // Hard guard #2: pointer over another card => hide
+    document.addEventListener('pointerover', (e) => {
+      if (!hp.classList.contains('show')) return;
+      const otherCard = e.target.closest('.content-card');
+      if (otherCard && otherCard !== currentPreviewCard) hidePreviewImmediate();
+    }, true);
 
-      // Run the check whenever the user scrolls the shelf
-      track.addEventListener('scroll', () => {
-        // We add a tiny delay (debounce) so this doesn't fire too aggressively
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(updateActivePoster, 50);
-      });
-
-      // Run it once right after the page loads
-      updateActivePoster();
+    // Hard guard #3: geometry check (preview nor origin) => hide
+    document.addEventListener('mousemove', (e) => {
+      if (!hp.classList.contains('show') || !currentPreviewCard) return;
+      const pr = hp.getBoundingClientRect();
+      const cr = currentPreviewCard.getBoundingClientRect();
+      const inPreview = e.clientX>=pr.left && e.clientX<=pr.right && e.clientY>=pr.top && e.clientY<=pr.bottom;
+      const inCard = e.clientX>=cr.left && e.clientX<=cr.right && e.clientY>=cr.top && e.clientY<=cr.bottom;
+      if (!inPreview && !inCard) hidePreviewImmediate();
     });
+
+    // Hard guard #4: hit-test check => hide
+    document.addEventListener('pointermove', (e) => {
+      if (!hp.classList.contains('show')) return;
+      const topEl = document.elementFromPoint(e.clientX, e.clientY);
+      if (!topEl) return;
+      const overPreview = hp.contains(topEl);
+      const overOrigin  = currentPreviewCard && currentPreviewCard.contains(topEl);
+      if (!overPreview && !overOrigin) hidePreviewImmediate();
+    }, {passive:true});
+
+    // Global wheel closes preview instantly
+    window.addEventListener('wheel', ()=>{ if (hp.classList.contains('show')) hidePreviewImmediate(); }, {passive:true});
+
+    // Show preview near a card
+    function showPreview(cardEl, label){
+      lastActiveShelf = cardEl.closest('.shelf-row');
+      currentPreviewCard = cardEl;
+
+      const rect = cardEl.getBoundingClientRect();
+      const w = PREVIEW_MIN_W; // fixed
+      const estH = w * 9/16 + PREVIEW_BODY_EXTRA;
+      const left = clamp(rect.left, 16, innerWidth - w - 16);
+      const top  = clamp(rect.top - estH * 0.28, 16, innerHeight - estH - 16);
+
+      hp.style.width = w+'px';
+      hp.style.left  = left+'px';
+      hp.style.top   = top+'px';
+
+      const cssVar = `--${label}`;
+      const bg = getComputedStyle(document.documentElement).getPropertyValue(cssVar);
+      hp.querySelector('.hp-banner').style.backgroundImage = bg && bg.trim()? bg : 'linear-gradient(135deg,#1f2937,#0f172a)';
+      hp.querySelector('.hp-title').textContent = label;
+      hp.querySelector('.hp-chips').textContent = 'Action • Sci‑Fi • Trending';
+
+      // Morph in
+      const startTx = rect.left - left;
+      const startTy = rect.top  - top;
+      const sx = rect.width / w;
+      const sy = rect.height / estH;
+      hp.classList.add('show');
+      hp.style.pointerEvents = 'auto';
+      hp.style.opacity = '0';
+      hp.style.transform = `translate(${startTx}px, ${startTy}px) scale(${sx}, ${sy})`;
+      requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ hp.style.opacity='1'; hp.style.transform='translate(0,0) scale(1,1)'; }); });
+    }
+
+    // ---------- Build shelves ----------
+    shelves.forEach((shelf, idx) => {
+      // Track element
+      const track = document.createElement('div');
+      track.className = 'card-track flex space-x-3 isolate drag-grab';
+      track.style.position = 'relative';
+
+      // Data for this row
+      const rowData = makeRowData(rowsLetters[idx] || 'X');
+      let html = '';
+      for(let s=0;s<NUM_SETS;s++){
+        for(let i=0;i<rowData.length;i++){
+          const item = rowData[i];
+          const cssVar = `--${item.key}`;
+          const resistClass = i===0 ? 'resist-first' : '';
+          html += `
+            <div class="relative flex-shrink-0 w-56 md:w-64 h-32 md:h-36 group ${resistClass}">
+              <div class="content-card absolute inset-0 ${item.color} rounded-lg overflow-hidden cursor-pointer flex items-center justify-center">
+                <div class="absolute inset-0" style="background-image:var(${cssVar}, none); background-size:cover; background-position:center;"></div>
+                <div class="relative z-10 text-white text-3xl md:text-4xl font-extrabold tracking-wide select-none">${item.key}</div>
+                <div class="info-panel absolute left-0 bottom-0 w-full h-full bg-gradient-to-t from-black/60 via-black/20 to-transparent p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
+              </div>
+            </div>`;
+        }
+      }
+      // Pink COMING SOON plank
+      html += `
+        <div class="relative flex-shrink-0 w-[1200px] md:w-[1600px] h-32 md:h-36 rounded-xl bg-pink-600/90 flex items-center justify-center px-6">
+          <div class="w-full text-black font-extrabold tracking-widest uppercase text-xl md:text-2xl whitespace-nowrap overflow-hidden">COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON // COMING SOON</div>
+        </div>`;
+
+      track.innerHTML = html;
+      shelf.appendChild(track);
+
+      // Measure one-set width and set initial X to -setWidth (start at set 2)
+      const setWidth = track.children[ITEMS_PER_ROW].offsetLeft;
+      shelf.dataset.setWidth = String(setWidth);
+      let currentX = -setWidth;
+      shelf.dataset.currentX = String(currentX);
+      track.style.transform = `translateX(${currentX}px)`;
+      track.style.transition = 'transform 120ms linear';
+
+      // Resistance helpers
+      const firstTileEl = ()=> track.children[ITEMS_PER_ROW];
+      const setFirstScale = (overflow)=>{ const s=1+Math.min(MAX_PULL,Math.max(0,overflow))/(MAX_PULL/(MAX_SCALE-1)); const el=firstTileEl(); el.classList.add('edge-active'); el.style.transform=`scaleX(${Math.min(s,MAX_SCALE)})`; };
+      const clearFirstScale = ()=>{ const el=firstTileEl(); el.style.transform='none'; el.classList.remove('edge-active'); };
+      const clampWithResistance = (x)=>{ const w=+shelf.dataset.setWidth; if(x>-w){ const raw=x+w; const pull=Math.min(MAX_PULL, raw*PULL_FEEL); setFirstScale(pull); return -w+pull; } clearFirstScale(); return x; };
+      const wrapRightIfNeeded = (x)=>{ const w=+shelf.dataset.setWidth; if(x<-(NUM_SETS)*w) x += (NUM_SETS-1)*w; return x; };
+
+      // Movement helper
+      const moveBy = (delta) => { let x = +shelf.dataset.currentX + delta; x = clampWithResistance(x); x = wrapRightIfNeeded(x); shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`; };
+      shelf._moveBy = moveBy; // expose
+
+      // Mouse wheel -> horizontal translate, also close preview
+      shelf.addEventListener('wheel', (e)=>{
+        e.preventDefault();
+        const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+        moveBy(-delta);
+        hidePreviewImmediate();
+      }, {passive:false});
+
+      // Arrow buttons
+      const leftArrow=document.createElement('button');
+      leftArrow.className='shelf-nav-left absolute left-0 top-1/2 -translate-y-1/2 z-40 bg-black/80 hover:bg-black/90 p-3 rounded-r-full opacity-0 transition-opacity duration-300 hidden md:block group-hover/shelf:opacity-100';
+      leftArrow.innerHTML='<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>';
+      leftArrow.onclick=()=>{ hidePreviewImmediate(); moveBy(SCROLL_DISTANCE); };
+      shelf.parentElement.style.position='relative'; leftArrow.style.left='1.5rem'; shelf.parentElement.appendChild(leftArrow);
+
+      const rightArrow=document.createElement('button');
+      rightArrow.className='shelf-nav-right absolute right-0 top-1/2 -translate-y-1/2 z-40 bg-black/80 hover:bg-black/90 p-3 rounded-l-full opacity-0 transition-opacity duration-300 hidden md:block group-hover/shelf:opacity-100';
+      rightArrow.innerHTML='<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>';
+      rightArrow.onclick=()=>{ hidePreviewImmediate(); moveBy(-SCROLL_DISTANCE); };
+      rightArrow.style.right='1.5rem'; shelf.parentElement.appendChild(rightArrow);
+
+      // Pointer dragging with inertia
+      let isDragging=false, lastX=0, v=0, inertiaId=null;
+      const stopInertia=()=>{ if(inertiaId){ cancelAnimationFrame(inertiaId); inertiaId=null; } };
+      shelf.addEventListener('pointerdown',(e)=>{
+        if(e.button!==undefined && e.button!==0) return;
+        stopInertia(); isDragging=true; lastX=e.clientX; v=0;
+        track.classList.remove('drag-grab'); track.classList.add('drag-grabbing');
+        hidePreviewImmediate();
+        try{ shelf.setPointerCapture(e.pointerId);}catch(_){ }
+      });
+      window.addEventListener('pointermove',(e)=>{
+        if(!isDragging) return;
+        const dx=e.clientX-lastX; lastX=e.clientX; v=dx;
+        let x=+shelf.dataset.currentX+dx; x=clampWithResistance(x); x=wrapRightIfNeeded(x);
+        shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`;
+      });
+      const endDrag=(e)=>{
+        if(!isDragging) return; isDragging=false;
+        track.classList.remove('drag-grabbing'); track.classList.add('drag-grab');
+        try{ shelf.releasePointerCapture(e.pointerId);}catch(_){ }
+        const step=()=>{
+          if(Math.abs(v)<DRAG_MIN_VELOCITY){ inertiaId=null; return; }
+          let x=+shelf.dataset.currentX+v; x=clampWithResistance(x); x=wrapRightIfNeeded(x);
+          shelf.dataset.currentX=String(x); track.style.transform=`translateX(${x}px)`; v*=DRAG_DECAY;
+          inertiaId=requestAnimationFrame(step);
+        }; inertiaId=requestAnimationFrame(step);
+      };
+      window.addEventListener('pointerup', endDrag);
+      window.addEventListener('pointercancel', endDrag);
+
+      // Snap back on leave to remove stretched first tile
+      shelf.addEventListener('mouseleave',()=>{ const w=+shelf.dataset.setWidth; if(+shelf.dataset.currentX>-w){ shelf.dataset.currentX=String(-w); track.style.transform=`translateX(${-w}px)`; } clearFirstScale(); });
+
+      // Hover to show preview
+      track.querySelectorAll('.content-card').forEach(card=>{
+        const label = card.querySelector('.relative.z-10')?.textContent.trim() || '';
+        card.addEventListener('mouseenter', ()=>{
+          // Close any existing preview immediately
+          if (hp.classList.contains('show')) hidePreviewImmediate();
+          clearTimeout(hoverTimer);
+          hoverTimer = setTimeout(()=> showPreview(card, label), PREVIEW_DELAY);
+        });
+        card.addEventListener('mouseleave', ()=>{ clearTimeout(hoverTimer); });
+      });
+    });
+
+    // Public helper: set image for all duplicates of a key
+    window.setThumb = (key, url) => { document.documentElement.style.setProperty(`--${key}`, `url(${url})`); };
+
+    // ---------- Smoke tests ----------
+    console.group('[StreamVerse tests]');
+    console.assert(document.querySelectorAll('.shelf-row').length===3, '3 shelves expected');
+    console.assert(!!window.__hoverPreview, 'hover preview element exists');
+    console.assert(typeof window.setThumb==='function','setThumb exposed');
+    console.assert(getComputedStyle(document.querySelector('.hover-preview')).pointerEvents==='none','preview overlay pointer-events none');
+    console.assert(document.querySelectorAll('.content-card').length>=30,'cards rendered');
+    console.groupEnd();
   });
-</script>
+  </script>
 </body>
 </html>
