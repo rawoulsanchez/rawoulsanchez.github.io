@@ -508,6 +508,17 @@ html { overflow-x: hidden; }
   }
 }
 
+
+.hero-debug{
+  position:absolute;
+  inset:0;
+  background:#ff2f9b;
+  background-image:
+    linear-gradient(#ffffff55 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff55 1px, transparent 1px);
+  background-size: calc(100%/3) calc(100%/3);
+}
+
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -531,13 +542,7 @@ html { overflow-x: hidden; }
   <main>
 <section class="hero" id="hero">
   <div class="hero-video">
-    <iframe
-      id="hero-yt"
-      title="Hero trailer"
-      src="https://www.youtube.com/embed/VBdaOkpLe_o?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o"
-      allow="autoplay; encrypted-media"
-      allowfullscreen
-    ></iframe>
+    <div class="hero-debug" aria-label="Hero debug framing"></div>
   </div>
 
   <!-- Hero gradient: bottom → top -->
@@ -576,7 +581,7 @@ html { overflow-x: hidden; }
     </div>
   </div>
 
-  <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
+  
 </section>
 <!-- This wrapper div was limiting the width and causing the pink background to leak. -->
 <!-- OLD: <div class="wrap wrap--flush"> -->
@@ -674,21 +679,9 @@ html { overflow-x: hidden; }
 
   <footer>© <span id="y"></span> Rawoul</footer>
   <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
   // Changed alerts to console.log as alerts break the canvas environment.
-  let ytPlayer, isMuted = true;
-  function onYouTubeIframeAPIReady(){
-    ytPlayer = new YT.Player('hero-yt', {
-      events: { onReady: e => { e.target.mute(); e.target.playVideo(); } }
-    });
-  }
-  function toggleMute(){
-    if(!ytPlayer) return;
-    if(isMuted){ ytPlayer.unMute(); isMuted=false; document.querySelector('.mute-btn').textContent='🔊'; document.querySelector('.mute-btn').setAttribute('aria-pressed','false'); }
-    else{ ytPlayer.mute(); isMuted=true; document.querySelector('.mute-btn').textContent='🔇'; document.querySelector('.mute-btn').setAttribute('aria-pressed','true'); }
-  }
-</script>
+  
 <script>
   // Make the CTA row 1/3 shorter than its own available width
   (function(){
