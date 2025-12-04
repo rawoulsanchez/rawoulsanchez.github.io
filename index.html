@@ -461,7 +461,7 @@ html { overflow-x: hidden; }
   .after-hero{
     position:relative;
     z-index:3;
-    margin-top: -15vh;   /* counter the extra hero height */
+    margin-top: -16vh;   /* counter the extra hero height */
     background: transparent;
   }
 
@@ -474,7 +474,7 @@ html { overflow-x: hidden; }
   }
 
   .hero-synopsis{
-    margin-bottom:0.5rem !important;
+    margin-bottom:0.64rem !important;
   }
 
   .hero-cta{
@@ -492,6 +492,19 @@ html { overflow-x: hidden; }
       rgba(0,0,0,0.16) 82%,
       rgba(0,0,0,0.00) 100%
     );
+  }
+
+  .hero-overlay-inline{
+    left:0;
+    padding-left:calc(16px + env(safe-area-inset-left)) !important;
+  }
+
+  .hero-cta{
+    margin-left:0;
+  }
+
+  .shelf-title{
+    margin-left:0;
   }
 }
 
