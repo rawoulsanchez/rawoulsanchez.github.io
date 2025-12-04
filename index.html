@@ -630,17 +630,7 @@ html { overflow-x: hidden; }
         As a rogue AI network threatens global collapse, a disgraced former agent is called
         back into the field for one last, impossible mission to save humanity.
       </p>
-    </div>
-  </div>
-
-  <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
-</section>
-<!-- This wrapper div was limiting the width and causing the pink background to leak. -->
-<!-- OLD: <div class="wrap wrap--flush"> -->
-<section class="after-hero" aria-label="Actions">
-  <!-- Use a new inner wrapper to apply max-width and centering for content -->
-  <div class="content-pad content-pad--tight">
-    <div class="hero-cta">
+      <div class="hero-cta">
       <!-- Play Now -->
       <button type="button" class="btn btn--solid" onclick="console.log('Play trailer')">
         <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor">
@@ -658,7 +648,15 @@ html { overflow-x: hidden; }
         <span>Details</span>
       </button>
     </div>
+    </div>
   </div>
+
+  <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
+</section>
+<!-- This wrapper div was limiting the width and causing the pink background to leak. -->
+<!-- OLD: <div class="wrap wrap--flush"> -->
+<section class="after-hero" aria-label="Actions">
+  <!-- Use a new inner wrapper to apply max-width and centering for content -->
 
   <!-- Row A moved inside after-hero -->
   <section class="shelf shelf--tight" aria-labelledby="row-a-title">
