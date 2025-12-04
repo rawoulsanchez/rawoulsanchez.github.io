@@ -398,7 +398,24 @@ html { overflow-x: hidden; }
 .shelf--tight{ margin-top:8px; }
 
 @media (min-width:1024px){
-  /* Reduce hero height slightly on desktop so shelves come up without overlapping */
+  /* Desktop nav and content aligned to same safe zone */
+  .nav-inner {
+    max-width: 1280px;
+    padding: env(safe-area-inset-top) 40px 0 40px;
+  }
+
+  /* Wider central content area for desktop */
+  .content-pad {
+    max-width: 1280px;
+    padding: 0 40px 24px 40px;
+  }
+
+  /* Align hero overlay text and CTA to the same left safe zone */
+  .hero-overlay-inline {
+    padding: 12px 40px 0 40px;
+  }
+
+  /* Reduce hero height so text + CTA + Row A stack cleanly */
   .hero {
     width: 100vw;
     max-height: 62vh;
@@ -408,12 +425,6 @@ html { overflow-x: hidden; }
     width: 130vw;       /* keep some horizontal overscan */
     height: 115%;
     transform: translate(-50%, -8%);
-  }
-
-  /* Wider central content area for desktop */
-  .content-pad {
-    max-width: 1280px;
-    padding: 0 40px 24px 40px;
   }
 
   /* Extra breathing room if .hero-text is used elsewhere */
@@ -440,6 +451,42 @@ html { overflow-x: hidden; }
   /* Larger posters on desktop for a more cinematic feel */
   .poster {
     width: 200px;
+  }
+}
+
+
+@media (min-width:1024px){
+  /* Align hero overlay text/CTA to the same centered safe-zone column as nav and shelves */
+  .hero-overlay-inline {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+    max-width: 1280px !important;
+    padding: 12px 40px 0 40px !important;
+  }
+}
+
+
+@media (min-width:1024px){
+  /* Desktop: anchor content to viewport left with a shared safe-zone inset */
+  .nav-inner {
+    max-width: none;
+    margin: 0;
+    padding: env(safe-area-inset-top) 4vw 0 4vw;
+  }
+
+  .content-pad {
+    max-width: none;
+    margin: 0;
+    padding: 0 4vw 24px 4vw;
+  }
+
+  .hero-overlay-inline {
+    left: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 12px 4vw 0 4vw !important;
   }
 }
 
