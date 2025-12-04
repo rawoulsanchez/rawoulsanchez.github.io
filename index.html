@@ -479,7 +479,6 @@ html { overflow-x: hidden; }
 
   .hero-cta{
     margin-top:0;
-    margin-left:0;
   }
 
   .hero-gradient{
@@ -500,12 +499,17 @@ html { overflow-x: hidden; }
     padding-left:calc(16px + env(safe-area-inset-left)) !important;
   }
 
+  .hero-cta{
+    margin-left:0;
+  }
+
   .shelf-title{
     margin-left:0;
   }
 
+  /* Ensure active, scaled posters are not vertically clipped on desktop */
   .shelf-track{
-    padding: 0 40px 16px 40px;
+    overflow-y: visible;
   }
 }
 
