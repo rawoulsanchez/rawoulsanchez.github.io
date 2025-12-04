@@ -408,14 +408,6 @@ html { overflow-x: hidden; }
     padding: 0 40px 24px 40px;
   }
 
-  .content-pad--tight{
-    padding-bottom: 0;
-  }
-
-  .shelf.shelf--tight{
-    margin-top: 0;
-  }
-
   .hero-overlay-inline{
     padding-left: 40px !important;
     padding-right: 40px !important;
@@ -464,6 +456,10 @@ html { overflow-x: hidden; }
       linear-gradient(rgba(255,47,155,0.8) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255,47,155,0.8) 1px, transparent 1px);
     background-size: calc(100%/6) calc(100%/4);
+  }
+
+  .shelf--tight{
+    margin-top:-16px; /* pull Row A upward on desktop only */
   }
 }
 
