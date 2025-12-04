@@ -510,15 +510,21 @@ html { overflow-x: hidden; }
 
 
 .hero-debug{
-  position:absolute;
-  inset:0;
-  z-index:3;
-  pointer-events:none;
-  background:transparent;
-  background-image:
-    linear-gradient(rgba(255,47,155,0.8) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,47,155,0.8) 1px, transparent 1px);
-  background-size: calc(100%/3) calc(100%/3);
+  display:none;
+}
+
+@media (min-width:1024px){
+  .hero-debug{
+    position:absolute;
+    inset:0;
+    z-index:3;
+    pointer-events:none;
+    background:transparent;
+    background-image:
+      linear-gradient(rgba(255,47,155,0.8) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,47,155,0.8) 1px, transparent 1px);
+    background-size: calc(100%/3) calc(100%/3);
+  }
 }
 
 </style>
