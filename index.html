@@ -408,6 +408,11 @@ html { overflow-x: hidden; }
     padding: 0 40px 24px 40px;
   }
 
+  .hero-overlay-inline{
+    padding-left: 40px !important;
+    padding-right: 40px !important;
+  }
+
   .hero-text {
     padding: 96px 0;
   }
@@ -450,7 +455,7 @@ html { overflow-x: hidden; }
     background-image:
       linear-gradient(rgba(255,47,155,0.8) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255,47,155,0.8) 1px, transparent 1px);
-    background-size: calc(100%/3) calc(100%/3);
+    background-size: calc(100%/6) calc(100%/4);
   }
 }
 
@@ -458,10 +463,11 @@ html { overflow-x: hidden; }
 @media (min-width:1024px){
   /* Desktop: zoom video further so it fully covers hero container with cinematic crop */
   .hero-video iframe{
-    width: 210vw;
-    height: 120%;
-    left:50%;
-    transform:translate(-50%, -8%);
+    width: 100vw;
+    height: 100vh;
+    left: 0;
+    top: -17.5vh;
+    transform: none;
   }
 }
 
