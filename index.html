@@ -543,6 +543,13 @@ html { overflow-x: hidden; }
 <section class="hero" id="hero">
   <div class="hero-video">
     <div class="hero-debug" aria-label="Hero debug framing"></div>
+  <iframe
+      id="hero-yt"
+      title="Hero trailer"
+      src="https://www.youtube.com/embed/VBdaOkpLe_o?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o"
+      allow="autoplay; encrypted-media"
+      allowfullscreen
+    ></iframe>
   </div>
 
   <!-- Hero gradient: bottom → top -->
@@ -582,6 +589,7 @@ html { overflow-x: hidden; }
   </div>
 
   
+  <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
 </section>
 <!-- This wrapper div was limiting the width and causing the pink background to leak. -->
 <!-- OLD: <div class="wrap wrap--flush"> -->
@@ -678,7 +686,22 @@ html { overflow-x: hidden; }
   </main>
 
   <footer>© <span id="y"></span> Rawoul</footer>
-  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+<script>
+  let ytPlayer, isMuted = true;
+  function onYouTubeIframeAPIReady(){
+    ytPlayer = new YT.Player('hero-yt', {
+      events: { onReady: e => { e.target.mute(); e.target.playVideo(); } }
+    });
+  }
+  function toggleMute(){
+    if(!ytPlayer) return;
+    if(isMuted){ ytPlayer.unMute(); isMuted=false; document.querySelector('.mute-btn').textContent='🔊'; document.querySelector('.mute-btn').setAttribute('aria-pressed','false'); }
+    else{ ytPlayer.mute(); isMuted=true; document.querySelector('.mute-btn').textContent='🔇'; document.querySelector('.mute-btn').setAttribute('aria-pressed','true'); }
+  }
+</script>
+
+<script>document.getElementById('y').textContent = new Date().getFullYear();</script>
 <script>
   // Changed alerts to console.log as alerts break the canvas environment.
   
