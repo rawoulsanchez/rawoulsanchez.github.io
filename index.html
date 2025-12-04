@@ -454,6 +454,17 @@ html { overflow-x: hidden; }
   }
 }
 
+
+@media (min-width:1024px){
+  /* Desktop: zoom video further so it fully covers hero container with cinematic crop */
+  .hero-video iframe{
+    width: 210vw;
+    height: 120%;
+    left:50%;
+    transform:translate(-50%, -8%);
+  }
+}
+
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
