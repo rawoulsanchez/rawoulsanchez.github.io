@@ -437,8 +437,8 @@ html { overflow-x: hidden; }
   /* Desktop: hero/video fills viewport width */
   .hero {
     width: 100vw;
-    height: 75vh;
-    max-height: 75vh;
+    height: 80vh;
+    max-height: 80vh;
     left: 0;
     transform: none;
     aspect-ratio: auto;
@@ -457,6 +457,12 @@ html { overflow-x: hidden; }
       linear-gradient(90deg, rgba(255,47,155,0.8) 1px, transparent 1px);
     background-size: calc(100%/6) calc(100%/4);
   }
+
+  .after-hero{
+    margin-top: -15vh;   /* counter the extra hero height */
+    background: transparent;
+  }
+
 }
 
 
