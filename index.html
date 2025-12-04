@@ -461,13 +461,16 @@ html { overflow-x: hidden; }
 
 
 @media (min-width:1024px){
-  /* Desktop: zoom video further so it fully covers hero container with cinematic crop */
+  /* Desktop: make iframe 16:9 and full viewport width, anchored to bottom of hero */
   .hero-video iframe{
-    width: 100vw;
-    height: 100vh;
-    left: 0;
-    top: -17.5vh;
-    transform: none;
+    position:absolute;
+    left:50%;
+    bottom:0;
+    top:auto;
+    right:auto;
+    width:100vw;
+    height:calc(100vw * 9 / 16);
+    transform:translateX(-50%);
   }
 }
 
