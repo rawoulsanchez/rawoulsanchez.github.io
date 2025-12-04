@@ -396,6 +396,53 @@ html { overflow-x: hidden; }
 .content-pad--tight{ padding-bottom:8px; }
 /* First shelf sits tighter under CTA */
 .shelf--tight{ margin-top:8px; }
+
+@media (min-width:1024px){
+  /* Reduce hero height slightly on desktop so shelves come up without overlapping */
+  .hero {
+    width: 100vw;
+    max-height: 62vh;
+  }
+
+  .hero-video iframe {
+    width: 130vw;       /* keep some horizontal overscan */
+    height: 115%;
+    transform: translate(-50%, -8%);
+  }
+
+  /* Wider central content area for desktop */
+  .content-pad {
+    max-width: 1280px;
+    padding: 0 40px 24px 40px;
+  }
+
+  /* Extra breathing room if .hero-text is used elsewhere */
+  .hero-text {
+    padding: 96px 0;
+  }
+
+  /* Slightly more spacing between shelves on desktop */
+  .shelf {
+    margin: 40px 0 48px;
+  }
+
+  /* Larger CTA group on desktop, still two columns */
+  .hero-cta {
+    max-width: 520px;
+  }
+
+  /* Slightly larger button text and padding on desktop */
+  .btn {
+    font-size: 0.95rem;
+    padding: 0.50rem 0.80rem;
+  }
+
+  /* Larger posters on desktop for a more cinematic feel */
+  .poster {
+    width: 200px;
+  }
+}
+
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
