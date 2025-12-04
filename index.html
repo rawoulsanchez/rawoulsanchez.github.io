@@ -479,6 +479,7 @@ html { overflow-x: hidden; }
 
   .hero-cta{
     margin-top:0;
+    margin-left:0;
   }
 
   .hero-gradient{
@@ -499,17 +500,12 @@ html { overflow-x: hidden; }
     padding-left:calc(16px + env(safe-area-inset-left)) !important;
   }
 
-  .hero-cta{
-    margin-left:0;
-  }
-
   .shelf-title{
     margin-left:0;
   }
 
-  /* Ensure active, scaled posters are not vertically clipped on desktop */
   .shelf-track{
-    overflow-y: visible;
+    padding: 0 40px 16px 40px;
   }
 }
 
@@ -525,6 +521,46 @@ html { overflow-x: hidden; }
     width:100vw;
     height:calc(100vw * 9 / 16);
     transform:translate(-50%, -50%);
+  }
+}
+
+
+@media (min-width: 1024px) {
+  /* Desktop-only debug outlines */
+
+  .hero {
+    outline: 2px solid rgba(255, 0, 0, 0.8); /* red */
+  }
+
+  .hero-overlay-wrap {
+    outline: 2px solid rgba(0, 128, 255, 0.9); /* blue */
+  }
+
+  .after-hero {
+    outline: 2px solid rgba(0, 200, 120, 0.9); /* green */
+    background-color: rgba(0, 200, 120, 0.06);
+  }
+
+  .shelf {
+    outline: 2px dashed rgba(255, 165, 0, 0.9); /* orange */
+  }
+
+  .shelf-outer {
+    outline: 2px solid rgba(255, 255, 0, 0.8); /* yellow */
+    background-color: rgba(255, 255, 0, 0.04);
+  }
+
+  .shelf-track {
+    outline: 2px solid rgba(186, 85, 211, 0.9); /* purple */
+    background-color: rgba(186, 85, 211, 0.04);
+  }
+
+  .poster {
+    outline: 2px solid rgba(0, 255, 255, 0.9); /* cyan */
+  }
+
+  .poster.is-active {
+    outline: 3px solid rgba(255, 255, 255, 0.95); /* white, stronger */
   }
 }
 
