@@ -512,10 +512,12 @@ html { overflow-x: hidden; }
 .hero-debug{
   position:absolute;
   inset:0;
-  background:#ff2f9b;
+  z-index:3;
+  pointer-events:none;
+  background:transparent;
   background-image:
-    linear-gradient(#ffffff55 1px, transparent 1px),
-    linear-gradient(90deg, #ffffff55 1px, transparent 1px);
+    linear-gradient(rgba(255,47,155,0.8) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,47,155,0.8) 1px, transparent 1px);
   background-size: calc(100%/3) calc(100%/3);
 }
 
