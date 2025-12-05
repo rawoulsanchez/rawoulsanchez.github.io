@@ -421,6 +421,14 @@ html { overflow-x: hidden; }
     margin: 40px 0 48px;
   }
 
+  /* Desktop: pull Row A shelf (only) closer to the hero so that
+     the top edge of the Row A posters aligns with the bottom edge
+     of the hero video box. This moves Row A as a block without
+     affecting Rows B and C. */
+  .after-hero .shelf.shelf--tight {
+    margin-top: 0;          /* remove extra top margin for Row A */
+  }
+
   .hero-cta {
     max-width: 520px;
   }
@@ -506,6 +514,12 @@ html { overflow-x: hidden; }
 
   .shelf-track{
     padding: 24px 40px 24px 40px;
+  }
+
+  /* Desktop: remove extra top padding above Row A posters so their
+     top edges can sit flush with the hero bottom line. */
+  .after-hero .shelf.shelf--tight .shelf-track {
+    padding-top: 0;
   }
 }
 
