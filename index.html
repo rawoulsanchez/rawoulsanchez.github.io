@@ -426,7 +426,7 @@ html { overflow-x: hidden; }
      of the hero video box. This moves Row A as a block without
      affecting Rows B and C. */
   .after-hero .shelf.shelf--tight {
-    margin-top: 0;          /* remove extra top margin for Row A */
+    margin-top: 8px;        /* restore tight top margin for Row A */op margin for Row A */
   }
 
   .hero-cta {
@@ -471,6 +471,12 @@ html { overflow-x: hidden; }
     z-index:3;
     margin-top: -16vh;   /* counter the extra hero height */
     background: transparent;
+  }
+
+  /* Desktop: add spacer padding so Row A cards sit on the same
+     horizontal line as the bottom edge of the hero video box. */
+  .after-hero{
+    padding-top: 3.1rem; /* ~50px at 16px root, matching the old CTA block height */
   }
 
 
@@ -519,7 +525,7 @@ html { overflow-x: hidden; }
   /* Desktop: remove extra top padding above Row A posters so their
      top edges can sit flush with the hero bottom line. */
   .after-hero .shelf.shelf--tight .shelf-track {
-    padding-top: 0;
+    padding-top: 24px;      /* align Row A posters with global desktop shelf padding */
   }
 }
 
