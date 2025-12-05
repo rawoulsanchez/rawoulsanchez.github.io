@@ -1,5 +1,4 @@
 
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -426,11 +425,13 @@ html { overflow-x: hidden; }
      of the hero video box. This moves Row A as a block without
      affecting Rows B and C. */
   .after-hero .shelf.shelf--tight {
-    margin-top: 8px;        /* restore tight top margin for Row A */op margin for Row A */
+    margin-top: 0.40rem;        /* Pills → Row A label rhythm on desktop */
   }
 
   .hero-cta {
     max-width: 520px;
+    margin-top: 0.40rem;
+    margin-left: 0;
   }
 
   .btn {
@@ -488,13 +489,9 @@ html { overflow-x: hidden; }
   }
 
   .hero-synopsis{
-    margin-bottom:0.64rem !important;
+    margin-bottom:0 !important;
   }
 
-  .hero-cta{
-    margin-top:0;
-    margin-left:0;
-  }
 
   .hero-gradient{
     background:linear-gradient(
@@ -516,6 +513,7 @@ html { overflow-x: hidden; }
 
   .shelf-title{
     margin-left:0;
+    margin-bottom:0.32rem;
   }
 
   .shelf-track{
@@ -593,6 +591,25 @@ html { overflow-x: hidden; }
 
   .content-pad {
     outline: 2px solid rgba(173, 216, 230, 0.9); /* light blue */
+  }
+}
+
+/* ZAQ – desktop-only vertical rhythm for hero + Row A */
+@media (min-width: 1024px) {
+  .title-chip {
+    margin-bottom: 0.5rem;   /* Chip → Meta */
+  }
+
+  .hero-cta {
+    margin-top: 0.40rem;     /* Synopsis → Pills */
+  }
+
+  .shelf.shelf--tight {
+    margin-top: 0.40rem;     /* Pills → Row A Label */
+  }
+
+  .shelf-title {
+    margin-bottom: 0.20rem;  /* Row A Label → Divider */
   }
 }
 
