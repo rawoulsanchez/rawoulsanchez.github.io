@@ -342,12 +342,24 @@ html { overflow-x: hidden; }
   -webkit-overflow-scrolling: touch;
   padding: 10px calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left));
   scroll-snap-type: x mandatory; /* Snap horizontally */
+  cursor: grab;
   scrollbar-width: none; /* Hide scrollbar for Firefox */
 }
 .shelf-track::-webkit-scrollbar {
   display: none; /* Hide scrollbar for Chrome, Safari, Opera */
 }
 .shelf-track[role="list"] { list-style: none; }
+
+.shelf-track.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+@media (pointer: fine) {
+  .shelf-track {
+    scroll-snap-type: none;
+  }
+}
 
 /* --- POSTER --- */
 /* Add snap alignment, transitions, and a transform origin */
@@ -370,7 +382,6 @@ html { overflow-x: hidden; }
 
 /* Style the active/centered poster to give it scale and depth */
 .poster.is-active {
-  transform: scale(1.12); /* Makes the card 12% bigger */
   border-color: #777c83;  /* A slightly brighter border to highlight */
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Adds a "lifted" shadow for depth */
   z-index: 2; /* Ensures the active card renders on top of its neighbors */
@@ -647,7 +658,7 @@ html { overflow-x: hidden; }
     <iframe
       id="hero-yt"
       title="Hero trailer"
-      src="https://www.youtube.com/embed/WQd-6HOVREk?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=WQd-6HOVREk"
+      src="https://www.youtube.com/embed/VBdaOkpLe_o?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o"
       allow="autoplay; encrypted-media"
       allowfullscreen
     ></iframe>
@@ -861,20 +872,29 @@ html { overflow-x: hidden; }
       const initialPosterRect = initialPoster.getBoundingClientRect();
       track.scrollLeft = initialPoster.offsetLeft - (trackRect.width / 2) + (initialPosterRect.width / 2);
 
-      // --- 3. THIS IS THE NEW, RELIABLE METHOD ---
-      // This function finds which poster is physically closest to the center of the shelf.
-      let activePoster = null;
-      let scrollTimeout; // Used to prevent the code from running too frequently
+      // --- 3. Continuous magnifier scaling + active card ---
+      function updateScalesAndActive() {
+        const trackRect = track.getBoundingClientRect();
+        const trackCenterX = trackRect.left + trackRect.width / 2;
 
-      function updateActivePoster() {
-        const trackCenterX = track.getBoundingClientRect().left + track.getBoundingClientRect().width / 2;
+        const maxScale = 1.18; // largest at center
+        const minScale = 0.78; // smallest far away
+
         let closestPoster = null;
         let smallestDistance = Infinity;
+        const halfWidth = trackRect.width / 2 || 1; // avoid divide by zero
 
-        // Loop through all posters to find the closest one to the center
         for (const poster of track.children) {
-          const posterCenterX = poster.getBoundingClientRect().left + poster.getBoundingClientRect().width / 2;
+          const rect = poster.getBoundingClientRect();
+          const posterCenterX = rect.left + rect.width / 2;
+
           const distance = Math.abs(trackCenterX - posterCenterX);
+
+          const t = Math.min(distance / halfWidth, 1); // 0 at center, 1 at far edge
+
+          const scale = maxScale - (maxScale - minScale) * t;
+
+          poster.style.transform = 'scale(' + scale.toFixed(3) + ')';
 
           if (distance < smallestDistance) {
             smallestDistance = distance;
@@ -882,25 +902,48 @@ html { overflow-x: hidden; }
           }
         }
 
-        // If the closest poster has changed, update the styling
-        if (closestPoster && closestPoster !== activePoster) {
-          if (activePoster) {
-            activePoster.classList.remove('is-active');
+        if (closestPoster) {
+          for (const poster of track.children) {
+            if (poster === closestPoster) poster.classList.add('is-active');
+            else poster.classList.remove('is-active');
           }
-          closestPoster.classList.add('is-active');
-          activePoster = closestPoster;
         }
       }
 
-      // Run the check whenever the user scrolls the shelf
-      track.addEventListener('scroll', () => {
-        // We add a tiny delay (debounce) so this doesn't fire too aggressively
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(updateActivePoster, 50);
-      });
+      track.addEventListener('scroll', updateScalesAndActive);
 
-      // Run it once right after the page loads
-      updateActivePoster();
+      updateScalesAndActive();
+
+      if (window.matchMedia && window.matchMedia('(pointer: fine)').matches) {
+        let isDragging = false;
+        let startX;
+        let startScrollLeft;
+
+        track.addEventListener('mousedown', (event) => {
+          if (event.button !== 0) return; // left button only
+          isDragging = true;
+          track.classList.add('is-dragging');
+          startX = event.pageX - track.offsetLeft;
+          startScrollLeft = track.scrollLeft;
+        });
+
+        track.addEventListener('mousemove', (event) => {
+          if (!isDragging) return;
+          event.preventDefault();
+          const x = event.pageX - track.offsetLeft;
+          const walk = x - startX;
+          track.scrollLeft = startScrollLeft - walk;
+        });
+
+        const stopDragging = () => {
+          if (!isDragging) return;
+          isDragging = false;
+          track.classList.remove('is-dragging');
+        };
+
+        track.addEventListener('mouseleave', stopDragging);
+        track.addEventListener('mouseup', stopDragging);
+      }
     });
   });
 </script>
