@@ -508,7 +508,7 @@ html { overflow-x: hidden; }
 
   .hero-overlay-inline{
     left:0;
-    padding-left:calc(16px + env(safe-area-inset-left)) !important;
+    padding-left:calc(var(--space-synopsis-pills) + env(safe-area-inset-left)) !important;
   }
 
   .shelf-title{
@@ -594,22 +594,30 @@ html { overflow-x: hidden; }
   }
 }
 
+:root {
+  /* Hero + Row A spacing tokens, aligned to a 4px-based grid (comments only) */
+  --space-chip-meta: 0.5rem;      /* ≈ 8px  = 2 × 4px  (Chip → Meta) */
+  --space-synopsis-pills: 2.20rem;/* ≈ 35px ≈ 9 × 4px (Synopsis → Pills) */
+  --space-pills-rowa: 0.40rem;    /* ≈ 6px  ≈ 1.5 × 4px (Pills → Row A label) */
+  --space-rowa-divider: 0.20rem;  /* ≈ 3px  ≈ 0.75 × 4px (Row A label → divider) */
+}
+
 /* ZAQ – desktop-only vertical rhythm for hero + Row A */
 @media (min-width: 1024px) {
   .title-chip {
-    margin-bottom: 0.5rem;   /* Chip → Meta */
+    margin-bottom: var(--space-chip-meta);       /* Chip → Meta */
   }
 
   .hero-cta {
-    margin-top: 2.20rem;     /* Synopsis → Pills */
+    margin-top: var(--space-synopsis-pills);     /* Synopsis → Pills */
   }
 
   .shelf.shelf--tight {
-    margin-top: 0.40rem;     /* Pills → Row A Label */
+    margin-top: var(--space-pills-rowa);         /* Pills → Row A Label */
   }
 
   .shelf-title {
-    margin-bottom: 0.20rem;  /* Row A Label → Divider */
+    margin-bottom: var(--space-rowa-divider);    /* Row A Label → Divider */
   }
 }
 
