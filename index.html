@@ -554,10 +554,56 @@ html { overflow-x: hidden; }
 }
 
 
+@media (min-width: 1024px) {
+  /* Desktop-only debug outlines */
+
+  .hero {
+    outline: 2px solid rgba(255, 0, 0, 0.8); /* red */
+  }
+
+  .hero-overlay-wrap {
+    outline: 2px solid rgba(0, 128, 255, 0.9); /* blue */
+  }
+
+  .after-hero {
+    outline: 2px solid rgba(0, 200, 120, 0.9); /* green */
+    background-color: rgba(0, 200, 120, 0.06);
+  }
+
+  .shelf {
+    outline: 2px dashed rgba(255, 165, 0, 0.9); /* orange */
+  }
+
+  .shelf-outer {
+    outline: 2px solid rgba(255, 255, 0, 0.8); /* yellow */
+    background-color: rgba(255, 255, 0, 0.04);
+  }
+
+  .shelf-track {
+    outline: 2px solid rgba(186, 85, 211, 0.9); /* purple */
+    background-color: rgba(186, 85, 211, 0.04);
+  }
+
+  .poster {
+    outline: 2px solid rgba(0, 255, 255, 0.9); /* cyan */
+  }
+
+  .poster.is-active {
+    outline: 3px solid rgba(255, 255, 255, 0.95); /* white, stronger */
+  }
+}
 
 
+@media (min-width: 1024px) {
+  /* Desktop-only debug outlines: hero text + inner content container */
+  .hero-overlay-inline {
+    outline: 2px solid rgba(255, 105, 180, 0.9); /* pink */
+  }
 
-
+  .content-pad {
+    outline: 2px solid rgba(173, 216, 230, 0.9); /* light blue */
+  }
+}
 
 :root {
   /* Hero + Row A spacing tokens, aligned to a 4px-based grid (comments only) */
@@ -806,7 +852,7 @@ html { overflow-x: hidden; }
   document.addEventListener('DOMContentLoaded', () => {
     // Number of original sets to clone on each side for the infinite effect
     const CLONE_COUNT = 4;
-    const RECENTER_DURATION = 1200; // ms, slow cinematic glide
+    const RECENTER_DURATION = 1800; // ms, slow cinematic glide
     const activeScrollAnimations = new Map();
     let lastActiveTrack = null;
 
@@ -837,11 +883,11 @@ html { overflow-x: hidden; }
       track.__scrollAnimating = true;
 
       function easeInOutCubic(t) {
-        if (t < 0.5) {
-          return 4 * t * t * t;
-        }
-        const f = -2 * t + 2;
-        return 1 - (f * f * f) / 2;
+        // Extra gentle ease-in-out with zero velocity and acceleration at ends
+        // "smootherstep": t^3 * (t * (6t - 15) + 10)
+        if (t <= 0) return 0;
+        if (t >= 1) return 1;
+        return t * t * t * (t * (6 * t - 15) + 10);
       }
 
       function step(now) {
@@ -876,7 +922,12 @@ html { overflow-x: hidden; }
       const trackRect = track.getBoundingClientRect();
       const posterRect = activePoster.getBoundingClientRect();
 
-      const target = activePoster.offsetLeft - (trackRect.width / 2) + (posterRect.width / 2);
+      // Center the active poster to the viewport center, so all rows share the same screen center
+      const viewportCenterX = window.innerWidth / 2;
+      const posterCenterOffset = activePoster.offsetLeft + (posterRect.width / 2);
+      const viewportCenterRelativeToTrack = viewportCenterX - trackRect.left;
+      const target = posterCenterOffset - viewportCenterRelativeToTrack;
+
       animateScrollLeftSlow(track, target, RECENTER_DURATION);
     }
 
@@ -952,19 +1003,32 @@ html { overflow-x: hidden; }
         }
       }
 
+      let scrollEndTimeout = null;
+
       const handleScroll = () => {
         const isAnimating = !!track.__scrollAnimating;
 
         // Always keep the magnifier / active-card state in sync
         updateScalesAndActive();
 
-        // Only treat this as a "row interaction" when the user is driving,
-        // not when a recenter animation is updating scrollLeft.
         if (!isAnimating) {
+          // Cross-row behavior: when a *different* row is scrolled by the user,
+          // recenter the last active row once.
           if (lastActiveTrack && lastActiveTrack !== track && !activeScrollAnimations.has(lastActiveTrack)) {
             recenterTrackActivePoster(lastActiveTrack);
           }
           lastActiveTrack = track;
+
+          // Same-row behavior: when the user scrolls away and then stops,
+          // gently recenter the active card in this row.
+          if (scrollEndTimeout) {
+            clearTimeout(scrollEndTimeout);
+          }
+          scrollEndTimeout = setTimeout(() => {
+            if (!track.__scrollAnimating) {
+              recenterTrackActivePoster(track);
+            }
+          }, 120);
         }
       };
 
@@ -1022,6 +1086,7 @@ html { overflow-x: hidden; }
     });
   });
 </script>
+
 
 </body>
 </html>
