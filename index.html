@@ -395,10 +395,30 @@ html { overflow-x: hidden; }
 .shelf-outer{ position:relative; width:100vw; left:50%; transform:translateX(-50%); }
 /* Edge fades (narrow 48px) */
 .shelf-outer::before, .shelf-outer::after{
-  content:""; position:absolute; top:0; bottom:0; width:48px; pointer-events:none; z-index:1;
+  content:""; position:absolute; top:0; bottom:0; width:120px; pointer-events:none; z-index:2;
 }
-.shelf-outer::before{ left:0; background:linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0)); }
-.shelf-outer::after{ right:0; background:linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0)); }
+.shelf-outer::before{
+  left:0;
+  background:linear-gradient(
+    to right,
+    rgba(0,0,0,1) 0%,
+    rgba(0,0,0,0.88) 20%,
+    rgba(0,0,0,0.60) 45%,
+    rgba(0,0,0,0.32) 75%,
+    rgba(0,0,0,0.00) 100%
+  );
+}
+.shelf-outer::after{
+  right:0;
+  background:linear-gradient(
+    to left,
+    rgba(0,0,0,1) 0%,
+    rgba(0,0,0,0.88) 20%,
+    rgba(0,0,0,0.60) 45%,
+    rgba(0,0,0,0.32) 75%,
+    rgba(0,0,0,0.00) 100%
+  );
+}
 /* Horizontal list of posters */
 /* --- SHELF TRACK --- */
 /* Add scroll-snapping and hide the scrollbar */
@@ -413,6 +433,8 @@ html { overflow-x: hidden; }
   scroll-snap-type: x mandatory; /* Snap horizontally */
   scrollbar-width: none; /* Hide scrollbar for Firefox */
   cursor: grab;
+  position: relative;
+  z-index: 0;
 }
 .shelf-track::-webkit-scrollbar {
   display: none; /* Hide scrollbar for Chrome, Safari, Opera */
@@ -442,17 +464,26 @@ html { overflow-x: hidden; }
   width: calc((100vw - (16px * 2) - (var(--shelf-gap) * 2)) / 3); /* ~3.0 visible on mobile */
   scroll-snap-align: center; /* Snap posters to the center */
   transform-origin: center center;
+  filter: brightness(0.9);
+  opacity: 0.8;
   /* Animate all the properties we change on the active state */
   transition: transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1),
               box-shadow 0.35s cubic-bezier(0.25, 0.1, 0.25, 1),
-              border-color 0.35s ease;
+              border-color 0.35s ease,
+              filter 0.35s ease,
+              opacity 0.35s ease;
   z-index: 1; /* Default stacking level */
 }
 
 /* Style the active/centered poster to give it scale and depth */
 .poster.is-active {
-  border-color: #777c83;  /* A slightly brighter border to highlight */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Adds a "lifted" shadow for depth */
+  border-color: var(--brand);  /* Neon border color */
+  border-width: 2px;           /* 2px neon tubing vs 1px base */
+  box-shadow:
+    0 0 0 1px var(--brand),
+    0 0 24px color-mix(in srgb, var(--brand) 60%, transparent);
+  filter: brightness(1.08);
+  opacity: 1;
   z-index: 2; /* Ensures the active card renders on top of its neighbors */
 }
 
@@ -725,7 +756,7 @@ html { overflow-x: hidden; }
       </nav>
       <div class="nav-actions">
         <button class="icon-btn" aria-label="Search">
-          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 015.92 12.2l3.69 3.69-1.42 1.42-3.69-3.69A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 015.92 12.2l3.69 3.69-1.42 1.42-3.69-3.69A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 5.5 0 100 11 5.5 5.5 0 000-11z"/></svg>
         </button>
         <button class="icon-btn" aria-label="Notifications">
           <span class="dot" aria-hidden="true"></span>
