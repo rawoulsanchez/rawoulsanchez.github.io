@@ -554,11 +554,9 @@ html { overflow-x: hidden; }
 }
 
 
-@media (min-width: 1024px) { /* ZAQ: debug outlines removed */ }
 
 
 
-@media (min-width: 1024px) { /* ZAQ: hero/content debug outlines removed */ }
 
 
 :root {
@@ -593,9 +591,6 @@ html { overflow-x: hidden; }
   }
 }
 
-
-/* ZAQ: permanently disable hero debug grid */
-.hero-debug{ display:none !important; background-image:none !important; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -811,6 +806,79 @@ html { overflow-x: hidden; }
   document.addEventListener('DOMContentLoaded', () => {
     // Number of original sets to clone on each side for the infinite effect
     const CLONE_COUNT = 4;
+    const RECENTER_DURATION = 1200; // ms, slow cinematic glide
+    const activeScrollAnimations = new Map();
+    let lastActiveTrack = null;
+
+    function cancelScrollAnimation(track) {
+      if (!track) return;
+      const anim = activeScrollAnimations.get(track);
+      if (anim && typeof anim.frameId === 'number') {
+        cancelAnimationFrame(anim.frameId);
+      }
+      activeScrollAnimations.delete(track);
+      track.__scrollAnimating = false;
+    }
+
+    function animateScrollLeftSlow(track, target, durationMs) {
+      if (!track || typeof target !== 'number' || !isFinite(target)) return;
+
+      cancelScrollAnimation(track);
+
+      const start = track.scrollLeft;
+      const distance = target - start;
+
+      if (distance === 0 || durationMs <= 0) {
+        track.scrollLeft = target;
+        return;
+      }
+
+      const startTime = performance.now();
+      track.__scrollAnimating = true;
+
+      function easeInOutCubic(t) {
+        if (t < 0.5) {
+          return 4 * t * t * t;
+        }
+        const f = -2 * t + 2;
+        return 1 - (f * f * f) / 2;
+      }
+
+      function step(now) {
+        const elapsed = now - startTime;
+        let t = elapsed / durationMs;
+        if (t < 0) t = 0;
+        if (t > 1) t = 1;
+
+        const eased = easeInOutCubic(t);
+        track.scrollLeft = start + distance * eased;
+
+        const currentAnim = activeScrollAnimations.get(track);
+        if (t < 1 && currentAnim && currentAnim.step === step) {
+          const frameId = requestAnimationFrame(step);
+          currentAnim.frameId = frameId;
+        } else {
+          track.scrollLeft = target;
+          activeScrollAnimations.delete(track);
+          track.__scrollAnimating = false;
+        }
+      }
+
+      const frameId = requestAnimationFrame(step);
+      activeScrollAnimations.set(track, { frameId, step });
+    }
+
+    function recenterTrackActivePoster(track) {
+      if (!track) return;
+      const activePoster = track.querySelector('.poster.is-active');
+      if (!activePoster) return;
+
+      const trackRect = track.getBoundingClientRect();
+      const posterRect = activePoster.getBoundingClientRect();
+
+      const target = activePoster.offsetLeft - (trackRect.width / 2) + (posterRect.width / 2);
+      animateScrollLeftSlow(track, target, RECENTER_DURATION);
+    }
 
     document.querySelectorAll('.shelf-track').forEach(track => {
       const originalPosters = Array.from(track.children);
@@ -884,9 +952,31 @@ html { overflow-x: hidden; }
         }
       }
 
-      track.addEventListener('scroll', updateScalesAndActive);
+      const handleScroll = () => {
+        const isAnimating = !!track.__scrollAnimating;
 
-      updateScalesAndActive();
+        // Always keep the magnifier / active-card state in sync
+        updateScalesAndActive();
+
+        // Only treat this as a "row interaction" when the user is driving,
+        // not when a recenter animation is updating scrollLeft.
+        if (!isAnimating) {
+          if (lastActiveTrack && lastActiveTrack !== track && !activeScrollAnimations.has(lastActiveTrack)) {
+            recenterTrackActivePoster(lastActiveTrack);
+          }
+          lastActiveTrack = track;
+        }
+      };
+
+      track.addEventListener('scroll', handleScroll);
+
+      // Ensure the first magnifier run happens after scrollLeft/layout settle
+      requestAnimationFrame(updateScalesAndActive);
+
+      // Recalculate magnifier whenever the viewport size changes
+      window.addEventListener('resize', () => {
+        requestAnimationFrame(updateScalesAndActive);
+      });
 
       // Desktop-only grab-to-drag behavior
       if (window.matchMedia && window.matchMedia('(pointer: fine)').matches) {
@@ -896,6 +986,7 @@ html { overflow-x: hidden; }
 
         track.addEventListener('mousedown', (event) => {
           if (event.button !== 0) return; // left button only
+          cancelScrollAnimation(track);
           isDragging = true;
           track.classList.add('is-dragging');
           startX = event.pageX - track.offsetLeft;
@@ -919,8 +1010,18 @@ html { overflow-x: hidden; }
         track.addEventListener('mouseleave', stopDragging);
         track.addEventListener('mouseup', stopDragging);
       }
+
+      // Cancel any ongoing recenter animation when the user manually scrolls
+      track.addEventListener('wheel', () => {
+        cancelScrollAnimation(track);
+      }, { passive: true });
+
+      track.addEventListener('touchstart', () => {
+        cancelScrollAnimation(track);
+      }, { passive: true });
     });
   });
 </script>
+
 </body>
 </html>
