@@ -36,6 +36,7 @@ border-bottom:0;
   display:flex;
   align-items:center;
   justify-content:space-between;
+  gap:16px;
   padding:env(safe-area-inset-top) 16px 0 16px; /* <-- moved from .nav-bar */
 }
 .brand {
@@ -45,6 +46,47 @@ border-bottom:0;
     letter-spacing:.2px;
     text-decoration:none;
 }
+  .nav-links{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    margin:0 24px;
+    flex:1 1 auto;
+    min-width:0;
+    white-space:nowrap;
+  }
+  .nav-link{
+    font-size:.82rem;
+    font-weight:500;
+    color:var(--muted);
+    text-decoration:none;
+    padding:4px 8px;
+    border-radius:999px;
+    transition:color .16s ease, background-color .16s ease, opacity .16s ease;
+  }
+  .nav-link:hover{
+    color:var(--fg);
+    background:#111;
+  }
+  .nav-link--active{
+    color:#fff;
+    background:rgba(255,255,255,0.10);
+  }
+  @media (max-width:640px){
+    .nav-links{
+      gap:12px;
+      margin:0 12px;
+      font-size:.78rem;
+      white-space:normal;
+      flex-wrap:wrap;
+      justify-content:flex-start;
+    }
+    .nav-link{
+      font-size:.78rem;
+      padding:3px 6px;
+    }
+  }
   .nav-actions {
     display:flex;
     gap:12px;
@@ -126,6 +168,33 @@ main{
     text-align:center;
     padding:24px;
     border-top:1px solid #222;
+    font-size:.82rem;
+  }
+  .footer-nav{
+    margin-top:6px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:4px 10px;
+    font-size:.78rem;
+  }
+  .footer-nav-link{
+    position:relative;
+    color:var(--muted);
+    text-decoration:none;
+    transition:color .16s ease, opacity .16s ease;
+  }
+  .footer-nav-link:hover{
+    color:var(--fg);
+  }
+  .footer-nav-link::before{
+    content:"•";
+    opacity:.6;
+    margin:0 6px 0 2px;
+  }
+  .footer-nav-link:first-child::before{
+    content:"";
+    margin:0;
   }
   button.cta {
     background:var(--accent);
@@ -465,7 +534,7 @@ html { overflow-x: hidden; }
   }
 
     /* Desktop-only debug overlay grid */
-  .hero-debug{
+  body.debug-layout .hero-debug{
     display:block;
     position:absolute;
     inset:0;
@@ -557,38 +626,38 @@ html { overflow-x: hidden; }
 @media (min-width: 1024px) {
   /* Desktop-only debug outlines */
 
-  .hero {
+  body.debug-layout .hero {
     outline: 2px solid rgba(255, 0, 0, 0.8); /* red */
   }
 
-  .hero-overlay-wrap {
+  body.debug-layout .hero-overlay-wrap {
     outline: 2px solid rgba(0, 128, 255, 0.9); /* blue */
   }
 
-  .after-hero {
+  body.debug-layout .after-hero {
     outline: 2px solid rgba(0, 200, 120, 0.9); /* green */
     background-color: rgba(0, 200, 120, 0.06);
   }
 
-  .shelf {
+  body.debug-layout .shelf {
     outline: 2px dashed rgba(255, 165, 0, 0.9); /* orange */
   }
 
-  .shelf-outer {
+  body.debug-layout .shelf-outer {
     outline: 2px solid rgba(255, 255, 0, 0.8); /* yellow */
     background-color: rgba(255, 255, 0, 0.04);
   }
 
-  .shelf-track {
+  body.debug-layout .shelf-track {
     outline: 2px solid rgba(186, 85, 211, 0.9); /* purple */
     background-color: rgba(186, 85, 211, 0.04);
   }
 
-  .poster {
+  body.debug-layout .poster {
     outline: 2px solid rgba(0, 255, 255, 0.9); /* cyan */
   }
 
-  .poster.is-active {
+  body.debug-layout .poster.is-active {
     outline: 3px solid rgba(255, 255, 255, 0.95); /* white, stronger */
   }
 }
@@ -596,11 +665,11 @@ html { overflow-x: hidden; }
 
 @media (min-width: 1024px) {
   /* Desktop-only debug outlines: hero text + inner content container */
-  .hero-overlay-inline {
+  body.debug-layout .hero-overlay-inline {
     outline: 2px solid rgba(255, 105, 180, 0.9); /* pink */
   }
 
-  .content-pad {
+  body.debug-layout .content-pad {
     outline: 2px solid rgba(173, 216, 230, 0.9); /* light blue */
   }
 }
@@ -646,6 +715,14 @@ html { overflow-x: hidden; }
   <header class="nav-bar" role="navigation" aria-label="Main">
     <div class="nav-inner">
       <a class="brand" href="/" aria-label="Home">SanchezNinjah</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a class="nav-link nav-link--active" href="#hero" aria-label="Go to Film section" aria-current="page">Film</a>
+        <a class="nav-link" href="#photography" aria-label="Go to Photography section">Photography</a>
+        <a class="nav-link" href="#social-media" aria-label="Go to Social Media section">Social Media</a>
+        <a class="nav-link" href="#side-quests" aria-label="Go to Side Quests section">Side Quests</a>
+        <a class="nav-link" href="#about" aria-label="Go to About section">About</a>
+        <a class="nav-link" href="#contact" aria-label="Go to Contact section">Contact</a>
+      </nav>
       <div class="nav-actions">
         <button class="icon-btn" aria-label="Search">
           <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 015.92 12.2l3.69 3.69-1.42 1.42-3.69-3.69A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z"/></svg>
@@ -654,6 +731,7 @@ html { overflow-x: hidden; }
           <span class="dot" aria-hidden="true"></span>
           <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a4 4 0 00-4 4v1.1C6.2 8 5 9.7 5 11.6V17l-1.5 1.5v1h17v-1L19 17v-5.4c0-1.9-1.2-3.6-3-4.5V6a4 4 0 00-4-4zm0 20a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
         </button>
+        <button class="icon-btn" id="debugToggleButton" type="button" aria-label="Toggle layout debug" aria-pressed="false">Debug</button>
       </div>
     </div>
   </header>
@@ -800,7 +878,17 @@ html { overflow-x: hidden; }
 
   </main>
 
-  <footer>© <span id="y"></span> Rawoul</footer>
+  <footer>
+    © <span id="y"></span> Rawoul
+    <nav class="footer-nav" aria-label="Footer navigation">
+      <a class="footer-nav-link footer-nav-link--active" href="#hero" aria-label="Go to Film section">Film</a>
+      <a class="footer-nav-link" href="#photography" aria-label="Go to Photography section">Photography</a>
+      <a class="footer-nav-link" href="#social-media" aria-label="Go to Social Media section">Social Media</a>
+      <a class="footer-nav-link" href="#side-quests" aria-label="Go to Side Quests section">Side Quests</a>
+      <a class="footer-nav-link" href="#about" aria-label="Go to About section">About</a>
+      <a class="footer-nav-link" href="#contact" aria-label="Go to Contact section">Contact</a>
+    </nav>
+  </footer>
   <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
@@ -1079,6 +1167,24 @@ html { overflow-x: hidden; }
       track.addEventListener('touchstart', () => {
         cancelScrollAnimation(track);
       }, { passive: true });
+    });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var debugButton = document.getElementById('debugToggleButton');
+    if (!debugButton) return;
+
+    function syncDebugButtonState() {
+      var isActive = document.body.classList.contains('debug-layout');
+      debugButton.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    }
+
+    syncDebugButtonState();
+
+    debugButton.addEventListener('click', function () {
+      document.body.classList.toggle('debug-layout');
+      syncDebugButtonState();
     });
   });
 </script>
