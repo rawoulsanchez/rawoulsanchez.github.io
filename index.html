@@ -874,10 +874,8 @@ html { overflow-x: hidden; }
       const start = track.scrollLeft;
       const distance = target - start;
 
-      // If we're already effectively at the target, do not animate again.
-      if (Math.abs(distance) < 0.5 || durationMs <= 0) {
+      if (distance === 0 || durationMs <= 0) {
         track.scrollLeft = target;
-        track.__scrollAnimating = false;
         return;
       }
 
@@ -929,13 +927,6 @@ html { overflow-x: hidden; }
       const posterCenterOffset = activePoster.offsetLeft + (posterRect.width / 2);
       const viewportCenterRelativeToTrack = viewportCenterX - trackRect.left;
       const target = posterCenterOffset - viewportCenterRelativeToTrack;
-
-      // Avoid tiny "nudges" when a row is already centered.
-      const current = track.scrollLeft;
-      if (Math.abs(target - current) < 0.5) {
-        track.scrollLeft = target;
-        return;
-      }
 
       animateScrollLeftSlow(track, target, RECENTER_DURATION);
     }
@@ -1021,11 +1012,7 @@ html { overflow-x: hidden; }
         updateScalesAndActive();
 
         if (!isAnimating) {
-          // Cross-row behavior: when a *different* row is scrolled by the user,
-          // recenter the last active row once.
-          if (lastActiveTrack && lastActiveTrack !== track && !activeScrollAnimations.has(lastActiveTrack)) {
-            recenterTrackActivePoster(lastActiveTrack);
-          }
+          // Track which row the user last interacted with (no cross-row recentering).
           lastActiveTrack = track;
 
           // Same-row behavior: when the user scrolls away and then stops,
