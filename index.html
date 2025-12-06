@@ -1103,6 +1103,7 @@ html { overflow-x: hidden; }
       lastActiveTrack = closestTrack;
 
       if (previousActiveTrack !== closestTrack) {
+        recenterTrackActivePoster(closestTrack);
         recenterAllOtherTracks(closestTrack);
       }
     }
@@ -1266,8 +1267,10 @@ html { overflow-x: hidden; }
       }
 
       // Cancel any ongoing recenter animation when the user manually scrolls
-      track.addEventListener('wheel', () => {
-        cancelScrollAnimation(track);
+      track.addEventListener('wheel', (event) => {
+        if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+          cancelScrollAnimation(track);
+        }
       }, { passive: true });
 
       track.addEventListener('touchstart', () => {
