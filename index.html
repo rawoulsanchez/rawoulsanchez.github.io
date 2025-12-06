@@ -874,8 +874,10 @@ html { overflow-x: hidden; }
       const start = track.scrollLeft;
       const distance = target - start;
 
-      if (distance === 0 || durationMs <= 0) {
+      // If we're already effectively at the target, do not animate again.
+      if (Math.abs(distance) < 0.5 || durationMs <= 0) {
         track.scrollLeft = target;
+        track.__scrollAnimating = false;
         return;
       }
 
@@ -927,6 +929,13 @@ html { overflow-x: hidden; }
       const posterCenterOffset = activePoster.offsetLeft + (posterRect.width / 2);
       const viewportCenterRelativeToTrack = viewportCenterX - trackRect.left;
       const target = posterCenterOffset - viewportCenterRelativeToTrack;
+
+      // Avoid tiny "nudges" when a row is already centered.
+      const current = track.scrollLeft;
+      if (Math.abs(target - current) < 0.5) {
+        track.scrollLeft = target;
+        return;
+      }
 
       animateScrollLeftSlow(track, target, RECENTER_DURATION);
     }
