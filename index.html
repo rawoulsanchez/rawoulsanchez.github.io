@@ -1060,8 +1060,18 @@ html { overflow-x: hidden; }
       animateScrollLeftSlow(track, target, RECENTER_DURATION);
     }
 
-
     const shelfTracks = Array.from(document.querySelectorAll('.shelf-track'));
+
+    function recenterAllOtherTracks(currentTrack) {
+      if (!shelfTracks.length) return;
+      for (const track of shelfTracks) {
+        if (track === currentTrack) continue;
+        if (track.classList.contains('is-dragging')) continue;
+        cancelScrollAnimation(track);
+        recenterTrackActivePoster(track);
+      }
+    }
+
     let windowScrollRaf = null;
 
     function updateActiveTrackFromWindowScroll() {
@@ -1084,11 +1094,17 @@ html { overflow-x: hidden; }
 
       if (!closestTrack) return;
 
-      if (lastActiveTrack && lastActiveTrack !== closestTrack) {
-        lastActiveTrack.classList.remove('shelf-track--active');
+      const previousActiveTrack = lastActiveTrack;
+
+      if (previousActiveTrack && previousActiveTrack !== closestTrack) {
+        previousActiveTrack.classList.remove('shelf-track--active');
       }
       closestTrack.classList.add('shelf-track--active');
       lastActiveTrack = closestTrack;
+
+      if (previousActiveTrack !== closestTrack) {
+        recenterAllOtherTracks(closestTrack);
+      }
     }
 
     window.addEventListener('scroll', () => {
@@ -1180,12 +1196,18 @@ html { overflow-x: hidden; }
         updateScalesAndActive();
 
         if (!isAnimating) {
+          const previousActiveTrack = lastActiveTrack;
+
           // Toggle the active shelf-track for row-scoped neon
-          if (lastActiveTrack && lastActiveTrack !== track) {
-            lastActiveTrack.classList.remove('shelf-track--active');
+          if (previousActiveTrack && previousActiveTrack !== track) {
+            previousActiveTrack.classList.remove('shelf-track--active');
           }
           track.classList.add('shelf-track--active');
           lastActiveTrack = track;
+
+          if (previousActiveTrack !== track) {
+            recenterAllOtherTracks(track);
+          }
 
           // Same-row behavior: when the user scrolls away and then stops,
           // gently recenter the active card in this row.
