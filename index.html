@@ -776,6 +776,7 @@ html { overflow-x: hidden; }
   /* Future: when we add JS, we’ll toggle this class */
   .preview-overlay.is-visible {
     display: flex;
+    z-index: 9999;
   }
 
   .preview-card {
@@ -1528,8 +1529,8 @@ html { overflow-x: hidden; }
       }
 
       previewButton.addEventListener('click', (event) => {
-        event.stopPropagation();
         event.preventDefault();
+        event.stopPropagation();
         openPreviewFromCard(a1Card);
       });
     });
