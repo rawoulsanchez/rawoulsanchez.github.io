@@ -759,6 +759,158 @@ html { overflow-x: hidden; }
   }
 }
 
+  /* =============================
+     Preview Overlay (Static Layout)
+     ============================= */
+  .preview-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;                 /* hidden by default */
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at top, rgba(0,0,0,0.80), rgba(0,0,0,0.95));
+    z-index: 999;
+    padding: 16px;
+  }
+
+  /* Future: when we add JS, we’ll toggle this class */
+  .preview-overlay.is-visible {
+    display: flex;
+  }
+
+  .preview-card {
+    width: 100%;
+    max-width: 960px;
+    max-height: 90vh;
+    background: #05060a;
+    border-radius: 18px;
+    border: 1px solid #262b33;
+    box-shadow:
+      0 22px 60px rgba(0,0,0,0.80),
+      0 0 0 1px rgba(255,255,255,0.03);
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: minmax(180px, 1.2fr) minmax(180px, 1fr);
+  }
+
+  .preview-top {
+    position: relative;
+    background: #000;
+  }
+
+  .preview-media-placeholder {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at top, rgba(255,255,255,0.10), transparent 55%),
+      linear-gradient(135deg, #222632, #11131a);
+  }
+
+  .preview-bottom {
+    padding: 16px 18px 18px 18px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 12px;
+  }
+
+  .preview-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .preview-title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  .preview-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .preview-runtime {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    font-weight: 600;
+  }
+
+  .preview-tags {
+    opacity: 0.9;
+  }
+
+  .preview-body {
+    font-size: 0.88rem;
+    color: var(--muted);
+    overflow: auto;
+  }
+
+  .preview-description {
+    margin: 0;
+  }
+
+  .preview-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-start;
+  }
+
+  .preview-play-button,
+  .preview-details-button {
+    appearance: none;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font: 700 0.85rem/1 var(--font-ui);
+    cursor: pointer;
+    border: 0;
+    transition: background 0.16s ease, transform 0.12s ease, box-shadow 0.16s ease;
+  }
+
+  .preview-play-button {
+    background: #fff;
+    color: #000;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.55);
+  }
+
+  .preview-play-button:hover {
+    background: #f0f0f0;
+    transform: translateY(1px);
+  }
+
+  .preview-details-button {
+    background: rgba(255,255,255,0.06);
+    color: #eaeaf0;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+  }
+
+  .preview-details-button:hover {
+    background: rgba(255,255,255,0.10);
+  }
+
+  @media (max-width: 640px) {
+    .preview-card {
+      max-width: 100%;
+      border-radius: 0;
+      max-height: 100vh;
+      border-left: 0;
+      border-right: 0;
+    }
+
+    .preview-bottom {
+      padding: 14px 14px 16px 14px;
+    }
+  }
+
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
