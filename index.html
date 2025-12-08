@@ -911,6 +911,35 @@ html { overflow-x: hidden; }
     }
   }
 
+  /* =============================
+     Poster Preview Button (A1 only)
+     ============================= */
+  .poster-preview-button {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 14px;
+    font-size: 0.75rem;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff;
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    opacity: 1;            /* always visible for now */
+    pointer-events: auto;  /* clickable */
+  }
+
+  .poster-preview-button:hover {
+    background: rgba(255,255,255,0.20);
+    transform: translateX(-50%) scale(1.05);
+  }
+
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1022,7 +1051,7 @@ html { overflow-x: hidden; }
     </div>
     <div class="shelf-outer">
       <div class="shelf-track" data-row="A" role="list" aria-label="Row A posters">
-        <a class="poster" role="listitem" aria-label="A1" data-label="A1" data-title="TBD Title A1" data-description="TBD Description A1" data-runtime="TBD Runtime A1" data-tags="TBD Tags A1" data-youtube-url="TBD YouTube URL A1" data-poster-vert="images/poster-vert-A1.png" data-poster-wide="images/poster-wide-A1.png"><img src="images/poster-vert-A1.png" alt="Sanchez Ninjah A1 poster"></a>
+        <a class="poster" role="listitem" aria-label="A1" data-label="A1" data-title="TBD Title A1" data-description="TBD Description A1" data-runtime="TBD Runtime A1" data-tags="TBD Tags A1" data-youtube-url="TBD YouTube URL A1" data-poster-vert="images/poster-vert-A1.png" data-poster-wide="images/poster-wide-A1.png"><img src="images/poster-vert-A1.png" alt="Sanchez Ninjah A1 poster"><button class="poster-preview-button" type="button">Preview</button></a>
         <a class="poster" role="listitem" aria-label="A2" data-label="A2" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A2.png" data-poster-wide="images/poster-wide-A2.png"><img src="images/poster-vert-A2.png" alt="A2 poster"></a>
         <a class="poster" role="listitem" aria-label="A3" data-label="A3" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A3.png" data-poster-wide="images/poster-wide-A3.png"><img src="images/poster-vert-A3.png" alt="A3 poster"></a>
         <a class="poster" role="listitem" aria-label="A4" data-label="A4" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A4.png" data-poster-wide="images/poster-wide-A4.png"><img src="images/poster-vert-A4.png" alt="A4 poster"></a>
