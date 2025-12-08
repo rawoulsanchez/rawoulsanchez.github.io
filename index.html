@@ -1490,40 +1490,42 @@ html { overflow-x: hidden; }
     });
   });
 </script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const a1Poster = document.querySelector('.poster[data-label="A1"]');
-    const previewOverlay = document.querySelector('.preview-overlay');
-    const previewTitleEl = document.querySelector('.preview-title');
-    const previewRuntimeEl = document.querySelector('.preview-runtime');
-    const previewTagsEl = document.querySelector('.preview-tags');
-    const previewDescriptionEl = document.querySelector('.preview-description');
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const a1Poster = document.querySelector('.poster[data-label="A1"]');
+      const a1PreviewButton = a1Poster ? a1Poster.querySelector('.poster-preview-button') : null;
+      const previewOverlay = document.querySelector('.preview-overlay');
+      const previewTitleEl = document.querySelector('.preview-title');
+      const previewRuntimeEl = document.querySelector('.preview-runtime');
+      const previewTagsEl = document.querySelector('.preview-tags');
+      const previewDescriptionEl = document.querySelector('.preview-description');
 
-    if (!a1Poster || !previewOverlay || !previewTitleEl || !previewRuntimeEl || !previewTagsEl || !previewDescriptionEl) {
-      return;
-    }
+      if (!a1Poster || !a1PreviewButton || !previewOverlay || !previewTitleEl || !previewRuntimeEl || !previewTagsEl || !previewDescriptionEl) {
+        return;
+      }
 
-    function openPreviewFromCard(card) {
-      const title = card.dataset.title || 'Untitled';
-      const runtime = card.dataset.runtime || 'TBD Runtime';
-      const tags = card.dataset.tags || 'TBD Tags';
-      const description = card.dataset.description || 'Description coming soon.';
+      function openPreviewFromCard(card) {
+        const title = card.dataset.title || 'Untitled';
+        const runtime = card.dataset.runtime || 'TBD Runtime';
+        const tags = card.dataset.tags || 'TBD Tags';
+        const description = card.dataset.description || 'Description coming soon.';
 
-      previewTitleEl.textContent = title;
-      previewRuntimeEl.textContent = runtime;
-      previewTagsEl.textContent = tags;
-      previewDescriptionEl.textContent = description;
+        previewTitleEl.textContent = title;
+        previewRuntimeEl.textContent = runtime;
+        previewTagsEl.textContent = tags;
+        previewDescriptionEl.textContent = description;
 
-      previewOverlay.classList.add('is-visible');
-      previewOverlay.setAttribute('aria-hidden', 'false');
-    }
+        previewOverlay.classList.add('is-visible');
+        previewOverlay.setAttribute('aria-hidden', 'false');
+      }
 
-    a1Poster.addEventListener('click', (event) => {
-      event.preventDefault();
-      openPreviewFromCard(a1Poster);
+      a1PreviewButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        openPreviewFromCard(a1Poster);
+      });
     });
-  });
-</script>
+  </script>
 
   <!-- Preview Overlay (static skeleton) -->
   <div class="preview-overlay" aria-hidden="true">
