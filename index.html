@@ -1492,15 +1492,23 @@ html { overflow-x: hidden; }
 </script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const a1Poster = document.querySelector('.poster[data-label="A1"]');
-      const a1PreviewButton = a1Poster ? a1Poster.querySelector('.poster-preview-button') : null;
+      const a1Card = document.querySelector('.poster[data-label="A1"]');
+      const previewButton = a1Card ? a1Card.querySelector('.poster-preview-button') : null;
       const previewOverlay = document.querySelector('.preview-overlay');
       const previewTitleEl = document.querySelector('.preview-title');
       const previewRuntimeEl = document.querySelector('.preview-runtime');
       const previewTagsEl = document.querySelector('.preview-tags');
       const previewDescriptionEl = document.querySelector('.preview-description');
 
-      if (!a1Poster || !a1PreviewButton || !previewOverlay || !previewTitleEl || !previewRuntimeEl || !previewTagsEl || !previewDescriptionEl) {
+      if (
+        !a1Card ||
+        !previewButton ||
+        !previewOverlay ||
+        !previewTitleEl ||
+        !previewRuntimeEl ||
+        !previewTagsEl ||
+        !previewDescriptionEl
+      ) {
         return;
       }
 
@@ -1519,10 +1527,10 @@ html { overflow-x: hidden; }
         previewOverlay.setAttribute('aria-hidden', 'false');
       }
 
-      a1PreviewButton.addEventListener('click', (event) => {
-        event.preventDefault();
+      previewButton.addEventListener('click', (event) => {
         event.stopPropagation();
-        openPreviewFromCard(a1Poster);
+        event.preventDefault();
+        openPreviewFromCard(a1Card);
       });
     });
   </script>
