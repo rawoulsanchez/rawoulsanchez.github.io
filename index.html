@@ -460,6 +460,7 @@ html { overflow-x: hidden; }
   background: #1e2228;
   border: 1px solid #2a2f36;
   border-radius: var(--shelf-radius);
+  overflow: hidden;
   aspect-ratio: 2 / 3;
   width: calc((100vw - (16px * 2) - (var(--shelf-gap) * 2)) / 3); /* ~3.0 visible on mobile */
   scroll-snap-align: center; /* Snap posters to the center */
@@ -473,6 +474,14 @@ html { overflow-x: hidden; }
               filter 0.35s ease,
               opacity 0.35s ease;
   z-index: 1; /* Default stacking level */
+}
+
+.poster img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
 }
 
 /* Style the active/centered poster to give it scale and depth */
@@ -858,7 +867,7 @@ html { overflow-x: hidden; }
     </div>
     <div class="shelf-outer">
       <div class="shelf-track" data-row="A" role="list" aria-label="Row A posters">
-        <a class="poster" role="listitem" aria-label="A1" data-label="A1" data-title="TBD Title A1" data-description="TBD Description A1" data-runtime="TBD Runtime A1" data-tags="TBD Tags A1" data-youtube-url="TBD YouTube URL A1" data-poster-vert="images/poster-vert-A1.png" data-poster-wide="images/poster-wide-A1.png"></a>
+        <a class="poster" role="listitem" aria-label="A1" data-label="A1" data-title="TBD Title A1" data-description="TBD Description A1" data-runtime="TBD Runtime A1" data-tags="TBD Tags A1" data-youtube-url="TBD YouTube URL A1" data-poster-vert="images/poster-vert-A1.png" data-poster-wide="images/poster-wide-A1.png"><img src="images/poster-vert-A1.png" alt="Sanchez Ninjah A1 poster"></a>
         <a class="poster" role="listitem" aria-label="A2" data-label="A2" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A2.png" data-poster-wide="images/poster-wide-A2.png"></a>
         <a class="poster" role="listitem" aria-label="A3" data-label="A3" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A3.png" data-poster-wide="images/poster-wide-A3.png"></a>
         <a class="poster" role="listitem" aria-label="A4" data-label="A4" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A4.png" data-poster-wide="images/poster-wide-A4.png"></a>
