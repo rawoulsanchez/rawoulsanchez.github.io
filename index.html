@@ -835,8 +835,8 @@ html { overflow-x: hidden; }
     display: grid;
     grid-template-rows: auto 1fr;
     position: relative;
-    opacity: 0;
-    transition: opacity 0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
+    opacity: 1;
+    transition: transform 0.34s cubic-bezier(0.22, 0.61, 0.36, 1);
   }
 
   .preview-card.is-active {
@@ -1639,7 +1639,7 @@ html { overflow-x: hidden; }
       }
 
       function setPreviewTransitions(previewCard) {
-        previewCard.style.transition = `transform ${MORPH_DURATION}ms ${PREVIEW_EASING}, opacity 0.26s ${PREVIEW_EASING}`;
+        previewCard.style.transition = `transform ${MORPH_DURATION}ms ${PREVIEW_EASING}`;
         previewCard.style.transformOrigin = 'top left';
       }
 
@@ -1681,10 +1681,13 @@ html { overflow-x: hidden; }
           const scaleX = startRect.width / endRect.width;
           const scaleY = startRect.height / endRect.height;
 
+          previewOverlay.style.opacity = '';
+          previewOverlay.style.pointerEvents = '';
           previewOverlay.classList.add('is-visible');
           previewCard.classList.add('is-active');
           previewCard.style.transition = 'none';
           previewCard.style.transformOrigin = 'top left';
+          previewCard.style.opacity = '1';
           applyTransform(previewCard, translateX, translateY, scaleX, scaleY);
 
           previewCard.getBoundingClientRect();
@@ -1739,6 +1742,8 @@ html { overflow-x: hidden; }
             previewCard.classList.remove('is-active');
             previewOverlay.classList.remove('is-visible');
             previewOverlay.setAttribute('aria-hidden', 'true');
+            previewOverlay.style.opacity = '';
+            previewOverlay.style.pointerEvents = '';
             clearPreviewTransitions(previewCard);
             previewCard.style.transform = '';
             lastOpenedCard = null;
@@ -1753,8 +1758,8 @@ html { overflow-x: hidden; }
           previewCard.addEventListener('transitionend', handleTransformEnd);
 
           requestAnimationFrame(() => {
-            previewOverlay.classList.remove('is-visible');
-            previewOverlay.setAttribute('aria-hidden', 'true');
+            previewOverlay.style.opacity = '0';
+            previewOverlay.style.pointerEvents = 'none';
             applyTransform(previewCard, translateX, translateY, scaleX, scaleY);
           });
 
