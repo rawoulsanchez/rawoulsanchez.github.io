@@ -1574,6 +1574,19 @@ html { overflow-x: hidden; }
           event.stopPropagation();
           openPreviewFromCard(card);
         });
+
+        card.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openPreviewFromCard(card);
+          }
+        });
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && previewOverlay.classList.contains('is-visible')) {
+          closePreviewOverlay();
+        }
       });
     });
   </script>
