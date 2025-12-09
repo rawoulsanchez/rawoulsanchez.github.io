@@ -7,7 +7,7 @@
   <title>Rawoul — Starter</title>
 <style>
   /* Design tokens */
-:root { --bg:#000; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; --brand:#e31b23; }
+:root { --bg:#000; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; --brand:#e31b23; --brand-glow-shadow:0 0 8px var(--brand), 0 0 24px color-mix(in srgb, var(--brand) 60%, transparent 40%); }
   :root{
   --font-ui: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
   --font-display: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
@@ -486,11 +486,9 @@ html { overflow-x: hidden; }
   z-index: 5000;
   background: #000;
   overflow: hidden;
-  box-shadow:
-    0 0 8px var(--brand),
-    0 0 24px color-mix(in srgb, var(--brand) 60%, transparent 40%);
-  transition: transform 0.36s cubic-bezier(0.25, 0.1, 0.25, 1),
-              opacity 0.22s ease;
+  box-shadow: var(--brand-glow-shadow);
+  transition: transform 0.34s cubic-bezier(0.22, 0.61, 0.36, 1),
+              opacity 0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
   will-change: transform, opacity;
 }
 
@@ -537,9 +535,7 @@ html { overflow-x: hidden; }
 /* Row-activated neon: only when the shelf-track is active */
 .shelf-track--active .poster.is-active {
   border-color: var(--brand);
-  box-shadow:
-    0 0 8px var(--brand),
-    0 0 24px color-mix(in srgb, var(--brand) 60%, transparent 40%);
+  box-shadow: var(--brand-glow-shadow);
   filter: brightness(1.08);
   opacity: 1;
 }
@@ -809,7 +805,7 @@ html { overflow-x: hidden; }
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.36s ease, visibility 0s linear 0.36s;
+    transition: opacity 0.34s cubic-bezier(0.22, 0.61, 0.36, 1), visibility 0s linear 0.34s;
   }
 
   /* Future: when we add JS, we’ll toggle this class */
@@ -818,7 +814,7 @@ html { overflow-x: hidden; }
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
-    transition: opacity 0.36s ease;
+    transition: opacity 0.34s cubic-bezier(0.22, 0.61, 0.36, 1);
   }
 
   .preview-card {
@@ -830,13 +826,14 @@ html { overflow-x: hidden; }
     border: 1px solid #262b33;
     box-shadow:
       0 22px 60px rgba(0,0,0,0.80),
-      0 0 0 1px rgba(255,255,255,0.03);
+      0 0 0 1px rgba(255,255,255,0.03),
+      var(--brand-glow-shadow);
     overflow: hidden;
     display: grid;
     grid-template-rows: auto 1fr;
     position: relative;
     opacity: 0;
-    transition: opacity 0.24s ease;
+    transition: opacity 0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
   }
 
   .preview-card.is-active {
@@ -1584,7 +1581,8 @@ html { overflow-x: hidden; }
         return;
       }
 
-      const MORPH_DURATION = 360;
+      const MORPH_DURATION = 340;
+      const CROSSFADE_OVERLAP = 180;
       let lastOpenedCard = null;
 
       function measurePreviewRect() {
@@ -1674,7 +1672,24 @@ html { overflow-x: hidden; }
             });
           });
 
+          let cleaned = false;
+          let hasCrossfaded = false;
+          const crossfadeDelay = Math.max(0, MORPH_DURATION - CROSSFADE_OVERLAP);
+
+          const crossfade = () => {
+            if (hasCrossfaded) return;
+            hasCrossfaded = true;
+            previewCard.classList.add('is-active');
+            tile.classList.add('glow-tile--fade-out');
+          };
+
           const cleanup = () => {
+            if (cleaned) return;
+            cleaned = true;
+            crossfade();
+            clearTimeout(crossfadeTimeout);
+            tile.removeEventListener('transitionend', handleTransformEnd);
+            tile.removeEventListener('transitionend', handleFadeEnd);
             card.style.visibility = originalVisibility;
             tile.remove();
             resolve();
@@ -1682,24 +1697,19 @@ html { overflow-x: hidden; }
 
           const handleTransformEnd = (event) => {
             if (event.propertyName !== 'transform') return;
-            previewCard.classList.add('is-active');
-            tile.classList.add('glow-tile--fade-out');
-
-            const handleFadeEnd = (fadeEvent) => {
-              if (fadeEvent.propertyName !== 'opacity') return;
-              tile.removeEventListener('transitionend', handleFadeEnd);
-              cleanup();
-            };
-
-            tile.addEventListener('transitionend', handleFadeEnd);
+            crossfade();
           };
 
+          const handleFadeEnd = (event) => {
+            if (event.propertyName !== 'opacity') return;
+            cleanup();
+          };
+
+          const crossfadeTimeout = setTimeout(crossfade, crossfadeDelay);
+
           tile.addEventListener('transitionend', handleTransformEnd);
-          setTimeout(() => {
-            previewCard.classList.add('is-active');
-            tile.classList.add('glow-tile--fade-out');
-            setTimeout(cleanup, 120);
-          }, MORPH_DURATION + 60);
+          tile.addEventListener('transitionend', handleFadeEnd);
+          setTimeout(cleanup, MORPH_DURATION + 240);
         });
       }
 
@@ -1720,16 +1730,17 @@ html { overflow-x: hidden; }
           tile.classList.add('glow-tile--to-black');
           tile.style.opacity = '0';
 
-          previewCard.classList.remove('is-active');
           document.body.appendChild(tile);
 
           requestAnimationFrame(() => {
-            previewOverlay.classList.remove('is-visible');
-            tile.style.opacity = '1';
             const translateX = endRect.left - startRect.left;
             const translateY = endRect.top - startRect.top;
             const scaleX = endRect.width / startRect.width;
             const scaleY = endRect.height / startRect.height;
+
+            previewOverlay.classList.remove('is-visible');
+            previewCard.classList.remove('is-active');
+            tile.style.opacity = '1';
 
             tile.getBoundingClientRect();
 
@@ -1738,7 +1749,12 @@ html { overflow-x: hidden; }
             });
           });
 
+          let cleaned = false;
+
           const cleanup = () => {
+            if (cleaned) return;
+            cleaned = true;
+            tile.removeEventListener('transitionend', handleTransformEnd);
             tile.remove();
             previewOverlay.classList.remove('is-visible');
             previewOverlay.setAttribute('aria-hidden', 'true');
@@ -1752,7 +1768,7 @@ html { overflow-x: hidden; }
           };
 
           tile.addEventListener('transitionend', handleTransformEnd);
-          setTimeout(cleanup, MORPH_DURATION + 80);
+          setTimeout(cleanup, MORPH_DURATION + 240);
         });
       }
 
