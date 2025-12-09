@@ -1124,6 +1124,31 @@ html { overflow-x: hidden; }
       <a class="footer-nav-link" href="#contact" aria-label="Go to Contact section">Contact</a>
     </nav>
   </footer>
+  <div class="preview-overlay" aria-hidden="true">
+    <div class="preview-card" role="dialog" aria-modal="true" aria-labelledby="preview-title">
+      <div class="preview-top">
+        <div class="preview-media-placeholder"></div>
+      </div>
+      <div class="preview-bottom">
+        <header class="preview-header">
+          <h2 id="preview-title" class="preview-title">Sample Title</h2>
+          <div class="preview-meta">
+            <span class="preview-runtime">TBD Runtime</span>
+            <span class="preview-tags">TBD Tags</span>
+          </div>
+        </header>
+        <div class="preview-body">
+          <p class="preview-description">
+            This is placeholder preview copy for the selected card. It will be replaced with the card’s data.
+          </p>
+        </div>
+        <div class="preview-actions">
+          <button class="preview-play-button" type="button">Play</button>
+          <button class="preview-details-button" type="button">Details</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
