@@ -476,15 +476,39 @@ html { overflow-x: hidden; }
   z-index: 1; /* Default stacking level */
 }
 
-.poster-morph-clone {
+
+.glow-tile {
   position: fixed;
+  top: 0;
+  left: 0;
   transform-origin: top left;
   pointer-events: none;
   z-index: 5000;
-  transition: transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1),
-              border-radius 0.35s ease,
-              box-shadow 0.35s ease;
-  will-change: transform, border-radius, box-shadow;
+  background: #000;
+  overflow: hidden;
+  box-shadow:
+    0 0 8px var(--brand),
+    0 0 24px color-mix(in srgb, var(--brand) 60%, transparent 40%);
+  transition: transform 0.36s cubic-bezier(0.25, 0.1, 0.25, 1),
+              opacity 0.22s ease;
+  will-change: transform, opacity;
+}
+
+.glow-tile__fill {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 1;
+  transition: opacity 0.18s ease;
+}
+
+.glow-tile--to-black .glow-tile__fill {
+  opacity: 0;
+}
+
+.glow-tile--fade-out {
+  opacity: 0;
 }
 
 .poster img {
@@ -776,18 +800,25 @@ html { overflow-x: hidden; }
   .preview-overlay {
     position: fixed;
     inset: 0;
-    display: none;                 /* hidden by default */
+    display: flex;
     align-items: center;
     justify-content: center;
     background: radial-gradient(circle at top, rgba(0,0,0,0.80), rgba(0,0,0,0.95));
     z-index: 999;
     padding: 16px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.36s ease, visibility 0s linear 0.36s;
   }
 
   /* Future: when we add JS, we’ll toggle this class */
   .preview-overlay.is-visible {
-    display: flex;
     z-index: 9999;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 0.36s ease;
   }
 
   .preview-card {
@@ -804,6 +835,12 @@ html { overflow-x: hidden; }
     display: grid;
     grid-template-rows: auto 1fr;
     position: relative;
+    opacity: 0;
+    transition: opacity 0.24s ease;
+  }
+
+  .preview-card.is-active {
+    opacity: 1;
   }
 
   .preview-close-btn {
@@ -1547,9 +1584,42 @@ html { overflow-x: hidden; }
         return;
       }
 
-      function closePreviewOverlay() {
-        previewOverlay.classList.remove('is-visible');
-        previewOverlay.setAttribute('aria-hidden', 'true');
+      const MORPH_DURATION = 360;
+      let lastOpenedCard = null;
+
+      function measurePreviewRect() {
+        const previewCard = previewOverlay.querySelector('.preview-card');
+        if (!previewCard) return null;
+        return previewCard.getBoundingClientRect();
+      }
+
+      function createGlowTile(card, rect) {
+        const tile = document.createElement('div');
+        tile.className = 'glow-tile';
+        tile.style.top = `${rect.top}px`;
+        tile.style.left = `${rect.left}px`;
+        tile.style.width = `${rect.width}px`;
+        tile.style.height = `${rect.height}px`;
+        tile.style.transform = 'translate(0, 0) scale(1)';
+
+        const cardStyles = getComputedStyle(card);
+        const radius = cardStyles.borderRadius || '12px';
+        const shadow = cardStyles.boxShadow && cardStyles.boxShadow !== 'none'
+          ? cardStyles.boxShadow
+          : '0 0 8px var(--brand), 0 0 24px color-mix(in srgb, var(--brand) 60%, transparent 40%)';
+        tile.style.borderRadius = radius;
+        tile.style.boxShadow = shadow;
+
+        const fill = document.createElement('div');
+        fill.className = 'glow-tile__fill';
+
+        const cardImage = card.querySelector('img');
+        if (cardImage && cardImage.src) {
+          fill.style.backgroundImage = `url(${cardImage.src})`;
+        }
+
+        tile.appendChild(fill);
+        return { tile, fill };
       }
 
       function openPreviewFromCard(card) {
@@ -1563,93 +1633,131 @@ html { overflow-x: hidden; }
         previewTagsEl.textContent = tags;
         previewDescriptionEl.textContent = description;
 
-        previewOverlay.classList.add('is-visible');
+        lastOpenedCard = card;
         previewOverlay.setAttribute('aria-hidden', 'false');
+        runOpenMorph(card);
       }
 
-      function measurePreviewRect() {
-        const previewCard = previewOverlay.querySelector('.preview-card');
-        if (!previewCard) return null;
-
-        const wasVisible = previewOverlay.classList.contains('is-visible');
-        const previousDisplay = previewOverlay.style.display;
-        const previousVisibility = previewOverlay.style.visibility;
-        const previousPointerEvents = previewOverlay.style.pointerEvents;
-
-        if (!wasVisible) {
-          previewOverlay.style.visibility = 'hidden';
-          previewOverlay.style.display = 'flex';
-          previewOverlay.style.pointerEvents = 'none';
-        }
-
-        const rect = previewCard.getBoundingClientRect();
-
-        if (!wasVisible) {
-          previewOverlay.style.display = previousDisplay || '';
-          previewOverlay.style.visibility = previousVisibility || '';
-          previewOverlay.style.pointerEvents = previousPointerEvents || '';
-        }
-
-        return rect;
-      }
-
-      function runPosterMorph(card) {
+      function runOpenMorph(card) {
         return new Promise((resolve) => {
           const startRect = card.getBoundingClientRect();
           const previewCard = previewOverlay.querySelector('.preview-card');
           const endRect = measurePreviewRect();
 
           if (!previewCard || !endRect) {
+            previewOverlay.classList.add('is-visible');
+            previewCard.classList.add('is-active');
             resolve();
             return;
           }
 
-          const cardStyles = getComputedStyle(card);
-          const previewStyles = getComputedStyle(previewCard);
-          const clone = card.cloneNode(true);
-          clone.classList.add('poster-morph-clone');
-
-          clone.style.top = `${startRect.top}px`;
-          clone.style.left = `${startRect.left}px`;
-          clone.style.width = `${startRect.width}px`;
-          clone.style.height = `${startRect.height}px`;
-          clone.style.transform = 'translate(0, 0) scale(1, 1)';
-          clone.style.borderRadius = cardStyles.borderRadius;
-          clone.style.boxShadow = cardStyles.boxShadow;
-          clone.style.filter = cardStyles.filter;
-
+          const { tile, fill } = createGlowTile(card, startRect);
           const originalVisibility = card.style.visibility;
           card.style.visibility = 'hidden';
 
-          document.body.appendChild(clone);
+          previewCard.classList.remove('is-active');
+          previewOverlay.classList.add('is-visible');
+
+          document.body.appendChild(tile);
 
           requestAnimationFrame(() => {
+            tile.classList.add('glow-tile--to-black');
             const translateX = endRect.left - startRect.left;
             const translateY = endRect.top - startRect.top;
             const scaleX = endRect.width / startRect.width;
             const scaleY = endRect.height / startRect.height;
 
-            clone.getBoundingClientRect();
+            tile.getBoundingClientRect();
 
             requestAnimationFrame(() => {
-              clone.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
-              clone.style.borderRadius = previewStyles.borderRadius;
+              tile.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
             });
           });
 
           const cleanup = () => {
             card.style.visibility = originalVisibility;
-            clone.remove();
+            tile.remove();
             resolve();
           };
 
-          clone.addEventListener('transitionend', (event) => {
+          const handleTransformEnd = (event) => {
             if (event.propertyName !== 'transform') return;
-            cleanup();
+            previewCard.classList.add('is-active');
+            tile.classList.add('glow-tile--fade-out');
+
+            const handleFadeEnd = (fadeEvent) => {
+              if (fadeEvent.propertyName !== 'opacity') return;
+              tile.removeEventListener('transitionend', handleFadeEnd);
+              cleanup();
+            };
+
+            tile.addEventListener('transitionend', handleFadeEnd);
+          };
+
+          tile.addEventListener('transitionend', handleTransformEnd);
+          setTimeout(() => {
+            previewCard.classList.add('is-active');
+            tile.classList.add('glow-tile--fade-out');
+            setTimeout(cleanup, 120);
+          }, MORPH_DURATION + 60);
+        });
+      }
+
+      function runCloseMorph() {
+        return new Promise((resolve) => {
+          const card = lastOpenedCard;
+          const previewCard = previewOverlay.querySelector('.preview-card');
+          if (!card || !previewCard) {
+            previewOverlay.classList.remove('is-visible');
+            previewOverlay.setAttribute('aria-hidden', 'true');
+            resolve();
+            return;
+          }
+
+          const startRect = previewCard.getBoundingClientRect();
+          const endRect = card.getBoundingClientRect();
+          const { tile } = createGlowTile(card, startRect);
+          tile.classList.add('glow-tile--to-black');
+          tile.style.opacity = '0';
+
+          previewCard.classList.remove('is-active');
+          document.body.appendChild(tile);
+
+          requestAnimationFrame(() => {
+            previewOverlay.classList.remove('is-visible');
+            tile.style.opacity = '1';
+            const translateX = endRect.left - startRect.left;
+            const translateY = endRect.top - startRect.top;
+            const scaleX = endRect.width / startRect.width;
+            const scaleY = endRect.height / startRect.height;
+
+            tile.getBoundingClientRect();
+
+            requestAnimationFrame(() => {
+              tile.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+            });
           });
 
-          setTimeout(cleanup, 500);
+          const cleanup = () => {
+            tile.remove();
+            previewOverlay.classList.remove('is-visible');
+            previewOverlay.setAttribute('aria-hidden', 'true');
+            lastOpenedCard = null;
+            resolve();
+          };
+
+          const handleTransformEnd = (event) => {
+            if (event.propertyName !== 'transform') return;
+            cleanup();
+          };
+
+          tile.addEventListener('transitionend', handleTransformEnd);
+          setTimeout(cleanup, MORPH_DURATION + 80);
         });
+      }
+
+      function closePreviewOverlay() {
+        runCloseMorph();
       }
 
       previewCloseButton.addEventListener('click', () => {
@@ -1669,17 +1777,13 @@ html { overflow-x: hidden; }
         previewButton.addEventListener('click', (event) => {
           event.preventDefault();
           event.stopPropagation();
-          runPosterMorph(card).then(() => {
-            openPreviewFromCard(card);
-          });
+          openPreviewFromCard(card);
         });
 
         card.addEventListener('keydown', (event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
-            runPosterMorph(card).then(() => {
-              openPreviewFromCard(card);
-            });
+            openPreviewFromCard(card);
           }
         });
       });
