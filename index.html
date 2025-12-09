@@ -792,6 +792,28 @@ html { overflow-x: hidden; }
     overflow: hidden;
     display: grid;
     grid-template-rows: minmax(180px, 1.2fr) minmax(180px, 1fr);
+    position: relative;
+  }
+
+  .preview-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .preview-close-btn:hover {
+    background: rgba(255,255,255,0.10);
   }
 
   .preview-top {
@@ -1495,6 +1517,7 @@ html { overflow-x: hidden; }
     document.addEventListener('DOMContentLoaded', () => {
       const a1Cards = Array.from(document.querySelectorAll('.poster[data-label="A1"]'));
       const previewOverlay = document.querySelector('.preview-overlay');
+      const previewCloseButton = document.querySelector('.preview-close-btn');
       const previewTitleEl = document.querySelector('.preview-title');
       const previewRuntimeEl = document.querySelector('.preview-runtime');
       const previewTagsEl = document.querySelector('.preview-tags');
@@ -1503,12 +1526,18 @@ html { overflow-x: hidden; }
       if (
         !a1Cards.length ||
         !previewOverlay ||
+        !previewCloseButton ||
         !previewTitleEl ||
         !previewRuntimeEl ||
         !previewTagsEl ||
         !previewDescriptionEl
       ) {
         return;
+      }
+
+      function closePreviewOverlay() {
+        previewOverlay.classList.remove('is-visible');
+        previewOverlay.setAttribute('aria-hidden', 'true');
       }
 
       function openPreviewFromCard(card) {
@@ -1526,6 +1555,16 @@ html { overflow-x: hidden; }
         previewOverlay.setAttribute('aria-hidden', 'false');
       }
 
+      previewCloseButton.addEventListener('click', () => {
+        closePreviewOverlay();
+      });
+
+      previewOverlay.addEventListener('click', (event) => {
+        if (event.target === previewOverlay) {
+          closePreviewOverlay();
+        }
+      });
+
       a1Cards.forEach((card) => {
         const previewButton = card.querySelector('.poster-preview-button');
         if (!previewButton) return;
@@ -1542,6 +1581,7 @@ html { overflow-x: hidden; }
   <!-- Preview Overlay (static skeleton) -->
   <div class="preview-overlay" aria-hidden="true">
     <div class="preview-card" role="dialog" aria-modal="true" aria-labelledby="preview-title">
+      <button class="preview-close-btn" type="button" aria-label="Close preview">×</button>
       <div class="preview-top">
         <!-- Later: video or wide poster goes here -->
         <div class="preview-media-placeholder"></div>
