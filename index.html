@@ -1,4 +1,5 @@
 
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -1602,16 +1603,12 @@ html { overflow-x: hidden; }
         tile.style.transform = 'translate(0, 0) scale(1)';
 
         const cardStyles = frameStyles || getComputedStyle(card);
-        const radius = cardStyles.borderRadius || '12px';
-        const shadow = cardStyles.boxShadow && cardStyles.boxShadow !== 'none'
-          ? cardStyles.boxShadow
-          : '0 0 8px var(--brand), 0 0 24px color-mix(in srgb, var(--brand) 60%, transparent 40%)';
-        const border = cardStyles.border && cardStyles.border !== 'none'
-          ? cardStyles.border
-          : '1px solid #262b33';
-        tile.style.borderRadius = radius;
-        tile.style.boxShadow = shadow;
-        tile.style.border = border;
+        // Use the exact computed frame from the source element (card or preview)
+        tile.style.borderRadius = cardStyles.borderRadius;
+        tile.style.boxShadow = cardStyles.boxShadow;
+        tile.style.border = cardStyles.border;
+        // Align the background frame as well where applicable
+        tile.style.backgroundColor = cardStyles.backgroundColor;
 
         const fill = document.createElement('div');
         fill.className = 'glow-tile__fill';
@@ -1665,10 +1662,11 @@ html { overflow-x: hidden; }
           document.body.appendChild(tile);
 
           requestAnimationFrame(() => {
-            tile.classList.add('glow-tile--to-black');
-            tile.style.borderRadius = previewStyles.borderRadius || '18px';
-            tile.style.boxShadow = previewStyles.boxShadow || 'var(--preview-frame-shadow)';
-            tile.style.border = previewStyles.border || '1px solid #262b33';
+            // Match the preview card frame exactly as the morph target
+            tile.style.borderRadius = previewStyles.borderRadius;
+            tile.style.boxShadow = previewStyles.boxShadow;
+            tile.style.border = previewStyles.border;
+            tile.style.backgroundColor = previewStyles.backgroundColor;
             const translateX = endRect.left - startRect.left;
             const translateY = endRect.top - startRect.top;
             const scaleX = endRect.width / startRect.width;
@@ -1687,6 +1685,7 @@ html { overflow-x: hidden; }
           const startCrossfade = () => {
             if (hasCrossfaded) return;
             hasCrossfaded = true;
+            tile.classList.add('glow-tile--to-black');
             previewCard.classList.add('is-active');
             tile.classList.add('glow-tile--fade-out');
           };
@@ -1715,8 +1714,8 @@ html { overflow-x: hidden; }
           tile.addEventListener('transitionend', handleFadeEnd);
           setTimeout(() => {
             startCrossfade();
-          }, MORPH_DURATION + 60);
-          setTimeout(cleanup, MORPH_DURATION + 320);
+          }, MORPH_DURATION + 260);
+          setTimeout(cleanup, MORPH_DURATION + 900);
         });
       }
 
@@ -1735,7 +1734,8 @@ html { overflow-x: hidden; }
           const endRect = card.getBoundingClientRect();
           const previewStyles = getComputedStyle(previewCard);
           const cardStyles = getComputedStyle(card);
-          const { tile } = createGlowTile(card, startRect, previewStyles);
+          const { tile, fill } = createGlowTile(card, startRect, previewStyles);
+          fill.style.backgroundImage = '';
           tile.classList.add('glow-tile--to-black');
           tile.style.opacity = '0';
 
@@ -1758,13 +1758,11 @@ html { overflow-x: hidden; }
             hasMoved = true;
             previewOverlay.classList.remove('is-visible');
             previewOverlay.setAttribute('aria-hidden', 'true');
-            tile.style.borderRadius = cardStyles.borderRadius || '14px';
-            tile.style.boxShadow = cardStyles.boxShadow && cardStyles.boxShadow !== 'none'
-              ? cardStyles.boxShadow
-              : '0 0 8px var(--brand), 0 0 24px color-mix(in srgb, var(--brand) 60%, transparent 40%)';
-            tile.style.border = cardStyles.border && cardStyles.border !== 'none'
-              ? cardStyles.border
-              : '1px solid #262b33';
+            // As the tile returns, match the source card frame exactly
+            tile.style.borderRadius = cardStyles.borderRadius;
+            tile.style.boxShadow = cardStyles.boxShadow;
+            tile.style.border = cardStyles.border;
+            tile.style.backgroundColor = cardStyles.backgroundColor;
 
             const translateX = endRect.left - startRect.left;
             const translateY = endRect.top - startRect.top;
@@ -1800,8 +1798,8 @@ html { overflow-x: hidden; }
 
           previewCard.addEventListener('transitionend', handlePreviewFade);
           tile.addEventListener('transitionend', handleTransformEnd);
-          setTimeout(startReturn, 280);
-          setTimeout(cleanup, MORPH_DURATION + 320);
+          setTimeout(startReturn, MORPH_DURATION + 260);
+          setTimeout(cleanup, MORPH_DURATION + 900);
         });
       }
 
