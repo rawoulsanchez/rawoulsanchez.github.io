@@ -7,7 +7,7 @@
   <title>Rawoul — Starter</title>
 <style>
   /* Design tokens */
-:root { --bg:#000; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; --brand:#e31b23; --brand-glow-shadow:0 0 8px var(--brand), 0 0 24px color-mix(in srgb, var(--brand) 60%, transparent 40%); }
+:root { --bg:#000; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; --brand:#e31b23; --brand-glow-shadow:0 0 8px var(--brand), 0 0 24px color-mix(in srgb, var(--brand) 60%, transparent 40%); --preview-frame-radius:18px; --preview-frame-border:1px solid #262b33; --preview-frame-shadow:0 22px 60px rgba(0,0,0,0.80), 0 0 0 1px rgba(255,255,255,0.03), var(--brand-glow-shadow); }
   :root{
   --font-ui: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
   --font-display: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
@@ -486,9 +486,14 @@ html { overflow-x: hidden; }
   z-index: 5000;
   background: #000;
   overflow: hidden;
-  box-shadow: var(--brand-glow-shadow);
+  border: var(--preview-frame-border);
+  border-radius: var(--preview-frame-radius);
+  box-shadow: var(--preview-frame-shadow);
   transition: transform 0.34s cubic-bezier(0.22, 0.61, 0.36, 1),
-              opacity 0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
+              opacity 0.26s cubic-bezier(0.22, 0.61, 0.36, 1),
+              border-radius 0.34s cubic-bezier(0.22, 0.61, 0.36, 1),
+              box-shadow 0.34s cubic-bezier(0.22, 0.61, 0.36, 1),
+              border-color 0.34s cubic-bezier(0.22, 0.61, 0.36, 1);
   will-change: transform, opacity;
 }
 
@@ -822,12 +827,9 @@ html { overflow-x: hidden; }
     max-width: 960px;
     max-height: 90vh;
     background: #05060a;
-    border-radius: 18px;
-    border: 1px solid #262b33;
-    box-shadow:
-      0 22px 60px rgba(0,0,0,0.80),
-      0 0 0 1px rgba(255,255,255,0.03),
-      var(--brand-glow-shadow);
+    border-radius: var(--preview-frame-radius);
+    border: var(--preview-frame-border);
+    box-shadow: var(--preview-frame-shadow);
     overflow: hidden;
     display: grid;
     grid-template-rows: auto 1fr;
@@ -1582,7 +1584,6 @@ html { overflow-x: hidden; }
       }
 
       const MORPH_DURATION = 340;
-      const CROSSFADE_OVERLAP = 180;
       let lastOpenedCard = null;
 
       function measurePreviewRect() {
@@ -1591,7 +1592,7 @@ html { overflow-x: hidden; }
         return previewCard.getBoundingClientRect();
       }
 
-      function createGlowTile(card, rect) {
+      function createGlowTile(card, rect, frameStyles) {
         const tile = document.createElement('div');
         tile.className = 'glow-tile';
         tile.style.top = `${rect.top}px`;
@@ -1600,13 +1601,17 @@ html { overflow-x: hidden; }
         tile.style.height = `${rect.height}px`;
         tile.style.transform = 'translate(0, 0) scale(1)';
 
-        const cardStyles = getComputedStyle(card);
+        const cardStyles = frameStyles || getComputedStyle(card);
         const radius = cardStyles.borderRadius || '12px';
         const shadow = cardStyles.boxShadow && cardStyles.boxShadow !== 'none'
           ? cardStyles.boxShadow
           : '0 0 8px var(--brand), 0 0 24px color-mix(in srgb, var(--brand) 60%, transparent 40%)';
+        const border = cardStyles.border && cardStyles.border !== 'none'
+          ? cardStyles.border
+          : '1px solid #262b33';
         tile.style.borderRadius = radius;
         tile.style.boxShadow = shadow;
+        tile.style.border = border;
 
         const fill = document.createElement('div');
         fill.className = 'glow-tile__fill';
@@ -1649,7 +1654,8 @@ html { overflow-x: hidden; }
             return;
           }
 
-          const { tile, fill } = createGlowTile(card, startRect);
+          const previewStyles = getComputedStyle(previewCard);
+          const { tile } = createGlowTile(card, startRect);
           const originalVisibility = card.style.visibility;
           card.style.visibility = 'hidden';
 
@@ -1660,6 +1666,9 @@ html { overflow-x: hidden; }
 
           requestAnimationFrame(() => {
             tile.classList.add('glow-tile--to-black');
+            tile.style.borderRadius = previewStyles.borderRadius || '18px';
+            tile.style.boxShadow = previewStyles.boxShadow || 'var(--preview-frame-shadow)';
+            tile.style.border = previewStyles.border || '1px solid #262b33';
             const translateX = endRect.left - startRect.left;
             const translateY = endRect.top - startRect.top;
             const scaleX = endRect.width / startRect.width;
@@ -1674,9 +1683,8 @@ html { overflow-x: hidden; }
 
           let cleaned = false;
           let hasCrossfaded = false;
-          const crossfadeDelay = Math.max(0, MORPH_DURATION - CROSSFADE_OVERLAP);
 
-          const crossfade = () => {
+          const startCrossfade = () => {
             if (hasCrossfaded) return;
             hasCrossfaded = true;
             previewCard.classList.add('is-active');
@@ -1686,8 +1694,6 @@ html { overflow-x: hidden; }
           const cleanup = () => {
             if (cleaned) return;
             cleaned = true;
-            crossfade();
-            clearTimeout(crossfadeTimeout);
             tile.removeEventListener('transitionend', handleTransformEnd);
             tile.removeEventListener('transitionend', handleFadeEnd);
             card.style.visibility = originalVisibility;
@@ -1697,7 +1703,7 @@ html { overflow-x: hidden; }
 
           const handleTransformEnd = (event) => {
             if (event.propertyName !== 'transform') return;
-            crossfade();
+            startCrossfade();
           };
 
           const handleFadeEnd = (event) => {
@@ -1705,11 +1711,12 @@ html { overflow-x: hidden; }
             cleanup();
           };
 
-          const crossfadeTimeout = setTimeout(crossfade, crossfadeDelay);
-
           tile.addEventListener('transitionend', handleTransformEnd);
           tile.addEventListener('transitionend', handleFadeEnd);
-          setTimeout(cleanup, MORPH_DURATION + 240);
+          setTimeout(() => {
+            startCrossfade();
+          }, MORPH_DURATION + 60);
+          setTimeout(cleanup, MORPH_DURATION + 320);
         });
       }
 
@@ -1726,40 +1733,64 @@ html { overflow-x: hidden; }
 
           const startRect = previewCard.getBoundingClientRect();
           const endRect = card.getBoundingClientRect();
-          const { tile } = createGlowTile(card, startRect);
+          const previewStyles = getComputedStyle(previewCard);
+          const cardStyles = getComputedStyle(card);
+          const { tile } = createGlowTile(card, startRect, previewStyles);
           tile.classList.add('glow-tile--to-black');
           tile.style.opacity = '0';
 
           document.body.appendChild(tile);
 
           requestAnimationFrame(() => {
+            tile.getBoundingClientRect();
+
+            requestAnimationFrame(() => {
+              previewCard.classList.remove('is-active');
+              tile.style.opacity = '1';
+            });
+          });
+
+          let cleaned = false;
+          let hasMoved = false;
+
+          const startReturn = () => {
+            if (hasMoved) return;
+            hasMoved = true;
+            previewOverlay.classList.remove('is-visible');
+            previewOverlay.setAttribute('aria-hidden', 'true');
+            tile.style.borderRadius = cardStyles.borderRadius || '14px';
+            tile.style.boxShadow = cardStyles.boxShadow && cardStyles.boxShadow !== 'none'
+              ? cardStyles.boxShadow
+              : '0 0 8px var(--brand), 0 0 24px color-mix(in srgb, var(--brand) 60%, transparent 40%)';
+            tile.style.border = cardStyles.border && cardStyles.border !== 'none'
+              ? cardStyles.border
+              : '1px solid #262b33';
+
             const translateX = endRect.left - startRect.left;
             const translateY = endRect.top - startRect.top;
             const scaleX = endRect.width / startRect.width;
             const scaleY = endRect.height / startRect.height;
-
-            previewOverlay.classList.remove('is-visible');
-            previewCard.classList.remove('is-active');
-            tile.style.opacity = '1';
 
             tile.getBoundingClientRect();
 
             requestAnimationFrame(() => {
               tile.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
             });
-          });
-
-          let cleaned = false;
+          };
 
           const cleanup = () => {
             if (cleaned) return;
             cleaned = true;
             tile.removeEventListener('transitionend', handleTransformEnd);
+            previewCard.removeEventListener('transitionend', handlePreviewFade);
             tile.remove();
-            previewOverlay.classList.remove('is-visible');
-            previewOverlay.setAttribute('aria-hidden', 'true');
             lastOpenedCard = null;
             resolve();
+          };
+
+          const handlePreviewFade = (event) => {
+            if (event.propertyName !== 'opacity') return;
+            startReturn();
           };
 
           const handleTransformEnd = (event) => {
@@ -1767,8 +1798,10 @@ html { overflow-x: hidden; }
             cleanup();
           };
 
+          previewCard.addEventListener('transitionend', handlePreviewFade);
           tile.addEventListener('transitionend', handleTransformEnd);
-          setTimeout(cleanup, MORPH_DURATION + 240);
+          setTimeout(startReturn, 280);
+          setTimeout(cleanup, MORPH_DURATION + 320);
         });
       }
 
