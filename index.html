@@ -1681,13 +1681,18 @@ html { overflow-x: hidden; }
 
           let cleaned = false;
           let hasCrossfaded = false;
+          const CROSSFADE_TILE_DELAY = 100; // ms
 
           const startCrossfade = () => {
             if (hasCrossfaded) return;
             hasCrossfaded = true;
-            tile.classList.add('glow-tile--to-black');
             previewCard.classList.add('is-active');
-            tile.classList.add('glow-tile--fade-out');
+
+            setTimeout(() => {
+              if (!hasCrossfaded || cleaned) return;
+              tile.classList.add('glow-tile--to-black');
+              tile.classList.add('glow-tile--fade-out');
+            }, CROSSFADE_TILE_DELAY);
           };
 
           const cleanup = () => {
