@@ -484,7 +484,7 @@ html { overflow-x: hidden; }
   left: 0;
   transform-origin: top left;
   pointer-events: none;
-  z-index: 5000;
+  z-index: 12000;
   background: #000;
   overflow: hidden;
   border: var(--preview-frame-border);
@@ -1687,6 +1687,7 @@ html { overflow-x: hidden; }
             if (hasCrossfaded) return;
             hasCrossfaded = true;
             previewCard.classList.add('is-active');
+            tile.style.zIndex = '9998';
 
             setTimeout(() => {
               if (!hasCrossfaded || cleaned) return;
