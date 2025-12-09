@@ -492,7 +492,7 @@ html { overflow-x: hidden; }
   box-shadow: var(--preview-frame-shadow);
   transition:
     transform 0.34s cubic-bezier(0.22, 0.61, 0.36, 1),
-    opacity 0.18s ease,
+    opacity 0.24s ease,
     border-radius 0.34s cubic-bezier(0.22, 0.61, 0.36, 1),
     box-shadow 0.34s cubic-bezier(0.22, 0.61, 0.36, 1),
     border-color 0.34s cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -502,10 +502,11 @@ html { overflow-x: hidden; }
 .preview-morph-fill {
   position: absolute;
   inset: 0;
+  background: #000;
   background-size: cover;
   background-position: center;
   opacity: 1;
-  transition: opacity 0.18s ease;
+  transition: opacity 0.24s ease;
 }
 
 .preview-morph-tile.is-fade-out {
@@ -1590,6 +1591,7 @@ html { overflow-x: hidden; }
       const MORPH_DURATION = 340;
       const PREVIEW_EASING = 'cubic-bezier(0.22, 0.61, 0.36, 1)';
       const CROSSFADE_DURATION = 180;
+      const FILL_FADE_DURATION = 220;
       let lastOpenedCard = null;
       let activeMorphTile = null;
 
@@ -1648,6 +1650,11 @@ html { overflow-x: hidden; }
 
         const fill = document.createElement('div');
         fill.className = 'preview-morph-fill';
+
+        tile.classList.remove('is-fade-out');
+        fill.classList.remove('is-fade-out');
+        tile.style.opacity = '';
+        fill.style.opacity = '1';
 
         const posterImg = card.querySelector('img');
         if (posterImg && posterImg.src) {
@@ -1713,15 +1720,21 @@ html { overflow-x: hidden; }
           activeMorphTile = tile;
           const targetRadius = getComputedStyle(previewCard).borderRadius;
 
+          fill.style.transition = `opacity ${FILL_FADE_DURATION}ms ease`;
+          fill.style.opacity = '1';
+
           requestAnimationFrame(() => {
             tile.offsetHeight;
-            moveTile(tile, startRect, endRect, targetRadius);
+            fill.style.opacity = '0';
+
+            requestAnimationFrame(() => {
+              moveTile(tile, startRect, endRect, targetRadius);
+            });
           });
 
           const finishCrossfade = () => {
             previewCard.style.opacity = '1';
-            tile.classList.add('is-fade-out');
-            fill.classList.add('is-fade-out');
+            fill.style.opacity = '0';
 
             setTimeout(() => {
               tile.remove();
@@ -1766,6 +1779,8 @@ html { overflow-x: hidden; }
           activeMorphTile = tile;
           tile.style.borderRadius = getComputedStyle(previewCard).borderRadius;
           tile.style.opacity = '0';
+          fill.style.backgroundImage = '';
+          fill.style.opacity = '1';
 
           const targetRadius = getComputedStyle(card).borderRadius;
 
@@ -1791,7 +1806,10 @@ html { overflow-x: hidden; }
           const handleTransformEnd = (event) => {
             if (event.propertyName !== 'transform') return;
             tile.removeEventListener('transitionend', handleTransformEnd);
-            cleanup();
+            fill.style.opacity = '0';
+            setTimeout(() => {
+              cleanup();
+            }, FILL_FADE_DURATION + 50);
           };
 
           tile.addEventListener('transitionend', handleTransformEnd);
@@ -1800,13 +1818,18 @@ html { overflow-x: hidden; }
             tile.offsetHeight;
             previewCard.style.opacity = '0';
             tile.style.opacity = '1';
-            moveTile(tile, previewRect, cardRect, targetRadius);
+            setTimeout(() => {
+              moveTile(tile, previewRect, cardRect, targetRadius);
+            }, CROSSFADE_DURATION);
           });
 
           setTimeout(() => {
             tile.removeEventListener('transitionend', handleTransformEnd);
-            cleanup();
-          }, MORPH_DURATION + 120);
+            fill.style.opacity = '0';
+            setTimeout(() => {
+              cleanup();
+            }, FILL_FADE_DURATION + 20);
+          }, MORPH_DURATION + CROSSFADE_DURATION + 150);
         });
       }
 
