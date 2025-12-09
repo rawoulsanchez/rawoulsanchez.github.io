@@ -476,6 +476,17 @@ html { overflow-x: hidden; }
   z-index: 1; /* Default stacking level */
 }
 
+.poster-morph-clone {
+  position: fixed;
+  transform-origin: top left;
+  pointer-events: none;
+  z-index: 5000;
+  transition: transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1),
+              border-radius 0.35s ease,
+              box-shadow 0.35s ease;
+  will-change: transform, border-radius, box-shadow;
+}
+
 .poster img {
   display: block;
   width: 100%;
@@ -1556,6 +1567,91 @@ html { overflow-x: hidden; }
         previewOverlay.setAttribute('aria-hidden', 'false');
       }
 
+      function measurePreviewRect() {
+        const previewCard = previewOverlay.querySelector('.preview-card');
+        if (!previewCard) return null;
+
+        const wasVisible = previewOverlay.classList.contains('is-visible');
+        const previousDisplay = previewOverlay.style.display;
+        const previousVisibility = previewOverlay.style.visibility;
+        const previousPointerEvents = previewOverlay.style.pointerEvents;
+
+        if (!wasVisible) {
+          previewOverlay.style.visibility = 'hidden';
+          previewOverlay.style.display = 'flex';
+          previewOverlay.style.pointerEvents = 'none';
+        }
+
+        const rect = previewCard.getBoundingClientRect();
+
+        if (!wasVisible) {
+          previewOverlay.style.display = previousDisplay || '';
+          previewOverlay.style.visibility = previousVisibility || '';
+          previewOverlay.style.pointerEvents = previousPointerEvents || '';
+        }
+
+        return rect;
+      }
+
+      function runPosterMorph(card) {
+        return new Promise((resolve) => {
+          const startRect = card.getBoundingClientRect();
+          const previewCard = previewOverlay.querySelector('.preview-card');
+          const endRect = measurePreviewRect();
+
+          if (!previewCard || !endRect) {
+            resolve();
+            return;
+          }
+
+          const cardStyles = getComputedStyle(card);
+          const previewStyles = getComputedStyle(previewCard);
+          const clone = card.cloneNode(true);
+          clone.classList.add('poster-morph-clone');
+
+          clone.style.top = `${startRect.top}px`;
+          clone.style.left = `${startRect.left}px`;
+          clone.style.width = `${startRect.width}px`;
+          clone.style.height = `${startRect.height}px`;
+          clone.style.transform = 'translate(0, 0) scale(1, 1)';
+          clone.style.borderRadius = cardStyles.borderRadius;
+          clone.style.boxShadow = cardStyles.boxShadow;
+          clone.style.filter = cardStyles.filter;
+
+          const originalVisibility = card.style.visibility;
+          card.style.visibility = 'hidden';
+
+          document.body.appendChild(clone);
+
+          requestAnimationFrame(() => {
+            const translateX = endRect.left - startRect.left;
+            const translateY = endRect.top - startRect.top;
+            const scaleX = endRect.width / startRect.width;
+            const scaleY = endRect.height / startRect.height;
+
+            clone.getBoundingClientRect();
+
+            requestAnimationFrame(() => {
+              clone.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+              clone.style.borderRadius = previewStyles.borderRadius;
+            });
+          });
+
+          const cleanup = () => {
+            card.style.visibility = originalVisibility;
+            clone.remove();
+            resolve();
+          };
+
+          clone.addEventListener('transitionend', (event) => {
+            if (event.propertyName !== 'transform') return;
+            cleanup();
+          });
+
+          setTimeout(cleanup, 500);
+        });
+      }
+
       previewCloseButton.addEventListener('click', () => {
         closePreviewOverlay();
       });
@@ -1573,13 +1669,17 @@ html { overflow-x: hidden; }
         previewButton.addEventListener('click', (event) => {
           event.preventDefault();
           event.stopPropagation();
-          openPreviewFromCard(card);
+          runPosterMorph(card).then(() => {
+            openPreviewFromCard(card);
+          });
         });
 
         card.addEventListener('keydown', (event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
-            openPreviewFromCard(card);
+            runPosterMorph(card).then(() => {
+              openPreviewFromCard(card);
+            });
           }
         });
       });
