@@ -1493,8 +1493,7 @@ html { overflow-x: hidden; }
 </script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const a1Card = document.querySelector('.poster[data-label="A1"]');
-      const previewButton = a1Card ? a1Card.querySelector('.poster-preview-button') : null;
+      const a1Cards = Array.from(document.querySelectorAll('.poster[data-label="A1"]'));
       const previewOverlay = document.querySelector('.preview-overlay');
       const previewTitleEl = document.querySelector('.preview-title');
       const previewRuntimeEl = document.querySelector('.preview-runtime');
@@ -1502,8 +1501,7 @@ html { overflow-x: hidden; }
       const previewDescriptionEl = document.querySelector('.preview-description');
 
       if (
-        !a1Card ||
-        !previewButton ||
+        !a1Cards.length ||
         !previewOverlay ||
         !previewTitleEl ||
         !previewRuntimeEl ||
@@ -1528,10 +1526,15 @@ html { overflow-x: hidden; }
         previewOverlay.setAttribute('aria-hidden', 'false');
       }
 
-      previewButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        openPreviewFromCard(a1Card);
+      a1Cards.forEach((card) => {
+        const previewButton = card.querySelector('.poster-preview-button');
+        if (!previewButton) return;
+
+        previewButton.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          openPreviewFromCard(card);
+        });
       });
     });
   </script>
