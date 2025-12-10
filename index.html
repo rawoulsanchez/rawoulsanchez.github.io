@@ -8,7 +8,7 @@
   <title>Rawoul — Starter</title>
 <style>
   /* Design tokens */
-:root { --bg:#000; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; --brand:#e31b23; --brand-glow-shadow:0 0 8px var(--brand), 0 0 24px color-mix(in srgb, var(--brand) 60%, transparent 40%); --preview-frame-radius:18px; --preview-frame-border:1px solid #262b33; --preview-frame-shadow:0 22px 60px rgba(0,0,0,0.80), 0 0 0 1px rgba(255,255,255,0.03), var(--brand-glow-shadow); }
+:root { --bg:#000; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; --brand:#e31b23; --brand-glow-shadow:0 0 8px var(--brand), 0 0 24px color-mix(in srgb, var(--brand) 60%, transparent 40%); --preview-frame-radius:18px; --preview-frame-border:1px solid #262b33; --preview-frame-shadow:0 22px 60px rgba(0,0,0,0.80), 0 0 0 1px rgba(255,255,255,0.03), var(--brand-glow-shadow); --preview-morph-duration:340ms; --preview-morph-ease:cubic-bezier(0.22, 0.61, 0.36, 1); }
   :root{
   --font-ui: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
   --font-display: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
@@ -491,11 +491,11 @@ html { overflow-x: hidden; }
   border-radius: var(--preview-frame-radius);
   box-shadow: var(--preview-frame-shadow);
   transition:
-    transform 0.34s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform var(--preview-morph-duration) var(--preview-morph-ease),
     opacity 0.24s ease,
-    border-radius 0.34s cubic-bezier(0.22, 0.61, 0.36, 1),
-    box-shadow 0.34s cubic-bezier(0.22, 0.61, 0.36, 1),
-    border-color 0.34s cubic-bezier(0.22, 0.61, 0.36, 1);
+    border-radius var(--preview-morph-duration) var(--preview-morph-ease),
+    box-shadow var(--preview-morph-duration) var(--preview-morph-ease),
+    border-color var(--preview-morph-duration) var(--preview-morph-ease);
   will-change: transform, opacity;
 }
 
@@ -506,7 +506,7 @@ html { overflow-x: hidden; }
   background-size: cover;
   background-position: center;
   opacity: 1;
-  transition: opacity 0.24s ease;
+  transition: opacity var(--preview-morph-duration) var(--preview-morph-ease);
 }
 
 .preview-morph-tile.is-fade-out {
@@ -839,8 +839,8 @@ html { overflow-x: hidden; }
     position: relative;
     opacity: 1;
     transition:
-      transform 0.34s cubic-bezier(0.22, 0.61, 0.36, 1),
-      opacity 0.18s ease;
+      transform var(--preview-morph-duration) var(--preview-morph-ease),
+      opacity var(--preview-morph-duration) var(--preview-morph-ease);
   }
 
   .preview-card.is-active {
@@ -1595,7 +1595,6 @@ html { overflow-x: hidden; }
 
       const MORPH_DURATION = 340;
       const PREVIEW_EASING = 'cubic-bezier(0.22, 0.61, 0.36, 1)';
-      const CROSSFADE_DURATION = 180;
       const FILL_FADE_DURATION = 220;
       let lastOpenedCard = null;
       let activeMorphTile = null;
@@ -1721,38 +1720,31 @@ html { overflow-x: hidden; }
           previewOverlay.classList.add('is-visible');
           previewCard.classList.add('is-active');
           previewCard.style.opacity = '0';
-          previewCard.style.transition = `opacity ${CROSSFADE_DURATION}ms ease`;
+          previewCard.style.transition = `opacity ${MORPH_DURATION}ms ${PREVIEW_EASING}`;
           previewCard.style.transform = '';
 
           const { tile, fill } = createGlowTileFromCard(card, startRect);
           activeMorphTile = tile;
           const targetRadius = getComputedStyle(previewCard).borderRadius;
 
-          fill.style.transition = `opacity ${FILL_FADE_DURATION}ms ease`;
+          fill.style.transition = `opacity ${MORPH_DURATION}ms ${PREVIEW_EASING}`;
           fill.style.opacity = '1';
 
           requestAnimationFrame(() => {
             tile.offsetHeight;
+            previewCard.style.opacity = '1';
             fill.style.opacity = '0';
-
-            requestAnimationFrame(() => {
-              moveTile(tile, startRect, endRect, targetRadius);
-            });
+            moveTile(tile, startRect, endRect, targetRadius);
           });
 
           const finishCrossfade = () => {
-            previewCard.style.opacity = '1';
-            fill.style.opacity = '0';
-
-            setTimeout(() => {
-              tile.remove();
-              if (activeMorphTile === tile) {
-                activeMorphTile = null;
-              }
-              previewCard.style.transition = '';
-              previewCard.style.opacity = '';
-              resolve();
-            }, CROSSFADE_DURATION + 50);
+            tile.remove();
+            if (activeMorphTile === tile) {
+              activeMorphTile = null;
+            }
+            previewCard.style.transition = '';
+            previewCard.style.opacity = '';
+            resolve();
           };
 
           const handleTransformEnd = (event) => {
@@ -1786,14 +1778,13 @@ html { overflow-x: hidden; }
           const { tile, fill } = createGlowTileFromCard(card, previewRect);
           activeMorphTile = tile;
           tile.style.borderRadius = getComputedStyle(previewCard).borderRadius;
-          tile.style.opacity = '0';
-          fill.style.transition = `opacity ${FILL_FADE_DURATION}ms ease`;
+          fill.style.transition = `opacity ${MORPH_DURATION}ms ${PREVIEW_EASING}`;
           fill.style.backgroundImage = '';
-          fill.style.opacity = '1';
+          fill.style.opacity = '0';
 
           const targetRadius = getComputedStyle(card).borderRadius;
 
-          previewCard.style.transition = `opacity ${CROSSFADE_DURATION}ms ease`;
+          previewCard.style.transition = `opacity ${MORPH_DURATION}ms ${PREVIEW_EASING}`;
           previewCard.style.opacity = '1';
 
           const cleanup = () => {
@@ -1814,6 +1805,7 @@ html { overflow-x: hidden; }
           const handleTransformEnd = (event) => {
             if (event.propertyName !== 'transform') return;
             tile.removeEventListener('transitionend', handleTransformEnd);
+            fill.style.transition = `opacity ${FILL_FADE_DURATION}ms ease`;
             fill.style.opacity = '0';
             setTimeout(() => {
               cleanup();
@@ -1825,23 +1817,18 @@ html { overflow-x: hidden; }
           requestAnimationFrame(() => {
             tile.offsetHeight;
             previewCard.style.opacity = '0';
-            tile.style.opacity = '1';
-            setTimeout(() => {
-              previewCard.classList.add('is-hidden');
-              previewCard.style.opacity = '0';
-            }, CROSSFADE_DURATION);
-            setTimeout(() => {
-              moveTile(tile, previewRect, cardRect, targetRadius);
-            }, CROSSFADE_DURATION);
+            fill.style.opacity = '1';
+            moveTile(tile, previewRect, cardRect, targetRadius);
           });
 
           setTimeout(() => {
             tile.removeEventListener('transitionend', handleTransformEnd);
+            fill.style.transition = `opacity ${FILL_FADE_DURATION}ms ease`;
             fill.style.opacity = '0';
             setTimeout(() => {
               cleanup();
             }, FILL_FADE_DURATION + 20);
-          }, MORPH_DURATION + CROSSFADE_DURATION + 150);
+          }, MORPH_DURATION + 100);
         });
       }
 
