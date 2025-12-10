@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -480,6 +481,7 @@ html { overflow-x: hidden; }
   position: fixed;
   top: 0;
   left: 0;
+  transform-origin: top left;
   pointer-events: none;
   z-index: 12000;
   background: transparent;
@@ -488,15 +490,14 @@ html { overflow-x: hidden; }
   border-radius: var(--preview-frame-radius);
   box-shadow: var(--preview-frame-shadow);
   transition:
-    left var(--preview-morph-duration) var(--preview-morph-ease),
-    top var(--preview-morph-duration) var(--preview-morph-ease),
+    transform var(--preview-morph-duration) var(--preview-morph-ease),
     width var(--preview-morph-duration) var(--preview-morph-ease),
     height var(--preview-morph-duration) var(--preview-morph-ease),
     opacity 0.24s ease,
     border-radius var(--preview-morph-duration) var(--preview-morph-ease),
     box-shadow var(--preview-morph-duration) var(--preview-morph-ease),
     border-color var(--preview-morph-duration) var(--preview-morph-ease);
-  will-change: left, top, width, height, opacity;
+  will-change: transform, opacity;
 }
 
 .preview-morph-fill {
@@ -1666,24 +1667,20 @@ html { overflow-x: hidden; }
         }
 
         tile.appendChild(fill);
-        tile.style.left = `${startRect.left}px`;
-        tile.style.top = `${startRect.top}px`;
         tile.style.width = `${startRect.width}px`;
         tile.style.height = `${startRect.height}px`;
-        tile.style.borderRadius = getComputedStyle(card).borderRadius;
+        tile.style.transformOrigin = 'top left';
+        tile.style.transform = `translate(${startRect.left}px, ${startRect.top}px) scale(1, 1)`;
         document.body.appendChild(tile);
 
         return { tile, fill };
       }
 
-      function moveTile(tile, targetRect, targetRadius) {
-        tile.style.left = `${targetRect.left}px`;
-        tile.style.top = `${targetRect.top}px`;
+      function moveTile(tile, startRect, targetRect, targetRadius) {
+        tile.style.borderRadius = targetRadius;
         tile.style.width = `${targetRect.width}px`;
         tile.style.height = `${targetRect.height}px`;
-        if (targetRadius) {
-          tile.style.borderRadius = targetRadius;
-        }
+        tile.style.transform = `translate(${targetRect.left}px, ${targetRect.top}px)`;
       }
 
       function openPreviewFromCard(card) {
@@ -1771,19 +1768,18 @@ html { overflow-x: hidden; }
 
           requestAnimationFrame(() => {
             tile.offsetHeight;
-            moveTile(tile, endRect, targetRadius);
+            moveTile(tile, startRect, endRect, targetRadius);
           });
 
-          const handleGeometryEnd = (event) => {
-            const watchedProps = ['left', 'top', 'width', 'height'];
-            if (!watchedProps.includes(event.propertyName)) return;
-            tile.removeEventListener('transitionend', handleGeometryEnd);
+          const handleTransformEnd = (event) => {
+            if (event.propertyName !== 'transform') return;
+            tile.removeEventListener('transitionend', handleTransformEnd);
             startCrossfade();
           };
 
-          tile.addEventListener('transitionend', handleGeometryEnd);
+          tile.addEventListener('transitionend', handleTransformEnd);
           setTimeout(() => {
-            tile.removeEventListener('transitionend', handleGeometryEnd);
+            tile.removeEventListener('transitionend', handleTransformEnd);
             startCrossfade();
           }, MORPH_DURATION + 100);
         });
@@ -1850,8 +1846,7 @@ html { overflow-x: hidden; }
           };
 
           const handleTransformEnd = (event) => {
-            const watchedProps = ['left', 'top', 'width', 'height'];
-            if (!watchedProps.includes(event.propertyName)) return;
+            if (event.propertyName !== 'transform') return;
             tile.removeEventListener('transitionend', handleTransformEnd);
             fill.style.transition = `opacity ${FILL_FADE_DURATION}ms ${PREVIEW_EASING}`;
             fill.style.opacity = '0';
@@ -1870,7 +1865,7 @@ html { overflow-x: hidden; }
             previewOverlay.style.opacity = '0';
             fill.style.opacity = '1';
             tile.addEventListener('transitionend', handleTransformEnd);
-            moveTile(tile, cardRect, targetRadius);
+            moveTile(tile, previewRect, cardRect, targetRadius);
           };
 
           const handleCardFadeOutEnd = (event) => {
