@@ -1695,6 +1695,7 @@ html { overflow-x: hidden; }
         previewDescriptionEl.textContent = description;
 
         lastOpenedCard = triggerElement;
+        document.body.style.overflow = 'hidden';
         previewOverlay.setAttribute('aria-hidden', 'false');
         runOpenMorph(card);
       }
@@ -1786,28 +1787,83 @@ html { overflow-x: hidden; }
       }
 
       function closePreview() {
-        if (!previewOverlay) return;
-
-        previewOverlay.classList.remove('is-visible');
-        previewOverlay.setAttribute('aria-hidden', 'true');
+        if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
 
         const previewCard = previewOverlay.querySelector('.preview-card');
-        if (previewCard) {
+        if (!previewCard) return;
+
+        const previewCardRect = previewCard.getBoundingClientRect();
+        if (!lastOpenedCard) {
+          previewOverlay.classList.remove('is-visible');
+          previewOverlay.setAttribute('aria-hidden', 'true');
           previewCard.classList.remove('is-active');
-          previewCard.style.transform = '';
           previewCard.style.opacity = '';
+          previewCard.style.pointerEvents = '';
+          if (activeMorphTile && activeMorphTile.parentNode) {
+            activeMorphTile.parentNode.removeChild(activeMorphTile);
+          }
+          activeMorphTile = null;
+          document.body.style.overflow = '';
+          return;
+        }
+        const cardRect = lastOpenedCard.getBoundingClientRect();
+
+        let tile = activeMorphTile;
+        let fill = null;
+
+        if (!tile) {
+          const created = createGlowTileFromCard(lastOpenedCard, previewCardRect);
+          tile = created.tile;
+          fill = created.fill;
+          activeMorphTile = tile;
+        } else {
+          tile.style.borderRadius = getComputedStyle(previewCard).borderRadius;
+          tile.style.width = `${previewCardRect.width}px`;
+          tile.style.height = `${previewCardRect.height}px`;
+          tile.style.transform = `translate(${previewCardRect.left}px, ${previewCardRect.top}px)`;
+          tile.classList.remove('is-fade-out');
+          tile.style.opacity = '';
+          fill = tile.querySelector('.preview-morph-fill');
+          if (fill) {
+            fill.classList.remove('is-fade-out');
+            fill.style.opacity = '1';
+            const posterImg = lastOpenedCard.querySelector('img');
+            if (posterImg && posterImg.src) {
+              fill.style.backgroundImage = `url(${posterImg.src})`;
+            }
+          }
         }
 
-        if (activeMorphTile && activeMorphTile.parentNode) {
-          activeMorphTile.parentNode.removeChild(activeMorphTile);
-        }
-        activeMorphTile = null;
+        previewCard.style.opacity = '0';
+        previewCard.style.pointerEvents = 'none';
 
-        document.body.style.overflow = '';
+        const targetRadius = getComputedStyle(lastOpenedCard).borderRadius;
 
-        if (lastOpenedCard && document.body.contains(lastOpenedCard)) {
-          lastOpenedCard.focus();
-        }
+        requestAnimationFrame(() => {
+          tile.offsetHeight;
+          moveTile(tile, previewCardRect, cardRect, targetRadius);
+        });
+
+        setTimeout(() => {
+          previewOverlay.classList.remove('is-visible');
+          previewOverlay.setAttribute('aria-hidden', 'true');
+          previewCard.classList.remove('is-active');
+          previewCard.style.opacity = '';
+          previewCard.style.pointerEvents = '';
+
+          if (tile && tile.parentNode) {
+            tile.parentNode.removeChild(tile);
+          }
+          if (activeMorphTile === tile) {
+            activeMorphTile = null;
+          }
+
+          document.body.style.overflow = '';
+
+          if (lastOpenedCard && document.body.contains(lastOpenedCard)) {
+            lastOpenedCard.focus();
+          }
+        }, MORPH_DURATION);
       }
 
       previewCloseButton.addEventListener('click', () => {
