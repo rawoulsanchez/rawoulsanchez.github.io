@@ -895,6 +895,42 @@ html { overflow-x: hidden; }
     gap: 12px;
   }
 
+  /* Split entrance: media from left, info from right */
+  .preview-card .preview-media,
+  .preview-card .preview-info {
+    opacity: 0;
+  }
+
+  .preview-card.is-active .preview-media {
+    animation: previewMediaSplitIn 420ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+
+  .preview-card.is-active .preview-info {
+    animation: previewInfoSplitIn 420ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+
+  @keyframes previewMediaSplitIn {
+    from {
+      opacity: 0;
+      transform: translateX(-32px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes previewInfoSplitIn {
+    from {
+      opacity: 0;
+      transform: translateX(32px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
   .preview-header {
     display: flex;
     flex-direction: column;
@@ -1771,7 +1807,6 @@ html { overflow-x: hidden; }
           requestAnimationFrame(() => {
             tile.offsetHeight;
             moveTile(tile, startRect, endRect, targetRadius);
-            startCrossfade();
           });
 
           const handleTransformEnd = (event) => {
