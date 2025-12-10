@@ -847,6 +847,11 @@ html { overflow-x: hidden; }
     opacity: 1;
   }
 
+  .preview-card.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
   .preview-close-btn {
     position: absolute;
     top: 12px;
@@ -1699,6 +1704,9 @@ html { overflow-x: hidden; }
         return new Promise((resolve) => {
           const startRect = card.getBoundingClientRect();
           const previewCard = previewOverlay.querySelector('.preview-card');
+          if (previewCard) {
+            previewCard.classList.remove('is-hidden');
+          }
           const endRect = measurePreviewRect();
 
           if (!previewCard || !endRect) {
@@ -1779,6 +1787,7 @@ html { overflow-x: hidden; }
           activeMorphTile = tile;
           tile.style.borderRadius = getComputedStyle(previewCard).borderRadius;
           tile.style.opacity = '0';
+          fill.style.transition = `opacity ${FILL_FADE_DURATION}ms ease`;
           fill.style.backgroundImage = '';
           fill.style.opacity = '1';
 
@@ -1797,7 +1806,6 @@ html { overflow-x: hidden; }
             previewOverlay.style.opacity = '';
             previewOverlay.style.pointerEvents = '';
             previewCard.classList.remove('is-active');
-            previewCard.style.opacity = '';
             previewCard.style.transition = '';
             lastOpenedCard = null;
             resolve();
@@ -1818,6 +1826,10 @@ html { overflow-x: hidden; }
             tile.offsetHeight;
             previewCard.style.opacity = '0';
             tile.style.opacity = '1';
+            setTimeout(() => {
+              previewCard.classList.add('is-hidden');
+              previewCard.style.opacity = '0';
+            }, CROSSFADE_DURATION);
             setTimeout(() => {
               moveTile(tile, previewRect, cardRect, targetRadius);
             }, CROSSFADE_DURATION);
