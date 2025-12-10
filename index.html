@@ -835,7 +835,7 @@ html { overflow-x: hidden; }
     display: grid;
     grid-template-rows: auto 1fr;
     position: relative;
-    opacity: 1;
+    opacity: 0;
     transition:
       transform var(--preview-morph-duration) var(--preview-morph-ease),
       opacity var(--preview-morph-duration) var(--preview-morph-ease);
@@ -1716,26 +1716,23 @@ html { overflow-x: hidden; }
           previewOverlay.style.opacity = '';
           previewOverlay.style.pointerEvents = '';
           previewOverlay.classList.add('is-visible');
+          previewOverlay.setAttribute('aria-hidden', 'false');
           previewCard.classList.add('is-active');
           previewCard.style.opacity = '0';
-          previewCard.style.transition = `opacity ${MORPH_DURATION}ms ${PREVIEW_EASING}`;
+          previewCard.style.transition = '';
           previewCard.style.transform = '';
 
           const { tile, fill } = createGlowTileFromCard(card, startRect);
           activeMorphTile = tile;
           const targetRadius = getComputedStyle(previewCard).borderRadius;
 
-          fill.style.transition = `opacity ${MORPH_DURATION}ms ${PREVIEW_EASING}`;
+          fill.style.transition = '';
           fill.style.opacity = '1';
 
-          requestAnimationFrame(() => {
-            tile.offsetHeight;
-            previewCard.style.opacity = '1';
-            fill.style.opacity = '0';
-            moveTile(tile, startRect, endRect, targetRadius);
-          });
+          let hasCrossfaded = false;
 
           const finishCrossfade = () => {
+            if (!hasCrossfaded) return;
             tile.remove();
             if (activeMorphTile === tile) {
               activeMorphTile = null;
@@ -1745,16 +1742,43 @@ html { overflow-x: hidden; }
             resolve();
           };
 
+          const handleCardFadeInEnd = (event) => {
+            if (event.propertyName !== 'opacity') return;
+            previewCard.removeEventListener('transitionend', handleCardFadeInEnd);
+            finishCrossfade();
+          };
+
+          const startCrossfade = () => {
+            if (hasCrossfaded) return;
+            hasCrossfaded = true;
+            previewCard.addEventListener('transitionend', handleCardFadeInEnd);
+            previewCard.style.transition = `opacity ${FILL_FADE_DURATION}ms ${PREVIEW_EASING}`;
+            fill.style.transition = `opacity ${FILL_FADE_DURATION}ms ${PREVIEW_EASING}`;
+            previewCard.style.opacity = '1';
+            tile.classList.add('is-fade-out');
+            fill.style.opacity = '0';
+
+            setTimeout(() => {
+              previewCard.removeEventListener('transitionend', handleCardFadeInEnd);
+              finishCrossfade();
+            }, FILL_FADE_DURATION + 120);
+          };
+
+          requestAnimationFrame(() => {
+            tile.offsetHeight;
+            moveTile(tile, startRect, endRect, targetRadius);
+          });
+
           const handleTransformEnd = (event) => {
             if (event.propertyName !== 'transform') return;
             tile.removeEventListener('transitionend', handleTransformEnd);
-            finishCrossfade();
+            startCrossfade();
           };
 
           tile.addEventListener('transitionend', handleTransformEnd);
           setTimeout(() => {
             tile.removeEventListener('transitionend', handleTransformEnd);
-            finishCrossfade();
+            startCrossfade();
           }, MORPH_DURATION + 100);
         });
       }
@@ -1781,18 +1805,18 @@ html { overflow-x: hidden; }
 
           tile.style.borderRadius = previewRadius;
 
-          // Synchronize overlay + content fade-out with the morph
           previewOverlay.style.transition = `opacity ${MORPH_DURATION}ms ${PREVIEW_EASING}`;
           previewOverlay.style.opacity = '1';
           previewOverlay.classList.add('is-visible');
           previewOverlay.setAttribute('aria-hidden', 'false');
 
-          previewCard.style.transition = `opacity ${MORPH_DURATION}ms ${PREVIEW_EASING}`;
+          previewCard.style.transition = `opacity ${FILL_FADE_DURATION}ms ${PREVIEW_EASING}`;
           previewCard.style.opacity = '1';
 
-          // Crossfade the tile fill with the preview content during the morph
-          fill.style.transition = `opacity ${MORPH_DURATION}ms ${PREVIEW_EASING}`;
-          fill.style.opacity = '0';
+          fill.style.transition = '';
+          fill.style.opacity = '1';
+
+          let hasLaunchedReturn = false;
 
           const cleanup = () => {
             tile.remove();
@@ -1813,29 +1837,52 @@ html { overflow-x: hidden; }
             resolve();
           };
 
-          const handleTransformEnd = (event) => {
-            if (event.propertyName !== 'transform') return;
-            tile.removeEventListener('transitionend', handleTransformEnd);
+          const handleFillFadeEnd = (event) => {
+            if (event.propertyName !== 'opacity') return;
+            fill.removeEventListener('transitionend', handleFillFadeEnd);
             cleanup();
           };
 
-          tile.addEventListener('transitionend', handleTransformEnd);
+          const handleTransformEnd = (event) => {
+            if (event.propertyName !== 'transform') return;
+            tile.removeEventListener('transitionend', handleTransformEnd);
+            fill.style.transition = `opacity ${FILL_FADE_DURATION}ms ${PREVIEW_EASING}`;
+            fill.style.opacity = '0';
+            fill.addEventListener('transitionend', handleFillFadeEnd);
+            setTimeout(() => {
+              fill.removeEventListener('transitionend', handleFillFadeEnd);
+              cleanup();
+            }, FILL_FADE_DURATION + 120);
+          };
 
-          requestAnimationFrame(() => {
-            // Kick off the synchronized fade + morph
-            // Force layout before applying transitions
-            tile.offsetHeight;
+          const startTileReturn = () => {
+            if (hasLaunchedReturn) return;
+            hasLaunchedReturn = true;
             previewCard.style.opacity = '0';
+            previewCard.classList.add('is-hidden');
             previewOverlay.style.opacity = '0';
             fill.style.opacity = '1';
+            tile.addEventListener('transitionend', handleTransformEnd);
             moveTile(tile, previewRect, cardRect, targetRadius);
+          };
+
+          const handleCardFadeOutEnd = (event) => {
+            if (event.propertyName !== 'opacity') return;
+            previewCard.removeEventListener('transitionend', handleCardFadeOutEnd);
+            startTileReturn();
+          };
+
+          previewCard.addEventListener('transitionend', handleCardFadeOutEnd);
+
+          requestAnimationFrame(() => {
+            tile.offsetHeight;
+            previewCard.style.opacity = '0';
           });
 
-          // Fallback in case the transitionend event is missed
           setTimeout(() => {
-            tile.removeEventListener('transitionend', handleTransformEnd);
-            cleanup();
-          }, MORPH_DURATION + 120);
+            previewCard.removeEventListener('transitionend', handleCardFadeOutEnd);
+            startTileReturn();
+          }, FILL_FADE_DURATION + 120);
         });
       }
 
