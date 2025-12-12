@@ -1023,6 +1023,23 @@ html { overflow-x: hidden; }
     transform: translateX(-50%) scale(1.05);
   }
 
+
+/* --- TOP CONTENT OVERLAY (ABOVE MORPH TILE) --- */
+#preview-top-content-overlay{
+  position: fixed;
+  inset: 0;
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 13000; /* Must be above .preview-morph-tile (12000) */
+  transition: opacity var(--preview-morph-duration) var(--preview-morph-ease);
+}
+#preview-top-content-overlay .preview-top-content-card{
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1582,6 +1599,60 @@ html { overflow-x: hidden; }
       const previewRuntimeEl = document.querySelector('.preview-runtime');
       const previewTagsEl = document.querySelector('.preview-tags');
       const previewDescriptionEl = document.querySelector('.preview-description');
+      const topContentOverlay = document.getElementById('preview-top-content-overlay');
+
+      function hideTopContentOverlayImmediate() {
+        if (!topContentOverlay) return;
+        topContentOverlay.style.transition = '';
+        topContentOverlay.style.opacity = '0';
+        topContentOverlay.style.display = 'none';
+        topContentOverlay.setAttribute('aria-hidden', 'true');
+        topContentOverlay.innerHTML = '';
+      }
+
+      function showTopContentOverlay(previewCard) {
+        if (!topContentOverlay || !previewCard) return;
+
+        const overlayCard = document.createElement('div');
+        overlayCard.className = 'preview-card preview-top-content-card is-active';
+
+        const media = previewCard.querySelector('.preview-media');
+        const info = previewCard.querySelector('.preview-info');
+
+        if (media) overlayCard.appendChild(media.cloneNode(true));
+        if (info) overlayCard.appendChild(info.cloneNode(true));
+
+        overlayCard.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
+
+        const rect = previewCard.getBoundingClientRect();
+        overlayCard.style.left = `${rect.left}px`;
+        overlayCard.style.top = `${rect.top}px`;
+        overlayCard.style.width = `${rect.width}px`;
+        overlayCard.style.height = `${rect.height}px`;
+        overlayCard.style.maxWidth = 'none';
+        overlayCard.style.maxHeight = 'none';
+
+        topContentOverlay.innerHTML = '';
+        topContentOverlay.appendChild(overlayCard);
+        topContentOverlay.setAttribute('aria-hidden', 'false');
+        topContentOverlay.style.display = 'block';
+        topContentOverlay.style.opacity = '0';
+        topContentOverlay.style.transition = `opacity var(--preview-morph-duration) var(--preview-morph-ease)`;
+
+        requestAnimationFrame(() => {
+          topContentOverlay.style.opacity = '1';
+        });
+      }
+
+      function hideTopContentOverlayAfterHandoff() {
+        if (!topContentOverlay || topContentOverlay.style.display === 'none') return;
+        topContentOverlay.style.transition = `opacity 90ms var(--preview-morph-ease)`;
+        topContentOverlay.style.opacity = '0';
+        setTimeout(() => {
+          hideTopContentOverlayImmediate();
+        }, 110);
+      }
+
 
       if (
         !a1Cards.length ||
@@ -1724,6 +1795,8 @@ html { overflow-x: hidden; }
           previewCard.style.transition = '';
           previewCard.style.transform = '';
 
+          showTopContentOverlay(previewCard);
+
           const { tile, fill } = createGlowTileFromCard(card, startRect);
           activeMorphTile = tile;
           const cardRadius = getComputedStyle(card).borderRadius;
@@ -1743,6 +1816,7 @@ html { overflow-x: hidden; }
             }
             previewCard.style.transition = '';
             previewCard.style.opacity = '';
+            hideTopContentOverlayAfterHandoff();
             resolve();
           };
 
@@ -1788,6 +1862,7 @@ html { overflow-x: hidden; }
       }
 
       function closePreview() {
+        hideTopContentOverlayImmediate();
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
 
         const previewCard = previewOverlay.querySelector('.preview-card');
@@ -1940,6 +2015,9 @@ html { overflow-x: hidden; }
       </div>
     </div>
   </div>
+
+
+  <div id="preview-top-content-overlay" aria-hidden="true"></div>
 
 
 </body>
