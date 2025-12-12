@@ -815,7 +815,7 @@ html { overflow-x: hidden; }
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.34s cubic-bezier(0.22, 0.61, 0.36, 1), visibility 0s linear 0.34s;
+    transition: opacity var(--preview-morph-duration) var(--preview-morph-ease), visibility 0s linear var(--preview-morph-duration);
   }
 
   /* Future: when we add JS, we’ll toggle this class */
@@ -824,7 +824,7 @@ html { overflow-x: hidden; }
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
-    transition: opacity 0.34s cubic-bezier(0.22, 0.61, 0.36, 1);
+    transition: opacity var(--preview-morph-duration) var(--preview-morph-ease);
   }
 
   .preview-card {
@@ -877,7 +877,6 @@ html { overflow-x: hidden; }
 
   .preview-media {
     position: relative;
-    will-change: transform, opacity;
     background: #000;
     aspect-ratio: 16 / 9;
   }
@@ -892,7 +891,6 @@ html { overflow-x: hidden; }
 
   .preview-info {
     padding: 16px 18px 18px 18px;
-    will-change: transform, opacity;
     display: grid;
     grid-template-rows: auto 1fr auto;
     gap: 12px;
@@ -1633,8 +1631,6 @@ html { overflow-x: hidden; }
         const rect = previewCard.getBoundingClientRect();
 
         if (!wasVisible) {
-          previewOverlay.classList.remove('is-visible');
-          previewOverlay.setAttribute('aria-hidden', 'true');
         }
 
         if (!wasActive) {
@@ -1707,18 +1703,6 @@ html { overflow-x: hidden; }
         return new Promise((resolve) => {
           const startRect = card.getBoundingClientRect();
           const previewCard = previewOverlay.querySelector('.preview-card');
-          const previewMedia = previewOverlay.querySelector('.preview-media');
-          const previewInfo = previewOverlay.querySelector('.preview-info');
-
-          if (previewMedia && previewInfo) {
-            previewMedia.style.transition = 'none';
-            previewInfo.style.transition = 'none';
-            previewMedia.style.opacity = '0';
-            previewInfo.style.opacity = '0';
-            previewMedia.style.transform = 'translateX(-20px)';
-            previewInfo.style.transform = 'translateX(20px)';
-          }
-
           if (previewCard) {
             previewCard.classList.remove('is-hidden');
           }
@@ -1736,12 +1720,14 @@ html { overflow-x: hidden; }
           previewOverlay.classList.add('is-visible');
           previewOverlay.setAttribute('aria-hidden', 'false');
           previewCard.classList.add('is-active');
-          previewCard.style.opacity = '';
+          previewCard.style.opacity = '0';
           previewCard.style.transition = '';
           previewCard.style.transform = '';
 
           const { tile, fill } = createGlowTileFromCard(card, startRect);
           activeMorphTile = tile;
+          const cardRadius = getComputedStyle(card).borderRadius;
+          tile.style.borderRadius = cardRadius;
           const targetRadius = getComputedStyle(previewCard).borderRadius;
 
           fill.style.transition = '';
@@ -1758,14 +1744,6 @@ html { overflow-x: hidden; }
             previewCard.style.transition = '';
             previewCard.style.opacity = '';
             resolve();
-            if (previewMedia && previewInfo) {
-              previewMedia.style.transition = '';
-              previewMedia.style.opacity = '';
-              previewMedia.style.transform = '';
-              previewInfo.style.transition = '';
-              previewInfo.style.opacity = '';
-              previewInfo.style.transform = '';
-            }
           };
 
           const handleCardFadeInEnd = (event) => {
@@ -1778,20 +1756,11 @@ html { overflow-x: hidden; }
             if (hasCrossfaded) return;
             hasCrossfaded = true;
             previewCard.addEventListener('transitionend', handleCardFadeInEnd);
+            previewCard.style.transition = `opacity ${FILL_FADE_DURATION}ms ${PREVIEW_EASING}`;
             fill.style.transition = `opacity ${FILL_FADE_DURATION}ms ${PREVIEW_EASING}`;
+            previewCard.style.opacity = '1';
             tile.classList.add('is-fade-out');
             fill.style.opacity = '0';
-
-            if (previewMedia && previewInfo) {
-              previewMedia.style.transition = `transform ${FILL_FADE_DURATION}ms ${PREVIEW_EASING}, opacity ${FILL_FADE_DURATION}ms ${PREVIEW_EASING}`;
-              previewInfo.style.transition = `transform ${FILL_FADE_DURATION}ms ${PREVIEW_EASING}, opacity ${FILL_FADE_DURATION}ms ${PREVIEW_EASING}`;
-              requestAnimationFrame(() => {
-                previewMedia.style.transform = 'translateX(0)';
-                previewMedia.style.opacity = '1';
-                previewInfo.style.transform = 'translateX(0)';
-                previewInfo.style.opacity = '1';
-              });
-            }
 
             setTimeout(() => {
               previewCard.removeEventListener('transitionend', handleCardFadeInEnd);
@@ -1869,6 +1838,9 @@ html { overflow-x: hidden; }
         previewCard.style.opacity = '0';
         previewCard.style.pointerEvents = 'none';
 
+        previewOverlay.classList.remove('is-visible');
+        previewOverlay.setAttribute('aria-hidden', 'true');
+
         const targetRadius = getComputedStyle(lastOpenedCard).borderRadius;
 
         requestAnimationFrame(() => {
@@ -1877,8 +1849,6 @@ html { overflow-x: hidden; }
         });
 
         setTimeout(() => {
-          previewOverlay.classList.remove('is-visible');
-          previewOverlay.setAttribute('aria-hidden', 'true');
           previewCard.classList.remove('is-active');
           previewCard.style.opacity = '';
           previewCard.style.pointerEvents = '';
