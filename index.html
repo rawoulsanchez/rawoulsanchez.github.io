@@ -1,6 +1,3 @@
-
-
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -1653,6 +1650,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
       function animateOpenTile(tile, startRect, endRect, cardRadius, targetRadius, previewShadow, previewBorderColor, profile) {
         const fill = tile.querySelector('.preview-morph-fill');
 
+        const startTileShadow = getComputedStyle(tile).boxShadow;
+        const startTileBorderColor = getComputedStyle(tile).borderColor;
+
         const startX = startRect.left;
         const startY = startRect.top;
         const endX = endRect.left;
@@ -1671,8 +1671,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           width: `${startW}px`,
           height: `${startH}px`,
           borderRadius: cardRadius,
-          boxShadow: 'none',
-          borderColor: 'rgba(255,255,255,0.06)',
+          boxShadow: startTileShadow,
+          borderColor: startTileBorderColor,
           opacity: 1,
           filter: 'none'
         };
@@ -1695,8 +1695,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
         tile.style.opacity = '1';
         tile.style.clipPath = '';
         tile.style.borderRadius = cardRadius;
-        tile.style.boxShadow = 'none';
-        tile.style.borderColor = 'rgba(255,255,255,0.06)';
+        tile.style.boxShadow = startTileShadow;
+        tile.style.borderColor = startTileBorderColor;
 
         if (fill) {
           fill.style.filter = 'none';
@@ -2343,6 +2343,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           const startRect = card.getBoundingClientRect();
           const previewCard = previewOverlay.querySelector('.preview-card');
           if (previewCard) {
+            previewCard.style.opacity = '0';
+            previewCard.style.transition = '';
             previewCard.classList.remove('is-hidden');
           }
           const endRect = measurePreviewRect();
@@ -2364,6 +2366,22 @@ const previewOverlay = document.querySelector('.preview-overlay');
           previewCard.style.transform = '';
 
           const { tile, fill } = createGlowTileFromCard(card, startRect);
+
+          const originalPreviewParent = previewCard.parentElement;
+          const originalPreviewNextSibling = previewCard.nextSibling;
+
+          tile.appendChild(previewCard);
+
+          previewCard.style.position = 'absolute';
+          previewCard.style.inset = '0';
+          previewCard.style.width = '100%';
+          previewCard.style.height = '100%';
+          previewCard.style.margin = '0';
+          previewCard.style.border = '0';
+          previewCard.style.boxShadow = 'none';
+          previewCard.style.borderRadius = 'inherit';
+          previewCard.style.overflow = 'hidden';
+
           activeMorphTile = tile;
           const cardRadius = getComputedStyle(card).borderRadius;
           tile.style.borderRadius = cardRadius;
@@ -2376,6 +2394,25 @@ const previewOverlay = document.querySelector('.preview-overlay');
 
           const finishCrossfade = () => {
             if (!hasCrossfaded) return;
+
+            if (originalPreviewParent) {
+              if (originalPreviewNextSibling && originalPreviewNextSibling.parentNode === originalPreviewParent) {
+                originalPreviewParent.insertBefore(previewCard, originalPreviewNextSibling);
+              } else {
+                originalPreviewParent.appendChild(previewCard);
+              }
+            }
+
+            previewCard.style.position = '';
+            previewCard.style.inset = '';
+            previewCard.style.width = '';
+            previewCard.style.height = '';
+            previewCard.style.margin = '';
+            previewCard.style.border = '';
+            previewCard.style.boxShadow = '';
+            previewCard.style.borderRadius = '';
+            previewCard.style.overflow = '';
+
             tile.remove();
             if (activeMorphTile === tile) {
               activeMorphTile = null;
@@ -2398,7 +2435,6 @@ const previewOverlay = document.querySelector('.preview-overlay');
             previewCard.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
             fill.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
             previewCard.style.opacity = '1';
-            tile.classList.add('is-fade-out');
             fill.style.opacity = '0';
 
             setTimeout(() => {
