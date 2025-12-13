@@ -1,0 +1,403 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Length 4010 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 40 752 Tm
+(1. **Actors \(Elements involved\)**) Tj
+1 0 0 1 40 738 Tm
+(- `.poster[data-label="A1"]` anchor in Row A with child `<img>` and `.poster-preview-button` \(“Preview”\) used as trigger; exists in DOM inside `.shelf-track` list for Row A.) Tj
+1 0 0 1 40 724 Tm
+() Tj
+1 0 0 1 40 710 Tm
+() Tj
+1 0 0 1 40 696 Tm
+(- `.poster-preview-button` absolute-positioned button on the A1 poster; existing element inside the A1 anchor.) Tj
+1 0 0 1 40 682 Tm
+() Tj
+1 0 0 1 40 668 Tm
+() Tj
+1 0 0 1 40 654 Tm
+(- `.preview-overlay` fixed full-viewport container with radial-gradient backdrop; exists in DOM near page end, initially hidden via opacity/visibility/pointer-events.) Tj
+1 0 0 1 40 640 Tm
+() Tj
+1 0 0 1 40 626 Tm
+() Tj
+1 0 0 1 40 612 Tm
+() Tj
+1 0 0 1 40 598 Tm
+(- `.preview-card` dialog frame inside the overlay containing media placeholder, info, and actions; existing element set to `opacity:0` until activated.) Tj
+1 0 0 1 40 584 Tm
+() Tj
+1 0 0 1 40 570 Tm
+() Tj
+1 0 0 1 40 556 Tm
+() Tj
+1 0 0 1 40 542 Tm
+(- `.preview-close-btn` absolute close button within the preview card; existing element.) Tj
+1 0 0 1 40 528 Tm
+() Tj
+1 0 0 1 40 514 Tm
+() Tj
+1 0 0 1 40 500 Tm
+() Tj
+1 0 0 1 40 486 Tm
+(- Preview content fields: `.preview-title`, `.preview-runtime`, `.preview-tags`, `.preview-description` inside `.preview-info`; existing elements populated from A1 data attributes.) Tj
+1 0 0 1 40 472 Tm
+() Tj
+1 0 0 1 40 458 Tm
+() Tj
+1 0 0 1 40 444 Tm
+() Tj
+1 0 0 1 40 430 Tm
+(- `.preview-morph-tile` and child `.preview-morph-fill` translucent clone created by JS during morph; appended to `document.body` at runtime.) Tj
+1 0 0 1 40 416 Tm
+() Tj
+1 0 0 1 40 402 Tm
+() Tj
+1 0 0 1 40 388 Tm
+() Tj
+1 0 0 1 40 374 Tm
+(- Body element: scrolling disabled/enabled via inline `overflow` style during preview lifecycle.) Tj
+1 0 0 1 40 360 Tm
+() Tj
+1 0 0 1 40 346 Tm
+() Tj
+1 0 0 1 40 332 Tm
+() Tj
+1 0 0 1 40 318 Tm
+(- Optional `activeMorphTile` reference maintained in JS for reuse during close transitions \(not a DOM element itself\).) Tj
+1 0 0 1 40 304 Tm
+() Tj
+1 0 0 1 40 290 Tm
+() Tj
+1 0 0 1 40 276 Tm
+() Tj
+1 0 0 1 40 262 Tm
+() Tj
+1 0 0 1 40 248 Tm
+(2. **Timeline \(Step-by-step with timestamps\)**) Tj
+1 0 0 1 40 234 Tm
+(- **T+0ms \(click/keydown trigger\):** Clicking `.poster-preview-button` \(or pressing Enter/Space on the A1 card\) prevents default/propagation and calls `openPreviewFromCard\(card, triggerElement\)` only if overlay not already visible.) Tj
+1 0 0 1 40 220 Tm
+() Tj
+1 0 0 1 40 206 Tm
+() Tj
+1 0 0 1 40 192 Tm
+(- **T+0ms:** `openPreviewFromCard` reads `data-title/runtime/tags/description` from the A1 card and writes textContent into `.preview-title`, `.preview-runtime`, `.preview-tags`, `.preview-description`; saves `lastOpenedCard = triggerElement`; sets `body.style.overflow = 'hidden'`; marks overlay `aria-hidden="false"`; calls `runOpenMorph\(card\)`.) Tj
+1 0 0 1 40 178 Tm
+() Tj
+1 0 0 1 40 164 Tm
+() Tj
+1 0 0 1 40 150 Tm
+(- **T+0ms inside `runOpenMorph`:** Gets `startRect` via `card.getBoundingClientRect\(\)`; clears any `.is-hidden` on preview card; measures destination rect by temporarily forcing overlay visible and preview active without transitions \(`transition='none'`, opacity/visibility/pointer-events overridden\) to get `previewCard.getBoundingClientRect\(\)`, then restores prior styles/classes.) Tj
+1 0 0 1 40 136 Tm
+() Tj
+1 0 0 1 40 122 Tm
+() Tj
+1 0 0 1 40 108 Tm
+() Tj
+1 0 0 1 40 94 Tm
+(- **T+0ms:** Sets overlay styles back to default, adds `.is-visible` \(opacity/visibility/pointer-events reset\) and `.is-active` on preview card; sets preview card `opacity:0`, clears transition/transform to prepare fade-in.) Tj
+1 0 0 1 40 80 Tm
+() Tj
+1 0 0 1 40 66 Tm
+() Tj
+1 0 0 1 40 52 Tm
+(- **T+0ms:** Creates morph tile/ fill with background image from the card’s `<img>`; sets tile size/transform to startRect, borderRadius to card’s computed radius; stores `activeMorphTile`; reads target radius from preview card styles; ensures fill opacity 1.) Tj
+ET
+endstream
+endobj
+3 0 obj
+<< /Type /Page /Parent 10 0 R /MediaBox [0 0 612 792] /Contents 2 0 R /Resources << /Font << /F1 1 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 4190 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 40 752 Tm
+() Tj
+1 0 0 1 40 738 Tm
+() Tj
+1 0 0 1 40 724 Tm
+() Tj
+1 0 0 1 40 710 Tm
+(- **T+1 animation frame:** After `requestAnimationFrame`, forces layout via `tile.offsetHeight` then calls `moveTile` to set tile width/height/transform to destination rect and target radius; CSS transitions \(340ms cubic-bezier\(0.22,0.61,0.36,1\)\) begin on transform/size/border/box-shadow per `.preview-morph-tile`.) Tj
+1 0 0 1 40 696 Tm
+() Tj
+1 0 0 1 40 682 Tm
+() Tj
+1 0 0 1 40 668 Tm
+() Tj
+1 0 0 1 40 654 Tm
+(- **During morph:** Tile listens for `transitionend` on `transform`; fallback `setTimeout` at `MORPH_DURATION + 100` \(440ms\) also triggers next phase.) Tj
+1 0 0 1 40 640 Tm
+() Tj
+1 0 0 1 40 626 Tm
+() Tj
+1 0 0 1 40 612 Tm
+() Tj
+1 0 0 1 40 598 Tm
+(- **After transform end \(~340ms\):** `startCrossfade` executes once: sets preview card transition `opacity 220ms cubic-bezier\(0.22, 0.61, 0.36, 1\)` and same for fill; sets preview card `opacity:1`; adds `is-fade-out` to tile and sets fill opacity 0 to fade tile out while card fades in.) Tj
+1 0 0 1 40 584 Tm
+() Tj
+1 0 0 1 40 570 Tm
+() Tj
+1 0 0 1 40 556 Tm
+(- **T+ up to 220ms later:** `transitionend` on preview card opacity or fallback timeout `FILL_FADE_DURATION + 120` \(340ms\) calls `finishCrossfade`, which removes tile from DOM, clears preview card transition/opacity, and resolves open promise \(no further class changes\).) Tj
+1 0 0 1 40 542 Tm
+() Tj
+1 0 0 1 40 528 Tm
+() Tj
+1 0 0 1 40 514 Tm
+(- **Close trigger T+0ms:** Close button click, overlay outside click \(ignoring clicks inside preview card\), or Escape key when overlay visible invokes `closePreview\(\)`.) Tj
+1 0 0 1 40 500 Tm
+() Tj
+1 0 0 1 40 486 Tm
+() Tj
+1 0 0 1 40 472 Tm
+(- **Close T+0ms:** If `lastOpenedCard` missing, overlay `.is-visible` removed, `aria-hidden` true, preview card deactivated, morph tile removed, body overflow restored, exit.) Tj
+1 0 0 1 40 458 Tm
+() Tj
+1 0 0 1 40 444 Tm
+() Tj
+1 0 0 1 40 430 Tm
+(- **Close normal:** Compute previewCardRect and cardRect; reuse existing `activeMorphTile` or create new from preview card rect \(background reset to card image, opacity 1, remove fade-out\). Set tile border radius/size/transform to preview card position; set preview card `opacity:0` and `pointerEvents:'none'`; remove overlay `.is-visible` and set `aria-hidden='true'`; compute target radius from card.) Tj
+1 0 0 1 40 416 Tm
+() Tj
+1 0 0 1 40 402 Tm
+() Tj
+1 0 0 1 40 388 Tm
+() Tj
+1 0 0 1 40 374 Tm
+(- **Close T+1 animation frame:** After `requestAnimationFrame`, force layout then `moveTile` tile to cardRect with target radius \(340ms transform/size transition\).) Tj
+1 0 0 1 40 360 Tm
+() Tj
+1 0 0 1 40 346 Tm
+() Tj
+1 0 0 1 40 332 Tm
+() Tj
+1 0 0 1 40 318 Tm
+(- **Close T+340ms:** Timeout at `MORPH_DURATION` removes `.is-active` from preview card, clears its opacity/pointer styles, removes tile, clears `activeMorphTile`, restores `body.style.overflow`, and refocuses `lastOpenedCard` if still in DOM.) Tj
+1 0 0 1 40 304 Tm
+() Tj
+1 0 0 1 40 290 Tm
+() Tj
+1 0 0 1 40 276 Tm
+(  ) Tj
+1 0 0 1 40 262 Tm
+(3. **Layer stack \(“pile of papers”\)**) Tj
+1 0 0 1 40 248 Tm
+(- Base page content including shelves/posters \(default stacking\).) Tj
+1 0 0 1 40 234 Tm
+(- `.preview-overlay` fixed with `z-index:999` hidden, raised to `9999` when `.is-visible`, creating stacking context via `position:fixed` and opacity/transform transitions.) Tj
+1 0 0 1 40 220 Tm
+() Tj
+1 0 0 1 40 206 Tm
+() Tj
+1 0 0 1 40 192 Tm
+(- `.preview-card` inside overlay with `position:relative` \(new stacking context\) and box shadow/border, opacity-animated.) Tj
+1 0 0 1 40 178 Tm
+() Tj
+1 0 0 1 40 164 Tm
+() Tj
+1 0 0 1 40 150 Tm
+(- `.preview-morph-tile` fixed positioned with `z-index:12000`, border/shadow, transitions; overlays above overlay while morphing.) Tj
+1 0 0 1 40 136 Tm
+() Tj
+1 0 0 1 40 122 Tm
+() Tj
+1 0 0 1 40 108 Tm
+(- `.preview-morph-fill` absolutely positioned inside tile, carries poster image; opacity animated during crossfade.) Tj
+1 0 0 1 40 94 Tm
+() Tj
+1 0 0 1 40 80 Tm
+() Tj
+1 0 0 1 40 66 Tm
+(- Preview content \(title/meta/body/actions\) sits within preview card grid; inherits card’s stacking context.) Tj
+1 0 0 1 40 52 Tm
+() Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 10 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 1 0 R >> >> >>
+endobj
+6 0 obj
+<< /Length 3794 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 40 752 Tm
+() Tj
+1 0 0 1 40 738 Tm
+() Tj
+1 0 0 1 40 724 Tm
+() Tj
+1 0 0 1 40 710 Tm
+(4. **Morph mechanics**) Tj
+1 0 0 1 40 696 Tm
+(- Moving element is a cloned `.preview-morph-tile` created from the clicked A1 card; the real card stays in place.) Tj
+1 0 0 1 40 682 Tm
+() Tj
+1 0 0 1 40 668 Tm
+() Tj
+1 0 0 1 40 654 Tm
+(- Start rectangle from `card.getBoundingClientRect\(\)` for the trigger card.) Tj
+1 0 0 1 40 640 Tm
+() Tj
+1 0 0 1 40 626 Tm
+() Tj
+1 0 0 1 40 612 Tm
+(- End rectangle measured by temporarily making overlay/card visible without transitions \(`measurePreviewRect` uses `previewCard.getBoundingClientRect\(\)`\).) Tj
+1 0 0 1 40 598 Tm
+() Tj
+1 0 0 1 40 584 Tm
+() Tj
+1 0 0 1 40 570 Tm
+(- Animated properties on tile: `transform` \(translate\), `width`, `height`, `border-radius`, `box-shadow`, `border-color` with duration `var\(--preview-morph-duration\)` \(340ms\) and easing `var\(--preview-morph-ease\)` \(`cubic-bezier\(0.22, 0.61, 0.36, 1\)`\); opacity transitions 0.24s ease; crossfade triggers additional opacity transitions \(220ms same easing\) for preview card and fill.) Tj
+1 0 0 1 40 556 Tm
+() Tj
+1 0 0 1 40 542 Tm
+() Tj
+1 0 0 1 40 528 Tm
+() Tj
+1 0 0 1 40 514 Tm
+(- Crossfade removal of tile occurs after opacity transition end or after 340ms fallback.) Tj
+1 0 0 1 40 500 Tm
+() Tj
+1 0 0 1 40 486 Tm
+() Tj
+1 0 0 1 40 472 Tm
+() Tj
+1 0 0 1 40 458 Tm
+(5. **Preview content population**) Tj
+1 0 0 1 40 444 Tm
+(- Immediately on open trigger, before any morph, text fields \(`.preview-title`, `.preview-runtime`, `.preview-tags`, `.preview-description`\) are set from the A1 card’s `data-*` attributes \(fallback strings provided\).) Tj
+1 0 0 1 40 430 Tm
+() Tj
+1 0 0 1 40 416 Tm
+() Tj
+1 0 0 1 40 402 Tm
+(- Content remains visible but preview card starts with `opacity:0`; becomes visible during crossfade when `startCrossfade` sets `opacity:1`.) Tj
+1 0 0 1 40 388 Tm
+() Tj
+1 0 0 1 40 374 Tm
+() Tj
+1 0 0 1 40 360 Tm
+() Tj
+1 0 0 1 40 346 Tm
+(- No additional data fetching; poster image for morph fill pulled from the card’s `<img>` src at tile creation and again on close if tile reused.) Tj
+1 0 0 1 40 332 Tm
+() Tj
+1 0 0 1 40 318 Tm
+() Tj
+1 0 0 1 40 304 Tm
+() Tj
+1 0 0 1 40 290 Tm
+() Tj
+1 0 0 1 40 276 Tm
+(6. **Close mechanics**) Tj
+1 0 0 1 40 262 Tm
+(- Triggers: `.preview-close-btn` click; clicking outside `.preview-card` on `.preview-overlay`; pressing `Escape`/`Esc` while overlay has `.is-visible`.) Tj
+1 0 0 1 40 248 Tm
+() Tj
+1 0 0 1 40 234 Tm
+() Tj
+1 0 0 1 40 220 Tm
+(- Actions on close: set preview card opacity 0 and pointer-events none; remove overlay `.is-visible` and set `aria-hidden="true"`; animate morph tile back to card position with target border radius; after `MORPH_DURATION` remove tile, clear preview card active state/styles, clear `activeMorphTile`, restore `body.style.overflow`, and refocus `lastOpenedCard` if present.) Tj
+1 0 0 1 40 206 Tm
+() Tj
+1 0 0 1 40 192 Tm
+() Tj
+1 0 0 1 40 178 Tm
+(- If no `lastOpenedCard`, close immediately: overlay class removed, preview card reset, any active morph tile removed, body scrolling restored, no animation.) Tj
+1 0 0 1 40 164 Tm
+() Tj
+1 0 0 1 40 150 Tm
+() Tj
+1 0 0 1 40 136 Tm
+(- Morph tile is removed in both crossfade finish \(open\) and post-close timeout; reuse occurs if tile still exists when closing before open completes.) Tj
+1 0 0 1 40 122 Tm
+() Tj
+1 0 0 1 40 108 Tm
+() Tj
+1 0 0 1 40 94 Tm
+() Tj
+1 0 0 1 40 80 Tm
+() Tj
+1 0 0 1 40 66 Tm
+(7. **Constants and variables**) Tj
+1 0 0 1 40 52 Tm
+(- CSS tokens: `--preview-morph-duration:340ms`, `--preview-morph-ease:cubic-bezier\(0.22, 0.61, 0.36, 1\)`, `--preview-frame-radius:18px`, `--preview-frame-border:1px solid #262b33`, `--preview-frame-shadow:0 22px 60px rgba\(0,0,0,0.80\), 0 0 0 1px rgba\(255,255,255,0.03\),` etc.) Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 10 0 R /MediaBox [0 0 612 792] /Contents 6 0 R /Resources << /Font << /F1 1 0 R >> >> >>
+endobj
+8 0 obj
+<< /Length 698 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 40 752 Tm
+() Tj
+1 0 0 1 40 738 Tm
+() Tj
+1 0 0 1 40 724 Tm
+() Tj
+1 0 0 1 40 710 Tm
+(- JS constants: `MORPH_DURATION = 340`, `PREVIEW_EASING = 'cubic-bezier\(0.22, 0.61, 0.36, 1\)'`, `FILL_FADE_DURATION = 220`.) Tj
+1 0 0 1 40 696 Tm
+() Tj
+1 0 0 1 40 682 Tm
+() Tj
+1 0 0 1 40 668 Tm
+() Tj
+1 0 0 1 40 654 Tm
+(- Overlay default z-index 999, raised to 9999 when `.is-visible`; morph tile z-index 12000.) Tj
+1 0 0 1 40 640 Tm
+() Tj
+1 0 0 1 40 626 Tm
+() Tj
+1 0 0 1 40 612 Tm
+() Tj
+1 0 0 1 40 598 Tm
+(- Close fallback timeout uses `MORPH_DURATION` \(340ms\); transform listener fallback at `MORPH_DURATION + 100` \(440ms\); crossfade fallback `FILL_FADE_DURATION + 120` \(340ms\).) Tj
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 10 0 R /MediaBox [0 0 612 792] /Contents 8 0 R /Resources << /Font << /F1 1 0 R >> >> >>
+endobj
+10 0 obj
+<< /Type /Pages /Kids [ 3 0 R 5 0 R 7 0 R 9 0 R ] /Count 4 >>
+endobj
+11 0 obj
+<< /Type /Catalog /Pages 10 0 R >>
+endobj
+xref
+0 12
+0000000000 65535 f 
+0000000009 00000 n 
+0000000079 00000 n 
+0000004133 00000 n 
+0000004260 00000 n 
+0000008496 00000 n 
+0000008623 00000 n 
+0000012465 00000 n 
+0000012592 00000 n 
+0000013341 00000 n 
+0000013468 00000 n 
+0000013546 00000 n 
+trailer
+<< /Size 12 /Root 11 0 R >>
+startxref
+13597
+%%EOF
