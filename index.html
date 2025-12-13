@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -496,10 +497,9 @@ html { overflow-x: hidden; }
     border-radius var(--preview-morph-duration) var(--preview-morph-ease),
     box-shadow var(--preview-morph-duration) var(--preview-morph-ease),
     border-color var(--preview-morph-duration) var(--preview-morph-ease);
-  will-change: transform, width, height, opacity, border-radius;
+  will-change: transform, opacity, width, height, border-radius;
   backface-visibility: hidden;
   transform: translate3d(0,0,0);
-  contain: layout paint;
 }
 
 .preview-morph-fill {
@@ -512,7 +512,6 @@ html { overflow-x: hidden; }
   opacity: 1;
   transition: opacity var(--preview-morph-duration) var(--preview-morph-ease);
   backface-visibility: hidden;
-  border-radius: inherit;
 }
 
 .preview-morph-tile.is-fade-out {
@@ -1670,16 +1669,10 @@ const previewOverlay = document.querySelector('.preview-overlay');
         const dX = endX - startX;
         const dY = endY - startY;
 
-        const interpolate = (start, end, t) => start + (end - start) * t;
-        const translateAt = (t, offsetX = 0, offsetY = 0) => `translate3d(${startX + dX * t + offsetX}px, ${startY + dY * t + offsetY}px, 0)`;
-        const sizeAt = (t, factorW = 1, factorH = factorW) => ({
-          width: `${interpolate(startW, endW, t) * factorW}px`,
-          height: `${interpolate(startH, endH, t) * factorH}px`
-        });
-
         const baseStart = {
-          transform: translateAt(0),
-          ...sizeAt(0),
+          transform: `translate(${startX}px, ${startY}px)`,
+          width: `${startW}px`,
+          height: `${startH}px`,
           borderRadius: cardRadius,
           boxShadow: startTileShadow,
           borderColor: startTileBorderColor,
@@ -1688,8 +1681,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
         };
 
         const baseEnd = {
-          transform: translateAt(1),
-          ...sizeAt(1),
+          transform: `translate(${endX}px, ${endY}px)`,
+          width: `${endW}px`,
+          height: `${endH}px`,
           borderRadius: targetRadius,
           boxShadow: previewShadow,
           borderColor: previewBorderColor,
@@ -1740,8 +1734,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.55,
-            transform: translateAt(0.55, ax, ay),
-            ...sizeAt(0.55),
+            transform: `translate(${startX + dX * 0.55 + ax}px, ${startY + dY * 0.55 + ay}px) rotate(0deg)`,
+            width: `${startW + (endW - startW) * 0.55}px`,
+            height: `${startH + (endH - startH) * 0.55}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.70)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor
@@ -1755,8 +1750,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.78,
-            transform: translateAt(1, os, -os * 0.45),
-            ...sizeAt(1, 1.02),
+            transform: `translate(${endX + os}px, ${endY - os * 0.45}px)`,
+            width: `${endW * 1.02}px`,
+            height: `${endH * 1.02}px`,
             borderRadius: `calc(${targetRadius} * 0.92)`,
             boxShadow: midShadowStrong,
             borderColor: previewBorderColor,
@@ -1775,8 +1771,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.58,
-            transform: translateAt(1, 18, -10),
-            ...sizeAt(1, 1.04),
+            transform: `translate(${endX + 18}px, ${endY - 10}px)`,
+            width: `${endW * 1.04}px`,
+            height: `${endH * 1.04}px`,
             borderRadius: `calc(${targetRadius} * 0.88)`,
             boxShadow: midShadowStrong,
             borderColor: previewBorderColor,
@@ -1784,8 +1781,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           });
           add({
             offset: 0.74,
-            transform: translateAt(1, -10, 6),
-            ...sizeAt(1, 0.99),
+            transform: `translate(${endX - 10}px, ${endY + 6}px)`,
+            width: `${endW * 0.99}px`,
+            height: `${endH * 0.99}px`,
             borderRadius: `calc(${targetRadius} * 1.02)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor,
@@ -1794,8 +1792,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           if (b >= 3) {
             add({
               offset: 0.86,
-              transform: translateAt(1, 4, -3),
-              ...sizeAt(1, 1.01),
+              transform: `translate(${endX + 4}px, ${endY - 3}px)`,
+              width: `${endW * 1.01}px`,
+              height: `${endH * 1.01}px`,
               borderRadius: targetRadius,
               boxShadow: previewShadow,
               borderColor: previewBorderColor,
@@ -1811,16 +1810,18 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.45,
-            transform: translateAt(0.45),
-            ...sizeAt(0.45),
+            transform: `translate(${startX + dX * 0.45}px, ${startY + dY * 0.45}px) perspective(900px) rotateX(${tilt}deg) rotateZ(-4deg)`,
+            width: `${startW + (endW - startW) * 0.45}px`,
+            height: `${startH + (endH - startH) * 0.45}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.55)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor
           });
           add({
             offset: 0.78,
-            transform: translateAt(1),
-            ...sizeAt(1),
+            transform: `translate(${endX}px, ${endY}px) perspective(900px) rotateX(-4deg) rotateZ(2deg)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor
@@ -1834,16 +1835,18 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.52,
-            transform: translateAt(0.52),
-            ...sizeAt(0.52),
+            transform: `translate(${startX + dX * 0.52}px, ${startY + dY * 0.52}px) perspective(900px) rotateY(${yaw}deg)`,
+            width: `${startW + (endW - startW) * 0.52}px`,
+            height: `${startH + (endH - startH) * 0.52}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.60)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor
           });
           add({
             offset: 0.78,
-            transform: translateAt(1),
-            ...sizeAt(1),
+            transform: `translate(${endX}px, ${endY}px) perspective(900px) rotateY(-6deg)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor
@@ -1856,8 +1859,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.40,
-            transform: translateAt(0.12),
-            ...sizeAt(0.18, 1.08),
+            transform: `translate(${startX + dX * 0.12}px, ${startY + dY * 0.12}px) scale(1.08)`,
+            width: `${startW + (endW - startW) * 0.18}px`,
+            height: `${startH + (endH - startH) * 0.18}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.30)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor,
@@ -1865,8 +1869,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           });
           add({
             offset: 0.78,
-            transform: translateAt(1),
-            ...sizeAt(1, 1.02),
+            transform: `translate(${endX}px, ${endY}px) scale(1.02)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor
@@ -1880,8 +1885,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart, opacity: 1 });
           add({
             offset: 0.45,
-            transform: translateAt(0.45, slideX, 0),
-            ...sizeAt(0.45),
+            transform: `translate(${startX + dX * 0.45 + slideX}px, ${startY + dY * 0.45}px)`,
+            width: `${startW + (endW - startW) * 0.45}px`,
+            height: `${startH + (endH - startH) * 0.45}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.50)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor,
@@ -1889,8 +1895,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           });
           add({
             offset: 0.78,
-            transform: translateAt(1),
-            ...sizeAt(1),
+            transform: `translate(${endX}px, ${endY}px)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor,
@@ -1905,16 +1912,18 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.60,
-            transform: translateAt(0.60, 0, drop),
-            ...sizeAt(0.60),
+            transform: `translate(${startX + dX * 0.60}px, ${startY + dY * 0.60 + drop}px)`,
+            width: `${startW + (endW - startW) * 0.60}px`,
+            height: `${startH + (endH - startH) * 0.60}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.68)`,
             boxShadow: midShadowStrong,
             borderColor: previewBorderColor
           });
           add({
             offset: 0.86,
-            transform: translateAt(1),
-            ...sizeAt(1),
+            transform: `translate(${endX}px, ${endY}px)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor
@@ -1929,16 +1938,18 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.52,
-            transform: translateAt(0.52, sx, sy),
-            ...sizeAt(0.52),
+            transform: `translate(${startX + dX * 0.52 + sx}px, ${startY + dY * 0.52 + sy}px) rotate(-6deg)`,
+            width: `${startW + (endW - startW) * 0.52}px`,
+            height: `${startH + (endH - startH) * 0.52}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.62)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor
           });
           add({
             offset: 0.80,
-            transform: translateAt(1),
-            ...sizeAt(1),
+            transform: `translate(${endX}px, ${endY}px) rotate(2deg)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor
@@ -1950,16 +1961,18 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.28,
-            transform: translateAt(0.28),
-            ...sizeAt(0.28, 0.92, 1.08),
+            transform: `translate(${startX + dX * 0.28}px, ${startY + dY * 0.28}px) scaleX(0.92) scaleY(1.08)`,
+            width: `${startW + (endW - startW) * 0.28}px`,
+            height: `${startH + (endH - startH) * 0.28}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.42)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor
           });
           add({
             offset: 0.58,
-            transform: translateAt(0.58),
-            ...sizeAt(0.58, 1.08, 0.96),
+            transform: `translate(${startX + dX * 0.58}px, ${startY + dY * 0.58}px) scaleX(1.08) scaleY(0.96)`,
+            width: `${startW + (endW - startW) * 0.58}px`,
+            height: `${startH + (endH - startH) * 0.58}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.70)`,
             boxShadow: midShadowStrong,
             borderColor: previewBorderColor
@@ -1973,8 +1986,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart, filter: 'blur(0px)' });
           add({
             offset: 0.48,
-            transform: translateAt(0.48),
-            ...sizeAt(0.48),
+            transform: `translate(${startX + dX * 0.48}px, ${startY + dY * 0.48}px)`,
+            width: `${startW + (endW - startW) * 0.48}px`,
+            height: `${startH + (endH - startH) * 0.48}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.60)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor,
@@ -1989,8 +2003,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.55,
-            transform: translateAt(0.55),
-            ...sizeAt(0.55),
+            transform: `translate(${startX + dX * 0.55}px, ${startY + dY * 0.55}px)`,
+            width: `${startW + (endW - startW) * 0.55}px`,
+            height: `${startH + (endH - startH) * 0.55}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.70)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor
@@ -2016,16 +2031,18 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.72,
-            transform: translateAt(1),
-            ...sizeAt(1, portal),
+            transform: `translate(${endX}px, ${endY}px) scale(${portal})`,
+            width: `${endW}px`,
+            height: `${endH}px`,
             borderRadius: targetRadius,
             boxShadow: midShadowStrong,
             borderColor: previewBorderColor
           });
           add({
             offset: 0.88,
-            transform: translateAt(1),
-            ...sizeAt(1, 0.98),
+            transform: `translate(${endX}px, ${endY}px) scale(0.98)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor
@@ -2039,16 +2056,18 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.45,
-            transform: translateAt(0.45, 0, -lift),
-            ...sizeAt(0.45),
+            transform: `translate(${startX + dX * 0.45}px, ${startY + dY * 0.45 - lift}px) perspective(900px) translateZ(24px)`,
+            width: `${startW + (endW - startW) * 0.45}px`,
+            height: `${startH + (endH - startH) * 0.45}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.55)`,
             boxShadow: midShadowStrong,
             borderColor: previewBorderColor
           });
           add({
             offset: 0.78,
-            transform: translateAt(1),
-            ...sizeAt(1),
+            transform: `translate(${endX}px, ${endY}px) perspective(900px) translateZ(0px)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor
@@ -2063,8 +2082,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.62,
-            transform: translateAt(0.62),
-            ...sizeAt(0.62),
+            transform: `translate(${startX + dX * 0.62}px, ${startY + dY * 0.62}px)`,
+            width: `${startW + (endW - startW) * 0.62}px`,
+            height: `${startH + (endH - startH) * 0.62}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.74)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor
@@ -2074,9 +2094,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           if (fill) {
             try {
               fill.animate([
-                { offset: 0, transform: 'translate(0px, 0px)', backgroundPosition: 'center' },
-                { offset: 0.55, transform: `translate(${driftX}px, ${driftY}px)`, backgroundPosition: '60% 40%' },
-                { offset: 1, transform: 'translate(0px, 0px)', backgroundPosition: 'center' }
+                { offset: 0, transform: 'translate(0px, 0px) scale(1.00)', backgroundPosition: 'center' },
+                { offset: 0.55, transform: `translate(${driftX}px, ${driftY}px) scale(1.06)`, backgroundPosition: '60% 40%' },
+                { offset: 1, transform: 'translate(0px, 0px) scale(1.00)', backgroundPosition: 'center' }
               ], { duration: dur, easing: ease, fill: 'forwards' });
             } catch (e) { /* no-op */ }
           }
@@ -2088,16 +2108,18 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.52,
-            transform: translateAt(0.52),
-            ...sizeAt(0.52),
+            transform: `translate(${startX + dX * 0.52}px, ${startY + dY * 0.52}px) skewX(${skewDeg}deg)`,
+            width: `${startW + (endW - startW) * 0.52}px`,
+            height: `${startH + (endH - startH) * 0.52}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.64)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor
           });
           add({
             offset: 0.80,
-            transform: translateAt(1),
-            ...sizeAt(1),
+            transform: `translate(${endX}px, ${endY}px) skewX(-4deg)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor
@@ -2108,11 +2130,11 @@ const previewOverlay = document.querySelector('.preview-overlay');
         else if (kf === 'glitchJitter') {
           // Brief jitter micro-movements mid-flight.
           add({ offset: 0, ...baseStart });
-          add({ offset: 0.40, transform: translateAt(0.40), ...sizeAt(0.40), borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.54)`, boxShadow: midShadowSoft, borderColor: previewBorderColor });
-          add({ offset: 0.52, transform: translateAt(0.52, 6, -4), ...sizeAt(0.52), borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.64)`, boxShadow: midShadowSoft, borderColor: previewBorderColor });
-          add({ offset: 0.56, transform: translateAt(0.56, -5, 3), ...sizeAt(0.56), borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.68)`, boxShadow: midShadowSoft, borderColor: previewBorderColor });
-          add({ offset: 0.60, transform: translateAt(0.60, 4, 1), ...sizeAt(0.60), borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.72)`, boxShadow: midShadowStrong, borderColor: previewBorderColor });
-          add({ offset: 0.68, transform: translateAt(0.68), ...sizeAt(0.68), borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.78)`, boxShadow: previewShadow, borderColor: previewBorderColor });
+          add({ offset: 0.40, transform: `translate(${startX + dX * 0.40}px, ${startY + dY * 0.40}px)`, width: `${startW + (endW - startW) * 0.40}px`, height: `${startH + (endH - startH) * 0.40}px`, borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.54)`, boxShadow: midShadowSoft, borderColor: previewBorderColor });
+          add({ offset: 0.52, transform: `translate(${startX + dX * 0.52 + 6}px, ${startY + dY * 0.52 - 4}px)`, width: `${startW + (endW - startW) * 0.52}px`, height: `${startH + (endH - startH) * 0.52}px`, borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.64)`, boxShadow: midShadowSoft, borderColor: previewBorderColor });
+          add({ offset: 0.56, transform: `translate(${startX + dX * 0.56 - 5}px, ${startY + dY * 0.56 + 3}px)`, width: `${startW + (endW - startW) * 0.56}px`, height: `${startH + (endH - startH) * 0.56}px`, borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.68)`, boxShadow: midShadowSoft, borderColor: previewBorderColor });
+          add({ offset: 0.60, transform: `translate(${startX + dX * 0.60 + 4}px, ${startY + dY * 0.60 + 1}px)`, width: `${startW + (endW - startW) * 0.60}px`, height: `${startH + (endH - startH) * 0.60}px`, borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.72)`, boxShadow: midShadowStrong, borderColor: previewBorderColor });
+          add({ offset: 0.68, transform: `translate(${startX + dX * 0.68}px, ${startY + dY * 0.68}px)`, width: `${startW + (endW - startW) * 0.68}px`, height: `${startH + (endH - startH) * 0.68}px`, borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.78)`, boxShadow: previewShadow, borderColor: previewBorderColor });
           add({ offset: 1, ...baseEnd });
         }
 
@@ -2120,8 +2142,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.52,
-            transform: translateAt(0.52),
-            ...sizeAt(0.52, 1.08),
+            transform: `translate(${startX + dX * 0.52}px, ${startY + dY * 0.52}px) scale(1.08)`,
+            width: `${startW + (endW - startW) * 0.52}px`,
+            height: `${startH + (endH - startH) * 0.52}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.66)`,
             boxShadow: midShadowStrong,
             borderColor: previewBorderColor,
@@ -2129,8 +2152,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           });
           add({
             offset: 0.72,
-            transform: translateAt(0.72),
-            ...sizeAt(0.72, 0.98),
+            transform: `translate(${startX + dX * 0.72}px, ${startY + dY * 0.72}px) scale(0.98)`,
+            width: `${startW + (endW - startW) * 0.72}px`,
+            height: `${startH + (endH - startH) * 0.72}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.82)`,
             boxShadow: previewShadow,
             borderColor: previewBorderColor,
@@ -2146,8 +2170,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart, easing: 'cubic-bezier(0.40, 0.00, 0.60, 1)' });
           add({
             offset: 0.22,
-            transform: translateAt(0.18),
-            ...sizeAt(0.18),
+            transform: `translate(${startX + dX * 0.18}px, ${startY + dY * 0.18}px)`,
+            width: `${startW + (endW - startW) * 0.18}px`,
+            height: `${startH + (endH - startH) * 0.18}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.22)`,
             boxShadow: 'none',
             borderColor: 'rgba(255,255,255,0.10)',
@@ -2155,8 +2180,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           });
           add({
             offset: 0.62,
-            transform: translateAt(0.74),
-            ...sizeAt(0.74),
+            transform: `translate(${startX + dX * 0.74}px, ${startY + dY * 0.74}px)`,
+            width: `${startW + (endW - startW) * 0.74}px`,
+            height: `${startH + (endH - startH) * 0.74}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.55)`, /* radius lags */
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor,
@@ -2164,8 +2190,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           });
           add({
             offset: 0.86,
-            transform: translateAt(1),
-            ...sizeAt(1),
+            transform: `translate(${endX}px, ${endY}px)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.86)`,
             boxShadow: previewShadow,
             borderColor: previewBorderColor,
@@ -2185,8 +2212,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
         // Hard constraint: end clean (no rotation, skew, blur, opacity issues).
         anim.onfinish = () => {
           tile.style.transform = baseEnd.transform;
-          tile.style.width = `${endW}px`;
-          tile.style.height = `${endH}px`;
+          tile.style.width = baseEnd.width;
+          tile.style.height = baseEnd.height;
           tile.style.borderRadius = baseEnd.borderRadius;
           tile.style.boxShadow = baseEnd.boxShadow;
           tile.style.borderColor = baseEnd.borderColor;
@@ -2273,7 +2300,7 @@ const previewOverlay = document.querySelector('.preview-overlay');
         tile.style.width = `${startRect.width}px`;
         tile.style.height = `${startRect.height}px`;
         tile.style.transformOrigin = 'top left';
-        tile.style.transform = `translate3d(${startRect.left}px, ${startRect.top}px, 0)`;
+        tile.style.transform = `translate(${startRect.left}px, ${startRect.top}px) scale(1, 1)`;
         document.body.appendChild(tile);
 
         return { tile, fill };
@@ -2283,7 +2310,7 @@ const previewOverlay = document.querySelector('.preview-overlay');
         tile.style.borderRadius = targetRadius;
         tile.style.width = `${targetRect.width}px`;
         tile.style.height = `${targetRect.height}px`;
-        tile.style.transform = `translate3d(${targetRect.left}px, ${targetRect.top}px, 0)`;
+        tile.style.transform = `translate(${targetRect.left}px, ${targetRect.top}px)`;
       }
 
       function openPreviewFromCard(card, triggerElement = card) {
@@ -2319,18 +2346,15 @@ const previewOverlay = document.querySelector('.preview-overlay');
           const startRect = card.getBoundingClientRect();
           const previewCard = previewOverlay.querySelector('.preview-card');
           if (previewCard) {
-            previewCard.style.transition = '';
             previewCard.style.opacity = '0';
-            previewCard.style.pointerEvents = 'none';
+            previewCard.style.transition = '';
             previewCard.classList.remove('is-hidden');
           }
           const endRect = measurePreviewRect();
 
           if (!previewCard || !endRect) {
             previewOverlay.classList.add('is-visible');
-            if (previewCard) {
-              previewCard.classList.add('is-active');
-            }
+            previewCard.classList.add('is-active');
             resolve();
             return;
           }
@@ -2341,7 +2365,6 @@ const previewOverlay = document.querySelector('.preview-overlay');
           previewOverlay.setAttribute('aria-hidden', 'false');
           previewCard.classList.add('is-active');
           previewCard.style.opacity = '0';
-          previewCard.style.pointerEvents = 'none';
           previewCard.style.transition = '';
           previewCard.style.transform = '';
 
@@ -2349,6 +2372,21 @@ const previewOverlay = document.querySelector('.preview-overlay');
           const previewBorderColor = getComputedStyle(previewCard).borderColor;
 
           const { tile, fill } = createGlowTileFromCard(card, startRect);
+
+          const originalPreviewParent = previewCard.parentElement;
+          const originalPreviewNextSibling = previewCard.nextSibling;
+
+          tile.appendChild(previewCard);
+
+          previewCard.style.position = 'absolute';
+          previewCard.style.inset = '0';
+          previewCard.style.width = '100%';
+          previewCard.style.height = '100%';
+          previewCard.style.margin = '0';
+          previewCard.style.border = '0';
+          previewCard.style.boxShadow = 'none';
+          previewCard.style.borderRadius = 'inherit';
+          previewCard.style.overflow = 'hidden';
 
           activeMorphTile = tile;
           const cardRadius = getComputedStyle(card).borderRadius;
@@ -2359,38 +2397,56 @@ const previewOverlay = document.querySelector('.preview-overlay');
           fill.style.opacity = '1';
 
           let hasCrossfaded = false;
-          let fadeRemoved = false;
 
           const finishCrossfade = () => {
-            if (!hasCrossfaded || fadeRemoved) return;
+            if (!hasCrossfaded) return;
 
-            fadeRemoved = true;
+            if (originalPreviewParent) {
+              if (originalPreviewNextSibling && originalPreviewNextSibling.parentNode === originalPreviewParent) {
+                originalPreviewParent.insertBefore(previewCard, originalPreviewNextSibling);
+              } else {
+                originalPreviewParent.appendChild(previewCard);
+              }
+            }
+
+            previewCard.style.position = '';
+            previewCard.style.inset = '';
+            previewCard.style.width = '';
+            previewCard.style.height = '';
+            previewCard.style.margin = '';
+            previewCard.style.border = '';
+            previewCard.style.boxShadow = '';
+            previewCard.style.borderRadius = '';
+            previewCard.style.overflow = '';
+
             tile.remove();
             if (activeMorphTile === tile) {
               activeMorphTile = null;
             }
             previewCard.style.transition = '';
             previewCard.style.opacity = '';
-            previewCard.style.pointerEvents = '';
             resolve();
+          };
+
+          const handleCardFadeInEnd = (event) => {
+            if (event.propertyName !== 'opacity') return;
+            previewCard.removeEventListener('transitionend', handleCardFadeInEnd);
+            finishCrossfade();
           };
 
           const startCrossfade = () => {
             if (hasCrossfaded) return;
             hasCrossfaded = true;
-            tile.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
+            previewCard.addEventListener('transitionend', handleCardFadeInEnd);
             previewCard.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
+            fill.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
             previewCard.style.opacity = '1';
-            previewCard.style.pointerEvents = '';
-            tile.style.opacity = '0';
+            fill.style.opacity = '0';
 
-            const handleTileFade = (event) => {
-              if (event.target !== tile || event.propertyName !== 'opacity') return;
-              tile.removeEventListener('transitionend', handleTileFade);
+            setTimeout(() => {
+              previewCard.removeEventListener('transitionend', handleCardFadeInEnd);
               finishCrossfade();
-            };
-
-            tile.addEventListener('transitionend', handleTileFade);
+            }, FILL_FADE_DURATION + 120);
           };
 
           const resolvedProfile = profile || getOpenMorphProfileForCard(card);
