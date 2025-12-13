@@ -1,5 +1,6 @@
 
 
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -1599,8 +1600,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
         return;
       }
 
-      const MORPH_DURATION = 340;
-      const PREVIEW_EASING = 'cubic-bezier(0.22, 0.61, 0.36, 1)';
+      const MORPH_DURATION = 520;
+      const PREVIEW_EASING = 'cubic-bezier(0.25, 0.1, 0.25, 1)';
       const FILL_FADE_DURATION = 220;
       let lastOpenedCard = null;
       let activeMorphTile = null;
@@ -1609,7 +1610,7 @@ const previewOverlay = document.querySelector('.preview-overlay');
       let currentMorphEasing = PREVIEW_EASING;
 
       const OPEN_MORPH_PROFILES = [
-        { id: 'morph-01', name: 'Straight Zoom', kf: 'straight', duration: 360, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)' },
+        { id: 'morph-01', name: 'Straight Zoom', kf: 'straight', duration: 520, easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)' },
         { id: 'morph-02', name: 'Arc Sweep', kf: 'arcSweep', duration: 520, easing: 'cubic-bezier(0.18, 0.80, 0.20, 1)', arcX: 46, arcY: -34 },
         { id: 'morph-03', name: 'Overshoot Snap', kf: 'overshootSnap', duration: 480, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', overshoot: 18 },
         { id: 'morph-04', name: 'Spring Elastic', kf: 'springElastic', duration: 720, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)', bounce: 3 },
@@ -1634,7 +1635,7 @@ const previewOverlay = document.querySelector('.preview-overlay');
 
       function getOpenMorphProfileForCard(card) {
         // Force ALL cards to use the same open morph as B6 (morph-16: Parallax Drift).
-        const forced = OPEN_MORPH_PROFILES.find(p => p.id === 'morph-16');
+        const forced = OPEN_MORPH_PROFILES.find(p => p.id === 'morph-01');
         return forced || OPEN_MORPH_PROFILES[0];
       }
 
@@ -2406,35 +2407,29 @@ const previewOverlay = document.querySelector('.preview-overlay');
             }, FILL_FADE_DURATION + 120);
           };
 
-          const resolvedProfile = profile || getOpenMorphProfileForCard(card);
+                    const resolvedProfile = profile || getOpenMorphProfileForCard(card);
           const previewShadow = getComputedStyle(previewCard).boxShadow;
           const previewBorderColor = getComputedStyle(previewCard).borderColor;
 
           // Run per-card unique open morph (start/end geometry unchanged).
-          const dur = (resolvedProfile && resolvedProfile.duration) ? resolvedProfile.duration : MORPH_DURATION;
-          const ease = (resolvedProfile && resolvedProfile.easing) ? resolvedProfile.easing : PREVIEW_EASING;
+          const tileAnim = animateOpenTile(
+            tile,
+            startRect,
+            endRect,
+            cardRadius,
+            targetRadius,
+            previewShadow,
+            previewBorderColor,
+            resolvedProfile
+          );
 
-          tile.style.transition = `transform ${dur}ms ${ease}, width ${dur}ms ${ease}, height ${dur}ms ${ease}, border-radius ${dur}ms ${ease}, box-shadow ${dur}ms ${ease}, border-color ${dur}ms ${ease}`;
-
-          const handleTileTransitionEnd = (event) => {
-            if (event.propertyName !== 'transform' && event.propertyName !== 'width') return;
-            tile.removeEventListener('transitionend', handleTileTransitionEnd);
+          tileAnim.onfinish = () => {
             startCrossfade();
           };
 
-          tile.addEventListener('transitionend', handleTileTransitionEnd);
-
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              moveTile(tile, startRect, endRect, targetRadius);
-              tile.style.boxShadow = previewShadow;
-              tile.style.borderColor = previewBorderColor;
-            });
-          });
-
           setTimeout(() => {
             startCrossfade();
-          }, dur + 140);
+          }, resolvedProfile.duration + 140);
         });
       }
 
@@ -2603,4 +2598,5 @@ document.addEventListener('keydown', (event) => {
 
 </body>
 </html>
+
 
