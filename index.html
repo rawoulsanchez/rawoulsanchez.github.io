@@ -510,6 +510,7 @@ html { overflow-x: hidden; }
   opacity: 1;
   transition: opacity var(--preview-morph-duration) var(--preview-morph-ease);
   backface-visibility: hidden;
+  border-radius: inherit;
 }
 
 .preview-morph-tile.is-fade-out {
@@ -2306,6 +2307,7 @@ const previewOverlay = document.querySelector('.preview-overlay');
           previewOverlay.setAttribute('aria-hidden', 'false');
           previewCard.classList.add('is-active');
           previewCard.style.opacity = '0';
+          previewCard.style.pointerEvents = 'none';
           previewCard.style.transition = '';
           previewCard.style.transform = '';
 
@@ -2313,21 +2315,6 @@ const previewOverlay = document.querySelector('.preview-overlay');
           const previewBorderColor = getComputedStyle(previewCard).borderColor;
 
           const { tile, fill } = createGlowTileFromCard(card, startRect);
-
-          const originalPreviewParent = previewCard.parentElement;
-          const originalPreviewNextSibling = previewCard.nextSibling;
-
-          tile.appendChild(previewCard);
-
-          previewCard.style.position = 'absolute';
-          previewCard.style.inset = '0';
-          previewCard.style.width = '100%';
-          previewCard.style.height = '100%';
-          previewCard.style.margin = '0';
-          previewCard.style.border = '0';
-          previewCard.style.boxShadow = 'none';
-          previewCard.style.borderRadius = 'inherit';
-          previewCard.style.overflow = 'hidden';
 
           activeMorphTile = tile;
           const cardRadius = getComputedStyle(card).borderRadius;
@@ -2342,30 +2329,13 @@ const previewOverlay = document.querySelector('.preview-overlay');
           const finishCrossfade = () => {
             if (!hasCrossfaded) return;
 
-            if (originalPreviewParent) {
-              if (originalPreviewNextSibling && originalPreviewNextSibling.parentNode === originalPreviewParent) {
-                originalPreviewParent.insertBefore(previewCard, originalPreviewNextSibling);
-              } else {
-                originalPreviewParent.appendChild(previewCard);
-              }
-            }
-
-            previewCard.style.position = '';
-            previewCard.style.inset = '';
-            previewCard.style.width = '';
-            previewCard.style.height = '';
-            previewCard.style.margin = '';
-            previewCard.style.border = '';
-            previewCard.style.boxShadow = '';
-            previewCard.style.borderRadius = '';
-            previewCard.style.overflow = '';
-
             tile.remove();
             if (activeMorphTile === tile) {
               activeMorphTile = null;
             }
             previewCard.style.transition = '';
             previewCard.style.opacity = '';
+            previewCard.style.pointerEvents = '';
             resolve();
           };
 
@@ -2380,9 +2350,10 @@ const previewOverlay = document.querySelector('.preview-overlay');
             hasCrossfaded = true;
             previewCard.addEventListener('transitionend', handleCardFadeInEnd);
             previewCard.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
-            fill.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
+            tile.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
             previewCard.style.opacity = '1';
-            fill.style.opacity = '0';
+            previewCard.style.pointerEvents = '';
+            tile.style.opacity = '0';
 
             setTimeout(() => {
               previewCard.removeEventListener('transitionend', handleCardFadeInEnd);
