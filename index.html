@@ -490,11 +490,13 @@ html { overflow-x: hidden; }
   box-shadow: var(--preview-frame-shadow);
   transition:
     transform var(--preview-morph-duration) var(--preview-morph-ease),
+    width var(--preview-morph-duration) var(--preview-morph-ease),
+    height var(--preview-morph-duration) var(--preview-morph-ease),
     opacity 0.24s ease,
     border-radius var(--preview-morph-duration) var(--preview-morph-ease),
     box-shadow var(--preview-morph-duration) var(--preview-morph-ease),
     border-color var(--preview-morph-duration) var(--preview-morph-ease);
-  will-change: transform, opacity, border-radius;
+  will-change: transform, width, height, opacity, border-radius;
   backface-visibility: hidden;
   transform: translate3d(0,0,0);
   contain: layout paint;
@@ -1665,26 +1667,19 @@ const previewOverlay = document.querySelector('.preview-overlay');
         const endW = endRect.width;
         const endH = endRect.height;
 
-        const scaleX = endW / startW;
-        const scaleY = endH / startH;
-
-        const scalePair = (t, extraX = 1, extraY = extraX) => {
-          return {
-            x: (1 + (scaleX - 1) * t) * extraX,
-            y: (1 + (scaleY - 1) * t) * extraY
-          };
-        };
-
-        const scaleString = (t, extraX = 1, extraY = extraX) => {
-          const { x, y } = scalePair(t, extraX, extraY);
-          return `scale(${x}, ${y})`;
-        };
-
         const dX = endX - startX;
         const dY = endY - startY;
 
+        const interpolate = (start, end, t) => start + (end - start) * t;
+        const translateAt = (t, offsetX = 0, offsetY = 0) => `translate3d(${startX + dX * t + offsetX}px, ${startY + dY * t + offsetY}px, 0)`;
+        const sizeAt = (t, factorW = 1, factorH = factorW) => ({
+          width: `${interpolate(startW, endW, t) * factorW}px`,
+          height: `${interpolate(startH, endH, t) * factorH}px`
+        });
+
         const baseStart = {
-          transform: `translate3d(${startX}px, ${startY}px, 0) ${scaleString(0)}`,
+          transform: translateAt(0),
+          ...sizeAt(0),
           borderRadius: cardRadius,
           boxShadow: startTileShadow,
           borderColor: startTileBorderColor,
@@ -1693,7 +1688,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
         };
 
         const baseEnd = {
-          transform: `translate3d(${endX}px, ${endY}px, 0) ${scaleString(1)}`,
+          transform: translateAt(1),
+          ...sizeAt(1),
           borderRadius: targetRadius,
           boxShadow: previewShadow,
           borderColor: previewBorderColor,
@@ -1744,7 +1740,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.55,
-            transform: `translate3d(${startX + dX * 0.55 + ax}px, ${startY + dY * 0.55 + ay}px, 0) ${scaleString(0.55)} rotate(0deg)`,
+            transform: translateAt(0.55, ax, ay),
+            ...sizeAt(0.55),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.70)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor
@@ -1758,7 +1755,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.78,
-            transform: `translate3d(${endX + os}px, ${endY - os * 0.45}px, 0) scale(${scaleX * 1.02}, ${scaleY * 1.02})`,
+            transform: translateAt(1, os, -os * 0.45),
+            ...sizeAt(1, 1.02),
             borderRadius: `calc(${targetRadius} * 0.92)`,
             boxShadow: midShadowStrong,
             borderColor: previewBorderColor,
@@ -1777,7 +1775,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.58,
-            transform: `translate3d(${endX + 18}px, ${endY - 10}px, 0) scale(${scaleX * 1.04}, ${scaleY * 1.04})`,
+            transform: translateAt(1, 18, -10),
+            ...sizeAt(1, 1.04),
             borderRadius: `calc(${targetRadius} * 0.88)`,
             boxShadow: midShadowStrong,
             borderColor: previewBorderColor,
@@ -1785,7 +1784,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           });
           add({
             offset: 0.74,
-            transform: `translate3d(${endX - 10}px, ${endY + 6}px, 0) scale(${scaleX * 0.99}, ${scaleY * 0.99})`,
+            transform: translateAt(1, -10, 6),
+            ...sizeAt(1, 0.99),
             borderRadius: `calc(${targetRadius} * 1.02)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor,
@@ -1794,7 +1794,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           if (b >= 3) {
             add({
               offset: 0.86,
-              transform: `translate3d(${endX + 4}px, ${endY - 3}px, 0) scale(${scaleX * 1.01}, ${scaleY * 1.01})`,
+              transform: translateAt(1, 4, -3),
+              ...sizeAt(1, 1.01),
               borderRadius: targetRadius,
               boxShadow: previewShadow,
               borderColor: previewBorderColor,
@@ -1810,14 +1811,16 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.45,
-            transform: `translate3d(${startX + dX * 0.45}px, ${startY + dY * 0.45}px, 0) ${scaleString(0.45)} perspective(900px) rotateX(${tilt}deg) rotateZ(-4deg)`,
+            transform: translateAt(0.45),
+            ...sizeAt(0.45),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.55)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor
           });
           add({
             offset: 0.78,
-            transform: `translate3d(${endX}px, ${endY}px, 0) ${scaleString(1)} perspective(900px) rotateX(-4deg) rotateZ(2deg)`,
+            transform: translateAt(1),
+            ...sizeAt(1),
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor
@@ -1831,14 +1834,16 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.52,
-            transform: `translate3d(${startX + dX * 0.52}px, ${startY + dY * 0.52}px, 0) ${scaleString(0.52)} perspective(900px) rotateY(${yaw}deg)`,
+            transform: translateAt(0.52),
+            ...sizeAt(0.52),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.60)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor
           });
           add({
             offset: 0.78,
-            transform: `translate3d(${endX}px, ${endY}px, 0) ${scaleString(1)} perspective(900px) rotateY(-6deg)`,
+            transform: translateAt(1),
+            ...sizeAt(1),
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor
@@ -1851,7 +1856,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.40,
-            transform: `translate3d(${startX + dX * 0.12}px, ${startY + dY * 0.12}px, 0) ${scaleString(0.18, 1.08)} `,
+            transform: translateAt(0.12),
+            ...sizeAt(0.18, 1.08),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.30)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor,
@@ -1859,7 +1865,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           });
           add({
             offset: 0.78,
-            transform: `translate3d(${endX}px, ${endY}px, 0) scale(${scaleX * 1.02}, ${scaleY * 1.02})`,
+            transform: translateAt(1),
+            ...sizeAt(1, 1.02),
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor
@@ -1873,7 +1880,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart, opacity: 1 });
           add({
             offset: 0.45,
-            transform: `translate3d(${startX + dX * 0.45 + slideX}px, ${startY + dY * 0.45}px, 0) ${scaleString(0.45)}`,
+            transform: translateAt(0.45, slideX, 0),
+            ...sizeAt(0.45),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.50)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor,
@@ -1881,7 +1889,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           });
           add({
             offset: 0.78,
-            transform: `translate3d(${endX}px, ${endY}px, 0) ${scaleString(1)}`,
+            transform: translateAt(1),
+            ...sizeAt(1),
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor,
@@ -1896,14 +1905,16 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.60,
-            transform: `translate3d(${startX + dX * 0.60}px, ${startY + dY * 0.60 + drop}px, 0) ${scaleString(0.60)}`,
+            transform: translateAt(0.60, 0, drop),
+            ...sizeAt(0.60),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.68)`,
             boxShadow: midShadowStrong,
             borderColor: previewBorderColor
           });
           add({
             offset: 0.86,
-            transform: `translate3d(${endX}px, ${endY}px, 0) ${scaleString(1)}`,
+            transform: translateAt(1),
+            ...sizeAt(1),
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor
@@ -1918,14 +1929,16 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.52,
-            transform: `translate3d(${startX + dX * 0.52 + sx}px, ${startY + dY * 0.52 + sy}px, 0) ${scaleString(0.52)} rotate(-6deg)`,
+            transform: translateAt(0.52, sx, sy),
+            ...sizeAt(0.52),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.62)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor
           });
           add({
             offset: 0.80,
-            transform: `translate3d(${endX}px, ${endY}px, 0) ${scaleString(1)} rotate(2deg)`,
+            transform: translateAt(1),
+            ...sizeAt(1),
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor
@@ -1937,14 +1950,16 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.28,
-            transform: (() => { const s = scalePair(0.28, 0.92, 1.08); return `translate3d(${startX + dX * 0.28}px, ${startY + dY * 0.28}px, 0) scale(${s.x}, ${s.y})`; })(),
+            transform: translateAt(0.28),
+            ...sizeAt(0.28, 0.92, 1.08),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.42)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor
           });
           add({
             offset: 0.58,
-            transform: (() => { const s = scalePair(0.58, 1.08, 0.96); return `translate3d(${startX + dX * 0.58}px, ${startY + dY * 0.58}px, 0) scale(${s.x}, ${s.y})`; })(),
+            transform: translateAt(0.58),
+            ...sizeAt(0.58, 1.08, 0.96),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.70)`,
             boxShadow: midShadowStrong,
             borderColor: previewBorderColor
@@ -1958,7 +1973,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart, filter: 'blur(0px)' });
           add({
             offset: 0.48,
-            transform: `translate3d(${startX + dX * 0.48}px, ${startY + dY * 0.48}px, 0) ${scaleString(0.48)}`,
+            transform: translateAt(0.48),
+            ...sizeAt(0.48),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.60)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor,
@@ -1973,7 +1989,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.55,
-            transform: `translate3d(${startX + dX * 0.55}px, ${startY + dY * 0.55}px, 0) ${scaleString(0.55)}`,
+            transform: translateAt(0.55),
+            ...sizeAt(0.55),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.70)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor
@@ -1999,14 +2016,16 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.72,
-            transform: `translate3d(${endX}px, ${endY}px, 0) scale(${scaleX * portal}, ${scaleY * portal})`,
+            transform: translateAt(1),
+            ...sizeAt(1, portal),
             borderRadius: targetRadius,
             boxShadow: midShadowStrong,
             borderColor: previewBorderColor
           });
           add({
             offset: 0.88,
-            transform: `translate3d(${endX}px, ${endY}px, 0) scale(${scaleX * 0.98}, ${scaleY * 0.98})`,
+            transform: translateAt(1),
+            ...sizeAt(1, 0.98),
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor
@@ -2020,14 +2039,16 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.45,
-            transform: `translate3d(${startX + dX * 0.45}px, ${startY + dY * 0.45 - lift}px, 0) ${scaleString(0.45)} perspective(900px) translateZ(24px)`,
+            transform: translateAt(0.45, 0, -lift),
+            ...sizeAt(0.45),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.55)`,
             boxShadow: midShadowStrong,
             borderColor: previewBorderColor
           });
           add({
             offset: 0.78,
-            transform: `translate3d(${endX}px, ${endY}px, 0) ${scaleString(1)} perspective(900px) translateZ(0px)`,
+            transform: translateAt(1),
+            ...sizeAt(1),
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor
@@ -2042,7 +2063,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.62,
-            transform: `translate3d(${startX + dX * 0.62}px, ${startY + dY * 0.62}px, 0) ${scaleString(0.62)}`,
+            transform: translateAt(0.62),
+            ...sizeAt(0.62),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.74)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor
@@ -2052,9 +2074,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           if (fill) {
             try {
               fill.animate([
-                { offset: 0, transform: 'translate(0px, 0px) scale(1.00)', backgroundPosition: 'center' },
-                { offset: 0.55, transform: `translate(${driftX}px, ${driftY}px) scale(1.06)`, backgroundPosition: '60% 40%' },
-                { offset: 1, transform: 'translate(0px, 0px) scale(1.00)', backgroundPosition: 'center' }
+                { offset: 0, transform: 'translate(0px, 0px)', backgroundPosition: 'center' },
+                { offset: 0.55, transform: `translate(${driftX}px, ${driftY}px)`, backgroundPosition: '60% 40%' },
+                { offset: 1, transform: 'translate(0px, 0px)', backgroundPosition: 'center' }
               ], { duration: dur, easing: ease, fill: 'forwards' });
             } catch (e) { /* no-op */ }
           }
@@ -2066,14 +2088,16 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.52,
-            transform: `translate3d(${startX + dX * 0.52}px, ${startY + dY * 0.52}px, 0) ${scaleString(0.52)} skewX(${skewDeg}deg)`,
+            transform: translateAt(0.52),
+            ...sizeAt(0.52),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.64)`,
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor
           });
           add({
             offset: 0.80,
-            transform: `translate3d(${endX}px, ${endY}px, 0) ${scaleString(1)} skewX(-4deg)`,
+            transform: translateAt(1),
+            ...sizeAt(1),
             borderRadius: targetRadius,
             boxShadow: previewShadow,
             borderColor: previewBorderColor
@@ -2084,11 +2108,11 @@ const previewOverlay = document.querySelector('.preview-overlay');
         else if (kf === 'glitchJitter') {
           // Brief jitter micro-movements mid-flight.
           add({ offset: 0, ...baseStart });
-          add({ offset: 0.40, transform: `translate3d(${startX + dX * 0.40}px, ${startY + dY * 0.40}px, 0) ${scaleString(0.40)}`, borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.54)`, boxShadow: midShadowSoft, borderColor: previewBorderColor });
-          add({ offset: 0.52, transform: `translate3d(${startX + dX * 0.52 + 6}px, ${startY + dY * 0.52 - 4}px, 0) ${scaleString(0.52)}`, borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.64)`, boxShadow: midShadowSoft, borderColor: previewBorderColor });
-          add({ offset: 0.56, transform: `translate3d(${startX + dX * 0.56 - 5}px, ${startY + dY * 0.56 + 3}px, 0) ${scaleString(0.56)}`, borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.68)`, boxShadow: midShadowSoft, borderColor: previewBorderColor });
-          add({ offset: 0.60, transform: `translate3d(${startX + dX * 0.60 + 4}px, ${startY + dY * 0.60 + 1}px, 0) ${scaleString(0.60)}`, borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.72)`, boxShadow: midShadowStrong, borderColor: previewBorderColor });
-          add({ offset: 0.68, transform: `translate3d(${startX + dX * 0.68}px, ${startY + dY * 0.68}px, 0) ${scaleString(0.68)}`, borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.78)`, boxShadow: previewShadow, borderColor: previewBorderColor });
+          add({ offset: 0.40, transform: translateAt(0.40), ...sizeAt(0.40), borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.54)`, boxShadow: midShadowSoft, borderColor: previewBorderColor });
+          add({ offset: 0.52, transform: translateAt(0.52, 6, -4), ...sizeAt(0.52), borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.64)`, boxShadow: midShadowSoft, borderColor: previewBorderColor });
+          add({ offset: 0.56, transform: translateAt(0.56, -5, 3), ...sizeAt(0.56), borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.68)`, boxShadow: midShadowSoft, borderColor: previewBorderColor });
+          add({ offset: 0.60, transform: translateAt(0.60, 4, 1), ...sizeAt(0.60), borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.72)`, boxShadow: midShadowStrong, borderColor: previewBorderColor });
+          add({ offset: 0.68, transform: translateAt(0.68), ...sizeAt(0.68), borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.78)`, boxShadow: previewShadow, borderColor: previewBorderColor });
           add({ offset: 1, ...baseEnd });
         }
 
@@ -2096,7 +2120,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart });
           add({
             offset: 0.52,
-            transform: (() => { const s = scalePair(0.52, 1.08); return `translate3d(${startX + dX * 0.52}px, ${startY + dY * 0.52}px, 0) scale(${s.x}, ${s.y})`; })(),
+            transform: translateAt(0.52),
+            ...sizeAt(0.52, 1.08),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.66)`,
             boxShadow: midShadowStrong,
             borderColor: previewBorderColor,
@@ -2104,7 +2129,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           });
           add({
             offset: 0.72,
-            transform: (() => { const s = scalePair(0.72, 0.98); return `translate3d(${startX + dX * 0.72}px, ${startY + dY * 0.72}px, 0) scale(${s.x}, ${s.y})`; })(),
+            transform: translateAt(0.72),
+            ...sizeAt(0.72, 0.98),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.82)`,
             boxShadow: previewShadow,
             borderColor: previewBorderColor,
@@ -2120,7 +2146,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           add({ offset: 0, ...baseStart, easing: 'cubic-bezier(0.40, 0.00, 0.60, 1)' });
           add({
             offset: 0.22,
-            transform: `translate3d(${startX + dX * 0.18}px, ${startY + dY * 0.18}px, 0) ${scaleString(0.18)}`,
+            transform: translateAt(0.18),
+            ...sizeAt(0.18),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.22)`,
             boxShadow: 'none',
             borderColor: 'rgba(255,255,255,0.10)',
@@ -2128,7 +2155,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           });
           add({
             offset: 0.62,
-            transform: `translate3d(${startX + dX * 0.74}px, ${startY + dY * 0.74}px, 0) ${scaleString(0.74)}`,
+            transform: translateAt(0.74),
+            ...sizeAt(0.74),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.55)`, /* radius lags */
             boxShadow: midShadowSoft,
             borderColor: previewBorderColor,
@@ -2136,7 +2164,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
           });
           add({
             offset: 0.86,
-            transform: `translate3d(${endX}px, ${endY}px, 0) ${scaleString(1)}`,
+            transform: translateAt(1),
+            ...sizeAt(1),
             borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.86)`,
             boxShadow: previewShadow,
             borderColor: previewBorderColor,
@@ -2156,6 +2185,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
         // Hard constraint: end clean (no rotation, skew, blur, opacity issues).
         anim.onfinish = () => {
           tile.style.transform = baseEnd.transform;
+          tile.style.width = `${endW}px`;
+          tile.style.height = `${endH}px`;
           tile.style.borderRadius = baseEnd.borderRadius;
           tile.style.boxShadow = baseEnd.boxShadow;
           tile.style.borderColor = baseEnd.borderColor;
@@ -2242,7 +2273,7 @@ const previewOverlay = document.querySelector('.preview-overlay');
         tile.style.width = `${startRect.width}px`;
         tile.style.height = `${startRect.height}px`;
         tile.style.transformOrigin = 'top left';
-        tile.style.transform = `translate3d(${startRect.left}px, ${startRect.top}px, 0) scale(1, 1)`;
+        tile.style.transform = `translate3d(${startRect.left}px, ${startRect.top}px, 0)`;
         document.body.appendChild(tile);
 
         return { tile, fill };
@@ -2250,9 +2281,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
 
       function moveTile(tile, startRect, targetRect, targetRadius) {
         tile.style.borderRadius = targetRadius;
-        const scaleX = targetRect.width / startRect.width;
-        const scaleY = targetRect.height / startRect.height;
-        tile.style.transform = `translate3d(${targetRect.left}px, ${targetRect.top}px, 0) scale(${scaleX}, ${scaleY})`;
+        tile.style.width = `${targetRect.width}px`;
+        tile.style.height = `${targetRect.height}px`;
+        tile.style.transform = `translate3d(${targetRect.left}px, ${targetRect.top}px, 0)`;
       }
 
       function openPreviewFromCard(card, triggerElement = card) {
@@ -2289,7 +2320,7 @@ const previewOverlay = document.querySelector('.preview-overlay');
           const previewCard = previewOverlay.querySelector('.preview-card');
           if (previewCard) {
             previewCard.style.transition = '';
-            previewCard.style.opacity = '1';
+            previewCard.style.opacity = '0';
             previewCard.style.pointerEvents = 'none';
             previewCard.classList.remove('is-hidden');
           }
@@ -2297,7 +2328,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
 
           if (!previewCard || !endRect) {
             previewOverlay.classList.add('is-visible');
-            previewCard.classList.add('is-active');
+            if (previewCard) {
+              previewCard.classList.add('is-active');
+            }
             resolve();
             return;
           }
@@ -2307,7 +2340,7 @@ const previewOverlay = document.querySelector('.preview-overlay');
           previewOverlay.classList.add('is-visible');
           previewOverlay.setAttribute('aria-hidden', 'false');
           previewCard.classList.add('is-active');
-          previewCard.style.opacity = '1';
+          previewCard.style.opacity = '0';
           previewCard.style.pointerEvents = 'none';
           previewCard.style.transition = '';
           previewCard.style.transform = '';
@@ -2326,10 +2359,12 @@ const previewOverlay = document.querySelector('.preview-overlay');
           fill.style.opacity = '1';
 
           let hasCrossfaded = false;
+          let fadeRemoved = false;
 
           const finishCrossfade = () => {
-            if (!hasCrossfaded) return;
+            if (!hasCrossfaded || fadeRemoved) return;
 
+            fadeRemoved = true;
             tile.remove();
             if (activeMorphTile === tile) {
               activeMorphTile = null;
@@ -2344,12 +2379,18 @@ const previewOverlay = document.querySelector('.preview-overlay');
             if (hasCrossfaded) return;
             hasCrossfaded = true;
             tile.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
+            previewCard.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
+            previewCard.style.opacity = '1';
             previewCard.style.pointerEvents = '';
             tile.style.opacity = '0';
 
-            setTimeout(() => {
+            const handleTileFade = (event) => {
+              if (event.target !== tile || event.propertyName !== 'opacity') return;
+              tile.removeEventListener('transitionend', handleTileFade);
               finishCrossfade();
-            }, FILL_FADE_DURATION + 80);
+            };
+
+            tile.addEventListener('transitionend', handleTileFade);
           };
 
           const resolvedProfile = profile || getOpenMorphProfileForCard(card);
