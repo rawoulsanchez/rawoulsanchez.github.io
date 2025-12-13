@@ -2406,29 +2406,35 @@ const previewOverlay = document.querySelector('.preview-overlay');
             }, FILL_FADE_DURATION + 120);
           };
 
-                    const resolvedProfile = profile || getOpenMorphProfileForCard(card);
+          const resolvedProfile = profile || getOpenMorphProfileForCard(card);
           const previewShadow = getComputedStyle(previewCard).boxShadow;
           const previewBorderColor = getComputedStyle(previewCard).borderColor;
 
           // Run per-card unique open morph (start/end geometry unchanged).
-          const tileAnim = animateOpenTile(
-            tile,
-            startRect,
-            endRect,
-            cardRadius,
-            targetRadius,
-            previewShadow,
-            previewBorderColor,
-            resolvedProfile
-          );
+          const dur = (resolvedProfile && resolvedProfile.duration) ? resolvedProfile.duration : MORPH_DURATION;
+          const ease = (resolvedProfile && resolvedProfile.easing) ? resolvedProfile.easing : PREVIEW_EASING;
 
-          tileAnim.onfinish = () => {
+          tile.style.transition = `transform ${dur}ms ${ease}, width ${dur}ms ${ease}, height ${dur}ms ${ease}, border-radius ${dur}ms ${ease}, box-shadow ${dur}ms ${ease}, border-color ${dur}ms ${ease}`;
+
+          const handleTileTransitionEnd = (event) => {
+            if (event.propertyName !== 'transform' && event.propertyName !== 'width') return;
+            tile.removeEventListener('transitionend', handleTileTransitionEnd);
             startCrossfade();
           };
 
+          tile.addEventListener('transitionend', handleTileTransitionEnd);
+
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              moveTile(tile, startRect, endRect, targetRadius);
+              tile.style.boxShadow = previewShadow;
+              tile.style.borderColor = previewBorderColor;
+            });
+          });
+
           setTimeout(() => {
             startCrossfade();
-          }, resolvedProfile.duration + 140);
+          }, dur + 140);
         });
       }
 
