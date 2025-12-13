@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Rawoul — Starter</title>
+  <title>All B6</title>
 <style>
   /* Design tokens */
 :root { --bg:#000; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; --brand:#e31b23; --brand-glow-shadow:0 0 8px var(--brand), 0 0 24px color-mix(in srgb, var(--brand) 60%, transparent 40%); --preview-frame-radius:18px; --preview-frame-border:1px solid #262b33; --preview-frame-shadow:0 22px 60px rgba(0,0,0,0.80), 0 0 0 1px rgba(255,255,255,0.03), var(--brand-glow-shadow); --preview-morph-duration:340ms; --preview-morph-ease:cubic-bezier(0.22, 0.61, 0.36, 1); }
@@ -478,12 +478,6 @@ html { overflow-x: hidden; }
 }
 
 
-@property --wipe {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 0deg;
-}
-
 .preview-morph-tile {
   position: fixed;
   top: 0;
@@ -513,17 +507,8 @@ html { overflow-x: hidden; }
   background: #000;
   background-size: cover;
   background-position: center;
-  --wipe: 0deg;
-  -webkit-mask-image: conic-gradient(from -90deg, rgba(0,0,0,0) 0deg var(--wipe), rgba(0,0,0,1) var(--wipe) 360deg);
-  mask-image: conic-gradient(from -90deg, rgba(0,0,0,0) 0deg var(--wipe), rgba(0,0,0,1) var(--wipe) 360deg);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  -webkit-mask-position: center;
-  mask-position: center;
   opacity: 1;
-  transition: opacity var(--preview-morph-duration) var(--preview-morph-ease), --wipe 0.24s ease;
+  transition: opacity var(--preview-morph-duration) var(--preview-morph-ease);
 }
 
 .preview-morph-tile.is-fade-out {
@@ -1149,16 +1134,16 @@ html { overflow-x: hidden; }
     </div>
     <div class="shelf-outer">
       <div class="shelf-track" data-row="A" role="list" aria-label="Row A posters">
-        <a class="poster" role="listitem" aria-label="A1" data-label="A1" data-title="TBD Title A1" data-description="TBD Description A1" data-runtime="TBD Runtime A1" data-tags="TBD Tags A1" data-youtube-url="TBD YouTube URL A1" data-poster-vert="images/poster-vert-A1.png" data-poster-wide="images/poster-wide-A1.png"><img src="images/poster-vert-A1.png" alt="Sanchez Ninjah A1 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-        <a class="poster" role="listitem" aria-label="A2" data-label="A2" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A2.png" data-poster-wide="images/poster-wide-A2.png"><img src="images/poster-vert-A2.png" alt="A2 poster"></a>
-        <a class="poster" role="listitem" aria-label="A3" data-label="A3" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A3.png" data-poster-wide="images/poster-wide-A3.png"><img src="images/poster-vert-A3.png" alt="A3 poster"></a>
-        <a class="poster" role="listitem" aria-label="A4" data-label="A4" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A4.png" data-poster-wide="images/poster-wide-A4.png"><img src="images/poster-vert-A4.png" alt="A4 poster"></a>
-        <a class="poster" role="listitem" aria-label="A5" data-label="A5" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A5.png" data-poster-wide="images/poster-wide-A5.png"><img src="images/poster-vert-A5.png" alt="A5 poster"></a>
-        <a class="poster" role="listitem" aria-label="A6" data-label="A6" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A6.png" data-poster-wide="images/poster-wide-A6.png"><img src="images/poster-vert-A6.png" alt="A6 poster"></a>
-        <a class="poster" role="listitem" aria-label="A7" data-label="A7" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A7.png" data-poster-wide="images/poster-wide-A7.png"><img src="images/poster-vert-A7.png" alt="A7 poster"></a>
-        <a class="poster" role="listitem" aria-label="A8" data-label="A8" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A8.png" data-poster-wide="images/poster-wide-A8.png"><img src="images/poster-vert-A8.png" alt="A8 poster"></a>
-        <a class="poster" role="listitem" aria-label="A9" data-label="A9" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A9.png" data-poster-wide="images/poster-wide-A9.png"><img src="images/poster-vert-A9.png" alt="A9 poster"></a>
-        <a class="poster" role="listitem" aria-label="A10" data-label="A10" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A10.png" data-poster-wide="images/poster-wide-A10.png"><img src="images/poster-vert-A10.png" alt="A10 poster"></a>
+        <a class="poster" role="listitem" aria-label="A1" data-label="A1" data-title="TBD Title A1" data-description="TBD Description A1" data-runtime="TBD Runtime A1" data-tags="TBD Tags A1" data-youtube-url="TBD YouTube URL A1" data-poster-vert="images/poster-vert-A1.png" data-poster-wide="images/poster-wide-A1.png" data-morph-id="morph-01"><img src="images/poster-vert-A1.png" alt="Sanchez Ninjah A1 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A2" data-label="A2" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A2.png" data-poster-wide="images/poster-wide-A2.png" data-morph-id="morph-02"><img src="images/poster-vert-A2.png" alt="A2 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A3" data-label="A3" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A3.png" data-poster-wide="images/poster-wide-A3.png" data-morph-id="morph-03"><img src="images/poster-vert-A3.png" alt="A3 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A4" data-label="A4" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A4.png" data-poster-wide="images/poster-wide-A4.png" data-morph-id="morph-04"><img src="images/poster-vert-A4.png" alt="A4 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A5" data-label="A5" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A5.png" data-poster-wide="images/poster-wide-A5.png" data-morph-id="morph-05"><img src="images/poster-vert-A5.png" alt="A5 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A6" data-label="A6" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A6.png" data-poster-wide="images/poster-wide-A6.png" data-morph-id="morph-06"><img src="images/poster-vert-A6.png" alt="A6 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A7" data-label="A7" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A7.png" data-poster-wide="images/poster-wide-A7.png" data-morph-id="morph-07"><img src="images/poster-vert-A7.png" alt="A7 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A8" data-label="A8" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A8.png" data-poster-wide="images/poster-wide-A8.png" data-morph-id="morph-08"><img src="images/poster-vert-A8.png" alt="A8 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A9" data-label="A9" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A9.png" data-poster-wide="images/poster-wide-A9.png" data-morph-id="morph-09"><img src="images/poster-vert-A9.png" alt="A9 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A10" data-label="A10" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A10.png" data-poster-wide="images/poster-wide-A10.png" data-morph-id="morph-10"><img src="images/poster-vert-A10.png" alt="A10 poster"><button class="poster-preview-button" type="button">Preview</button></a>
       </div>
     </div>
   </section>
@@ -1172,16 +1157,16 @@ html { overflow-x: hidden; }
   </div>
   <div class="shelf-outer">
     <div class="shelf-track" data-row="B" role="list" aria-label="Row B posters">
-      <a class="poster" role="listitem" aria-label="B1" data-label="B1" data-title="TBD Title B1" data-description="TBD Description B1" data-runtime="TBD Runtime B1" data-tags="TBD Tags B1" data-youtube-url="TBD YouTube URL B1" data-poster-vert="images/poster-vert-B1.png" data-poster-wide="images/poster-wide-B1.png"></a>
-      <a class="poster" role="listitem" aria-label="B2" data-label="B2" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-B2.png" data-poster-wide="images/poster-wide-B2.png"></a>
-      <a class="poster" role="listitem" aria-label="B3" data-label="B3" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-B3.png" data-poster-wide="images/poster-wide-B3.png"></a>
-      <a class="poster" role="listitem" aria-label="B4" data-label="B4" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-B4.png" data-poster-wide="images/poster-wide-B4.png"></a>
-      <a class="poster" role="listitem" aria-label="B5" data-label="B5" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-B5.png" data-poster-wide="images/poster-wide-B5.png"></a>
-      <a class="poster" role="listitem" aria-label="B6" data-label="B6" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-B6.png" data-poster-wide="images/poster-wide-B6.png"></a>
-      <a class="poster" role="listitem" aria-label="B7" data-label="B7" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-B7.png" data-poster-wide="images/poster-wide-B7.png"></a>
-      <a class="poster" role="listitem" aria-label="B8" data-label="B8" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-B8.png" data-poster-wide="images/poster-wide-B8.png"></a>
-      <a class="poster" role="listitem" aria-label="B9" data-label="B9" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-B9.png" data-poster-wide="images/poster-wide-B9.png"></a>
-      <a class="poster" role="listitem" aria-label="B10" data-label="B10" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-B10.png" data-poster-wide="images/poster-wide-B10.png"></a>
+      <a class="poster" role="listitem" aria-label="B1" data-label="B1" data-title="TBD Title B1" data-description="TBD Description B1" data-runtime="TBD Runtime B1" data-tags="TBD Tags B1" data-youtube-url="TBD YouTube URL B1" data-poster-vert="images/poster-vert-A1.png" data-poster-wide="images/poster-wide-A1.png" data-morph-id="morph-11"><img src="images/poster-vert-A1.png" alt="B1 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B2" data-label="B2" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A2.png" data-poster-wide="images/poster-wide-A2.png" data-morph-id="morph-12"><img src="images/poster-vert-A2.png" alt="B2 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B3" data-label="B3" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A3.png" data-poster-wide="images/poster-wide-A3.png" data-morph-id="morph-13"><img src="images/poster-vert-A3.png" alt="B3 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B4" data-label="B4" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A4.png" data-poster-wide="images/poster-wide-A4.png" data-morph-id="morph-14"><img src="images/poster-vert-A4.png" alt="B4 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B5" data-label="B5" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A5.png" data-poster-wide="images/poster-wide-A5.png" data-morph-id="morph-15"><img src="images/poster-vert-A5.png" alt="B5 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B6" data-label="B6" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A6.png" data-poster-wide="images/poster-wide-A6.png" data-morph-id="morph-16"><img src="images/poster-vert-A6.png" alt="B6 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B7" data-label="B7" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A7.png" data-poster-wide="images/poster-wide-A7.png" data-morph-id="morph-17"><img src="images/poster-vert-A7.png" alt="B7 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B8" data-label="B8" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A8.png" data-poster-wide="images/poster-wide-A8.png" data-morph-id="morph-18"><img src="images/poster-vert-A8.png" alt="B8 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B9" data-label="B9" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A9.png" data-poster-wide="images/poster-wide-A9.png" data-morph-id="morph-19"><img src="images/poster-vert-A9.png" alt="B9 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B10" data-label="B10" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A10.png" data-poster-wide="images/poster-wide-A10.png" data-morph-id="morph-20"><img src="images/poster-vert-A10.png" alt="B10 poster"><button class="poster-preview-button" type="button">Preview</button></a>
     </div>
   </div>
 </section>
@@ -1590,8 +1575,12 @@ html { overflow-x: hidden; }
 </script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const a1Cards = Array.from(document.querySelectorAll('.poster[data-label="A1"]'));
-      const previewOverlay = document.querySelector('.preview-overlay');
+      
+      const morphCards = Array.from(document.querySelectorAll('.poster[data-morph-id]'));
+
+      // Note: shelves clone posters for infinite scrolling. We use event delegation
+      // and per-card data-morph-id so both originals and clones open correctly.
+const previewOverlay = document.querySelector('.preview-overlay');
       const previewCloseButton = document.querySelector('.preview-close-btn');
       const previewTitleEl = document.querySelector('.preview-title');
       const previewRuntimeEl = document.querySelector('.preview-runtime');
@@ -1599,7 +1588,7 @@ html { overflow-x: hidden; }
       const previewDescriptionEl = document.querySelector('.preview-description');
 
       if (
-        !a1Cards.length ||
+        !morphCards.length ||
         !previewOverlay ||
         !previewCloseButton ||
         !previewTitleEl ||
@@ -1615,6 +1604,629 @@ html { overflow-x: hidden; }
       const FILL_FADE_DURATION = 220;
       let lastOpenedCard = null;
       let activeMorphTile = null;
+
+      let currentMorphDuration = MORPH_DURATION;
+      let currentMorphEasing = PREVIEW_EASING;
+
+      const OPEN_MORPH_PROFILES = [
+        { id: 'morph-01', name: 'Straight Zoom', kf: 'straight', duration: 360, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)' },
+        { id: 'morph-02', name: 'Arc Sweep', kf: 'arcSweep', duration: 520, easing: 'cubic-bezier(0.18, 0.80, 0.20, 1)', arcX: 46, arcY: -34 },
+        { id: 'morph-03', name: 'Overshoot Snap', kf: 'overshootSnap', duration: 480, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', overshoot: 18 },
+        { id: 'morph-04', name: 'Spring Elastic', kf: 'springElastic', duration: 720, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)', bounce: 3 },
+        { id: 'morph-05', name: 'Hinge Flip', kf: 'hingeFlip', duration: 520, easing: 'cubic-bezier(0.20, 0.90, 0.20, 1)', tilt: 10 },
+        { id: 'morph-06', name: 'Yaw Rotate', kf: 'yawRotate', duration: 520, easing: 'cubic-bezier(0.20, 0.90, 0.20, 1)', yaw: 14 },
+        { id: 'morph-07', name: 'Pop In Place', kf: 'popInPlace', duration: 520, easing: 'cubic-bezier(0.12, 0.90, 0.10, 1)' },
+        { id: 'morph-08', name: 'Slide + Fade Cross', kf: 'slideFadeCross', duration: 560, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)', slideX: 80 },
+        { id: 'morph-09', name: 'Vertical Drop', kf: 'verticalDrop', duration: 520, easing: 'cubic-bezier(0.20, 0.90, 0.20, 1)', dropY: 64 },
+        { id: 'morph-10', name: 'Diagonal Slash', kf: 'diagonalSlash', duration: 520, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)', slashX: 72, slashY: -72 },
+
+        { id: 'morph-11', name: 'Squash & Stretch', kf: 'squashStretch', duration: 560, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)' },
+        { id: 'morph-12', name: 'Blur Burst', kf: 'blurBurst', duration: 520, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)', blurPx: 10 },
+        { id: 'morph-13', name: 'Shutter Wipe', kf: 'shutterWipe', duration: 560, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)' },
+        { id: 'morph-14', name: 'Portal Zoom Through', kf: 'portalZoom', duration: 620, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', portal: 1.22 },
+        { id: 'morph-15', name: 'Card Stack Lift', kf: 'stackLift', duration: 560, easing: 'cubic-bezier(0.18, 0.80, 0.20, 1)', lift: 18 },
+        { id: 'morph-16', name: 'Parallax Drift', kf: 'parallaxDrift', duration: 620, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)', driftX: 18, driftY: -12 },
+        { id: 'morph-17', name: 'Skew Shear', kf: 'skewShear', duration: 520, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)', skewDeg: 10 },
+        { id: 'morph-18', name: 'Glitch Jitter', kf: 'glitchJitter', duration: 520, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)' },
+        { id: 'morph-19', name: 'Ripple Expand', kf: 'rippleExpand', duration: 560, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)' },
+        { id: 'morph-20', name: 'Cinematic Ease', kf: 'cinematicEase', duration: 720, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)' }
+      ];
+
+      function getOpenMorphProfileForCard(card) {
+        // Force ALL cards to use the same open morph as B6 (morph-16: Parallax Drift).
+        const forced = OPEN_MORPH_PROFILES.find(p => p.id === 'morph-16');
+        return forced || OPEN_MORPH_PROFILES[0];
+      }
+
+      function buildBoostedShadow(baseShadow, boost) {
+        const brand = getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#e31b23';
+        const glowA = 10 + Math.round(22 * boost);
+        const glowB = 26 + Math.round(54 * boost);
+        const alphaA = (0.18 + 0.45 * boost).toFixed(2);
+        const alphaB = (0.10 + 0.28 * boost).toFixed(2);
+        const extra = `0 0 ${glowA}px rgba(227,27,35,${alphaA}), 0 0 ${glowB}px rgba(227,27,35,${alphaB})`;
+        if (!baseShadow || baseShadow === 'none') return extra;
+        return `${baseShadow}, ${extra}`;
+      }
+
+      function animateOpenTile(tile, startRect, endRect, cardRadius, targetRadius, previewShadow, previewBorderColor, profile) {
+        const fill = tile.querySelector('.preview-morph-fill');
+
+        const startX = startRect.left;
+        const startY = startRect.top;
+        const endX = endRect.left;
+        const endY = endRect.top;
+
+        const startW = startRect.width;
+        const startH = startRect.height;
+        const endW = endRect.width;
+        const endH = endRect.height;
+
+        const dX = endX - startX;
+        const dY = endY - startY;
+
+        const baseStart = {
+          transform: `translate(${startX}px, ${startY}px)`,
+          width: `${startW}px`,
+          height: `${startH}px`,
+          borderRadius: cardRadius,
+          boxShadow: 'none',
+          borderColor: 'rgba(255,255,255,0.06)',
+          opacity: 1,
+          filter: 'none'
+        };
+
+        const baseEnd = {
+          transform: `translate(${endX}px, ${endY}px)`,
+          width: `${endW}px`,
+          height: `${endH}px`,
+          borderRadius: targetRadius,
+          boxShadow: previewShadow,
+          borderColor: previewBorderColor,
+          opacity: 1,
+          filter: 'none'
+        };
+
+        // Ensure a clean baseline (no residual transforms / filters).
+        tile.style.transition = 'none';
+        tile.style.transformOrigin = 'top left';
+        tile.style.filter = 'none';
+        tile.style.opacity = '1';
+        tile.style.clipPath = '';
+        tile.style.borderRadius = cardRadius;
+        tile.style.boxShadow = 'none';
+        tile.style.borderColor = 'rgba(255,255,255,0.06)';
+
+        if (fill) {
+          fill.style.filter = 'none';
+          fill.style.opacity = '1';
+          fill.style.clipPath = '';
+          fill.style.transform = 'none';
+          fill.style.backgroundPosition = 'center';
+        }
+
+        const kf = (profile && profile.kf) ? profile.kf : 'straight';
+        const dur = (profile && profile.duration) ? profile.duration : MORPH_DURATION;
+        const ease = (profile && profile.easing) ? profile.easing : PREVIEW_EASING;
+
+        const kfs = [];
+        let options = { duration: dur, easing: ease, fill: 'forwards' };
+
+        // Some concepts benefit from per-segment easing (keyframe easings).
+        const midShadowStrong = buildBoostedShadow(previewShadow, 0.70);
+        const midShadowSoft = buildBoostedShadow(previewShadow, 0.35);
+
+        const add = (obj) => kfs.push(obj);
+
+        if (kf === 'straight') {
+          add({ offset: 0, ...baseStart });
+          add({ offset: 1, ...baseEnd });
+        }
+
+        else if (kf === 'arcSweep') {
+          const ax = (profile && profile.arcX != null) ? profile.arcX : 40;
+          const ay = (profile && profile.arcY != null) ? profile.arcY : -28;
+
+          add({ offset: 0, ...baseStart });
+          add({
+            offset: 0.55,
+            transform: `translate(${startX + dX * 0.55 + ax}px, ${startY + dY * 0.55 + ay}px) rotate(0deg)`,
+            width: `${startW + (endW - startW) * 0.55}px`,
+            height: `${startH + (endH - startH) * 0.55}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.70)`,
+            boxShadow: midShadowSoft,
+            borderColor: previewBorderColor
+          });
+          add({ offset: 1, ...baseEnd });
+        }
+
+        else if (kf === 'overshootSnap') {
+          const os = (profile && profile.overshoot != null) ? profile.overshoot : 16;
+
+          add({ offset: 0, ...baseStart });
+          add({
+            offset: 0.78,
+            transform: `translate(${endX + os}px, ${endY - os * 0.45}px)`,
+            width: `${endW * 1.02}px`,
+            height: `${endH * 1.02}px`,
+            borderRadius: `calc(${targetRadius} * 0.92)`,
+            boxShadow: midShadowStrong,
+            borderColor: previewBorderColor,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+          });
+          add({
+            offset: 1,
+            ...baseEnd,
+            easing: 'cubic-bezier(0.20, 0.80, 0.20, 1)'
+          });
+        }
+
+        else if (kf === 'springElastic') {
+          const b = (profile && profile.bounce != null) ? profile.bounce : 3;
+
+          add({ offset: 0, ...baseStart });
+          add({
+            offset: 0.58,
+            transform: `translate(${endX + 18}px, ${endY - 10}px)`,
+            width: `${endW * 1.04}px`,
+            height: `${endH * 1.04}px`,
+            borderRadius: `calc(${targetRadius} * 0.88)`,
+            boxShadow: midShadowStrong,
+            borderColor: previewBorderColor,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+          });
+          add({
+            offset: 0.74,
+            transform: `translate(${endX - 10}px, ${endY + 6}px)`,
+            width: `${endW * 0.99}px`,
+            height: `${endH * 0.99}px`,
+            borderRadius: `calc(${targetRadius} * 1.02)`,
+            boxShadow: midShadowSoft,
+            borderColor: previewBorderColor,
+            easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+          });
+          if (b >= 3) {
+            add({
+              offset: 0.86,
+              transform: `translate(${endX + 4}px, ${endY - 3}px)`,
+              width: `${endW * 1.01}px`,
+              height: `${endH * 1.01}px`,
+              borderRadius: targetRadius,
+              boxShadow: previewShadow,
+              borderColor: previewBorderColor,
+              easing: 'cubic-bezier(0.20, 0.80, 0.20, 1)'
+            });
+          }
+          add({ offset: 1, ...baseEnd });
+        }
+
+        else if (kf === 'hingeFlip') {
+          const tilt = (profile && profile.tilt != null) ? profile.tilt : 10;
+
+          add({ offset: 0, ...baseStart });
+          add({
+            offset: 0.45,
+            transform: `translate(${startX + dX * 0.45}px, ${startY + dY * 0.45}px) perspective(900px) rotateX(${tilt}deg) rotateZ(-4deg)`,
+            width: `${startW + (endW - startW) * 0.45}px`,
+            height: `${startH + (endH - startH) * 0.45}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.55)`,
+            boxShadow: midShadowSoft,
+            borderColor: previewBorderColor
+          });
+          add({
+            offset: 0.78,
+            transform: `translate(${endX}px, ${endY}px) perspective(900px) rotateX(-4deg) rotateZ(2deg)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
+            borderRadius: targetRadius,
+            boxShadow: previewShadow,
+            borderColor: previewBorderColor
+          });
+          add({ offset: 1, ...baseEnd });
+        }
+
+        else if (kf === 'yawRotate') {
+          const yaw = (profile && profile.yaw != null) ? profile.yaw : 14;
+
+          add({ offset: 0, ...baseStart });
+          add({
+            offset: 0.52,
+            transform: `translate(${startX + dX * 0.52}px, ${startY + dY * 0.52}px) perspective(900px) rotateY(${yaw}deg)`,
+            width: `${startW + (endW - startW) * 0.52}px`,
+            height: `${startH + (endH - startH) * 0.52}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.60)`,
+            boxShadow: midShadowSoft,
+            borderColor: previewBorderColor
+          });
+          add({
+            offset: 0.78,
+            transform: `translate(${endX}px, ${endY}px) perspective(900px) rotateY(-6deg)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
+            borderRadius: targetRadius,
+            boxShadow: previewShadow,
+            borderColor: previewBorderColor
+          });
+          add({ offset: 1, ...baseEnd });
+        }
+
+        else if (kf === 'popInPlace') {
+          // Lingers near start, then "pops" and travels late.
+          add({ offset: 0, ...baseStart });
+          add({
+            offset: 0.40,
+            transform: `translate(${startX + dX * 0.12}px, ${startY + dY * 0.12}px) scale(1.08)`,
+            width: `${startW + (endW - startW) * 0.18}px`,
+            height: `${startH + (endH - startH) * 0.18}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.30)`,
+            boxShadow: midShadowSoft,
+            borderColor: previewBorderColor,
+            opacity: 1
+          });
+          add({
+            offset: 0.78,
+            transform: `translate(${endX}px, ${endY}px) scale(1.02)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
+            borderRadius: targetRadius,
+            boxShadow: previewShadow,
+            borderColor: previewBorderColor
+          });
+          add({ offset: 1, ...baseEnd });
+        }
+
+        else if (kf === 'slideFadeCross') {
+          const slideX = (profile && profile.slideX != null) ? profile.slideX : 80;
+
+          add({ offset: 0, ...baseStart, opacity: 1 });
+          add({
+            offset: 0.45,
+            transform: `translate(${startX + dX * 0.45 + slideX}px, ${startY + dY * 0.45}px)`,
+            width: `${startW + (endW - startW) * 0.45}px`,
+            height: `${startH + (endH - startH) * 0.45}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.50)`,
+            boxShadow: midShadowSoft,
+            borderColor: previewBorderColor,
+            opacity: 0.45
+          });
+          add({
+            offset: 0.78,
+            transform: `translate(${endX}px, ${endY}px)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
+            borderRadius: targetRadius,
+            boxShadow: previewShadow,
+            borderColor: previewBorderColor,
+            opacity: 1
+          });
+          add({ offset: 1, ...baseEnd, opacity: 1 });
+        }
+
+        else if (kf === 'verticalDrop') {
+          const drop = (profile && profile.dropY != null) ? profile.dropY : 64;
+
+          add({ offset: 0, ...baseStart });
+          add({
+            offset: 0.60,
+            transform: `translate(${startX + dX * 0.60}px, ${startY + dY * 0.60 + drop}px)`,
+            width: `${startW + (endW - startW) * 0.60}px`,
+            height: `${startH + (endH - startH) * 0.60}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.68)`,
+            boxShadow: midShadowStrong,
+            borderColor: previewBorderColor
+          });
+          add({
+            offset: 0.86,
+            transform: `translate(${endX}px, ${endY}px)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
+            borderRadius: targetRadius,
+            boxShadow: previewShadow,
+            borderColor: previewBorderColor
+          });
+          add({ offset: 1, ...baseEnd });
+        }
+
+        else if (kf === 'diagonalSlash') {
+          const sx = (profile && profile.slashX != null) ? profile.slashX : 72;
+          const sy = (profile && profile.slashY != null) ? profile.slashY : -72;
+
+          add({ offset: 0, ...baseStart });
+          add({
+            offset: 0.52,
+            transform: `translate(${startX + dX * 0.52 + sx}px, ${startY + dY * 0.52 + sy}px) rotate(-6deg)`,
+            width: `${startW + (endW - startW) * 0.52}px`,
+            height: `${startH + (endH - startH) * 0.52}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.62)`,
+            boxShadow: midShadowSoft,
+            borderColor: previewBorderColor
+          });
+          add({
+            offset: 0.80,
+            transform: `translate(${endX}px, ${endY}px) rotate(2deg)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
+            borderRadius: targetRadius,
+            boxShadow: previewShadow,
+            borderColor: previewBorderColor
+          });
+          add({ offset: 1, ...baseEnd });
+        }
+
+        else if (kf === 'squashStretch') {
+          add({ offset: 0, ...baseStart });
+          add({
+            offset: 0.28,
+            transform: `translate(${startX + dX * 0.28}px, ${startY + dY * 0.28}px) scaleX(0.92) scaleY(1.08)`,
+            width: `${startW + (endW - startW) * 0.28}px`,
+            height: `${startH + (endH - startH) * 0.28}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.42)`,
+            boxShadow: midShadowSoft,
+            borderColor: previewBorderColor
+          });
+          add({
+            offset: 0.58,
+            transform: `translate(${startX + dX * 0.58}px, ${startY + dY * 0.58}px) scaleX(1.08) scaleY(0.96)`,
+            width: `${startW + (endW - startW) * 0.58}px`,
+            height: `${startH + (endH - startH) * 0.58}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.70)`,
+            boxShadow: midShadowStrong,
+            borderColor: previewBorderColor
+          });
+          add({ offset: 1, ...baseEnd });
+        }
+
+        else if (kf === 'blurBurst') {
+          const blurPx = (profile && profile.blurPx != null) ? profile.blurPx : 10;
+
+          add({ offset: 0, ...baseStart, filter: 'blur(0px)' });
+          add({
+            offset: 0.48,
+            transform: `translate(${startX + dX * 0.48}px, ${startY + dY * 0.48}px)`,
+            width: `${startW + (endW - startW) * 0.48}px`,
+            height: `${startH + (endH - startH) * 0.48}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.60)`,
+            boxShadow: midShadowSoft,
+            borderColor: previewBorderColor,
+            filter: `blur(${blurPx}px)`
+          });
+          add({ offset: 0.72, filter: 'blur(0px)' });
+          add({ offset: 1, ...baseEnd, filter: 'blur(0px)' });
+        }
+
+        else if (kf === 'shutterWipe') {
+          // Tile moves normally; the fill reveals like a shutter wipe.
+          add({ offset: 0, ...baseStart });
+          add({
+            offset: 0.55,
+            transform: `translate(${startX + dX * 0.55}px, ${startY + dY * 0.55}px)`,
+            width: `${startW + (endW - startW) * 0.55}px`,
+            height: `${startH + (endH - startH) * 0.55}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.70)`,
+            boxShadow: midShadowSoft,
+            borderColor: previewBorderColor
+          });
+          add({ offset: 1, ...baseEnd });
+
+          if (fill) {
+            try {
+              fill.animate([
+                { offset: 0, clipPath: 'inset(0 0 0 0)' },
+                { offset: 0.18, clipPath: 'inset(0 0 0 0)' },
+                { offset: 0.55, clipPath: 'inset(0 0 0 100%)' },
+                { offset: 0.74, clipPath: 'inset(0 0 0 0)' },
+                { offset: 1, clipPath: 'inset(0 0 0 0)' }
+              ], { duration: dur, easing: 'linear', fill: 'forwards' });
+            } catch (e) { /* no-op */ }
+          }
+        }
+
+        else if (kf === 'portalZoom') {
+          const portal = (profile && profile.portal != null) ? profile.portal : 1.22;
+
+          add({ offset: 0, ...baseStart });
+          add({
+            offset: 0.72,
+            transform: `translate(${endX}px, ${endY}px) scale(${portal})`,
+            width: `${endW}px`,
+            height: `${endH}px`,
+            borderRadius: targetRadius,
+            boxShadow: midShadowStrong,
+            borderColor: previewBorderColor
+          });
+          add({
+            offset: 0.88,
+            transform: `translate(${endX}px, ${endY}px) scale(0.98)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
+            borderRadius: targetRadius,
+            boxShadow: previewShadow,
+            borderColor: previewBorderColor
+          });
+          add({ offset: 1, ...baseEnd });
+        }
+
+        else if (kf === 'stackLift') {
+          const lift = (profile && profile.lift != null) ? profile.lift : 18;
+
+          add({ offset: 0, ...baseStart });
+          add({
+            offset: 0.45,
+            transform: `translate(${startX + dX * 0.45}px, ${startY + dY * 0.45 - lift}px) perspective(900px) translateZ(24px)`,
+            width: `${startW + (endW - startW) * 0.45}px`,
+            height: `${startH + (endH - startH) * 0.45}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.55)`,
+            boxShadow: midShadowStrong,
+            borderColor: previewBorderColor
+          });
+          add({
+            offset: 0.78,
+            transform: `translate(${endX}px, ${endY}px) perspective(900px) translateZ(0px)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
+            borderRadius: targetRadius,
+            boxShadow: previewShadow,
+            borderColor: previewBorderColor
+          });
+          add({ offset: 1, ...baseEnd });
+        }
+
+        else if (kf === 'parallaxDrift') {
+          const driftX = (profile && profile.driftX != null) ? profile.driftX : 18;
+          const driftY = (profile && profile.driftY != null) ? profile.driftY : -12;
+
+          add({ offset: 0, ...baseStart });
+          add({
+            offset: 0.62,
+            transform: `translate(${startX + dX * 0.62}px, ${startY + dY * 0.62}px)`,
+            width: `${startW + (endW - startW) * 0.62}px`,
+            height: `${startH + (endH - startH) * 0.62}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.74)`,
+            boxShadow: midShadowSoft,
+            borderColor: previewBorderColor
+          });
+          add({ offset: 1, ...baseEnd });
+
+          if (fill) {
+            try {
+              fill.animate([
+                { offset: 0, transform: 'translate(0px, 0px) scale(1.00)', backgroundPosition: 'center' },
+                { offset: 0.55, transform: `translate(${driftX}px, ${driftY}px) scale(1.06)`, backgroundPosition: '60% 40%' },
+                { offset: 1, transform: 'translate(0px, 0px) scale(1.00)', backgroundPosition: 'center' }
+              ], { duration: dur, easing: ease, fill: 'forwards' });
+            } catch (e) { /* no-op */ }
+          }
+        }
+
+        else if (kf === 'skewShear') {
+          const skewDeg = (profile && profile.skewDeg != null) ? profile.skewDeg : 10;
+
+          add({ offset: 0, ...baseStart });
+          add({
+            offset: 0.52,
+            transform: `translate(${startX + dX * 0.52}px, ${startY + dY * 0.52}px) skewX(${skewDeg}deg)`,
+            width: `${startW + (endW - startW) * 0.52}px`,
+            height: `${startH + (endH - startH) * 0.52}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.64)`,
+            boxShadow: midShadowSoft,
+            borderColor: previewBorderColor
+          });
+          add({
+            offset: 0.80,
+            transform: `translate(${endX}px, ${endY}px) skewX(-4deg)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
+            borderRadius: targetRadius,
+            boxShadow: previewShadow,
+            borderColor: previewBorderColor
+          });
+          add({ offset: 1, ...baseEnd });
+        }
+
+        else if (kf === 'glitchJitter') {
+          // Brief jitter micro-movements mid-flight.
+          add({ offset: 0, ...baseStart });
+          add({ offset: 0.40, transform: `translate(${startX + dX * 0.40}px, ${startY + dY * 0.40}px)`, width: `${startW + (endW - startW) * 0.40}px`, height: `${startH + (endH - startH) * 0.40}px`, borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.54)`, boxShadow: midShadowSoft, borderColor: previewBorderColor });
+          add({ offset: 0.52, transform: `translate(${startX + dX * 0.52 + 6}px, ${startY + dY * 0.52 - 4}px)`, width: `${startW + (endW - startW) * 0.52}px`, height: `${startH + (endH - startH) * 0.52}px`, borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.64)`, boxShadow: midShadowSoft, borderColor: previewBorderColor });
+          add({ offset: 0.56, transform: `translate(${startX + dX * 0.56 - 5}px, ${startY + dY * 0.56 + 3}px)`, width: `${startW + (endW - startW) * 0.56}px`, height: `${startH + (endH - startH) * 0.56}px`, borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.68)`, boxShadow: midShadowSoft, borderColor: previewBorderColor });
+          add({ offset: 0.60, transform: `translate(${startX + dX * 0.60 + 4}px, ${startY + dY * 0.60 + 1}px)`, width: `${startW + (endW - startW) * 0.60}px`, height: `${startH + (endH - startH) * 0.60}px`, borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.72)`, boxShadow: midShadowStrong, borderColor: previewBorderColor });
+          add({ offset: 0.68, transform: `translate(${startX + dX * 0.68}px, ${startY + dY * 0.68}px)`, width: `${startW + (endW - startW) * 0.68}px`, height: `${startH + (endH - startH) * 0.68}px`, borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.78)`, boxShadow: previewShadow, borderColor: previewBorderColor });
+          add({ offset: 1, ...baseEnd });
+        }
+
+        else if (kf === 'rippleExpand') {
+          add({ offset: 0, ...baseStart });
+          add({
+            offset: 0.52,
+            transform: `translate(${startX + dX * 0.52}px, ${startY + dY * 0.52}px) scale(1.08)`,
+            width: `${startW + (endW - startW) * 0.52}px`,
+            height: `${startH + (endH - startH) * 0.52}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.66)`,
+            boxShadow: midShadowStrong,
+            borderColor: previewBorderColor,
+            opacity: 0.85
+          });
+          add({
+            offset: 0.72,
+            transform: `translate(${startX + dX * 0.72}px, ${startY + dY * 0.72}px) scale(0.98)`,
+            width: `${startW + (endW - startW) * 0.72}px`,
+            height: `${startH + (endH - startH) * 0.72}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.82)`,
+            boxShadow: previewShadow,
+            borderColor: previewBorderColor,
+            opacity: 1
+          });
+          add({ offset: 1, ...baseEnd, opacity: 1 });
+        }
+
+        else if (kf === 'cinematicEase') {
+          // Slow start, fast mid, slow end + subtle radius timing offset.
+          options = { duration: dur, easing: 'linear', fill: 'forwards' };
+
+          add({ offset: 0, ...baseStart, easing: 'cubic-bezier(0.40, 0.00, 0.60, 1)' });
+          add({
+            offset: 0.22,
+            transform: `translate(${startX + dX * 0.18}px, ${startY + dY * 0.18}px)`,
+            width: `${startW + (endW - startW) * 0.18}px`,
+            height: `${startH + (endH - startH) * 0.18}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.22)`,
+            boxShadow: 'none',
+            borderColor: 'rgba(255,255,255,0.10)',
+            easing: 'cubic-bezier(0.40, 0.00, 0.60, 1)'
+          });
+          add({
+            offset: 0.62,
+            transform: `translate(${startX + dX * 0.74}px, ${startY + dY * 0.74}px)`,
+            width: `${startW + (endW - startW) * 0.74}px`,
+            height: `${startH + (endH - startH) * 0.74}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.55)`, /* radius lags */
+            boxShadow: midShadowSoft,
+            borderColor: previewBorderColor,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+          });
+          add({
+            offset: 0.86,
+            transform: `translate(${endX}px, ${endY}px)`,
+            width: `${endW}px`,
+            height: `${endH}px`,
+            borderRadius: `calc(${cardRadius} + (${targetRadius} - ${cardRadius}) * 0.86)`,
+            boxShadow: previewShadow,
+            borderColor: previewBorderColor,
+            easing: 'cubic-bezier(0.40, 0.00, 0.60, 1)'
+          });
+          add({ offset: 1, ...baseEnd });
+        }
+
+        // Safety fallback
+        if (!kfs.length) {
+          kfs.push({ offset: 0, ...baseStart });
+          kfs.push({ offset: 1, ...baseEnd });
+        }
+
+        const anim = tile.animate(kfs, options);
+
+        // Hard constraint: end clean (no rotation, skew, blur, opacity issues).
+        anim.onfinish = () => {
+          tile.style.transform = baseEnd.transform;
+          tile.style.width = baseEnd.width;
+          tile.style.height = baseEnd.height;
+          tile.style.borderRadius = baseEnd.borderRadius;
+          tile.style.boxShadow = baseEnd.boxShadow;
+          tile.style.borderColor = baseEnd.borderColor;
+          tile.style.opacity = '1';
+          tile.style.filter = 'none';
+          tile.style.clipPath = '';
+
+          if (fill) {
+            fill.style.filter = 'none';
+            fill.style.clipPath = '';
+            fill.style.transform = 'none';
+            fill.style.backgroundPosition = 'center';
+          }
+        };
+
+        return anim;
+      }
 
       function measurePreviewRect() {
         const previewCard = previewOverlay.querySelector('.preview-card');
@@ -1711,10 +2323,21 @@ html { overflow-x: hidden; }
         lastOpenedCard = triggerElement;
         document.body.style.overflow = 'hidden';
         previewOverlay.setAttribute('aria-hidden', 'false');
-        runOpenMorph(card);
+        const profile = getOpenMorphProfileForCard(card);
+        currentMorphDuration = profile.duration;
+        currentMorphEasing = profile.easing;
+        // Sync overlay/card CSS variable timings to this open.
+        previewOverlay.style.setProperty('--preview-morph-duration', `${profile.duration}ms`);
+        previewOverlay.style.setProperty('--preview-morph-ease', profile.easing);
+        const previewCard = previewOverlay.querySelector('.preview-card');
+        if (previewCard) {
+          previewCard.style.setProperty('--preview-morph-duration', `${profile.duration}ms`);
+          previewCard.style.setProperty('--preview-morph-ease', profile.easing);
+        }
+        runOpenMorph(card, profile);
       }
 
-      function runOpenMorph(card) {
+      function runOpenMorph(card, profile) {
         return new Promise((resolve) => {
           const startRect = card.getBoundingClientRect();
           const previewCard = previewOverlay.querySelector('.preview-card');
@@ -1747,7 +2370,6 @@ html { overflow-x: hidden; }
 
           fill.style.transition = '';
           fill.style.opacity = '1';
-          fill.style.setProperty('--wipe', '0deg');
 
           let hasCrossfaded = false;
 
@@ -1772,10 +2394,11 @@ html { overflow-x: hidden; }
             if (hasCrossfaded) return;
             hasCrossfaded = true;
             previewCard.addEventListener('transitionend', handleCardFadeInEnd);
-            previewCard.style.transition = `opacity ${FILL_FADE_DURATION}ms ${PREVIEW_EASING}`;
-            fill.style.transition = `--wipe ${FILL_FADE_DURATION}ms ${PREVIEW_EASING}`;
+            previewCard.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
+            fill.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
             previewCard.style.opacity = '1';
-            fill.style.setProperty('--wipe', '360deg');
+            tile.classList.add('is-fade-out');
+            fill.style.opacity = '0';
 
             setTimeout(() => {
               previewCard.removeEventListener('transitionend', handleCardFadeInEnd);
@@ -1783,22 +2406,29 @@ html { overflow-x: hidden; }
             }, FILL_FADE_DURATION + 120);
           };
 
-          requestAnimationFrame(() => {
-            tile.offsetHeight;
-            moveTile(tile, startRect, endRect, targetRadius);
-          });
+                    const resolvedProfile = profile || getOpenMorphProfileForCard(card);
+          const previewShadow = getComputedStyle(previewCard).boxShadow;
+          const previewBorderColor = getComputedStyle(previewCard).borderColor;
 
-          const handleTransformEnd = (event) => {
-            if (event.propertyName !== 'transform') return;
-            tile.removeEventListener('transitionend', handleTransformEnd);
+          // Run per-card unique open morph (start/end geometry unchanged).
+          const tileAnim = animateOpenTile(
+            tile,
+            startRect,
+            endRect,
+            cardRadius,
+            targetRadius,
+            previewShadow,
+            previewBorderColor,
+            resolvedProfile
+          );
+
+          tileAnim.onfinish = () => {
             startCrossfade();
           };
 
-          tile.addEventListener('transitionend', handleTransformEnd);
           setTimeout(() => {
-            tile.removeEventListener('transitionend', handleTransformEnd);
             startCrossfade();
-          }, MORPH_DURATION + 100);
+          }, resolvedProfile.duration + 140);
         });
       }
 
@@ -1858,6 +2488,10 @@ html { overflow-x: hidden; }
 
         const targetRadius = getComputedStyle(lastOpenedCard).borderRadius;
 
+        // Keep close timing compatible with the last open profile.
+        tile.style.setProperty('--preview-morph-duration', `${currentMorphDuration}ms`);
+        tile.style.setProperty('--preview-morph-ease', currentMorphEasing);
+
         requestAnimationFrame(() => {
           tile.offsetHeight;
           moveTile(tile, previewCardRect, cardRect, targetRadius);
@@ -1880,7 +2514,7 @@ html { overflow-x: hidden; }
           if (lastOpenedCard && document.body.contains(lastOpenedCard)) {
             lastOpenedCard.focus();
           }
-        }, MORPH_DURATION);
+        }, currentMorphDuration);
       }
 
       previewCloseButton.addEventListener('click', () => {
@@ -1894,27 +2528,31 @@ html { overflow-x: hidden; }
         closePreview();
       });
 
-      a1Cards.forEach((card) => {
-        const previewButton = card.querySelector('.poster-preview-button');
+      document.addEventListener('click', (event) => {
+        const previewButton = event.target.closest('.poster-preview-button');
         if (!previewButton) return;
 
-        previewButton.addEventListener('click', (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          openPreviewFromCard(card, previewButton);
-        });
+        const card = previewButton.closest('.poster');
+        if (!card) return;
 
-        card.addEventListener('keydown', (event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            if (!previewOverlay.classList.contains('is-visible')) {
-              openPreviewFromCard(card, card);
-            }
-          }
-        });
-      });
+        event.preventDefault();
+        event.stopPropagation();
+        openPreviewFromCard(card, previewButton);
+      }, true);
 
       document.addEventListener('keydown', (event) => {
+        // Open preview from focused poster using Enter/Space.
+        if ((event.key === 'Enter' || event.key === ' ') && !previewOverlay.classList.contains('is-visible')) {
+          const active = document.activeElement;
+          const card = active ? active.closest('.poster[data-morph-id]') : null;
+          if (card) {
+            event.preventDefault();
+            openPreviewFromCard(card, card);
+          }
+        }
+      });
+
+document.addEventListener('keydown', (event) => {
         if ((event.key === 'Escape' || event.key === 'Esc') && previewOverlay.classList.contains('is-visible')) {
           event.preventDefault();
           closePreview();
@@ -1959,3 +2597,4 @@ html { overflow-x: hidden; }
 
 </body>
 </html>
+
