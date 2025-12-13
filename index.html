@@ -483,7 +483,7 @@ html { overflow-x: hidden; }
   transform-origin: top left;
   pointer-events: none;
   z-index: 12000;
-  background: transparent;
+  background: #05060a;
   overflow: hidden;
   border: var(--preview-frame-border);
   border-radius: var(--preview-frame-radius);
@@ -496,7 +496,9 @@ html { overflow-x: hidden; }
     border-radius var(--preview-morph-duration) var(--preview-morph-ease),
     box-shadow var(--preview-morph-duration) var(--preview-morph-ease),
     border-color var(--preview-morph-duration) var(--preview-morph-ease);
-  will-change: transform, opacity;
+  will-change: transform, opacity, width, height, border-radius;
+  backface-visibility: hidden;
+  transform: translate3d(0,0,0);
 }
 
 .preview-morph-fill {
@@ -505,8 +507,10 @@ html { overflow-x: hidden; }
   background: #000;
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   opacity: 1;
   transition: opacity var(--preview-morph-duration) var(--preview-morph-ease);
+  backface-visibility: hidden;
 }
 
 .preview-morph-tile.is-fade-out {
@@ -981,10 +985,8 @@ html { overflow-x: hidden; }
   @media (max-width: 640px) {
     .preview-card {
       max-width: 100%;
-      border-radius: 0;
+      border-radius: var(--preview-frame-radius);
       max-height: 100vh;
-      border-left: 0;
-      border-right: 0;
     }
 
     .preview-info {
