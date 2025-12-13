@@ -2288,8 +2288,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           const startRect = card.getBoundingClientRect();
           const previewCard = previewOverlay.querySelector('.preview-card');
           if (previewCard) {
-            previewCard.style.opacity = '0';
             previewCard.style.transition = '';
+            previewCard.style.opacity = '1';
+            previewCard.style.pointerEvents = 'none';
             previewCard.classList.remove('is-hidden');
           }
           const endRect = measurePreviewRect();
@@ -2306,7 +2307,7 @@ const previewOverlay = document.querySelector('.preview-overlay');
           previewOverlay.classList.add('is-visible');
           previewOverlay.setAttribute('aria-hidden', 'false');
           previewCard.classList.add('is-active');
-          previewCard.style.opacity = '0';
+          previewCard.style.opacity = '1';
           previewCard.style.pointerEvents = 'none';
           previewCard.style.transition = '';
           previewCard.style.transform = '';
@@ -2339,26 +2340,16 @@ const previewOverlay = document.querySelector('.preview-overlay');
             resolve();
           };
 
-          const handleCardFadeInEnd = (event) => {
-            if (event.propertyName !== 'opacity') return;
-            previewCard.removeEventListener('transitionend', handleCardFadeInEnd);
-            finishCrossfade();
-          };
-
           const startCrossfade = () => {
             if (hasCrossfaded) return;
             hasCrossfaded = true;
-            previewCard.addEventListener('transitionend', handleCardFadeInEnd);
-            previewCard.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
             tile.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
-            previewCard.style.opacity = '1';
             previewCard.style.pointerEvents = '';
             tile.style.opacity = '0';
 
             setTimeout(() => {
-              previewCard.removeEventListener('transitionend', handleCardFadeInEnd);
               finishCrossfade();
-            }, FILL_FADE_DURATION + 120);
+            }, FILL_FADE_DURATION + 80);
           };
 
           const resolvedProfile = profile || getOpenMorphProfileForCard(card);
