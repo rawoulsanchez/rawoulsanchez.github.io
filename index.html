@@ -2365,6 +2365,9 @@ const previewOverlay = document.querySelector('.preview-overlay');
           previewCard.style.transition = '';
           previewCard.style.transform = '';
 
+          const previewShadow = getComputedStyle(previewCard).boxShadow;
+          const previewBorderColor = getComputedStyle(previewCard).borderColor;
+
           const { tile, fill } = createGlowTileFromCard(card, startRect);
 
           const originalPreviewParent = previewCard.parentElement;
@@ -2443,9 +2446,7 @@ const previewOverlay = document.querySelector('.preview-overlay');
             }, FILL_FADE_DURATION + 120);
           };
 
-                    const resolvedProfile = profile || getOpenMorphProfileForCard(card);
-          const previewShadow = getComputedStyle(previewCard).boxShadow;
-          const previewBorderColor = getComputedStyle(previewCard).borderColor;
+          const resolvedProfile = profile || getOpenMorphProfileForCard(card);
 
           // Run per-card unique open morph (start/end geometry unchanged).
           const tileAnim = animateOpenTile(
