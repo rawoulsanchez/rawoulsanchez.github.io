@@ -338,6 +338,9 @@ main{
   }
   /* commit: no-horizontal-scroll */
 html { overflow-x: hidden; }
+/* ZAQ TASK — PREVIEW SCROLL LOCK: reserve scrollbar space to prevent layout shift */
+html { scrollbar-gutter: stable; }
+
 /* CTA row under the hero video */
 .hero-cta{
   display:grid;
@@ -1604,6 +1607,47 @@ const previewOverlay = document.querySelector('.preview-overlay');
       const PREVIEW_EASING = 'cubic-bezier(0.25, 0.1, 0.25, 1)';
       const FILL_FADE_DURATION = 220;
       let lastOpenedCard = null;
+
+      let scrollLockState = null;
+
+      function lockScroll() {
+        if (scrollLockState) return;
+        const docEl = document.documentElement;
+        const body = document.body;
+
+        scrollLockState = {
+          htmlOverflow: docEl.style.overflow,
+          bodyOverflow: body.style.overflow,
+          bodyPaddingRight: body.style.paddingRight
+        };
+
+        const supportsStableScrollbarGutter =
+          window.CSS && typeof CSS.supports === 'function' && CSS.supports('scrollbar-gutter: stable');
+
+        if (!supportsStableScrollbarGutter) {
+          const scrollbarWidth = window.innerWidth - docEl.clientWidth;
+          if (scrollbarWidth > 0) {
+            const computedPaddingRight = window.getComputedStyle(body).paddingRight;
+            const currentPadding = parseFloat(computedPaddingRight) || 0;
+            body.style.paddingRight = `${currentPadding + scrollbarWidth}px`;
+          }
+        }
+
+        docEl.style.overflow = 'hidden';
+        body.style.overflow = 'hidden';
+      }
+
+      function unlockScroll() {
+        if (!scrollLockState) return;
+        const docEl = document.documentElement;
+        const body = document.body;
+
+        docEl.style.overflow = scrollLockState.htmlOverflow;
+        body.style.overflow = scrollLockState.bodyOverflow;
+        body.style.paddingRight = scrollLockState.bodyPaddingRight;
+
+        scrollLockState = null;
+      }
       let activeMorphTile = null;
 
       let currentMorphDuration = MORPH_DURATION;
@@ -2314,6 +2358,12 @@ const previewOverlay = document.querySelector('.preview-overlay');
       }
 
       function openPreviewFromCard(card, triggerElement = card) {
+        // ZAQ TASK 1.8: Pause hero video when preview begins opening.
+        try {
+          if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+            ytPlayer.pauseVideo();
+          }
+        } catch (_) {}
         const title = card.dataset.title || 'Untitled';
         const runtime = card.dataset.runtime || 'TBD Runtime';
         const tags = card.dataset.tags || 'TBD Tags';
@@ -2325,7 +2375,7 @@ const previewOverlay = document.querySelector('.preview-overlay');
         previewDescriptionEl.textContent = description;
 
         lastOpenedCard = triggerElement;
-        document.body.style.overflow = 'hidden';
+        lockScroll();
         previewOverlay.setAttribute('aria-hidden', 'false');
         const profile = getOpenMorphProfileForCard(card);
         currentMorphDuration = profile.duration;
@@ -2490,7 +2540,8 @@ const previewOverlay = document.querySelector('.preview-overlay');
             activeMorphTile.parentNode.removeChild(activeMorphTile);
           }
           activeMorphTile = null;
-          document.body.style.overflow = '';
+          unlockScroll();
+          lastOpenedCard = null;
           return;
         }
         const cardRect = lastOpenedCard.getBoundingClientRect();
@@ -2549,12 +2600,14 @@ const previewOverlay = document.querySelector('.preview-overlay');
           if (activeMorphTile === tile) {
             activeMorphTile = null;
           }
+          activeMorphTile = null;
 
-          document.body.style.overflow = '';
+          unlockScroll();
 
           if (lastOpenedCard && document.body.contains(lastOpenedCard)) {
             lastOpenedCard.focus();
           }
+          lastOpenedCard = null;
         }, currentMorphDuration);
       }
 
@@ -2638,5 +2691,6 @@ document.addEventListener('keydown', (event) => {
 
 </body>
 </html>
+
 
 
