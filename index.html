@@ -1373,6 +1373,41 @@ html { scrollbar-gutter: stable; }
 
     let verticalCenterAnim = null; // { frameId, startY, targetY, startTime }
 
+    let verticalCenterPreserve = null; // { track, poster, hadTrackActiveClass }
+
+    function captureActiveStateForVerticalCenter(track) {
+      if (!track) return null;
+      const poster = track.querySelector('.poster.is-active');
+      return {
+        track,
+        poster,
+        hadTrackActiveClass: track.classList.contains('shelf-track--active')
+      };
+    }
+
+    function restoreActiveStateAfterVerticalCenter() {
+      if (!verticalCenterPreserve) return;
+
+      const { track, poster, hadTrackActiveClass } = verticalCenterPreserve;
+      verticalCenterPreserve = null;
+
+      if (hadTrackActiveClass && track) {
+        for (const t of shelfTracks) {
+          if (t !== track) t.classList.remove('shelf-track--active');
+        }
+        track.classList.add('shelf-track--active');
+        lastActiveTrack = track;
+      }
+
+      if (track && poster && track.contains(poster)) {
+        const actives = track.querySelectorAll('.poster.is-active');
+        for (const p of actives) {
+          if (p !== poster) p.classList.remove('is-active');
+        }
+        poster.classList.add('is-active');
+      }
+    }
+
     function cancelVerticalCenterAnimation() {
       if (verticalCenterAnim && typeof verticalCenterAnim.frameId === 'number') {
         cancelAnimationFrame(verticalCenterAnim.frameId);
@@ -1422,6 +1457,7 @@ html { scrollbar-gutter: stable; }
           verticalCenterAnim.frameId = requestAnimationFrame(step);
         } else {
           window.scrollTo(0, targetTop);
+          restoreActiveStateAfterVerticalCenter();
           cancelVerticalCenterAnimation();
         }
       }
@@ -1456,6 +1492,7 @@ html { scrollbar-gutter: stable; }
 
         if (Math.abs(targetTop - currentTop) < VERTICAL_CENTER_DEADZONE) return;
 
+        verticalCenterPreserve = captureActiveStateForVerticalCenter(t);
         animateWindowScrollToSoft(targetTop, VERTICAL_CENTER_DURATION);
       };
 
@@ -1520,6 +1557,10 @@ html { scrollbar-gutter: stable; }
         scheduleVerticalCenterAfterScrollSettles(closestTrack);
         recenterTrackActivePoster(closestTrack);
         recenterAllOtherTracks(closestTrack);
+      } else {
+        if (smallestDistance > VERTICAL_CENTER_DEADZONE) {
+          scheduleVerticalCenterAfterScrollSettles(closestTrack);
+        }
       }
     }
 
