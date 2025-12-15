@@ -1039,7 +1039,7 @@ html { scrollbar-gutter: stable; }
 /* ZAQ TASK — MOBILE BOTTOM SCROLL SPACE FOR LAST ROW */
 @media (max-width: 640px){
   main{
-    padding-bottom: min(40vh, 320px);
+    padding-bottom: var(--mobile-bottom-space, 0px);
   }
 }
 
@@ -1273,6 +1273,56 @@ html { scrollbar-gutter: stable; }
   // start disabled
   // document.body.classList.add('debug-gap');
 </script>
+
+<script>
+  // ZAQ TASK — TASK 3.3 (FIX): Dynamic Bottom Space Based on Footer Visibility (No Massive Gap)
+  (function(){
+    const DESIRED_GAP_PX = 32;
+    const MIN_SPACE = DESIRED_GAP_PX;
+    const MAX_SPACE = 160;
+
+    function getVisibleViewportHeight(){
+      return (window.visualViewport && typeof window.visualViewport.height === 'number')
+        ? window.visualViewport.height
+        : window.innerHeight;
+    }
+
+    function clamp(min, value, max){
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function updateMobileBottomSpace(){
+      const isMobile = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+      if (!isMobile) {
+        document.documentElement.style.setProperty('--mobile-bottom-space', '0px');
+        return;
+      }
+
+      const footer = document.querySelector('footer');
+      if (!footer) return;
+
+      const visibleH = getVisibleViewportHeight();
+      const layoutH = window.innerHeight;
+
+      // If the visible viewport is smaller than the layout viewport (mobile browser UI),
+      // add just enough extra space so the footer can fully enter the visible viewport.
+      let requiredSpace = (layoutH - visibleH) + DESIRED_GAP_PX;
+      if (!isFinite(requiredSpace) || requiredSpace < 0) requiredSpace = 0;
+
+      const clamped = clamp(MIN_SPACE, requiredSpace, MAX_SPACE);
+      document.documentElement.style.setProperty('--mobile-bottom-space', clamped + 'px');
+    }
+
+    window.addEventListener('load', updateMobileBottomSpace);
+    window.addEventListener('resize', updateMobileBottomSpace);
+    window.addEventListener('orientationchange', updateMobileBottomSpace);
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateMobileBottomSpace);
+    }
+  })();
+</script>
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     // Number of original sets to clone on each side for the infinite effect
