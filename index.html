@@ -1039,7 +1039,7 @@ html { scrollbar-gutter: stable; }
 /* ZAQ TASK — MOBILE BOTTOM SCROLL SPACE FOR LAST ROW */
 @media (max-width: 640px){
   main{
-    padding-bottom: var(--mobile-bottom-space, 0px);
+    padding-bottom: var(--mobile-bottom-space, 32px);
   }
 }
 
@@ -1275,50 +1275,27 @@ html { scrollbar-gutter: stable; }
 </script>
 
 <script>
-  // ZAQ TASK — TASK 3.3 (FIX): Dynamic Bottom Space Based on Footer Visibility (No Massive Gap)
+  // ZAQ TASK — TASK 3.3 (REWORK): Elastic Runner Band Bottom Space (Base init only)
   (function(){
-    const DESIRED_GAP_PX = 32;
-    const MIN_SPACE = DESIRED_GAP_PX;
-    const MAX_SPACE = 160;
+    const BASE_GAP_PX = 32;
 
-    function getVisibleViewportHeight(){
-      return (window.visualViewport && typeof window.visualViewport.height === 'number')
-        ? window.visualViewport.height
-        : window.innerHeight;
+    function isMobile(){
+      return window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
     }
 
-    function clamp(min, value, max){
-      return Math.min(max, Math.max(min, value));
+    function applyBaseBottomSpace(){
+      const value = isMobile() ? (BASE_GAP_PX + 'px') : '0px';
+      document.documentElement.style.setProperty('--mobile-bottom-space', value);
     }
 
-    function updateMobileBottomSpace(){
-      const isMobile = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
-      if (!isMobile) {
-        document.documentElement.style.setProperty('--mobile-bottom-space', '0px');
-        return;
-      }
+    window.addEventListener('load', applyBaseBottomSpace);
+    window.addEventListener('resize', applyBaseBottomSpace);
+    window.addEventListener('orientationchange', applyBaseBottomSpace);
 
-      const footer = document.querySelector('footer');
-      if (!footer) return;
-
-      const visibleH = getVisibleViewportHeight();
-      const layoutH = window.innerHeight;
-
-      // If the visible viewport is smaller than the layout viewport (mobile browser UI),
-      // add just enough extra space so the footer can fully enter the visible viewport.
-      let requiredSpace = (layoutH - visibleH) + DESIRED_GAP_PX;
-      if (!isFinite(requiredSpace) || requiredSpace < 0) requiredSpace = 0;
-
-      const clamped = clamp(MIN_SPACE, requiredSpace, MAX_SPACE);
-      document.documentElement.style.setProperty('--mobile-bottom-space', clamped + 'px');
-    }
-
-    window.addEventListener('load', updateMobileBottomSpace);
-    window.addEventListener('resize', updateMobileBottomSpace);
-    window.addEventListener('orientationchange', updateMobileBottomSpace);
-
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', updateMobileBottomSpace);
+    if (window.matchMedia) {
+      const mq = window.matchMedia('(max-width: 640px)');
+      if (mq && typeof mq.addEventListener === 'function') mq.addEventListener('change', applyBaseBottomSpace);
+      else if (mq && typeof mq.addListener === 'function') mq.addListener(applyBaseBottomSpace);
     }
   })();
 </script>
@@ -1425,6 +1402,48 @@ html { scrollbar-gutter: stable; }
     const VERTICAL_CENTER_DURATION = 1200; // ms (900–1400)
     const VERTICAL_CENTER_DEADZONE = 32; // px (24–40)
 
+
+    // ZAQ TASK — TASK 3.3 (REWORK): Elastic Runner Band Bottom Space (Mobile-only)
+    const BASE_GAP_PX = 32;
+    const MAX_ELASTIC_PX = 240;
+
+    function isMobileBottomSpace(){
+      return window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+    }
+
+    function setMobileBottomSpacePx(px){
+      document.documentElement.style.setProperty('--mobile-bottom-space', px + 'px');
+    }
+
+    function clamp(min, value, max){
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function resetMobileBottomSpaceToBase(){
+      if (!isMobileBottomSpace()) return;
+      setMobileBottomSpacePx(BASE_GAP_PX);
+    }
+
+    function applyElasticBottomSpaceForTargetTop(targetTop){
+      if (!isMobileBottomSpace()) return;
+
+      const maxScrollTop = (document.documentElement.scrollHeight - window.innerHeight);
+
+      if (typeof targetTop !== 'number' || !isFinite(targetTop) || typeof maxScrollTop !== 'number' || !isFinite(maxScrollTop)) {
+        setMobileBottomSpacePx(BASE_GAP_PX);
+        return;
+      }
+
+      if (targetTop > maxScrollTop) {
+        const extra = targetTop - maxScrollTop;
+        const desired = BASE_GAP_PX + extra;
+        const clamped = clamp(BASE_GAP_PX, desired, BASE_GAP_PX + MAX_ELASTIC_PX);
+        setMobileBottomSpacePx(clamped);
+      } else {
+        setMobileBottomSpacePx(BASE_GAP_PX);
+      }
+    }
+
     let verticalCenterTimeout = null;
     let lastWindowScrollEventAt = 0;
     let pendingVerticalCenterTrack = null;
@@ -1492,6 +1511,7 @@ html { scrollbar-gutter: stable; }
 
     function animateWindowScrollToSoft(targetTop, durationMs) {
       cancelVerticalCenterAnimation();
+      resetMobileBottomSpaceToBase();
 
       const startY = window.scrollY || window.pageYOffset || 0;
       const delta = targetTop - startY;
@@ -1517,6 +1537,8 @@ html { scrollbar-gutter: stable; }
           window.scrollTo(0, targetTop);
           restoreActiveStateAfterVerticalCenter();
           cancelVerticalCenterAnimation();
+      resetMobileBottomSpaceToBase();
+          resetMobileBottomSpaceToBase();
         }
       }
 
@@ -1550,8 +1572,10 @@ html { scrollbar-gutter: stable; }
 
         if (Math.abs(targetTop - currentTop) < VERTICAL_CENTER_DEADZONE) return;
 
+        applyElasticBottomSpaceForTargetTop(targetTop);
         verticalCenterPreserve = captureActiveStateForVerticalCenter(t);
         animateWindowScrollToSoft(targetTop, VERTICAL_CENTER_DURATION);
+        if (!verticalCenterAnim) resetMobileBottomSpaceToBase();
       };
 
       verticalCenterTimeout = setTimeout(checkAndRun, VERTICAL_CENTER_SETTLE_DELAY);
@@ -1561,6 +1585,7 @@ html { scrollbar-gutter: stable; }
     const cancelOnUserInput = (e) => {
       // Cancel only on input sources that indicate active user scroll/navigation intent.
       cancelVerticalCenterAnimation();
+      resetMobileBottomSpaceToBase();
 
       // Touch input should cancel only the active animation, not the pending scheduled centering.
       if (e && (e.type === 'touchstart' || e.type === 'touchmove')) {
