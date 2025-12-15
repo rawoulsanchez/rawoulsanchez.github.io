@@ -1462,10 +1462,15 @@ html { scrollbar-gutter: stable; }
       verticalCenterTimeout = setTimeout(checkAndRun, VERTICAL_CENTER_SETTLE_DELAY);
     }
 
-    // Cancel immediately on user input while the pull is happening
+        // Cancel immediately on user input while the pull is happening
     const cancelOnUserInput = (e) => {
       // Cancel only on input sources that indicate active user scroll/navigation intent.
       cancelVerticalCenterAnimation();
+
+      // Touch input should cancel only the active animation, not the pending scheduled centering.
+      if (e && (e.type === 'touchstart' || e.type === 'touchmove')) {
+        return;
+      }
 
       if (verticalCenterTimeout) {
         clearTimeout(verticalCenterTimeout);
