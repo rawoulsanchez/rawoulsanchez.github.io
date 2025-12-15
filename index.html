@@ -228,7 +228,8 @@ main{
   border-top:0;
 }
 
-.hero-video { position:absolute; inset:0; }
+.hero-video { position:absolute; inset:0; opacity:1; transition: opacity 400ms ease; }
+.hero-video.is-hero-fadeout{ opacity:0; }
 
 /* Cover + crop bottom WITHOUT clip-path */
 .hero-video iframe{
@@ -1601,6 +1602,85 @@ const previewOverlay = document.querySelector('.preview-overlay');
         !previewDescriptionEl
       ) {
         return;
+
+      // ZAQ TASK 1.9: Resume hero video on preview close with soft fades (visual + audio).
+      let heroAudioFadeInterval = null;
+
+      function cancelHeroAudioFade() {
+        if (heroAudioFadeInterval !== null) {
+          clearInterval(heroAudioFadeInterval);
+          heroAudioFadeInterval = null;
+        }
+      }
+
+      function resumeHeroAfterPreviewClose() {
+        // Run only after preview closes successfully.
+        if (typeof ytPlayer === 'undefined' || !ytPlayer) return;
+
+        const heroVisual = document.querySelector('.hero-video');
+        if (heroVisual) {
+          // Immediately fade out, then fade back in over CSS transition duration.
+          heroVisual.classList.add('is-hero-fadeout');
+        }
+
+        cancelHeroAudioFade();
+
+        try {
+          // Ensure playback resumes.
+          if (typeof ytPlayer.playVideo === 'function') {
+            ytPlayer.playVideo();
+          }
+
+          // Respect global mute state.
+          if (typeof isMuted !== 'undefined' && isMuted) {
+            if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
+          } else {
+            // Smooth audio ramp up using volume steps.
+            let targetVolume = 100;
+            try {
+              if (typeof ytPlayer.getVolume === 'function') {
+                const v = ytPlayer.getVolume();
+                if (typeof v === 'number' && isFinite(v)) targetVolume = v;
+              }
+            } catch (_) {}
+
+            const startVolume = 1;
+            const durationMs = 1400; // ~1.2–1.6s
+            const stepMs = 100;
+            const steps = Math.max(1, Math.round(durationMs / stepMs));
+            let step = 0;
+
+            try {
+              if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(startVolume);
+            } catch (_) {}
+
+            try {
+              if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
+            } catch (_) {}
+
+            heroAudioFadeInterval = setInterval(() => {
+              step += 1;
+              const t = Math.min(step / steps, 1);
+              const vol = Math.round(startVolume + (targetVolume - startVolume) * t);
+              try {
+                if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(vol);
+              } catch (_) {}
+              if (t >= 1) {
+                cancelHeroAudioFade();
+              }
+            }, stepMs);
+          }
+        } catch (_) {}
+
+        if (heroVisual) {
+          requestAnimationFrame(() => {
+            // Ensure the "faded out" state is applied before transitioning to visible.
+            heroVisual.offsetHeight;
+            heroVisual.classList.remove('is-hero-fadeout');
+          });
+        }
+      }
+
       }
 
       const MORPH_DURATION = 520;
@@ -2542,6 +2622,7 @@ const previewOverlay = document.querySelector('.preview-overlay');
           activeMorphTile = null;
           unlockScroll();
           lastOpenedCard = null;
+          resumeHeroAfterPreviewClose();
           return;
         }
         const cardRect = lastOpenedCard.getBoundingClientRect();
@@ -2608,6 +2689,7 @@ const previewOverlay = document.querySelector('.preview-overlay');
             lastOpenedCard.focus();
           }
           lastOpenedCard = null;
+          resumeHeroAfterPreviewClose();
         }, currentMorphDuration);
       }
 
