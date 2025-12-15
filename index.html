@@ -1412,6 +1412,14 @@ html { scrollbar-gutter: stable; }
 
     let verticalCenterViewportHeightSnapshot = null;
 
+    // ZAQ TASK — iOS Safari: suppress active-row updates during visualViewport resize bursts
+    let suppressActiveTrackUpdatesUntil = 0;
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        suppressActiveTrackUpdatesUntil = performance.now() + 250;
+      }, { passive: true });
+    }
+
 
     // ZAQ TASK — TASK 3.3 (REWORK): Elastic Runner Band Bottom Space (Mobile-only)
     const BASE_GAP_PX = 32;
@@ -1640,7 +1648,7 @@ html { scrollbar-gutter: stable; }
 
       let closestTrack = null;
       let smallestDistance = Infinity;
-      const viewportCenterY = window.innerHeight / 2;
+      const viewportCenterY = getViewportHeight() / 2;
 
       for (const track of shelfTracks) {
         const rect = track.getBoundingClientRect();
@@ -1676,6 +1684,7 @@ html { scrollbar-gutter: stable; }
 
     window.addEventListener('scroll', () => {
       lastWindowScrollEventAt = performance.now();
+      if (performance.now() < suppressActiveTrackUpdatesUntil) return;
       if (windowScrollRaf !== null) return;
       windowScrollRaf = requestAnimationFrame(() => {
         windowScrollRaf = null;
