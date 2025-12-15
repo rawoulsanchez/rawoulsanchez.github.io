@@ -1363,9 +1363,14 @@ html { scrollbar-gutter: stable; }
     let windowScrollRaf = null;
 
     // ZAQ TASK — SOFT-PULL VERTICAL ROW CENTERING (REDUCE JUMP)
-    const VERTICAL_CENTER_SETTLE_DELAY = 180; // ms (140–220)
+    const VERTICAL_CENTER_SETTLE_DELAY = 100; // ms (140–220)
     const VERTICAL_CENTER_DURATION = 1200; // ms (900–1400)
-    const VERTICAL_CENTER_DEADZONE = 32; // px (24–40)
+    const VERTICAL_CENTER_DEADZONE = 12; // px (24–40)
+
+    function clamp(min, max, v) {
+      return Math.max(min, Math.min(max, v));
+    }
+
 
     let verticalCenterTimeout = null;
     let lastWindowScrollEventAt = 0;
@@ -1456,8 +1461,14 @@ html { scrollbar-gutter: stable; }
 
         if (Math.abs(targetTop - currentTop) < VERTICAL_CENTER_DEADZONE) return;
 
-        animateWindowScrollToSoft(targetTop, VERTICAL_CENTER_DURATION);
-      };
+        const delta = targetTop - currentTop;
+
+
+        const durationMs = clamp(280, 1200, Math.abs(delta) * 2.2);
+
+
+        animateWindowScrollToSoft(targetTop, durationMs);
+};
 
       verticalCenterTimeout = setTimeout(checkAndRun, VERTICAL_CENTER_SETTLE_DELAY);
     }
