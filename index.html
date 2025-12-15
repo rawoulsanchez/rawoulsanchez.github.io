@@ -1410,7 +1410,35 @@ html { scrollbar-gutter: stable; }
         : window.innerHeight;
     }
 
-    let verticalCenterViewportHeightSnapshot = null;
+    
+    function isMobileViewport(){
+      return window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+    }
+
+    let mobileInstantCenterSuppressUntil = 0;
+
+    function centerTrackImmediatelyOnMobile(track){
+      if (!track) return;
+
+      const now = performance.now();
+      if (now < mobileInstantCenterSuppressUntil) return;
+      mobileInstantCenterSuppressUntil = now + 180;
+
+      if (verticalCenterTimeout) {
+        clearTimeout(verticalCenterTimeout);
+        verticalCenterTimeout = null;
+      }
+      pendingVerticalCenterTrack = null;
+
+      cancelVerticalCenterAnimation();
+      verticalCenterViewportHeightSnapshot = getViewportHeight();
+
+      const targetTop = computeVerticalCenterTargetTop(track);
+      applyElasticBottomSpaceForTargetTop(targetTop);
+      window.scrollTo(0, targetTop);
+    }
+
+let verticalCenterViewportHeightSnapshot = null;
 
     // ZAQ TASK — iOS Safari: suppress active-row updates during visualViewport resize bursts
     let suppressActiveTrackUpdatesUntil = 0;
@@ -1572,6 +1600,7 @@ html { scrollbar-gutter: stable; }
     }
 
     function scheduleVerticalCenterAfterScrollSettles(track) {
+      if (isMobileViewport()) return;
       pendingVerticalCenterTrack = track;
 
       if (verticalCenterTimeout) {
@@ -1672,11 +1701,15 @@ html { scrollbar-gutter: stable; }
       lastActiveTrack = closestTrack;
 
       if (previousActiveTrack !== closestTrack) {
-        scheduleVerticalCenterAfterScrollSettles(closestTrack);
+        if (isMobileViewport()) {
+          centerTrackImmediatelyOnMobile(closestTrack);
+        } else {
+          scheduleVerticalCenterAfterScrollSettles(closestTrack);
+        }
         recenterTrackActivePoster(closestTrack);
         recenterAllOtherTracks(closestTrack);
       } else {
-        if (smallestDistance > VERTICAL_CENTER_DEADZONE) {
+        if (!isMobileViewport() && smallestDistance > VERTICAL_CENTER_DEADZONE) {
           scheduleVerticalCenterAfterScrollSettles(closestTrack);
         }
       }
