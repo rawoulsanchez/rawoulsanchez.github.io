@@ -1362,6 +1362,127 @@ html { scrollbar-gutter: stable; }
 
     let windowScrollRaf = null;
 
+    // ZAQ TASK — SOFT-PULL VERTICAL ROW CENTERING (REDUCE JUMP)
+    const VERTICAL_CENTER_SETTLE_DELAY = 180; // ms (140–220)
+    const VERTICAL_CENTER_DURATION = 1200; // ms (900–1400)
+    const VERTICAL_CENTER_DEADZONE = 32; // px (24–40)
+
+    let verticalCenterTimeout = null;
+    let lastWindowScrollEventAt = 0;
+    let pendingVerticalCenterTrack = null;
+
+    let verticalCenterAnim = null; // { frameId, startY, targetY, startTime }
+
+    function cancelVerticalCenterAnimation() {
+      if (verticalCenterAnim && typeof verticalCenterAnim.frameId === 'number') {
+        cancelAnimationFrame(verticalCenterAnim.frameId);
+      }
+      verticalCenterAnim = null;
+    }
+
+    function easeInOutSmootherStep(t) {
+      // "smootherstep": t^3 * (t * (6t - 15) + 10)
+      if (t <= 0) return 0;
+      if (t >= 1) return 1;
+      return t * t * t * (t * (6 * t - 15) + 10);
+    }
+
+    function computeVerticalCenterTargetTop(track) {
+      const rect = track.getBoundingClientRect();
+      const scrollTop = window.scrollY || window.pageYOffset || 0;
+
+      const trackCenterY = (rect.top + scrollTop) + (rect.height / 2);
+      const viewportCenterY = scrollTop + (window.innerHeight / 2);
+
+      return scrollTop + (trackCenterY - viewportCenterY);
+    }
+
+    function animateWindowScrollToSoft(targetTop, durationMs) {
+      cancelVerticalCenterAnimation();
+
+      const startY = window.scrollY || window.pageYOffset || 0;
+      const delta = targetTop - startY;
+
+      if (Math.abs(delta) < VERTICAL_CENTER_DEADZONE || durationMs <= 0) return;
+
+      const startTime = performance.now();
+
+      function step(now) {
+        const elapsed = now - startTime;
+        let t = elapsed / durationMs;
+        if (t < 0) t = 0;
+        if (t > 1) t = 1;
+
+        const eased = easeInOutSmootherStep(t);
+        const nextY = startY + delta * eased;
+
+        window.scrollTo(0, nextY);
+
+        if (t < 1 && verticalCenterAnim && verticalCenterAnim.step === step) {
+          verticalCenterAnim.frameId = requestAnimationFrame(step);
+        } else {
+          window.scrollTo(0, targetTop);
+          cancelVerticalCenterAnimation();
+        }
+      }
+
+      verticalCenterAnim = { frameId: requestAnimationFrame(step), step, startY, targetY: targetTop, startTime };
+    }
+
+    function scheduleVerticalCenterAfterScrollSettles(track) {
+      pendingVerticalCenterTrack = track;
+
+      if (verticalCenterTimeout) {
+        clearTimeout(verticalCenterTimeout);
+        verticalCenterTimeout = null;
+      }
+
+      const checkAndRun = () => {
+        const now = performance.now();
+        const sinceLastScroll = now - lastWindowScrollEventAt;
+
+        if (sinceLastScroll < VERTICAL_CENTER_SETTLE_DELAY) {
+          verticalCenterTimeout = setTimeout(checkAndRun, VERTICAL_CENTER_SETTLE_DELAY - sinceLastScroll);
+          return;
+        }
+
+        const t = pendingVerticalCenterTrack;
+        pendingVerticalCenterTrack = null;
+
+        if (!t) return;
+
+        const targetTop = computeVerticalCenterTargetTop(t);
+        const currentTop = window.scrollY || window.pageYOffset || 0;
+
+        if (Math.abs(targetTop - currentTop) < VERTICAL_CENTER_DEADZONE) return;
+
+        animateWindowScrollToSoft(targetTop, VERTICAL_CENTER_DURATION);
+      };
+
+      verticalCenterTimeout = setTimeout(checkAndRun, VERTICAL_CENTER_SETTLE_DELAY);
+    }
+
+    // Cancel immediately on user input while the pull is happening
+    const cancelOnUserInput = (e) => {
+      // Cancel only on input sources that indicate active user scroll/navigation intent.
+      cancelVerticalCenterAnimation();
+
+      if (verticalCenterTimeout) {
+        clearTimeout(verticalCenterTimeout);
+        verticalCenterTimeout = null;
+      }
+    };
+
+    window.addEventListener('wheel', cancelOnUserInput, { passive: true });
+    window.addEventListener('touchstart', cancelOnUserInput, { passive: true });
+    window.addEventListener('touchmove', cancelOnUserInput, { passive: true });
+    window.addEventListener('keydown', (e) => {
+      const k = e.key;
+      if (k === 'ArrowUp' || k === 'ArrowDown' || k === 'PageUp' || k === 'PageDown' || k === 'Home' || k === 'End' || k === ' ') {
+        cancelOnUserInput(e);
+      }
+    }, { passive: true });
+
     function updateActiveTrackFromWindowScroll() {
       if (!shelfTracks.length) return;
 
@@ -1391,12 +1512,14 @@ html { scrollbar-gutter: stable; }
       lastActiveTrack = closestTrack;
 
       if (previousActiveTrack !== closestTrack) {
+        scheduleVerticalCenterAfterScrollSettles(closestTrack);
         recenterTrackActivePoster(closestTrack);
         recenterAllOtherTracks(closestTrack);
       }
     }
 
     window.addEventListener('scroll', () => {
+      lastWindowScrollEventAt = performance.now();
       if (windowScrollRaf !== null) return;
       windowScrollRaf = requestAnimationFrame(() => {
         windowScrollRaf = null;
