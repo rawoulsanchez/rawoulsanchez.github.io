@@ -1,4 +1,5 @@
 
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -1402,6 +1403,15 @@ html { scrollbar-gutter: stable; }
     const VERTICAL_CENTER_DURATION = 1200; // ms (900–1400)
     const VERTICAL_CENTER_DEADZONE = 32; // px (24–40)
 
+    // ZAQ TASK — iOS Safari viewport height stabilization (vertical centering)
+    function getViewportHeight(){
+      return (window.visualViewport && typeof window.visualViewport.height === 'number')
+        ? window.visualViewport.height
+        : window.innerHeight;
+    }
+
+    let verticalCenterViewportHeightSnapshot = null;
+
 
     // ZAQ TASK — TASK 3.3 (REWORK): Elastic Runner Band Bottom Space (Mobile-only)
     const BASE_GAP_PX = 32;
@@ -1427,7 +1437,8 @@ html { scrollbar-gutter: stable; }
     function applyElasticBottomSpaceForTargetTop(targetTop){
       if (!isMobileBottomSpace()) return;
 
-      const maxScrollTop = (document.documentElement.scrollHeight - window.innerHeight);
+      const snapshotHeight = verticalCenterViewportHeightSnapshot ?? getViewportHeight();
+      const maxScrollTop = (document.documentElement.scrollHeight - snapshotHeight);
 
       if (typeof targetTop !== 'number' || !isFinite(targetTop) || typeof maxScrollTop !== 'number' || !isFinite(maxScrollTop)) {
         setMobileBottomSpacePx(BASE_GAP_PX);
@@ -1486,10 +1497,16 @@ html { scrollbar-gutter: stable; }
     }
 
     function cancelVerticalCenterAnimation() {
+      const hadAnim = !!verticalCenterAnim;
+
       if (verticalCenterAnim && typeof verticalCenterAnim.frameId === 'number') {
         cancelAnimationFrame(verticalCenterAnim.frameId);
       }
       verticalCenterAnim = null;
+
+      if (hadAnim) {
+        verticalCenterViewportHeightSnapshot = null;
+      }
     }
 
     function easeInOutSmootherStep(t) {
@@ -1504,7 +1521,8 @@ html { scrollbar-gutter: stable; }
       const scrollTop = window.scrollY || window.pageYOffset || 0;
 
       const trackCenterY = (rect.top + scrollTop) + (rect.height / 2);
-      const viewportCenterY = scrollTop + (window.innerHeight / 2);
+      const snapshotHeight = verticalCenterViewportHeightSnapshot ?? getViewportHeight();
+      const viewportCenterY = scrollTop + (snapshotHeight / 2);
 
       return scrollTop + (trackCenterY - viewportCenterY);
     }
@@ -1567,15 +1585,24 @@ html { scrollbar-gutter: stable; }
 
         if (!t) return;
 
+        cancelVerticalCenterAnimation();
+        verticalCenterViewportHeightSnapshot = getViewportHeight();
+
         const targetTop = computeVerticalCenterTargetTop(t);
         const currentTop = window.scrollY || window.pageYOffset || 0;
 
-        if (Math.abs(targetTop - currentTop) < VERTICAL_CENTER_DEADZONE) return;
+        if (Math.abs(targetTop - currentTop) < VERTICAL_CENTER_DEADZONE) {
+          verticalCenterViewportHeightSnapshot = null;
+          return;
+        }
 
         applyElasticBottomSpaceForTargetTop(targetTop);
         verticalCenterPreserve = captureActiveStateForVerticalCenter(t);
         animateWindowScrollToSoft(targetTop, VERTICAL_CENTER_DURATION);
-        if (!verticalCenterAnim) resetMobileBottomSpaceToBase();
+        if (!verticalCenterAnim) {
+          verticalCenterViewportHeightSnapshot = null;
+          resetMobileBottomSpaceToBase();
+        }
       };
 
       verticalCenterTimeout = setTimeout(checkAndRun, VERTICAL_CENTER_SETTLE_DELAY);
@@ -3064,6 +3091,7 @@ document.addEventListener('keydown', (event) => {
 
 </body>
 </html>
+
 
 
 
