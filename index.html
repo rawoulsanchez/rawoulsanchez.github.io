@@ -1037,13 +1037,13 @@ html { scrollbar-gutter: stable; }
   }
 
 
-/* ZAQ TASK — MOBILE BOTTOM SCROLL SPACE FOR LAST ROW */
+/* ZAQ TASK — MOBILE ELASTIC BOTTOM SPACE (SPACER-BASED) */
+#elastic-bottom-spacer{ height:0px; }
 @media (max-width: 640px){
-  main{
-    padding-bottom: calc(50vh + env(safe-area-inset-bottom));
+  #elastic-bottom-spacer{
+    height: var(--mobile-elastic-space, 32px);
   }
 }
-
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1214,6 +1214,9 @@ html { scrollbar-gutter: stable; }
 </section>
 <!-- OLD: </div> -->
 
+
+    <div id="elastic-bottom-spacer" aria-hidden="true"></div>
+
   </main>
 
   <footer>
@@ -1276,6 +1279,7 @@ html { scrollbar-gutter: stable; }
 </script>
 
 <script>
+  <script>
   // ZAQ TASK — TASK 3.3 (REWORK): Elastic Runner Band Bottom Space (Base init only)
   (function(){
     const BASE_GAP_PX = 32;
@@ -1285,7 +1289,10 @@ html { scrollbar-gutter: stable; }
     }
 
     function applyBaseBottomSpace(){
-      if (isMobile()) return;
+      const elasticValue = isMobile() ? (BASE_GAP_PX + 'px') : '0px';
+      document.documentElement.style.setProperty('--mobile-elastic-space', elasticValue);
+
+      // Legacy variable kept non-interfering (padding-bottom no longer uses it)
       document.documentElement.style.setProperty('--mobile-bottom-space', '0px');
     }
 
@@ -1435,48 +1442,137 @@ let verticalCenterViewportHeightSnapshot = null;
 
 
     // ZAQ TASK — TASK 3.3 (REWORK): Elastic Runner Band Bottom Space (Mobile-only)
-    const BASE_GAP_PX = 32;
-    const MAX_ELASTIC_PX = 240;
+const BASE_GAP_PX = 32;
+const MAX_ELASTIC_PX = 240;
 
-    function isMobileBottomSpace(){
-      return false;
+const elasticSpacer = document.getElementById('elastic-bottom-spacer');
+
+function isMobileBottomSpace(){
+  return window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+}
+
+function setMobileBottomSpacePx(px){
+  // Primary mechanism: bottom spacer height via CSS variable
+  document.documentElement.style.setProperty('--mobile-elastic-space', px + 'px');
+
+  // Legacy variable kept non-interfering
+  document.documentElement.style.setProperty('--mobile-bottom-space', '0px');
+}
+
+function clamp(min, value, max){
+  return Math.min(max, Math.max(min, value));
+}
+
+function resetMobileBottomSpaceToBase(){
+  if (!isMobileBottomSpace()) return;
+  setMobileBottomSpacePx(BASE_GAP_PX);
+}
+
+function getMobileBottomSpacePx(){
+  const raw = getComputedStyle(document.documentElement).getPropertyValue('--mobile-elastic-space');
+  const n = parseFloat(raw);
+  return (typeof n === 'number' && isFinite(n)) ? n : BASE_GAP_PX;
+}
+
+function applyElasticBottomSpaceForTargetTop(targetTop){
+  if (!isMobileBottomSpace()) return;
+  if (!elasticSpacer) return;
+
+  const snapshotHeight = verticalCenterViewportHeightSnapshot ?? getViewportHeight();
+  const maxScrollTop = (document.documentElement.scrollHeight - snapshotHeight);
+
+  if (typeof targetTop !== 'number' || !isFinite(targetTop) || typeof maxScrollTop !== 'number' || !isFinite(maxScrollTop)) {
+    setMobileBottomSpacePx(BASE_GAP_PX);
+    return;
+  }
+
+  const currentSpace = getMobileBottomSpacePx();
+
+  if (targetTop > maxScrollTop) {
+    const needed = targetTop - maxScrollTop;
+    const desired = currentSpace + needed;
+    const clamped = clamp(BASE_GAP_PX, desired, BASE_GAP_PX + MAX_ELASTIC_PX);
+    setMobileBottomSpacePx(clamped);
+  } else {
+    setMobileBottomSpacePx(BASE_GAP_PX);
+  }
+}
+
+// ZAQ TASK — MOBILE-ONLY ELASTIC BOTTOM SCROLL ROOM (LAST ROW CENTERING) — SPACER-BASED
+let mobileElasticLastScrollY = null;
+let mobileElasticAdjusting = false;
+let mobileElasticBottomEngaged = false;
+
+function handleMobileElasticBottomScrollRoom(){
+  if (!isMobileBottomSpace()) {
+    setMobileBottomSpacePx(0);
+    mobileElasticLastScrollY = null;
+    mobileElasticBottomEngaged = false;
+    return;
+  }
+  if (!elasticSpacer) return;
+  if (!shelfTracks || !shelfTracks.length) return;
+  if (mobileElasticAdjusting) return;
+
+  const y = window.scrollY || window.pageYOffset || 0;
+  const currentSpace = getMobileBottomSpacePx();
+
+  if (mobileElasticLastScrollY === null) mobileElasticLastScrollY = y;
+
+  // Collapse priority: consume upward scroll by collapsing elastic space first.
+  if (y < mobileElasticLastScrollY && currentSpace > BASE_GAP_PX) {
+    const deltaUp = mobileElasticLastScrollY - y;
+    const reducible = currentSpace - BASE_GAP_PX;
+    const consume = Math.min(deltaUp, reducible);
+
+    if (consume > 0) {
+      setMobileBottomSpacePx(currentSpace - consume);
+
+      mobileElasticAdjusting = true;
+      window.scrollTo(0, y + consume);
+      mobileElasticAdjusting = false;
+
+      mobileElasticLastScrollY = y + consume;
+      mobileElasticBottomEngaged = false;
+      return;
     }
+  }
 
-    function setMobileBottomSpacePx(px){
-      document.documentElement.style.setProperty('--mobile-bottom-space', px + 'px');
-    }
+  const prevY = mobileElasticLastScrollY;
+  mobileElasticLastScrollY = y;
 
-    function clamp(min, value, max){
-      return Math.min(max, Math.max(min, value));
-    }
+  // Detect bottom engagement BEFORE any adjustment.
+  const vh = getViewportHeight();
+  const maxScrollTop = document.documentElement.scrollHeight - vh;
+  const bottomDistance = maxScrollTop - y;
+  const NEAR_BOTTOM_PX = 48;
 
-    function resetMobileBottomSpaceToBase(){
-      if (!isMobileBottomSpace()) return;
-      setMobileBottomSpacePx(BASE_GAP_PX);
-    }
+  if (bottomDistance <= NEAR_BOTTOM_PX) {
+    mobileElasticBottomEngaged = true;
+  } else if (y < prevY) {
+    mobileElasticBottomEngaged = false;
+  }
 
-    function applyElasticBottomSpaceForTargetTop(targetTop){
-      if (!isMobileBottomSpace()) return;
+  // Only open elastic space at/near the bottom, and only as much as needed.
+  if (mobileElasticBottomEngaged) {
+    const lastTrack = shelfTracks[shelfTracks.length - 1];
+    if (!lastTrack) return;
 
-      const snapshotHeight = verticalCenterViewportHeightSnapshot ?? getViewportHeight();
-      const maxScrollTop = (document.documentElement.scrollHeight - snapshotHeight);
+    const targetTop = computeVerticalCenterTargetTop(lastTrack);
+    applyElasticBottomSpaceForTargetTop(targetTop);
+  } else {
+    // No permanent layout change: return to base away from bottom.
+    if (currentSpace !== BASE_GAP_PX) setMobileBottomSpacePx(BASE_GAP_PX);
+  }
+}
 
-      if (typeof targetTop !== 'number' || !isFinite(targetTop) || typeof maxScrollTop !== 'number' || !isFinite(maxScrollTop)) {
-        setMobileBottomSpacePx(BASE_GAP_PX);
-        return;
-      }
-
-      if (targetTop > maxScrollTop) {
-        const extra = targetTop - maxScrollTop;
-        const desired = BASE_GAP_PX + extra;
-        const clamped = clamp(BASE_GAP_PX, desired, BASE_GAP_PX + MAX_ELASTIC_PX);
-        setMobileBottomSpacePx(clamped);
-      } else {
-        setMobileBottomSpacePx(BASE_GAP_PX);
-      }
-    }
-
-    let verticalCenterTimeout = null;
+window.addEventListener('scroll', handleMobileElasticBottomScrollRoom, { passive: true });
+window.addEventListener('resize', handleMobileElasticBottomScrollRoom, { passive: true });
+window.addEventListener('orientationchange', handleMobileElasticBottomScrollRoom, { passive: true });
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', handleMobileElasticBottomScrollRoom, { passive: true });
+}
+let verticalCenterTimeout = null;
     let lastWindowScrollEventAt = 0;
     let pendingVerticalCenterTrack = null;
 
