@@ -1040,7 +1040,7 @@ html { scrollbar-gutter: stable; }
 /* ZAQ TASK — MOBILE BOTTOM SCROLL SPACE FOR LAST ROW */
 @media (max-width: 640px){
   main{
-    padding-bottom: var(--mobile-bottom-space, 32px);
+    padding-bottom: calc(50vh + env(safe-area-inset-bottom));
   }
 }
 
@@ -1285,8 +1285,8 @@ html { scrollbar-gutter: stable; }
     }
 
     function applyBaseBottomSpace(){
-      const value = isMobile() ? (BASE_GAP_PX + 'px') : '0px';
-      document.documentElement.style.setProperty('--mobile-bottom-space', value);
+      if (isMobile()) return;
+      document.documentElement.style.setProperty('--mobile-bottom-space', '0px');
     }
 
     window.addEventListener('load', applyBaseBottomSpace);
@@ -1439,7 +1439,7 @@ let verticalCenterViewportHeightSnapshot = null;
     const MAX_ELASTIC_PX = 240;
 
     function isMobileBottomSpace(){
-      return window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+      return false;
     }
 
     function setMobileBottomSpacePx(px){
