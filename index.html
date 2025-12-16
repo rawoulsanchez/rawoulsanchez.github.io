@@ -1,4 +1,5 @@
 
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -1035,6 +1036,14 @@ html { scrollbar-gutter: stable; }
     transform: translateX(-50%) scale(1.05);
   }
 
+
+/* ZAQ TASK — MOBILE BOTTOM SCROLL SPACE FOR LAST ROW */
+@media (max-width: 640px){
+  main{
+    padding-bottom: var(--mobile-bottom-space, 32px);
+  }
+}
+
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1265,6 +1274,33 @@ html { scrollbar-gutter: stable; }
   // start disabled
   // document.body.classList.add('debug-gap');
 </script>
+
+<script>
+  // ZAQ TASK — TASK 3.3 (REWORK): Elastic Runner Band Bottom Space (Base init only)
+  (function(){
+    const BASE_GAP_PX = 32;
+
+    function isMobile(){
+      return window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+    }
+
+    function applyBaseBottomSpace(){
+      const value = isMobile() ? (BASE_GAP_PX + 'px') : '0px';
+      document.documentElement.style.setProperty('--mobile-bottom-space', value);
+    }
+
+    window.addEventListener('load', applyBaseBottomSpace);
+    window.addEventListener('resize', applyBaseBottomSpace);
+    window.addEventListener('orientationchange', applyBaseBottomSpace);
+
+    if (window.matchMedia) {
+      const mq = window.matchMedia('(max-width: 640px)');
+      if (mq && typeof mq.addEventListener === 'function') mq.addEventListener('change', applyBaseBottomSpace);
+      else if (mq && typeof mq.addListener === 'function') mq.addListener(applyBaseBottomSpace);
+    }
+  })();
+</script>
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     // Number of original sets to clone on each side for the infinite effect
@@ -1366,6 +1402,79 @@ html { scrollbar-gutter: stable; }
     const VERTICAL_CENTER_SETTLE_DELAY = 180; // ms (140–220)
     const VERTICAL_CENTER_DURATION = 1200; // ms (900–1400)
     const VERTICAL_CENTER_DEADZONE = 32; // px (24–40)
+    const MOBILE_VERTICAL_CENTER_DURATION = 280; // ms
+
+    // ZAQ TASK — iOS Safari viewport height stabilization (vertical centering)
+    function getViewportHeight(){
+      return (window.visualViewport && typeof window.visualViewport.height === 'number')
+        ? window.visualViewport.height
+        : window.innerHeight;
+    }
+
+    
+    function isMobileViewport(){
+      return window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+    }
+
+    let mobileInstantCenterSuppressUntil = 0;
+
+    function centerTrackImmediatelyOnMobile(track){
+      if (!track) return;
+      return;
+    }
+
+let verticalCenterViewportHeightSnapshot = null;
+
+    // ZAQ TASK — iOS Safari: suppress active-row updates during visualViewport resize bursts
+    let suppressActiveTrackUpdatesUntil = 0;
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        suppressActiveTrackUpdatesUntil = performance.now() + 250;
+      }, { passive: true });
+    }
+
+
+    // ZAQ TASK — TASK 3.3 (REWORK): Elastic Runner Band Bottom Space (Mobile-only)
+    const BASE_GAP_PX = 32;
+    const MAX_ELASTIC_PX = 240;
+
+    function isMobileBottomSpace(){
+      return window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+    }
+
+    function setMobileBottomSpacePx(px){
+      document.documentElement.style.setProperty('--mobile-bottom-space', px + 'px');
+    }
+
+    function clamp(min, value, max){
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function resetMobileBottomSpaceToBase(){
+      if (!isMobileBottomSpace()) return;
+      setMobileBottomSpacePx(BASE_GAP_PX);
+    }
+
+    function applyElasticBottomSpaceForTargetTop(targetTop){
+      if (!isMobileBottomSpace()) return;
+
+      const snapshotHeight = verticalCenterViewportHeightSnapshot ?? getViewportHeight();
+      const maxScrollTop = (document.documentElement.scrollHeight - snapshotHeight);
+
+      if (typeof targetTop !== 'number' || !isFinite(targetTop) || typeof maxScrollTop !== 'number' || !isFinite(maxScrollTop)) {
+        setMobileBottomSpacePx(BASE_GAP_PX);
+        return;
+      }
+
+      if (targetTop > maxScrollTop) {
+        const extra = targetTop - maxScrollTop;
+        const desired = BASE_GAP_PX + extra;
+        const clamped = clamp(BASE_GAP_PX, desired, BASE_GAP_PX + MAX_ELASTIC_PX);
+        setMobileBottomSpacePx(clamped);
+      } else {
+        setMobileBottomSpacePx(BASE_GAP_PX);
+      }
+    }
 
     let verticalCenterTimeout = null;
     let lastWindowScrollEventAt = 0;
@@ -1373,11 +1482,52 @@ html { scrollbar-gutter: stable; }
 
     let verticalCenterAnim = null; // { frameId, startY, targetY, startTime }
 
+    let verticalCenterPreserve = null; // { track, poster, hadTrackActiveClass }
+
+    function captureActiveStateForVerticalCenter(track) {
+      if (!track) return null;
+      const poster = track.querySelector('.poster.is-active');
+      return {
+        track,
+        poster,
+        hadTrackActiveClass: track.classList.contains('shelf-track--active')
+      };
+    }
+
+    function restoreActiveStateAfterVerticalCenter() {
+      if (!verticalCenterPreserve) return;
+
+      const { track, poster, hadTrackActiveClass } = verticalCenterPreserve;
+      verticalCenterPreserve = null;
+
+      if (hadTrackActiveClass && track) {
+        for (const t of shelfTracks) {
+          if (t !== track) t.classList.remove('shelf-track--active');
+        }
+        track.classList.add('shelf-track--active');
+        lastActiveTrack = track;
+      }
+
+      if (track && poster && track.contains(poster)) {
+        const actives = track.querySelectorAll('.poster.is-active');
+        for (const p of actives) {
+          if (p !== poster) p.classList.remove('is-active');
+        }
+        poster.classList.add('is-active');
+      }
+    }
+
     function cancelVerticalCenterAnimation() {
+      const hadAnim = !!verticalCenterAnim;
+
       if (verticalCenterAnim && typeof verticalCenterAnim.frameId === 'number') {
         cancelAnimationFrame(verticalCenterAnim.frameId);
       }
       verticalCenterAnim = null;
+
+      if (hadAnim) {
+        verticalCenterViewportHeightSnapshot = null;
+      }
     }
 
     function easeInOutSmootherStep(t) {
@@ -1392,13 +1542,15 @@ html { scrollbar-gutter: stable; }
       const scrollTop = window.scrollY || window.pageYOffset || 0;
 
       const trackCenterY = (rect.top + scrollTop) + (rect.height / 2);
-      const viewportCenterY = scrollTop + (window.innerHeight / 2);
+      const snapshotHeight = verticalCenterViewportHeightSnapshot ?? getViewportHeight();
+      const viewportCenterY = scrollTop + (snapshotHeight / 2);
 
       return scrollTop + (trackCenterY - viewportCenterY);
     }
 
     function animateWindowScrollToSoft(targetTop, durationMs) {
       cancelVerticalCenterAnimation();
+      resetMobileBottomSpaceToBase();
 
       const startY = window.scrollY || window.pageYOffset || 0;
       const delta = targetTop - startY;
@@ -1422,7 +1574,10 @@ html { scrollbar-gutter: stable; }
           verticalCenterAnim.frameId = requestAnimationFrame(step);
         } else {
           window.scrollTo(0, targetTop);
+          restoreActiveStateAfterVerticalCenter();
           cancelVerticalCenterAnimation();
+      resetMobileBottomSpaceToBase();
+          resetMobileBottomSpaceToBase();
         }
       }
 
@@ -1430,6 +1585,7 @@ html { scrollbar-gutter: stable; }
     }
 
     function scheduleVerticalCenterAfterScrollSettles(track) {
+      if (isMobileViewport()) return;
       pendingVerticalCenterTrack = track;
 
       if (verticalCenterTimeout) {
@@ -1451,21 +1607,39 @@ html { scrollbar-gutter: stable; }
 
         if (!t) return;
 
+        cancelVerticalCenterAnimation();
+        verticalCenterViewportHeightSnapshot = getViewportHeight();
+
         const targetTop = computeVerticalCenterTargetTop(t);
         const currentTop = window.scrollY || window.pageYOffset || 0;
 
-        if (Math.abs(targetTop - currentTop) < VERTICAL_CENTER_DEADZONE) return;
+        if (Math.abs(targetTop - currentTop) < VERTICAL_CENTER_DEADZONE) {
+          verticalCenterViewportHeightSnapshot = null;
+          return;
+        }
 
+        applyElasticBottomSpaceForTargetTop(targetTop);
+        verticalCenterPreserve = captureActiveStateForVerticalCenter(t);
         animateWindowScrollToSoft(targetTop, VERTICAL_CENTER_DURATION);
+        if (!verticalCenterAnim) {
+          verticalCenterViewportHeightSnapshot = null;
+          resetMobileBottomSpaceToBase();
+        }
       };
 
       verticalCenterTimeout = setTimeout(checkAndRun, VERTICAL_CENTER_SETTLE_DELAY);
     }
 
-    // Cancel immediately on user input while the pull is happening
+        // Cancel immediately on user input while the pull is happening
     const cancelOnUserInput = (e) => {
       // Cancel only on input sources that indicate active user scroll/navigation intent.
       cancelVerticalCenterAnimation();
+      resetMobileBottomSpaceToBase();
+
+      // Touch input should cancel only the active animation, not the pending scheduled centering.
+      if (e && (e.type === 'touchstart' || e.type === 'touchmove')) {
+        return;
+      }
 
       if (verticalCenterTimeout) {
         clearTimeout(verticalCenterTimeout);
@@ -1488,7 +1662,7 @@ html { scrollbar-gutter: stable; }
 
       let closestTrack = null;
       let smallestDistance = Infinity;
-      const viewportCenterY = window.innerHeight / 2;
+      const viewportCenterY = getViewportHeight() / 2;
 
       for (const track of shelfTracks) {
         const rect = track.getBoundingClientRect();
@@ -1512,14 +1686,23 @@ html { scrollbar-gutter: stable; }
       lastActiveTrack = closestTrack;
 
       if (previousActiveTrack !== closestTrack) {
-        scheduleVerticalCenterAfterScrollSettles(closestTrack);
+        if (isMobileViewport()) {
+          centerTrackImmediatelyOnMobile(closestTrack);
+        } else {
+          scheduleVerticalCenterAfterScrollSettles(closestTrack);
+        }
         recenterTrackActivePoster(closestTrack);
         recenterAllOtherTracks(closestTrack);
+      } else {
+        if (!isMobileViewport() && smallestDistance > VERTICAL_CENTER_DEADZONE) {
+          scheduleVerticalCenterAfterScrollSettles(closestTrack);
+        }
       }
     }
 
     window.addEventListener('scroll', () => {
       lastWindowScrollEventAt = performance.now();
+      if (performance.now() < suppressActiveTrackUpdatesUntil) return;
       if (windowScrollRaf !== null) return;
       windowScrollRaf = requestAnimationFrame(() => {
         windowScrollRaf = null;
@@ -2935,6 +3118,7 @@ document.addEventListener('keydown', (event) => {
 
 </body>
 </html>
+
 
 
 
