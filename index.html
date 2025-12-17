@@ -196,6 +196,22 @@ main{
     content:"";
     margin:0;
   }
+
+  @media (max-width: 768px){
+    footer{
+      position: sticky;
+      bottom: 0;
+      background: red;
+      height: 72px;
+      padding: 8px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .footer-nav{
+      margin-top: 4px;
+    }
+  }
   button.cta {
     background:var(--accent);
     color:#0b1020;
@@ -1203,6 +1219,7 @@ html { scrollbar-gutter: stable; }
     </div>
   </div>
 </section>
+<div id="bottomElasticSpacer" style="height:0px;"></div>
 <!-- OLD: </div> -->
 
   </main>
@@ -2933,6 +2950,76 @@ document.addEventListener('keydown', (event) => {
   </div>
 
 
+
+
+<script>
+  (function(){
+    const spacer = document.getElementById('bottomElasticSpacer');
+    if (!spacer) return;
+
+    function getLastShelfRow(){
+      const rows = document.querySelectorAll('section.shelf');
+      if (!rows || !rows.length) return null;
+      return rows[rows.length - 1];
+    }
+
+    function setSpacerHeight(px){
+      const next = (px > 0 ? Math.round(px) : 0) + 'px';
+      if (spacer.style.height !== next) spacer.style.height = next;
+    }
+
+    function updateBottomElasticSpacer(){
+      if (window.innerWidth > 768) {
+        setSpacerHeight(0);
+        return;
+      }
+
+      const lastRow = getLastShelfRow();
+      if (!lastRow) {
+        setSpacerHeight(0);
+        return;
+      }
+
+      const scrollY = window.scrollY || window.pageYOffset || 0;
+      const atBottom = (scrollY + window.innerHeight) >= (document.documentElement.scrollHeight - 1);
+
+      if (!atBottom) {
+        setSpacerHeight(0);
+        return;
+      }
+
+      const rect = lastRow.getBoundingClientRect();
+      const lastCenterY = rect.top + (rect.height / 2);
+      const viewportCenterY = window.innerHeight / 2;
+      const delta = lastCenterY - viewportCenterY;
+
+      const deadzone = 12;
+      if (Math.abs(delta) <= deadzone) {
+        setSpacerHeight(0);
+        return;
+      }
+
+      if (delta <= 0) {
+        setSpacerHeight(0);
+        return;
+      }
+
+      const maxPx = window.innerHeight * 0.25;
+      const needed = Math.min(delta, maxPx);
+
+      setSpacerHeight(needed);
+    }
+
+    window.addEventListener('scroll', updateBottomElasticSpacer, { passive: true });
+    window.addEventListener('resize', updateBottomElasticSpacer, { passive: true });
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', updateBottomElasticSpacer);
+    } else {
+      updateBottomElasticSpacer();
+    }
+  })();
+</script>
 </body>
 </html>
 
