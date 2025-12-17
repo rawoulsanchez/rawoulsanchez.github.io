@@ -1051,6 +1051,42 @@ html { scrollbar-gutter: stable; }
     transform: translateX(-50%) scale(1.05);
   }
 
+
+
+  #bottomElasticSpacer { height: 0px; }
+
+  /* ZAQ TASK — MOBILE CENTER DEBUG OVERLAY */
+  #centerDebugOverlay{
+    position:fixed;
+    top: calc(var(--nav-height) + env(safe-area-inset-top) + 8px);
+    left:8px;
+    z-index:2147483647;
+    display:none;
+    pointer-events:none;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size:14px;
+    line-height:1.35;
+    font-weight:700;
+    color:#000;
+    background: rgba(0, 255, 0, 0.92);
+    padding:8px 10px;
+    border-radius:10px;
+    border: 2px solid #ff00ff;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.55);
+    max-width: calc(100vw - 16px);
+    white-space:pre;
+  }
+  #centerDebugOverlay pre{
+    margin:0;
+    white-space:pre;
+  }
+  @media (max-width: 768px){
+    #centerDebugOverlay{ display:block; }
+  }
+  @media (min-width: 769px){
+    #centerDebugOverlay{ display:none; }
+  }
+
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1219,10 +1255,12 @@ html { scrollbar-gutter: stable; }
     </div>
   </div>
 </section>
-<div id="bottomElasticSpacer" style="height:0px;"></div>
 <!-- OLD: </div> -->
 
   </main>
+
+  <div id="bottomElasticSpacer" aria-hidden="true"></div>
+
 
   <footer>
     © <span id="y"></span> Rawoul
@@ -1529,7 +1567,6 @@ html { scrollbar-gutter: stable; }
       lastActiveTrack = closestTrack;
 
       if (previousActiveTrack !== closestTrack) {
-        scheduleVerticalCenterAfterScrollSettles(closestTrack);
         recenterTrackActivePoster(closestTrack);
         recenterAllOtherTracks(closestTrack);
       }
@@ -2951,73 +2988,161 @@ document.addEventListener('keydown', (event) => {
 
 
 
-
 <script>
   (function(){
     const spacer = document.getElementById('bottomElasticSpacer');
     if (!spacer) return;
 
-    function getLastShelfRow(){
-      const rows = document.querySelectorAll('section.shelf');
-      if (!rows || !rows.length) return null;
-      return rows[rows.length - 1];
-    }
-
-    function setSpacerHeight(px){
-      const next = (px > 0 ? Math.round(px) : 0) + 'px';
-      if (spacer.style.height !== next) spacer.style.height = next;
-    }
+    function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
 
     function updateBottomElasticSpacer(){
       if (window.innerWidth > 768) {
-        setSpacerHeight(0);
+        spacer.style.height = '0px';
         return;
       }
 
-      const lastRow = getLastShelfRow();
-      if (!lastRow) {
-        setSpacerHeight(0);
-        return;
-      }
-
-      const scrollY = window.scrollY || window.pageYOffset || 0;
-      const atBottom = (scrollY + window.innerHeight) >= (document.documentElement.scrollHeight - 1);
+      const docEl = document.documentElement;
+      const spacerPx = spacer.getBoundingClientRect().height;
+      const baselineScrollH = docEl.scrollHeight - spacerPx;
+      const atBottom = (window.scrollY + window.innerHeight >= baselineScrollH - 2);
 
       if (!atBottom) {
-        setSpacerHeight(0);
+        spacer.style.height = '0px';
         return;
       }
 
-      const rect = lastRow.getBoundingClientRect();
-      const lastCenterY = rect.top + (rect.height / 2);
+      const tracks = Array.from(document.querySelectorAll('.shelf-track'));
+      const lastTrack = tracks.length ? tracks[tracks.length - 1] : null;
+      if (!lastTrack) {
+        spacer.style.height = '0px';
+        return;
+      }
+
+      const rect = lastTrack.getBoundingClientRect();
+      const rowCenterY = rect.top + (rect.height / 2);
       const viewportCenterY = window.innerHeight / 2;
-      const delta = lastCenterY - viewportCenterY;
 
-      const deadzone = 12;
-      if (Math.abs(delta) <= deadzone) {
-        setSpacerHeight(0);
-        return;
+      const diff = rowCenterY - viewportCenterY;
+
+      if (diff > 12) {
+        const maxH = Math.round(window.innerHeight * 0.25);
+        const h = clamp(Math.round(diff), 0, maxH);
+        spacer.style.height = h + 'px';
+      } else {
+        spacer.style.height = '0px';
       }
-
-      if (delta <= 0) {
-        setSpacerHeight(0);
-        return;
-      }
-
-      const maxPx = window.innerHeight * 0.25;
-      const needed = Math.min(delta, maxPx);
-
-      setSpacerHeight(needed);
     }
 
     window.addEventListener('scroll', updateBottomElasticSpacer, { passive: true });
-    window.addEventListener('resize', updateBottomElasticSpacer, { passive: true });
+    window.addEventListener('resize', updateBottomElasticSpacer);
+    window.addEventListener('orientationchange', updateBottomElasticSpacer);
+    window.addEventListener('load', updateBottomElasticSpacer);
+  })();
+</script>
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', updateBottomElasticSpacer);
-    } else {
-      updateBottomElasticSpacer();
+
+
+  <!-- ZAQ TASK — MOBILE CENTER DEBUG OVERLAY -->
+  <div id="centerDebugOverlay" aria-hidden="true"><pre id="centerDebugOverlayText"></pre></div>
+
+<script>
+  // ZAQ TASK — MOBILE CENTER DEBUG OVERLAY UPDATER (rAF throttled)
+  (function(){
+    const overlay = document.getElementById('centerDebugOverlay');
+    const pre = document.getElementById('centerDebugOverlayText');
+
+    let rafPending = false;
+
+    function intOrNA(v){
+      if (v === null || v === undefined) return 'N/A';
+      if (typeof v === 'number' && !isFinite(v)) return 'N/A';
+      const n = (typeof v === 'number') ? v : parseFloat(String(v));
+      if (!isFinite(n)) return 'N/A';
+      return String(Math.round(n));
     }
+
+    function compute(){
+      if (!overlay || !pre) return;
+
+      const isMobile = window.innerWidth <= 768;
+
+      const scrollY = Math.round(window.scrollY || window.pageYOffset || 0);
+      const vh = Math.round(window.innerHeight || 0);
+      const docH = Math.round(document.documentElement ? document.documentElement.scrollHeight : 0);
+
+      const atBottom = (scrollY + vh) >= (docH - 2);
+
+      const lastRowSelector = 'last .shelf-track';
+
+      const tracks = document.querySelectorAll('.shelf-track');
+      const lastRowEl = (tracks && tracks.length) ? tracks[tracks.length - 1] : null;
+
+      let lastRowTop = 'N/A';
+      let lastRowH = 'N/A';
+      let lastRowCenterY = 'N/A';
+      let viewportCenterY = intOrNA(vh / 2);
+      let delta = 'N/A';
+
+      if (lastRowEl) {
+        const rect = lastRowEl.getBoundingClientRect();
+        const top = Math.round(rect.top);
+        const h = Math.round(rect.height);
+        const centerY = Math.round(rect.top + (rect.height / 2));
+        const vcy = Math.round((window.innerHeight || 0) / 2);
+        lastRowTop = String(top);
+        lastRowH = String(h);
+        lastRowCenterY = String(centerY);
+        viewportCenterY = String(vcy);
+        delta = String(Math.round(centerY - vcy));
+      }
+
+      const spacer = document.getElementById('bottomElasticSpacer');
+      let spacerH = 'N/A';
+      if (spacer) {
+        const h = getComputedStyle(spacer).height;
+        spacerH = intOrNA(h);
+      }
+
+      const footer = document.querySelector('footer');
+      let footerH = 'N/A';
+      if (footer) {
+        footerH = intOrNA(footer.getBoundingClientRect().height);
+      }
+
+      const lines = [
+        `isMobile: ${isMobile}`,
+        `scrollY: ${intOrNA(scrollY)}`,
+        `vh: ${intOrNA(vh)}`,
+        `docH: ${intOrNA(docH)}`,
+        `atBottom: ${atBottom}`,
+        `lastRowSelector: ${lastRowSelector}`,
+        `lastRowTop: ${lastRowTop}`,
+        `lastRowH: ${lastRowH}`,
+        `lastRowCenterY: ${lastRowCenterY}`,
+        `viewportCenterY: ${viewportCenterY}`,
+        `delta: ${delta}`,
+        `spacerH: ${spacerH}`,
+        `footerH: ${footerH}`
+      ];
+
+      pre.textContent = lines.join('\n');
+    }
+
+    function schedule(){
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(() => {
+        rafPending = false;
+        compute();
+      });
+    }
+
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    window.addEventListener('orientationchange', schedule);
+
+    // initial paint
+    schedule();
   })();
 </script>
 </body>
