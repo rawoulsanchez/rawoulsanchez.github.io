@@ -1418,6 +1418,7 @@ html { scrollbar-gutter: stable; }
     let windowScrollRaf = null;
 
     // ZAQ TASK — SOFT-PULL VERTICAL ROW CENTERING (REDUCE JUMP)
+    const ZAQ_DISABLE_VERTICAL_AUTO_CENTERING = true; // ZAQ TASK 05 — disable vertical auto-centering
     const VERTICAL_CENTER_SETTLE_DELAY = 180; // ms (140–220)
     const VERTICAL_CENTER_DURATION = 1200; // ms (900–1400)
     const VERTICAL_CENTER_DEADZONE = 32; // px (24–40)
@@ -1443,6 +1444,7 @@ html { scrollbar-gutter: stable; }
     }
 
     function computeVerticalCenterTargetTop(track) {
+      if (ZAQ_DISABLE_VERTICAL_AUTO_CENTERING) { return (window.scrollY || window.pageYOffset || 0); }
       const rect = track.getBoundingClientRect();
       const scrollTop = window.scrollY || window.pageYOffset || 0;
 
@@ -1453,6 +1455,15 @@ html { scrollbar-gutter: stable; }
     }
 
     function animateWindowScrollToSoft(targetTop, durationMs) {
+      if (ZAQ_DISABLE_VERTICAL_AUTO_CENTERING) {
+        cancelVerticalCenterAnimation();
+        if (verticalCenterTimeout) {
+          clearTimeout(verticalCenterTimeout);
+          verticalCenterTimeout = null;
+        }
+        pendingVerticalCenterTrack = null;
+        return;
+      }
       cancelVerticalCenterAnimation();
 
       const startY = window.scrollY || window.pageYOffset || 0;
@@ -1485,6 +1496,14 @@ html { scrollbar-gutter: stable; }
     }
 
     function scheduleVerticalCenterAfterScrollSettles(track) {
+      if (ZAQ_DISABLE_VERTICAL_AUTO_CENTERING) {
+        pendingVerticalCenterTrack = null;
+        if (verticalCenterTimeout) {
+          clearTimeout(verticalCenterTimeout);
+          verticalCenterTimeout = null;
+        }
+        return;
+      }
       pendingVerticalCenterTrack = track;
 
       if (verticalCenterTimeout) {
