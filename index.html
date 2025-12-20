@@ -2957,6 +2957,7 @@ document.addEventListener('keydown', (event) => {
     let isSnapping = false;
     let snapAnimRaf = null;
     let shelfTargets = null;
+    let suppressSnapUntil = 0;
 
     function isMobile(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
 
@@ -3121,8 +3122,16 @@ document.addEventListener('keydown', (event) => {
       }
     };
 
+    window.addEventListener('touchstart', (e) => {
+      if (!isMobile()) return;
+      if (e && e.target && e.target.closest('.shelf-track')) {
+        suppressSnapUntil = performance.now() + 450;
+      }
+    }, { passive: true });
+
     window.addEventListener('scroll', () => {
       if (!isMobile()) return;
+      if (performance.now() < suppressSnapUntil) return;
       scheduleSettle();
     }, { passive: true });
 
