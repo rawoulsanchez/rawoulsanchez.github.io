@@ -196,22 +196,6 @@ main{
     content:"";
     margin:0;
   }
-
-  @media (max-width: 768px){
-    footer{
-      position: sticky;
-      bottom: 0;
-      background: red;
-      height: 72px;
-      padding: 8px 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    .footer-nav{
-      margin-top: 4px;
-    }
-  }
   button.cta {
     background:var(--accent);
     color:#0b1020;
@@ -1051,42 +1035,6 @@ html { scrollbar-gutter: stable; }
     transform: translateX(-50%) scale(1.05);
   }
 
-
-
-  #bottomElasticSpacer { height: 0px; }
-
-  /* ZAQ TASK — MOBILE CENTER DEBUG OVERLAY */
-  #centerDebugOverlay{
-    position:fixed;
-    top: calc(var(--nav-height) + env(safe-area-inset-top) + 8px);
-    left:8px;
-    z-index:2147483647;
-    display:none;
-    pointer-events:none;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    font-size:14px;
-    line-height:1.35;
-    font-weight:700;
-    color:#000;
-    background: rgba(0, 255, 0, 0.92);
-    padding:8px 10px;
-    border-radius:10px;
-    border: 2px solid #ff00ff;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.55);
-    max-width: calc(100vw - 16px);
-    white-space:pre;
-  }
-  #centerDebugOverlay pre{
-    margin:0;
-    white-space:pre;
-  }
-  @media (max-width: 768px){
-    #centerDebugOverlay{ display:block; }
-  }
-  @media (min-width: 769px){
-    #centerDebugOverlay{ display:none; }
-  }
-
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1259,9 +1207,6 @@ html { scrollbar-gutter: stable; }
 
   </main>
 
-  <div id="bottomElasticSpacer" aria-hidden="true"></div>
-
-
   <footer>
     © <span id="y"></span> Rawoul
     <nav class="footer-nav" aria-label="Footer navigation">
@@ -1326,6 +1271,10 @@ html { scrollbar-gutter: stable; }
     const CLONE_COUNT = 4;
     const RECENTER_DURATION = 1800; // ms, slow cinematic glide
     const activeScrollAnimations = new Map();
+    // ZAQ TASK 1 — Mobile breakpoint helper (matches existing CSS @media max-width:640px)
+    const MOBILE_MQ = window.matchMedia('(max-width: 768px)');
+    function isMobileView(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
+
     let lastActiveTrack = null;
 
     function cancelScrollAnimation(track) {
@@ -1418,10 +1367,13 @@ html { scrollbar-gutter: stable; }
     let windowScrollRaf = null;
 
     // ZAQ TASK — SOFT-PULL VERTICAL ROW CENTERING (REDUCE JUMP)
-    const ZAQ_DISABLE_VERTICAL_AUTO_CENTERING = true; // ZAQ TASK 05 — disable vertical auto-centering
     const VERTICAL_CENTER_SETTLE_DELAY = 180; // ms (140–220)
     const VERTICAL_CENTER_DURATION = 1200; // ms (900–1400)
     const VERTICAL_CENTER_DEADZONE = 32; // px (24–40)
+
+    // ZAQ TASK 2 — Mobile guard (disable this legacy system on mobile only)
+    const SOFTPULL_MOBILE_MQ = window.matchMedia('(max-width: 768px)');
+    function isSoftpullMobile(){ return !!(SOFTPULL_MOBILE_MQ && SOFTPULL_MOBILE_MQ.matches); }
 
     let verticalCenterTimeout = null;
     let lastWindowScrollEventAt = 0;
@@ -1444,7 +1396,6 @@ html { scrollbar-gutter: stable; }
     }
 
     function computeVerticalCenterTargetTop(track) {
-      if (ZAQ_DISABLE_VERTICAL_AUTO_CENTERING) { return (window.scrollY || window.pageYOffset || 0); }
       const rect = track.getBoundingClientRect();
       const scrollTop = window.scrollY || window.pageYOffset || 0;
 
@@ -1455,15 +1406,7 @@ html { scrollbar-gutter: stable; }
     }
 
     function animateWindowScrollToSoft(targetTop, durationMs) {
-      if (ZAQ_DISABLE_VERTICAL_AUTO_CENTERING) {
-        cancelVerticalCenterAnimation();
-        if (verticalCenterTimeout) {
-          clearTimeout(verticalCenterTimeout);
-          verticalCenterTimeout = null;
-        }
-        pendingVerticalCenterTrack = null;
-        return;
-      }
+      if (isSoftpullMobile()) return;
       cancelVerticalCenterAnimation();
 
       const startY = window.scrollY || window.pageYOffset || 0;
@@ -1496,14 +1439,7 @@ html { scrollbar-gutter: stable; }
     }
 
     function scheduleVerticalCenterAfterScrollSettles(track) {
-      if (ZAQ_DISABLE_VERTICAL_AUTO_CENTERING) {
-        pendingVerticalCenterTrack = null;
-        if (verticalCenterTimeout) {
-          clearTimeout(verticalCenterTimeout);
-          verticalCenterTimeout = null;
-        }
-        return;
-      }
+      if (isSoftpullMobile()) return;
       pendingVerticalCenterTrack = track;
 
       if (verticalCenterTimeout) {
@@ -1558,6 +1494,7 @@ html { scrollbar-gutter: stable; }
     }, { passive: true });
 
     function updateActiveTrackFromWindowScroll() {
+      if (isSoftpullMobile()) return;
       if (!shelfTracks.length) return;
 
       let closestTrack = null;
@@ -1586,12 +1523,14 @@ html { scrollbar-gutter: stable; }
       lastActiveTrack = closestTrack;
 
       if (previousActiveTrack !== closestTrack) {
+        if (!isMobileView()) scheduleVerticalCenterAfterScrollSettles(closestTrack);
         recenterTrackActivePoster(closestTrack);
         recenterAllOtherTracks(closestTrack);
       }
     }
 
     window.addEventListener('scroll', () => {
+      if (isSoftpullMobile()) return;
       lastWindowScrollEventAt = performance.now();
       if (windowScrollRaf !== null) return;
       windowScrollRaf = requestAnimationFrame(() => {
@@ -3008,164 +2947,214 @@ document.addEventListener('keydown', (event) => {
 
 
 <script>
+  // ZAQ TASK 1 — Mobile 4-shelf “settle to nearest shelf” snapping
   (function(){
-    const spacer = document.getElementById('bottomElasticSpacer');
-    if (!spacer) return;
+    const MOBILE_MQ = window.matchMedia('(max-width: 768px)');
+    const SETTLE_DELAY_MS = 160; // debounce “scroll end”
+    const SNAP_DURATION_MS = 520;
 
-    function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+    let scrollEndTimer = null;
+    let isSnapping = false;
+    let snapAnimRaf = null;
+    let shelfTargets = null;
 
-    function updateBottomElasticSpacer(){
-      if (window.innerWidth > 768) {
-        spacer.style.height = '0px';
-        return;
-      }
+    function isMobile(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
 
-      const docEl = document.documentElement;
-      const spacerPx = spacer.getBoundingClientRect().height;
-      const baselineScrollH = docEl.scrollHeight - spacerPx;
-      const atBottom = (window.scrollY + window.innerHeight >= baselineScrollH - 2);
+    function cancelSnap(){
+      if (snapAnimRaf) cancelAnimationFrame(snapAnimRaf);
+      snapAnimRaf = null;
+      isSnapping = false;
+    }
 
-      if (!atBottom) {
-        spacer.style.height = '0px';
-        return;
-      }
+    function easeSmootherStep(t){
+      if (t <= 0) return 0;
+      if (t >= 1) return 1;
+      return t * t * t * (t * (6 * t - 15) + 10);
+    }
 
-      const tracks = Array.from(document.querySelectorAll('.shelf-track'));
-      const lastTrack = tracks.length ? tracks[tracks.length - 1] : null;
-      if (!lastTrack) {
-        spacer.style.height = '0px';
-        return;
-      }
+    function getAbsTop(el){
+      if (!el) return 0;
+      const r = el.getBoundingClientRect();
+      const y = window.scrollY || window.pageYOffset || 0;
+      return r.top + y;
+    }
 
-      const rect = lastTrack.getBoundingClientRect();
-      const rowCenterY = rect.top + (rect.height / 2);
-      const viewportCenterY = window.innerHeight / 2;
+    function computeCenterTargetTop(el){
+      if (!el) return 0;
+      const r = el.getBoundingClientRect();
+      const y = window.scrollY || window.pageYOffset || 0;
+      const centerAbs = (r.top + y) + (r.height / 2);
+      return centerAbs - (window.innerHeight / 2);
+    }
 
-      const diff = rowCenterY - viewportCenterY;
+    function clamp(v, min, max){
+      if (v < min) return min;
+      if (v > max) return max;
+      return v;
+    }
 
-      if (diff > 12) {
-        const maxH = Math.round(window.innerHeight * 0.25);
-        const h = clamp(Math.round(diff), 0, maxH);
-        spacer.style.height = h + 'px';
+    function maxScrollTop(){
+      const doc = document.documentElement;
+      const body = document.body;
+      const full = Math.max(
+        doc.scrollHeight, body.scrollHeight,
+        doc.offsetHeight, body.offsetHeight,
+        doc.clientHeight
+      );
+      return Math.max(0, full - window.innerHeight);
+    }
+
+    function ensureRowCCanCenter(rowCTarget){
+      const currentMax = maxScrollTop();
+      const needed = rowCTarget - currentMax;
+      if (needed > 0) {
+        // Minimal mobile-only spacing to allow Row C to reach center.
+        document.body.style.paddingBottom = Math.ceil(needed + 16) + 'px';
       } else {
-        spacer.style.height = '0px';
+        document.body.style.paddingBottom = '';
       }
     }
 
-    window.addEventListener('scroll', updateBottomElasticSpacer, { passive: true });
-    window.addEventListener('resize', updateBottomElasticSpacer);
-    window.addEventListener('orientationchange', updateBottomElasticSpacer);
-    window.addEventListener('load', updateBottomElasticSpacer);
-  })();
-</script>
+    function buildShelfTargets(){
+      const hero = document.querySelector('.hero');
+      const rowA = document.querySelector('.shelf-track[data-row="A"]');
+      const rowB = document.querySelector('.shelf-track[data-row="B"]');
+      const rowC = document.querySelector('.shelf-track[data-row="C"]');
+      if (!hero || !rowA || !rowB || !rowC) return null;
 
+      const heroTop = getAbsTop(hero);
+      const rowATop = computeCenterTargetTop(rowA);
+      const rowBTop = computeCenterTargetTop(rowB);
+      const rowCTop = computeCenterTargetTop(rowC);
 
+      ensureRowCCanCenter(rowCTop);
 
-  <!-- ZAQ TASK — MOBILE CENTER DEBUG OVERLAY -->
-  <div id="centerDebugOverlay" aria-hidden="true"><pre id="centerDebugOverlayText"></pre></div>
+      // Recompute after potential paddingBottom change.
+      const rowATop2 = computeCenterTargetTop(rowA);
+      const rowBTop2 = computeCenterTargetTop(rowB);
+      const rowCTop2 = computeCenterTargetTop(rowC);
 
-<script>
-  // ZAQ TASK — MOBILE CENTER DEBUG OVERLAY UPDATER (rAF throttled)
-  (function(){
-    const overlay = document.getElementById('centerDebugOverlay');
-    const pre = document.getElementById('centerDebugOverlayText');
+      const maxY = maxScrollTop();
 
-    let rafPending = false;
-
-    function intOrNA(v){
-      if (v === null || v === undefined) return 'N/A';
-      if (typeof v === 'number' && !isFinite(v)) return 'N/A';
-      const n = (typeof v === 'number') ? v : parseFloat(String(v));
-      if (!isFinite(n)) return 'N/A';
-      return String(Math.round(n));
-    }
-
-    function compute(){
-      if (!overlay || !pre) return;
-
-      const isMobile = window.innerWidth <= 768;
-
-      const scrollY = Math.round(window.scrollY || window.pageYOffset || 0);
-      const vh = Math.round(window.innerHeight || 0);
-      const docH = Math.round(document.documentElement ? document.documentElement.scrollHeight : 0);
-
-      const atBottom = (scrollY + vh) >= (docH - 2);
-
-      const lastRowSelector = 'last .shelf-track';
-
-      const tracks = document.querySelectorAll('.shelf-track');
-      const lastRowEl = (tracks && tracks.length) ? tracks[tracks.length - 1] : null;
-
-      let lastRowTop = 'N/A';
-      let lastRowH = 'N/A';
-      let lastRowCenterY = 'N/A';
-      let viewportCenterY = intOrNA(vh / 2);
-      let delta = 'N/A';
-
-      if (lastRowEl) {
-        const rect = lastRowEl.getBoundingClientRect();
-        const top = Math.round(rect.top);
-        const h = Math.round(rect.height);
-        const centerY = Math.round(rect.top + (rect.height / 2));
-        const vcy = Math.round((window.innerHeight || 0) / 2);
-        lastRowTop = String(top);
-        lastRowH = String(h);
-        lastRowCenterY = String(centerY);
-        viewportCenterY = String(vcy);
-        delta = String(Math.round(centerY - vcy));
-      }
-
-      const spacer = document.getElementById('bottomElasticSpacer');
-      let spacerH = 'N/A';
-      if (spacer) {
-        const h = getComputedStyle(spacer).height;
-        spacerH = intOrNA(h);
-      }
-
-      const footer = document.querySelector('footer');
-      let footerH = 'N/A';
-      if (footer) {
-        footerH = intOrNA(footer.getBoundingClientRect().height);
-      }
-
-      const lines = [
-        `isMobile: ${isMobile}`,
-        `scrollY: ${intOrNA(scrollY)}`,
-        `vh: ${intOrNA(vh)}`,
-        `docH: ${intOrNA(docH)}`,
-        `atBottom: ${atBottom}`,
-        `lastRowSelector: ${lastRowSelector}`,
-        `lastRowTop: ${lastRowTop}`,
-        `lastRowH: ${lastRowH}`,
-        `lastRowCenterY: ${lastRowCenterY}`,
-        `viewportCenterY: ${viewportCenterY}`,
-        `delta: ${delta}`,
-        `spacerH: ${spacerH}`,
-        `footerH: ${footerH}`
+      return [
+        clamp(heroTop, 0, maxY),
+        clamp(rowATop2, 0, maxY),
+        clamp(rowBTop2, 0, maxY),
+        clamp(rowCTop2, 0, maxY)
       ];
-
-      pre.textContent = lines.join('\n');
     }
 
-    function schedule(){
-      if (rafPending) return;
-      rafPending = true;
-      requestAnimationFrame(() => {
-        rafPending = false;
-        compute();
-      });
+    function updateTargets(){
+      if (!isMobile()) return;
+      shelfTargets = buildShelfTargets();
     }
 
-    window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', schedule);
-    window.addEventListener('orientationchange', schedule);
+    function animateScrollTo(targetTop){
+      cancelSnap();
 
-    // initial paint
-    schedule();
+      const startY = window.scrollY || window.pageYOffset || 0;
+      const delta = targetTop - startY;
+      if (!isFinite(delta) || Math.abs(delta) < 2) return;
+
+      const startTime = performance.now();
+      isSnapping = true;
+
+      function step(now){
+        const t = (now - startTime) / SNAP_DURATION_MS;
+        const eased = easeSmootherStep(t);
+        const nextY = startY + (delta * eased);
+        window.scrollTo(0, nextY);
+
+        if (t < 1) {
+          snapAnimRaf = requestAnimationFrame(step);
+        } else {
+          window.scrollTo(0, targetTop);
+          isSnapping = false;
+          snapAnimRaf = null;
+        }
+      }
+
+      snapAnimRaf = requestAnimationFrame(step);
+    }
+
+    function settleToNearestShelf(){
+      if (!isMobile()) return;
+      if (!shelfTargets || shelfTargets.length !== 4) updateTargets();
+      if (!shelfTargets || shelfTargets.length !== 4) return;
+
+      const y = window.scrollY || window.pageYOffset || 0;
+
+      let nearest = shelfTargets[0];
+      let bestDist = Math.abs(y - nearest);
+
+      for (let i = 1; i < shelfTargets.length; i++) {
+        const d = Math.abs(y - shelfTargets[i]);
+        if (d < bestDist) {
+          bestDist = d;
+          nearest = shelfTargets[i];
+        }
+      }
+
+      animateScrollTo(nearest);
+    }
+
+    function scheduleSettle(){
+      if (!isMobile()) return;
+
+      if (scrollEndTimer) {
+        clearTimeout(scrollEndTimer);
+        scrollEndTimer = null;
+      }
+
+      scrollEndTimer = setTimeout(() => {
+        scrollEndTimer = null;
+        if (isSnapping) return;
+        settleToNearestShelf();
+      }, SETTLE_DELAY_MS);
+    }
+
+    const cancelOnUserInput = () => {
+      cancelSnap();
+      if (scrollEndTimer) {
+        clearTimeout(scrollEndTimer);
+        scrollEndTimer = null;
+      }
+    };
+
+    window.addEventListener('scroll', () => {
+      if (!isMobile()) return;
+      scheduleSettle();
+    }, { passive: true });
+
+    window.addEventListener('resize', () => {
+      cancelOnUserInput();
+      // Wait one frame for layout to settle (address-bar and orientation changes).
+      requestAnimationFrame(updateTargets);
+    }, { passive: true });
+
+    window.addEventListener('orientationchange', () => {
+      cancelOnUserInput();
+      requestAnimationFrame(() => requestAnimationFrame(updateTargets));
+    }, { passive: true });
+
+    window.addEventListener('wheel', cancelOnUserInput, { passive: true });
+    window.addEventListener('touchstart', cancelOnUserInput, { passive: true });
+    window.addEventListener('touchmove', cancelOnUserInput, { passive: true });
+    window.addEventListener('keydown', (e) => {
+      const k = e.key;
+      if (k === 'ArrowUp' || k === 'ArrowDown' || k === 'PageUp' || k === 'PageDown' || k === 'Home' || k === 'End' || k === ' ') {
+        cancelOnUserInput();
+      }
+    }, { passive: true });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!isMobile()) return;
+      updateTargets();
+    });
   })();
 </script>
+
 </body>
 </html>
-
 
 
