@@ -1493,6 +1493,12 @@ html { scrollbar-gutter: stable; }
       }
     }, { passive: true });
 
+    const snapState = window.snapState || (window.snapState = {
+      isSnapping: false,
+      activeSnapTrack: null,
+      activeSnapTop: null
+    });
+
     function updateActiveTrackFromWindowScroll() {
       if (!shelfTracks.length) return;
 
@@ -1501,15 +1507,29 @@ html { scrollbar-gutter: stable; }
       const viewportCenterY = window.innerHeight / 2;
 
       const MOBILE_ACTIVE_TRACK_HYSTERESIS_PX = 40; // px
+      const SNAP_ACTIVE_TRACK_HYSTERESIS_PX = 90; // px
 
-      for (const track of shelfTracks) {
-        const rect = track.getBoundingClientRect();
-        const trackCenterY = rect.top + rect.height / 2;
-        const distance = Math.abs(trackCenterY - viewportCenterY);
+      if (snapState.isSnapping) {
+        if (snapState.activeSnapTrack) {
+          closestTrack = snapState.activeSnapTrack;
+          const lockedRect = closestTrack.getBoundingClientRect();
+          const lockedCenterY = lockedRect.top + lockedRect.height / 2;
+          smallestDistance = Math.abs(lockedCenterY - viewportCenterY);
+        } else {
+          return;
+        }
+      }
 
-        if (distance < smallestDistance) {
-          smallestDistance = distance;
-          closestTrack = track;
+      if (!closestTrack) {
+        for (const track of shelfTracks) {
+          const rect = track.getBoundingClientRect();
+          const trackCenterY = rect.top + rect.height / 2;
+          const distance = Math.abs(trackCenterY - viewportCenterY);
+
+          if (distance < smallestDistance) {
+            smallestDistance = distance;
+            closestTrack = track;
+          }
         }
       }
 
@@ -1520,9 +1540,12 @@ html { scrollbar-gutter: stable; }
         const lastRect = lastActiveTrack.getBoundingClientRect();
         const lastCenterY = lastRect.top + lastRect.height / 2;
         const lastDistance = Math.abs(lastCenterY - viewportCenterY);
+        const hysteresis = snapState.isSnapping
+          ? SNAP_ACTIVE_TRACK_HYSTERESIS_PX
+          : MOBILE_ACTIVE_TRACK_HYSTERESIS_PX;
 
         // Switch only if the new closest is closer by at least the threshold.
-        if (!(smallestDistance <= (lastDistance - MOBILE_ACTIVE_TRACK_HYSTERESIS_PX))) {
+        if (!(smallestDistance <= (lastDistance - hysteresis))) {
           closestTrack = lastActiveTrack;
           smallestDistance = lastDistance;
         }
@@ -2970,9 +2993,13 @@ document.addEventListener('keydown', (event) => {
     const SNAP_DURATION_MS = 520;
 
     let scrollEndTimer = null;
-    let isSnapping = false;
     let snapAnimRaf = null;
     let shelfTargets = null;
+    const snapState = window.snapState || (window.snapState = {
+      isSnapping: false,
+      activeSnapTrack: null,
+      activeSnapTop: null
+    });
 
     // ZAQ TASK 2 — loop guards
     // - While a programmatic scroll/relayout is in progress, ignore scroll events for settle scheduling.
@@ -2995,7 +3022,9 @@ document.addEventListener('keydown', (event) => {
     function cancelSnap(){
       if (snapAnimRaf) cancelAnimationFrame(snapAnimRaf);
       snapAnimRaf = null;
-      isSnapping = false;
+      snapState.isSnapping = false;
+      snapState.activeSnapTrack = null;
+      snapState.activeSnapTop = null;
       // Canceling due to user input should allow future settles once the user scrolls.
       userScrolledSinceLastSnap = true;
       programmaticGuard = false;
@@ -3094,10 +3123,10 @@ document.addEventListener('keydown', (event) => {
 
       // Clamp after recompute so Row C target is not forced below its centering position.
       return [
-        clamp(0, 0, maxY),          // hero top
-        clamp(rowATop, 0, maxY),    // Row A center
-        clamp(rowBTop, 0, maxY),    // Row B center
-        clamp(rowCTop, 0, maxY)     // Row C center
+        { top: clamp(0, 0, maxY), track: rowA },       // hero top
+        { top: clamp(rowATop, 0, maxY), track: rowA }, // Row A center
+        { top: clamp(rowBTop, 0, maxY), track: rowB }, // Row B center
+        { top: clamp(rowCTop, 0, maxY), track: rowC }  // Row C center
       ];
     }
 
@@ -3113,7 +3142,7 @@ document.addEventListener('keydown', (event) => {
       shelfTargets = buildShelfTargets();
     }
 
-    function animateScrollTo(targetTop){
+    function animateScrollTo(targetTop, targetTrack){
       cancelSnap();
 
       const startY = window.scrollY || window.pageYOffset || 0;
@@ -3121,7 +3150,9 @@ document.addEventListener('keydown', (event) => {
       if (!isFinite(delta) || Math.abs(delta) < 2) return;
 
       const startTime = performance.now();
-      isSnapping = true;
+      snapState.isSnapping = true;
+      snapState.activeSnapTop = targetTop;
+      snapState.activeSnapTrack = targetTrack || null;
       userScrolledSinceLastSnap = true;
       programmaticGuard = true;
 
@@ -3136,7 +3167,9 @@ document.addEventListener('keydown', (event) => {
           snapAnimRaf = requestAnimationFrame(step);
         } else {
           window.scrollTo(0, targetTop);
-          isSnapping = false;
+          snapState.isSnapping = false;
+          snapState.activeSnapTrack = null;
+          snapState.activeSnapTop = null;
           snapAnimRaf = null;
 
           // ZAQ TASK 2 — prevent “jump to bottom then pull up again” loops:
@@ -3165,24 +3198,24 @@ document.addEventListener('keydown', (event) => {
       const y = window.scrollY || window.pageYOffset || 0;
 
       let nearest = shelfTargets[0];
-      let bestDist = Math.abs(y - nearest);
+      let bestDist = Math.abs(y - nearest.top);
 
       for (let i = 1; i < shelfTargets.length; i++) {
-        const d = Math.abs(y - shelfTargets[i]);
+        const d = Math.abs(y - shelfTargets[i].top);
         if (d < bestDist) {
           bestDist = d;
           nearest = shelfTargets[i];
         }
       }
 
-      animateScrollTo(nearest);
+      animateScrollTo(nearest.top, nearest.track);
     }
 
     function scheduleSettle(){
       if (!isMobile()) return;
 
       // ZAQ TASK 2 — hard protections against snap feedback loops
-      if (isSnapping) return;
+      if (snapState.isSnapping) return;
       if (programmaticGuard) return;
       if (!userScrolledSinceLastSnap) return;
 
@@ -3195,7 +3228,7 @@ document.addEventListener('keydown', (event) => {
         scrollEndTimer = null;
 
         // Guard again at execution time
-        if (isSnapping) return;
+        if (snapState.isSnapping) return;
         if (programmaticGuard) return;
         if (!userScrolledSinceLastSnap) return;
 
@@ -3215,7 +3248,7 @@ document.addEventListener('keydown', (event) => {
       if (!isMobile()) return;
 
       // ZAQ TASK 2 — Ignore scroll events caused by snapping or paddingBottom adjustments.
-      if (isSnapping) return;
+      if (snapState.isSnapping) return;
       if (programmaticGuard) return;
 
       // Any non-guarded scroll implies user motion and allows a future settle.
