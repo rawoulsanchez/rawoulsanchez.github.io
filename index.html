@@ -2974,12 +2974,31 @@ document.addEventListener('keydown', (event) => {
     let snapAnimRaf = null;
     let shelfTargets = null;
 
+    // ZAQ TASK 2 — loop guards
+    // - While a programmatic scroll/relayout is in progress, ignore scroll events for settle scheduling.
+    // - After a snap finishes, do not auto-settle again until the user scrolls again.
+    let programmaticGuard = false;
+    let userScrolledSinceLastSnap = true;
+
     function isMobile(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
+
+    function withProgrammaticGuard(fn){
+      programmaticGuard = true;
+      try { fn(); } finally {
+        // Keep guard for two frames to cover relayout/scroll events (iOS especially).
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          programmaticGuard = false;
+        }));
+      }
+    }
 
     function cancelSnap(){
       if (snapAnimRaf) cancelAnimationFrame(snapAnimRaf);
       snapAnimRaf = null;
       isSnapping = false;
+      // Canceling due to user input should allow future settles once the user scrolls.
+      userScrolledSinceLastSnap = true;
+      programmaticGuard = false;
     }
 
     function easeSmootherStep(t){
@@ -3021,16 +3040,24 @@ document.addEventListener('keydown', (event) => {
     }
 
     function ensureRowCCanCenter(rowCTarget){
-      const currentMax = maxScrollTop();
-      const needed = rowCTarget - currentMax;
-      if (needed > 0) {
-        // Minimal mobile-only spacing to allow Row C to reach center.
-        document.body.style.paddingBottom = Math.ceil(needed + 16) + 'px';
-      } else {
-        document.body.style.paddingBottom = '';
-      }
+      // NOTE: Changing paddingBottom changes document height and can trigger scroll/relayout.
+      // This function is guarded so it cannot cause snap feedback loops.
+      withProgrammaticGuard(() => {
+        const currentMax = maxScrollTop();
+        const needed = rowCTarget - currentMax;
+        if (needed > 0) {
+          // Minimal mobile-only spacing to allow Row C to reach center.
+          document.body.style.paddingBottom = Math.ceil(needed + 16) + 'px';
+        } else {
+          document.body.style.paddingBottom = '';
+        }
+      });
     }
 
+    // ZAQ TASK 2 — deterministic target building order:
+    // 1) Compute raw targets (hero top, Row A/B/C center targets).
+    // 2) ensureRowCCanCenter(rowCTarget) BEFORE final clamping/choosing.
+    // 3) Recompute maxScrollTop() after padding adjustment, then clamp targets.
     function buildShelfTargets(){
       const hero = document.querySelector('.hero');
       const rowA = document.querySelector('.shelf-track[data-row="A"]');
@@ -3038,25 +3065,29 @@ document.addEventListener('keydown', (event) => {
       const rowC = document.querySelector('.shelf-track[data-row="C"]');
       if (!hero || !rowA || !rowB || !rowC) return null;
 
-      const heroTop = getAbsTop(hero);
+      // (1) Raw targets
+      const heroTopRaw = getAbsTop(hero);
+      const rowATopRaw = computeCenterTargetTop(rowA);
+      const rowBTopRaw = computeCenterTargetTop(rowB);
+      const rowCTopRaw = computeCenterTargetTop(rowC);
+
+      // (2) Ensure Row C can center BEFORE clamping
+      ensureRowCCanCenter(rowCTopRaw);
+
+      // (3) Recompute targets and max after potential paddingBottom change
+      const heroTop = heroTopRaw; // hero top is stable for our target list
       const rowATop = computeCenterTargetTop(rowA);
       const rowBTop = computeCenterTargetTop(rowB);
       const rowCTop = computeCenterTargetTop(rowC);
 
-      ensureRowCCanCenter(rowCTop);
-
-      // Recompute after potential paddingBottom change.
-      const rowATop2 = computeCenterTargetTop(rowA);
-      const rowBTop2 = computeCenterTargetTop(rowB);
-      const rowCTop2 = computeCenterTargetTop(rowC);
-
       const maxY = maxScrollTop();
 
+      // Clamp after recompute so Row C target is not forced below its centering position.
       return [
-        clamp(0, 0, maxY),
-        clamp(rowATop2, 0, maxY),
-        clamp(rowBTop2, 0, maxY),
-        clamp(rowCTop2, 0, maxY)
+        clamp(0, 0, maxY),          // hero top
+        clamp(rowATop, 0, maxY),    // Row A center
+        clamp(rowBTop, 0, maxY),    // Row B center
+        clamp(rowCTop, 0, maxY)     // Row C center
       ];
     }
 
@@ -3074,9 +3105,12 @@ document.addEventListener('keydown', (event) => {
 
       const startTime = performance.now();
       isSnapping = true;
+      userScrolledSinceLastSnap = true;
+      programmaticGuard = true;
 
       function step(now){
-        const t = (now - startTime) / SNAP_DURATION_MS;
+        const tRaw = (now - startTime) / SNAP_DURATION_MS;
+        const t = tRaw < 0 ? 0 : (tRaw > 1 ? 1 : tRaw);
         const eased = easeSmootherStep(t);
         const nextY = startY + (delta * eased);
         window.scrollTo(0, nextY);
@@ -3087,6 +3121,16 @@ document.addEventListener('keydown', (event) => {
           window.scrollTo(0, targetTop);
           isSnapping = false;
           snapAnimRaf = null;
+
+          // ZAQ TASK 2 — prevent “jump to bottom then pull up again” loops:
+          // After a programmatic snap finishes, do not schedule another settle
+          // unless the user scrolls again.
+          userScrolledSinceLastSnap = false;
+
+          // Keep guard for two frames so iOS does not re-trigger settle from the final scrollTo.
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            programmaticGuard = false;
+          }));
         }
       }
 
@@ -3100,7 +3144,8 @@ document.addEventListener('keydown', (event) => {
       // (address bar show/hide) and any required bottom padding do not leave Row C unreachable.
       updateTargets();
       if (!shelfTargets || shelfTargets.length !== 4) return;
-const y = window.scrollY || window.pageYOffset || 0;
+
+      const y = window.scrollY || window.pageYOffset || 0;
 
       let nearest = shelfTargets[0];
       let bestDist = Math.abs(y - nearest);
@@ -3119,6 +3164,11 @@ const y = window.scrollY || window.pageYOffset || 0;
     function scheduleSettle(){
       if (!isMobile()) return;
 
+      // ZAQ TASK 2 — hard protections against snap feedback loops
+      if (isSnapping) return;
+      if (programmaticGuard) return;
+      if (!userScrolledSinceLastSnap) return;
+
       if (scrollEndTimer) {
         clearTimeout(scrollEndTimer);
         scrollEndTimer = null;
@@ -3126,7 +3176,12 @@ const y = window.scrollY || window.pageYOffset || 0;
 
       scrollEndTimer = setTimeout(() => {
         scrollEndTimer = null;
+
+        // Guard again at execution time
         if (isSnapping) return;
+        if (programmaticGuard) return;
+        if (!userScrolledSinceLastSnap) return;
+
         settleToNearestShelf();
       }, SETTLE_DELAY_MS);
     }
@@ -3141,6 +3196,14 @@ const y = window.scrollY || window.pageYOffset || 0;
 
     window.addEventListener('scroll', () => {
       if (!isMobile()) return;
+
+      // ZAQ TASK 2 — Ignore scroll events caused by snapping or paddingBottom adjustments.
+      if (isSnapping) return;
+      if (programmaticGuard) return;
+
+      // Any non-guarded scroll implies user motion and allows a future settle.
+      userScrolledSinceLastSnap = true;
+
       scheduleSettle();
     }, { passive: true });
 
