@@ -3037,7 +3037,7 @@ document.addEventListener('keydown', (event) => {
       const maxY = maxScrollTop();
 
       return [
-        clamp(heroTop, 0, maxY),
+        clamp(0, 0, maxY),
         clamp(rowATop2, 0, maxY),
         clamp(rowBTop2, 0, maxY),
         clamp(rowCTop2, 0, maxY)
