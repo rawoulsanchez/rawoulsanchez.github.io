@@ -3039,25 +3039,39 @@ document.addEventListener('keydown', (event) => {
       return Math.max(0, full - window.innerHeight);
     }
 
-    function ensureRowCCanCenter(rowCTarget){
+    let cachedRowCPadding = 0;
+
+    function computeRowCPadding(rowCTarget){
+      const currentMax = maxScrollTop();
+      const needed = rowCTarget - currentMax;
+      if (needed > 0) {
+        // Minimal mobile-only spacing to allow Row C to reach center.
+        return Math.ceil(needed + 16);
+      }
+      return 0;
+    }
+
+    function applyRowCPadding(paddingPx){
       // NOTE: Changing paddingBottom changes document height and can trigger scroll/relayout.
-      // This function is guarded so it cannot cause snap feedback loops.
+      // This is always guarded so it cannot cause snap feedback loops.
       withProgrammaticGuard(() => {
-        const currentMax = maxScrollTop();
-        const needed = rowCTarget - currentMax;
-        if (needed > 0) {
-          // Minimal mobile-only spacing to allow Row C to reach center.
-          document.body.style.paddingBottom = Math.ceil(needed + 16) + 'px';
-        } else {
-          document.body.style.paddingBottom = '';
-        }
+        document.body.style.paddingBottom = paddingPx > 0 ? `${paddingPx}px` : '';
       });
+    }
+
+    function ensureRowCCanCenter(rowCTarget){
+      // Phase A: compute required padding (no DOM writes).
+      const nextPadding = computeRowCPadding(rowCTarget);
+      if (nextPadding === cachedRowCPadding) return;
+      cachedRowCPadding = nextPadding;
+
+      // Phase B: apply padding only during layout refresh events.
+      applyRowCPadding(nextPadding);
     }
 
     // ZAQ TASK 2 — deterministic target building order:
     // 1) Compute raw targets (hero top, Row A/B/C center targets).
-    // 2) ensureRowCCanCenter(rowCTarget) BEFORE final clamping/choosing.
-    // 3) Recompute maxScrollTop() after padding adjustment, then clamp targets.
+    // 2) Use cached padding (updated only on resize/orientation) and clamp targets.
     function buildShelfTargets(){
       const hero = document.querySelector('.hero');
       const rowA = document.querySelector('.shelf-track[data-row="A"]');
@@ -3071,15 +3085,11 @@ document.addEventListener('keydown', (event) => {
       const rowBTopRaw = computeCenterTargetTop(rowB);
       const rowCTopRaw = computeCenterTargetTop(rowC);
 
-      // (2) Ensure Row C can center BEFORE clamping
-      ensureRowCCanCenter(rowCTopRaw);
-
-      // (3) Recompute targets and max after potential paddingBottom change
+      // (2) Use cached padding value (updated on resize/orientation) and clamp targets.
       const heroTop = heroTopRaw; // hero top is stable for our target list
-      const rowATop = computeCenterTargetTop(rowA);
-      const rowBTop = computeCenterTargetTop(rowB);
-      const rowCTop = computeCenterTargetTop(rowC);
-
+      const rowATop = rowATopRaw;
+      const rowBTop = rowBTopRaw;
+      const rowCTop = rowCTopRaw;
       const maxY = maxScrollTop();
 
       // Clamp after recompute so Row C target is not forced below its centering position.
@@ -3091,8 +3101,15 @@ document.addEventListener('keydown', (event) => {
       ];
     }
 
-    function updateTargets(){
+    function updateTargets({ allowPaddingUpdate = false } = {}){
       if (!isMobile()) return;
+      if (allowPaddingUpdate) {
+        const rowC = document.querySelector('.shelf-track[data-row="C"]');
+        if (rowC) {
+          const rowCTarget = computeCenterTargetTop(rowC);
+          ensureRowCCanCenter(rowCTarget);
+        }
+      }
       shelfTargets = buildShelfTargets();
     }
 
@@ -3210,12 +3227,14 @@ document.addEventListener('keydown', (event) => {
     window.addEventListener('resize', () => {
       cancelOnUserInput();
       // Wait one frame for layout to settle (address-bar and orientation changes).
-      requestAnimationFrame(updateTargets);
+      requestAnimationFrame(() => updateTargets({ allowPaddingUpdate: true }));
     }, { passive: true });
 
     window.addEventListener('orientationchange', () => {
       cancelOnUserInput();
-      requestAnimationFrame(() => requestAnimationFrame(updateTargets));
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        updateTargets({ allowPaddingUpdate: true });
+      }));
     }, { passive: true });
 
     window.addEventListener('wheel', cancelOnUserInput, { passive: true });
@@ -3230,12 +3249,10 @@ document.addEventListener('keydown', (event) => {
 
     document.addEventListener('DOMContentLoaded', () => {
       if (!isMobile()) return;
-      updateTargets();
+      updateTargets({ allowPaddingUpdate: true });
     });
   })();
 </script>
 
 </body>
 </html>
-
-
