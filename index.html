@@ -2960,9 +2960,7 @@ document.addEventListener('keydown', (event) => {
     let suppressSnapUntil = 0;
 
     let isTouching = false;
-        let touchStartY = 0;
-    let touchDidScroll = false;
-function isMobile(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
+    function isMobile(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
 
     function cancelSnap(){
       if (snapAnimRaf) cancelAnimationFrame(snapAnimRaf);
@@ -3133,30 +3131,29 @@ function isMobile(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
     }, { passive: true });
 
 
-window.addEventListener('touchstart', () => {
+window.addEventListener('touchstart', (e) => {
       if (!isMobile()) return;
-      touchDidScroll = false;
-      touchStartY = window.scrollY || window.pageYOffset || 0;
+      if (e && e.target && e.target.closest('.shelf-track')) {
+        suppressSnapUntil = performance.now() + 450;
+      }
+    }, { passive: true });
+
+
+    window.addEventListener('touchstart', () => {
+      if (!isMobile()) return;
       isTouching = true;
     }, { passive: true });
-
-    window.addEventListener('touchmove', () => {
-      if (!isMobile()) return;
-      const currentY = window.scrollY || window.pageYOffset || 0;
-      if (Math.abs(currentY - touchStartY) >= 6) touchDidScroll = true;
-    }, { passive: true });
-
 
     window.addEventListener('touchend', () => {
       if (!isMobile()) return;
       isTouching = false;
-      if (touchDidScroll) scheduleSettle();
+      scheduleSettle();
     }, { passive: true });
 
     window.addEventListener('touchcancel', () => {
       if (!isMobile()) return;
       isTouching = false;
-      if (touchDidScroll) scheduleSettle();
+      scheduleSettle();
     }, { passive: true });
 
     window.addEventListener('scroll', () => {
