@@ -3095,10 +3095,12 @@ document.addEventListener('keydown', (event) => {
 
     function settleToNearestShelf(){
       if (!isMobile()) return;
-      if (!shelfTargets || shelfTargets.length !== 4) updateTargets();
-      if (!shelfTargets || shelfTargets.length !== 4) return;
 
-      const y = window.scrollY || window.pageYOffset || 0;
+      // Recompute targets at settle-time so dynamic mobile viewport height changes
+      // (address bar show/hide) and any required bottom padding do not leave Row C unreachable.
+      updateTargets();
+      if (!shelfTargets || shelfTargets.length !== 4) return;
+const y = window.scrollY || window.pageYOffset || 0;
 
       let nearest = shelfTargets[0];
       let bestDist = Math.abs(y - nearest);
