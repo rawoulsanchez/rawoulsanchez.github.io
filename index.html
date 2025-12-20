@@ -1494,7 +1494,6 @@ html { scrollbar-gutter: stable; }
     }, { passive: true });
 
     function updateActiveTrackFromWindowScroll() {
-      if (isSoftpullMobile()) return;
       if (!shelfTracks.length) return;
 
       let closestTrack = null;
@@ -1523,14 +1522,16 @@ html { scrollbar-gutter: stable; }
       lastActiveTrack = closestTrack;
 
       if (previousActiveTrack !== closestTrack) {
-        if (!isMobileView()) scheduleVerticalCenterAfterScrollSettles(closestTrack);
-        recenterTrackActivePoster(closestTrack);
-        recenterAllOtherTracks(closestTrack);
+        if (isMobileView()) {
+        } else {
+          if (!isMobileView()) scheduleVerticalCenterAfterScrollSettles(closestTrack);
+          recenterTrackActivePoster(closestTrack);
+          recenterAllOtherTracks(closestTrack);
+        }
       }
     }
 
     window.addEventListener('scroll', () => {
-      if (isSoftpullMobile()) return;
       lastWindowScrollEventAt = performance.now();
       if (windowScrollRaf !== null) return;
       windowScrollRaf = requestAnimationFrame(() => {
