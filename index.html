@@ -2960,7 +2960,9 @@ document.addEventListener('keydown', (event) => {
     let suppressSnapUntil = 0;
 
     let isTouching = false;
-    function isMobile(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
+        let touchStartY = 0;
+    let touchDidScroll = false;
+function isMobile(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
 
     function cancelSnap(){
       if (snapAnimRaf) cancelAnimationFrame(snapAnimRaf);
@@ -3131,29 +3133,30 @@ document.addEventListener('keydown', (event) => {
     }, { passive: true });
 
 
-window.addEventListener('touchstart', (e) => {
+window.addEventListener('touchstart', () => {
       if (!isMobile()) return;
-      if (e && e.target && e.target.closest('.shelf-track')) {
-        suppressSnapUntil = performance.now() + 450;
-      }
-    }, { passive: true });
-
-
-    window.addEventListener('touchstart', () => {
-      if (!isMobile()) return;
+      touchDidScroll = false;
+      touchStartY = window.scrollY || window.pageYOffset || 0;
       isTouching = true;
     }, { passive: true });
+
+    window.addEventListener('touchmove', () => {
+      if (!isMobile()) return;
+      const currentY = window.scrollY || window.pageYOffset || 0;
+      if (Math.abs(currentY - touchStartY) >= 6) touchDidScroll = true;
+    }, { passive: true });
+
 
     window.addEventListener('touchend', () => {
       if (!isMobile()) return;
       isTouching = false;
-      scheduleSettle();
+      if (touchDidScroll) scheduleSettle();
     }, { passive: true });
 
     window.addEventListener('touchcancel', () => {
       if (!isMobile()) return;
       isTouching = false;
-      scheduleSettle();
+      if (touchDidScroll) scheduleSettle();
     }, { passive: true });
 
     window.addEventListener('scroll', () => {
