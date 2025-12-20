@@ -1500,6 +1500,8 @@ html { scrollbar-gutter: stable; }
       let smallestDistance = Infinity;
       const viewportCenterY = window.innerHeight / 2;
 
+      const MOBILE_ACTIVE_TRACK_HYSTERESIS_PX = 40; // px
+
       for (const track of shelfTracks) {
         const rect = track.getBoundingClientRect();
         const trackCenterY = rect.top + rect.height / 2;
@@ -1512,6 +1514,19 @@ html { scrollbar-gutter: stable; }
       }
 
       if (!closestTrack) return;
+
+      // Mobile-only hysteresis: avoid rapid toggling near row boundaries.
+      if (isMobileView() && lastActiveTrack && lastActiveTrack !== closestTrack) {
+        const lastRect = lastActiveTrack.getBoundingClientRect();
+        const lastCenterY = lastRect.top + lastRect.height / 2;
+        const lastDistance = Math.abs(lastCenterY - viewportCenterY);
+
+        // Switch only if the new closest is closer by at least the threshold.
+        if (!(smallestDistance <= (lastDistance - MOBILE_ACTIVE_TRACK_HYSTERESIS_PX))) {
+          closestTrack = lastActiveTrack;
+          smallestDistance = lastDistance;
+        }
+      }
 
       const previousActiveTrack = lastActiveTrack;
 
