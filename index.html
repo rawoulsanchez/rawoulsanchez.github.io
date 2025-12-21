@@ -3192,7 +3192,7 @@ document.addEventListener('keydown', (event) => {
 
       // Recompute targets at settle-time so dynamic mobile viewport height changes
       // (address bar show/hide) and any required bottom padding do not leave Row C unreachable.
-      updateTargets();
+      updateTargets({ allowPaddingUpdate: true });
       if (!shelfTargets || shelfTargets.length !== 4) return;
 
       const y = window.scrollY || window.pageYOffset || 0;
