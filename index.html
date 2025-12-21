@@ -1,4 +1,5 @@
 
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -3003,7 +3004,6 @@ document.addEventListener('keydown', (event) => {
     const SNAP_DURATION_MS = 520;
     const MAX_SPACER_PX = 240;
     const SPACER_BUFFER_PX = 16;
-    const SNAP_MQ = window.matchMedia('(max-width: 768px)');
 
     let scrollEndTimer = null;
     let snapAnimRaf = null;
@@ -3019,10 +3019,6 @@ document.addEventListener('keydown', (event) => {
     // - After a snap finishes, do not auto-settle again until the user scrolls again.
     let programmaticGuard = false;
     let userScrolledSinceLastSnap = true;
-
-    function isSnapEnabled(){
-      return !!(SNAP_MQ && SNAP_MQ.matches);
-    }
 
     function withProgrammaticGuard(fn){
       programmaticGuard = true;
@@ -3239,7 +3235,6 @@ document.addEventListener('keydown', (event) => {
 
     function scheduleSettle(){
       // ZAQ TASK 2 — hard protections against snap feedback loops
-      if (!isSnapEnabled()) return;
       if (snapState.isSnapping) return;
       if (programmaticGuard) return;
       if (!userScrolledSinceLastSnap) return;
@@ -3270,7 +3265,6 @@ document.addEventListener('keydown', (event) => {
     };
 
     window.addEventListener('scroll', () => {
-      if (!isSnapEnabled()) return;
       // ZAQ TASK 2 — Ignore scroll events caused by snapping or paddingBottom adjustments.
       if (snapState.isSnapping) return;
       if (programmaticGuard) return;
@@ -3284,14 +3278,12 @@ document.addEventListener('keydown', (event) => {
 
     window.addEventListener('resize', () => {
       cancelOnUserInput();
-      if (!isSnapEnabled()) return;
       // Wait one frame for layout to settle (address-bar and orientation changes).
       requestAnimationFrame(() => updateTargets({ allowSpacerUpdate: true }));
     }, { passive: true });
 
     window.addEventListener('orientationchange', () => {
       cancelOnUserInput();
-      if (!isSnapEnabled()) return;
       requestAnimationFrame(() => requestAnimationFrame(() => {
         updateTargets({ allowSpacerUpdate: true });
       }));
@@ -3308,7 +3300,6 @@ document.addEventListener('keydown', (event) => {
     }, { passive: true });
 
     document.addEventListener('DOMContentLoaded', () => {
-      if (!isSnapEnabled()) return;
       updateTargets({ allowSpacerUpdate: true });
     });
   })();
