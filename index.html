@@ -171,7 +171,8 @@ main{
     font-size:.82rem;
   }
   #mobile-bottom-spacer{
-    height:0;
+    --mobile-bottom-spacer-height: 0px;
+    height: var(--mobile-bottom-spacer-height);
     transition:height .2s ease;
   }
   .footer-nav{
@@ -1211,7 +1212,7 @@ html { scrollbar-gutter: stable; }
 
   </main>
 
-  <!-- Mobile-only spacer to add scroll runway without affecting desktop layout. -->
+  <!-- Spacer to add scroll runway without affecting layout when collapsed. -->
   <div id="mobile-bottom-spacer" aria-hidden="true"></div>
   <footer>
     © <span id="y"></span> Rawoul
@@ -2992,9 +2993,8 @@ document.addEventListener('keydown', (event) => {
 
 
 <script>
-  // ZAQ TASK 1 — Mobile 4-shelf “settle to nearest shelf” snapping
+  // ZAQ TASK 1 — 4-shelf “settle to nearest shelf” snapping
   (function(){
-    const MOBILE_MQ = window.matchMedia('(hover: none) and (pointer: coarse)');
     const SETTLE_DELAY_MS = 280; // debounce “scroll end”
     const SNAP_DURATION_MS = 520;
     const MAX_SPACER_PX = 240;
@@ -3014,8 +3014,6 @@ document.addEventListener('keydown', (event) => {
     // - After a snap finishes, do not auto-settle again until the user scrolls again.
     let programmaticGuard = false;
     let userScrolledSinceLastSnap = true;
-
-    function isMobile(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
 
     function withProgrammaticGuard(fn){
       programmaticGuard = true;
@@ -3103,12 +3101,13 @@ document.addEventListener('keydown', (event) => {
       // Changing spacer height changes document height and can trigger scroll/relayout.
       // Guarded to prevent mobile bottom-clamp feedback loops.
       withProgrammaticGuard(() => {
-        spacer.style.height = heightPx > 0 ? `${heightPx}px` : '0px';
+        // Uses a CSS variable so the spacer follows the same auto-gap styling hooks.
+        spacer.style.setProperty('--mobile-bottom-spacer-height', heightPx > 0 ? `${heightPx}px` : '0px');
       });
     }
 
     function ensureRowCCanCenter(rowCTarget){
-      // Mobile-only spacer prevents the browser's max-scroll clamp from snapping the
+      // Spacer prevents the browser's max-scroll clamp from snapping the
       // last shelf back up when we try to vertically center it near the footer.
       // Phase A: compute required spacer height (no DOM writes).
       const nextSpacer = computeBottomSpacerHeight(rowCTarget);
@@ -3152,7 +3151,6 @@ document.addEventListener('keydown', (event) => {
     }
 
     function updateTargets({ allowSpacerUpdate = false } = {}){
-      if (!isMobile()) return;
       if (allowSpacerUpdate) {
         const rowC = document.querySelector('.shelf-track[data-row="C"]');
         if (rowC) {
@@ -3209,8 +3207,6 @@ document.addEventListener('keydown', (event) => {
     }
 
     function settleToNearestShelf(){
-      if (!isMobile()) return;
-
       // Recompute targets at settle-time so dynamic mobile viewport height changes
       // (address bar show/hide) and any required bottom spacer do not leave Row C unreachable.
       updateTargets({ allowSpacerUpdate: true });
@@ -3233,8 +3229,6 @@ document.addEventListener('keydown', (event) => {
     }
 
     function scheduleSettle(){
-      if (!isMobile()) return;
-
       // ZAQ TASK 2 — hard protections against snap feedback loops
       if (snapState.isSnapping) return;
       if (programmaticGuard) return;
@@ -3266,8 +3260,6 @@ document.addEventListener('keydown', (event) => {
     };
 
     window.addEventListener('scroll', () => {
-      if (!isMobile()) return;
-
       // ZAQ TASK 2 — Ignore scroll events caused by snapping or paddingBottom adjustments.
       if (snapState.isSnapping) return;
       if (programmaticGuard) return;
@@ -3303,7 +3295,6 @@ document.addEventListener('keydown', (event) => {
     }, { passive: true });
 
     document.addEventListener('DOMContentLoaded', () => {
-      if (!isMobile()) return;
       updateTargets({ allowSpacerUpdate: true });
     });
   })();
