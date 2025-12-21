@@ -1391,12 +1391,14 @@ html { scrollbar-gutter: stable; }
     let pendingVerticalCenterTrack = null;
 
     let verticalCenterAnim = null; // { frameId, startY, targetY, startTime }
+    let isVerticalCentering = false;
 
     function cancelVerticalCenterAnimation() {
       if (verticalCenterAnim && typeof verticalCenterAnim.frameId === 'number') {
         cancelAnimationFrame(verticalCenterAnim.frameId);
       }
       verticalCenterAnim = null;
+      isVerticalCentering = false;
     }
 
     function easeInOutSmootherStep(t) {
@@ -1426,6 +1428,7 @@ html { scrollbar-gutter: stable; }
       if (Math.abs(delta) < threshold || durationMs <= 0) return;
 
       const startTime = performance.now();
+      isVerticalCentering = true;
 
       function step(now) {
         const elapsed = now - startTime;
@@ -1452,6 +1455,7 @@ html { scrollbar-gutter: stable; }
     function scheduleVerticalCenterAfterScrollSettles(track) {
       const config = getVerticalCenterConfig();
       if (!config) return;
+      if (isVerticalCentering) return;
       pendingVerticalCenterTrack = track;
 
       if (verticalCenterTimeout) {
@@ -1513,6 +1517,7 @@ html { scrollbar-gutter: stable; }
 
     function updateActiveTrackFromWindowScroll() {
       if (!shelfTracks.length) return;
+      if (isVerticalCentering) return;
 
       let closestTrack = null;
       let smallestDistance = Infinity;
