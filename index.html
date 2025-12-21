@@ -1374,13 +1374,16 @@ html { scrollbar-gutter: stable; }
     let windowScrollRaf = null;
 
     // ZAQ TASK — SOFT-PULL VERTICAL ROW CENTERING (REDUCE JUMP)
-    const VERTICAL_CENTER_SETTLE_DELAY = 180; // ms (140–220)
-    const VERTICAL_CENTER_DURATION = 1200; // ms (900–1400)
-    const VERTICAL_CENTER_DEADZONE = 32; // px (24–40)
+    const VERTICAL_CENTER_CONFIG = {
+      desktop: { settleDelay: 180, duration: 1200, deadzone: 32 }, // ms / ms / px
+      mobile: { settleDelay: 240, duration: 1500, deadzone: 24 } // gentler, longer glide
+    };
+    const REDUCED_MOTION_MQ = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-    // ZAQ TASK 2 — Mobile guard (disable this legacy system on mobile only)
-    const SOFTPULL_MOBILE_MQ = window.matchMedia('(max-width: 768px)');
-    function isSoftpullMobile(){ return !!(SOFTPULL_MOBILE_MQ && SOFTPULL_MOBILE_MQ.matches); }
+    function getVerticalCenterConfig() {
+      if (REDUCED_MOTION_MQ && REDUCED_MOTION_MQ.matches) return null;
+      return isMobileView() ? VERTICAL_CENTER_CONFIG.mobile : VERTICAL_CENTER_CONFIG.desktop;
+    }
 
     let verticalCenterTimeout = null;
     let lastWindowScrollEventAt = 0;
@@ -1412,14 +1415,14 @@ html { scrollbar-gutter: stable; }
       return scrollTop + (trackCenterY - viewportCenterY);
     }
 
-    function animateWindowScrollToSoft(targetTop, durationMs) {
-      if (isSoftpullMobile()) return;
+    function animateWindowScrollToSoft(targetTop, durationMs, deadzone) {
       cancelVerticalCenterAnimation();
 
       const startY = window.scrollY || window.pageYOffset || 0;
       const delta = targetTop - startY;
 
-      if (Math.abs(delta) < VERTICAL_CENTER_DEADZONE || durationMs <= 0) return;
+      const threshold = typeof deadzone === 'number' ? deadzone : 0;
+      if (Math.abs(delta) < threshold || durationMs <= 0) return;
 
       const startTime = performance.now();
 
@@ -1446,7 +1449,8 @@ html { scrollbar-gutter: stable; }
     }
 
     function scheduleVerticalCenterAfterScrollSettles(track) {
-      if (isSoftpullMobile()) return;
+      const config = getVerticalCenterConfig();
+      if (!config) return;
       pendingVerticalCenterTrack = track;
 
       if (verticalCenterTimeout) {
@@ -1458,8 +1462,8 @@ html { scrollbar-gutter: stable; }
         const now = performance.now();
         const sinceLastScroll = now - lastWindowScrollEventAt;
 
-        if (sinceLastScroll < VERTICAL_CENTER_SETTLE_DELAY) {
-          verticalCenterTimeout = setTimeout(checkAndRun, VERTICAL_CENTER_SETTLE_DELAY - sinceLastScroll);
+        if (sinceLastScroll < config.settleDelay) {
+          verticalCenterTimeout = setTimeout(checkAndRun, config.settleDelay - sinceLastScroll);
           return;
         }
 
@@ -1471,12 +1475,12 @@ html { scrollbar-gutter: stable; }
         const targetTop = computeVerticalCenterTargetTop(t);
         const currentTop = window.scrollY || window.pageYOffset || 0;
 
-        if (Math.abs(targetTop - currentTop) < VERTICAL_CENTER_DEADZONE) return;
+        if (Math.abs(targetTop - currentTop) < config.deadzone) return;
 
-        animateWindowScrollToSoft(targetTop, VERTICAL_CENTER_DURATION);
+        animateWindowScrollToSoft(targetTop, config.duration, config.deadzone);
       };
 
-      verticalCenterTimeout = setTimeout(checkAndRun, VERTICAL_CENTER_SETTLE_DELAY);
+      verticalCenterTimeout = setTimeout(checkAndRun, config.settleDelay);
     }
 
     // Cancel immediately on user input while the pull is happening
