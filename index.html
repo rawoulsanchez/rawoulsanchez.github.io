@@ -3287,7 +3287,9 @@ document.addEventListener('keydown', (event) => {
       // Any non-guarded scroll implies user motion and allows a future settle.
       userScrolledSinceLastSnap = true;
 
-      updateTargets({ allowSpacerUpdate: true });
+      // Avoid updating the bottom spacer during active scroll to prevent
+      // layout-induced jumps while soft-pull centering is running.
+      updateTargets({ allowSpacerUpdate: false });
       scheduleSettle();
     }, { passive: true });
 
