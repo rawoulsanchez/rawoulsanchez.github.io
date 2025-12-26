@@ -171,6 +171,16 @@ main{
     border-top:1px solid #222;
     font-size:.82rem;
   }
+  .footer--locked {
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:200;
+  }
+  #footer-placeholder {
+    height:0px;
+  }
   #mobile-bottom-spacer{
     --mobile-bottom-spacer-height: 0px;
     height: var(--mobile-bottom-spacer-height);
@@ -1215,6 +1225,8 @@ html { scrollbar-gutter: stable; }
 
   <!-- Spacer to add scroll runway without affecting layout when collapsed. -->
   <div id="mobile-bottom-spacer" aria-hidden="true"></div>
+  <div id="footer-sentinel"></div>
+  <div id="footer-placeholder" aria-hidden="true"></div>
   <footer>
     © <span id="y"></span> Rawoul
     <nav class="footer-nav" aria-label="Footer navigation">
@@ -3080,6 +3092,7 @@ document.addEventListener('keydown', (event) => {
     }
 
     let cachedBottomSpacer = 0;
+    let isFooterLocked = false;
 
     function getBottomSpacer(){
       return document.getElementById('mobile-bottom-spacer');
@@ -3166,6 +3179,35 @@ document.addEventListener('keydown', (event) => {
       shelfTargets = buildShelfTargets();
     }
 
+    function refreshFooterLockLayout(){
+      if (!isFooterLocked) return;
+      const footer = document.querySelector('footer');
+      const placeholder = document.getElementById('footer-placeholder');
+      if (!footer || !placeholder) return;
+      const footerHeight = footer.getBoundingClientRect().height;
+      placeholder.style.height = `${footerHeight}px`;
+      updateTargets({ allowSpacerUpdate: true });
+    }
+
+    function setFooterLocked(locked){
+      if (locked === isFooterLocked) return;
+      const footer = document.querySelector('footer');
+      const placeholder = document.getElementById('footer-placeholder');
+      if (!footer || !placeholder) return;
+      isFooterLocked = locked;
+      footer.classList.toggle('footer--locked', locked);
+      if (locked) {
+        const footerHeight = footer.getBoundingClientRect().height;
+        placeholder.style.height = `${footerHeight}px`;
+        updateTargets({ allowSpacerUpdate: true });
+      } else {
+        placeholder.style.height = '0px';
+        cachedBottomSpacer = 0;
+        applyBottomSpacer(0);
+        updateTargets({ allowSpacerUpdate: false });
+      }
+    }
+
     function animateScrollTo(targetTop, targetTrack){
       cancelSnap();
 
@@ -3214,7 +3256,7 @@ document.addEventListener('keydown', (event) => {
     function settleToNearestShelf(){
       // Recompute targets at settle-time so dynamic mobile viewport height changes
       // (address bar show/hide) and any required bottom spacer do not leave Row C unreachable.
-      updateTargets({ allowSpacerUpdate: true });
+      updateTargets({ allowSpacerUpdate: isFooterLocked });
       if (!shelfTargets || shelfTargets.length !== 4) return;
 
       const y = window.scrollY || window.pageYOffset || 0;
@@ -3272,20 +3314,24 @@ document.addEventListener('keydown', (event) => {
       // Any non-guarded scroll implies user motion and allows a future settle.
       userScrolledSinceLastSnap = true;
 
-      updateTargets({ allowSpacerUpdate: true });
+      updateTargets({ allowSpacerUpdate: false });
       scheduleSettle();
     }, { passive: true });
 
     window.addEventListener('resize', () => {
       cancelOnUserInput();
       // Wait one frame for layout to settle (address-bar and orientation changes).
-      requestAnimationFrame(() => updateTargets({ allowSpacerUpdate: true }));
+      requestAnimationFrame(() => {
+        updateTargets({ allowSpacerUpdate: isFooterLocked });
+        refreshFooterLockLayout();
+      });
     }, { passive: true });
 
     window.addEventListener('orientationchange', () => {
       cancelOnUserInput();
       requestAnimationFrame(() => requestAnimationFrame(() => {
-        updateTargets({ allowSpacerUpdate: true });
+        updateTargets({ allowSpacerUpdate: isFooterLocked });
+        refreshFooterLockLayout();
       }));
     }, { passive: true });
 
@@ -3299,8 +3345,26 @@ document.addEventListener('keydown', (event) => {
       }
     }, { passive: true });
 
+    const footerSentinel = document.getElementById('footer-sentinel');
+    if (footerSentinel) {
+      const footerObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) {
+            const isBelowViewport = entry.boundingClientRect.top > window.innerHeight;
+            if (isBelowViewport) {
+              setFooterLocked(false);
+            }
+            return;
+          }
+          setFooterLocked(true);
+        });
+      }, { threshold: 0 });
+      footerObserver.observe(footerSentinel);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-      updateTargets({ allowSpacerUpdate: true });
+      updateTargets({ allowSpacerUpdate: isFooterLocked });
+      refreshFooterLockLayout();
     });
   })();
 </script>
