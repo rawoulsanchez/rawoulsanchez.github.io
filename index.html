@@ -1366,11 +1366,10 @@ html { scrollbar-gutter: stable; }
       if (!activePoster) return;
 
       const trackRect = track.getBoundingClientRect();
-      const posterRect = activePoster.getBoundingClientRect();
 
       // Center the active poster to the viewport center, so all rows share the same screen center
-      const viewportCenterX = window.innerWidth / 2;
-      const posterCenterOffset = activePoster.offsetLeft + (posterRect.width / 2);
+      const viewportCenterX = trackRect.width / 2;
+      const posterCenterOffset = activePoster.offsetLeft + (activePoster.offsetWidth / 2);
       const viewportCenterRelativeToTrack = viewportCenterX - trackRect.left;
       const target = posterCenterOffset - viewportCenterRelativeToTrack;
 
@@ -1591,7 +1590,6 @@ html { scrollbar-gutter: stable; }
       if (previousActiveTrack !== closestTrack) {
         if (isMobileView()) {
         } else {
-          if (!isMobileView()) scheduleVerticalCenterAfterScrollSettles(closestTrack);
           recenterTrackActivePoster(closestTrack);
           recenterAllOtherTracks(closestTrack);
         }
