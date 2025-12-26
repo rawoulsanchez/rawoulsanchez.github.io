@@ -3093,6 +3093,8 @@ document.addEventListener('keydown', (event) => {
 
     let cachedBottomSpacer = 0;
     let isFooterLocked = false;
+    let lastScrollY = window.scrollY || window.pageYOffset || 0;
+    let scrollDirection = 'down';
 
     function getBottomSpacer(){
       return document.getElementById('mobile-bottom-spacer');
@@ -3256,7 +3258,7 @@ document.addEventListener('keydown', (event) => {
     function settleToNearestShelf(){
       // Recompute targets at settle-time so dynamic mobile viewport height changes
       // (address bar show/hide) and any required bottom spacer do not leave Row C unreachable.
-      updateTargets({ allowSpacerUpdate: isFooterLocked });
+      updateTargets({ allowSpacerUpdate: false });
       if (!shelfTargets || shelfTargets.length !== 4) return;
 
       const y = window.scrollY || window.pageYOffset || 0;
@@ -3311,6 +3313,10 @@ document.addEventListener('keydown', (event) => {
       if (snapState.isSnapping) return;
       if (programmaticGuard) return;
 
+      const currentY = window.scrollY || window.pageYOffset || 0;
+      scrollDirection = currentY >= lastScrollY ? 'down' : 'up';
+      lastScrollY = currentY;
+
       // Any non-guarded scroll implies user motion and allows a future settle.
       userScrolledSinceLastSnap = true;
 
@@ -3349,14 +3355,14 @@ document.addEventListener('keydown', (event) => {
     if (footerSentinel) {
       const footerObserver = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
-          if (!entry.isIntersecting) {
-            const isBelowViewport = entry.boundingClientRect.top > window.innerHeight;
-            if (isBelowViewport) {
-              setFooterLocked(false);
-            }
+          if (!entry.isIntersecting) return;
+          if (scrollDirection === 'down' && !isFooterLocked) {
+            setFooterLocked(true);
             return;
           }
-          setFooterLocked(true);
+          if (scrollDirection === 'up' && isFooterLocked) {
+            setFooterLocked(false);
+          }
         });
       }, { threshold: 0 });
       footerObserver.observe(footerSentinel);
