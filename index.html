@@ -3090,7 +3090,14 @@ document.addEventListener('keydown', (event) => {
       return Math.max(0, currentMax - cachedBottomSpacer);
     }
 
-    function computeBottomSpacerHeight(rowCTarget){
+    function shouldUseBottomSpacerMobile(){
+      return window.matchMedia('(max-width: 1023px)').matches;
+    }
+
+    let lastSpacerMode = null;
+
+    function computeBottomSpacerHeight(rowCTarget, { force = false } = {}){
+      if (!force && !shouldUseBottomSpacerMobile()) return 0;
       const currentMax = baseMaxScrollTop();
       const needed = rowCTarget - currentMax;
       if (needed > 0) {
@@ -3160,10 +3167,34 @@ document.addEventListener('keydown', (event) => {
         const rowC = document.querySelector('.shelf-track[data-row="C"]');
         if (rowC) {
           const rowCTarget = computeCenterTargetTop(rowC);
-          ensureRowCCanCenter(rowCTarget);
+          if (shouldUseBottomSpacerMobile()) {
+            if (lastSpacerMode === 'desktop' && cachedBottomSpacer !== 0) {
+              cachedBottomSpacer = 0;
+              applyBottomSpacer(0);
+            }
+            ensureRowCCanCenter(rowCTarget);
+            lastSpacerMode = 'mobile';
+          }
         }
       }
       shelfTargets = buildShelfTargets();
+    }
+
+    function updateDesktopSpacerIfNeeded(){
+      if (shouldUseBottomSpacerMobile()) return;
+      const previousMode = lastSpacerMode;
+      lastSpacerMode = 'desktop';
+      if (previousMode === 'mobile' && cachedBottomSpacer !== 0) {
+        cachedBottomSpacer = 0;
+        applyBottomSpacer(0);
+      }
+      const rowC = document.querySelector('.shelf-track[data-row="C"]');
+      if (!rowC) return;
+      const rowCTarget = computeCenterTargetTop(rowC);
+      const nextSpacer = computeBottomSpacerHeight(rowCTarget, { force: true });
+      if (nextSpacer === cachedBottomSpacer) return;
+      cachedBottomSpacer = nextSpacer;
+      applyBottomSpacer(nextSpacer);
     }
 
     function animateScrollTo(targetTop, targetTrack){
@@ -3279,12 +3310,16 @@ document.addEventListener('keydown', (event) => {
     window.addEventListener('resize', () => {
       cancelOnUserInput();
       // Wait one frame for layout to settle (address-bar and orientation changes).
-      requestAnimationFrame(() => updateTargets({ allowSpacerUpdate: true }));
+      requestAnimationFrame(() => {
+        updateDesktopSpacerIfNeeded();
+        updateTargets({ allowSpacerUpdate: true });
+      });
     }, { passive: true });
 
     window.addEventListener('orientationchange', () => {
       cancelOnUserInput();
       requestAnimationFrame(() => requestAnimationFrame(() => {
+        updateDesktopSpacerIfNeeded();
         updateTargets({ allowSpacerUpdate: true });
       }));
     }, { passive: true });
@@ -3300,6 +3335,7 @@ document.addEventListener('keydown', (event) => {
     }, { passive: true });
 
     document.addEventListener('DOMContentLoaded', () => {
+      updateDesktopSpacerIfNeeded();
       updateTargets({ allowSpacerUpdate: true });
     });
   })();
