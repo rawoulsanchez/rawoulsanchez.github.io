@@ -151,6 +151,11 @@ main{
   /* 1px upward overlap to kill rounding sliver on DPR 2/3 */
   padding-top: calc(var(--nav-height) + env(safe-area-inset-top) - 1px);
 }
+@media (min-width: 1024px) {
+  main{
+    padding-bottom: 40vh;
+  }
+}
 .wrap {
   max-width:960px;
   margin:0 auto;
@@ -3182,19 +3187,10 @@ document.addEventListener('keydown', (event) => {
 
     function updateDesktopSpacerIfNeeded(){
       if (shouldUseBottomSpacerMobile()) return;
-      const previousMode = lastSpacerMode;
+      cachedBottomSpacer = 0;
+      applyBottomSpacer(0);
       lastSpacerMode = 'desktop';
-      if (previousMode === 'mobile' && cachedBottomSpacer !== 0) {
-        cachedBottomSpacer = 0;
-        applyBottomSpacer(0);
-      }
-      const rowC = document.querySelector('.shelf-track[data-row="C"]');
-      if (!rowC) return;
-      const rowCTarget = computeCenterTargetTop(rowC);
-      const nextSpacer = computeBottomSpacerHeight(rowCTarget, { force: true });
-      if (nextSpacer === cachedBottomSpacer) return;
-      cachedBottomSpacer = nextSpacer;
-      applyBottomSpacer(nextSpacer);
+      return;
     }
 
     function animateScrollTo(targetTop, targetTrack){
