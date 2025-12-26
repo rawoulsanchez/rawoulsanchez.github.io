@@ -151,11 +151,6 @@ main{
   /* 1px upward overlap to kill rounding sliver on DPR 2/3 */
   padding-top: calc(var(--nav-height) + env(safe-area-inset-top) - 1px);
 }
-@media (min-width: 1024px) {
-  main{
-    padding-bottom: 40vh;
-  }
-}
 .wrap {
   max-width:960px;
   margin:0 auto;
@@ -3095,14 +3090,7 @@ document.addEventListener('keydown', (event) => {
       return Math.max(0, currentMax - cachedBottomSpacer);
     }
 
-    function shouldUseBottomSpacerMobile(){
-      return window.matchMedia('(max-width: 1023px)').matches;
-    }
-
-    let lastSpacerMode = null;
-
-    function computeBottomSpacerHeight(rowCTarget, { force = false } = {}){
-      if (!force && !shouldUseBottomSpacerMobile()) return 0;
+    function computeBottomSpacerHeight(rowCTarget){
       const currentMax = baseMaxScrollTop();
       const needed = rowCTarget - currentMax;
       if (needed > 0) {
@@ -3172,25 +3160,10 @@ document.addEventListener('keydown', (event) => {
         const rowC = document.querySelector('.shelf-track[data-row="C"]');
         if (rowC) {
           const rowCTarget = computeCenterTargetTop(rowC);
-          if (shouldUseBottomSpacerMobile()) {
-            if (lastSpacerMode === 'desktop' && cachedBottomSpacer !== 0) {
-              cachedBottomSpacer = 0;
-              applyBottomSpacer(0);
-            }
-            ensureRowCCanCenter(rowCTarget);
-            lastSpacerMode = 'mobile';
-          }
+          ensureRowCCanCenter(rowCTarget);
         }
       }
       shelfTargets = buildShelfTargets();
-    }
-
-    function updateDesktopSpacerIfNeeded(){
-      if (shouldUseBottomSpacerMobile()) return;
-      cachedBottomSpacer = 0;
-      applyBottomSpacer(0);
-      lastSpacerMode = 'desktop';
-      return;
     }
 
     function animateScrollTo(targetTop, targetTrack){
@@ -3306,16 +3279,12 @@ document.addEventListener('keydown', (event) => {
     window.addEventListener('resize', () => {
       cancelOnUserInput();
       // Wait one frame for layout to settle (address-bar and orientation changes).
-      requestAnimationFrame(() => {
-        updateDesktopSpacerIfNeeded();
-        updateTargets({ allowSpacerUpdate: true });
-      });
+      requestAnimationFrame(() => updateTargets({ allowSpacerUpdate: true }));
     }, { passive: true });
 
     window.addEventListener('orientationchange', () => {
       cancelOnUserInput();
       requestAnimationFrame(() => requestAnimationFrame(() => {
-        updateDesktopSpacerIfNeeded();
         updateTargets({ allowSpacerUpdate: true });
       }));
     }, { passive: true });
@@ -3331,7 +3300,6 @@ document.addEventListener('keydown', (event) => {
     }, { passive: true });
 
     document.addEventListener('DOMContentLoaded', () => {
-      updateDesktopSpacerIfNeeded();
       updateTargets({ allowSpacerUpdate: true });
     });
   })();
