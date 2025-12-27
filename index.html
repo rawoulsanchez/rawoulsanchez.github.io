@@ -577,6 +577,11 @@ html { scrollbar-gutter: stable; }
   opacity: 1;
 }
 
+.hero--active .hero-cta .btn--solid {
+  outline: 2px solid var(--brand);
+  box-shadow: var(--brand-glow-shadow), 0 6px 14px rgba(0,0,0,.18);
+}
+
 /* Make the poster label visible and styled */
 .poster::after {
   content: attr(data-label);
@@ -1365,13 +1370,13 @@ html { scrollbar-gutter: stable; }
       const activePoster = track.querySelector('.poster.is-active');
       if (!activePoster) return;
 
-      const trackRect = track.getBoundingClientRect();
+      const trackWidth = track.clientWidth;
+      const activePosterWidth = activePoster.offsetWidth; // Use layout width, not visual width
+      const posterLeft = activePoster.offsetLeft;
 
-      // Center the active poster to the viewport center, so all rows share the same screen center
-      const viewportCenterX = trackRect.width / 2;
-      const posterCenterOffset = activePoster.offsetLeft + (activePoster.offsetWidth / 2);
-      const viewportCenterRelativeToTrack = viewportCenterX - trackRect.left;
-      const target = posterCenterOffset - viewportCenterRelativeToTrack;
+      const posterCenter = posterLeft + (activePosterWidth / 2);
+      const trackCenter = trackWidth / 2;
+      const target = posterCenter - trackCenter;
 
       animateScrollLeftSlow(track, target, RECENTER_DURATION);
     }
@@ -1529,6 +1534,7 @@ html { scrollbar-gutter: stable; }
 
     function updateActiveTrackFromWindowScroll() {
       if (!shelfTracks.length) return;
+      const hero = document.querySelector('.hero');
 
       let closestTrack = null;
       let smallestDistance = Infinity;
@@ -1549,7 +1555,8 @@ html { scrollbar-gutter: stable; }
       }
 
       if (!closestTrack) {
-        for (const track of shelfTracks) {
+        const candidates = hero ? [hero, ...shelfTracks] : shelfTracks;
+        for (const track of candidates) {
           const rect = track.getBoundingClientRect();
           const trackCenterY = rect.top + rect.height / 2;
           const distance = Math.abs(trackCenterY - viewportCenterY);
@@ -1583,15 +1590,23 @@ html { scrollbar-gutter: stable; }
 
       if (previousActiveTrack && previousActiveTrack !== closestTrack) {
         previousActiveTrack.classList.remove('shelf-track--active');
+        previousActiveTrack.classList.remove('hero--active');
       }
-      closestTrack.classList.add('shelf-track--active');
+      if (closestTrack.classList.contains('shelf-track')) {
+        closestTrack.classList.add('shelf-track--active');
+        if (hero) hero.classList.remove('hero--active');
+      } else if (closestTrack.classList.contains('hero')) {
+        closestTrack.classList.add('hero--active');
+      }
       lastActiveTrack = closestTrack;
 
       if (previousActiveTrack !== closestTrack) {
         if (isMobileView()) {
         } else {
-          recenterTrackActivePoster(closestTrack);
-          recenterAllOtherTracks(closestTrack);
+          if (closestTrack.classList.contains('shelf-track')) {
+            recenterTrackActivePoster(closestTrack);
+            recenterAllOtherTracks(closestTrack);
+          }
         }
       }
     }
@@ -1691,6 +1706,7 @@ html { scrollbar-gutter: stable; }
           // Toggle the active shelf-track for row-scoped neon
           if (previousActiveTrack && previousActiveTrack !== track) {
             previousActiveTrack.classList.remove('shelf-track--active');
+            previousActiveTrack.classList.remove('hero--active');
           }
           track.classList.add('shelf-track--active');
           lastActiveTrack = track;
@@ -3013,60 +3029,37 @@ document.addEventListener('keydown', (event) => {
 
 
 <script>
-  // ZAQ TASK 1 — 4-shelf “settle to nearest shelf” snapping
+  // ZAQ TASK 1 — "Zero Tolerance" Magnetic Pull
   (function(){
-    const SETTLE_DELAY_MS = 280; // debounce “scroll end”
-    const SNAP_DURATION_MS = 520;
+    const SETTLE_DELAY_MS = 60;    // React fast
+    const PULL_DURATION_MS = 900;  // Smooth, confident glide
     const MAX_SPACER_PX = 240;
     const SPACER_BUFFER_PX = 16;
 
     let scrollEndTimer = null;
-    let snapAnimRaf = null;
+    let pullAnimRaf = null;
     let shelfTargets = null;
+    
     const snapState = window.snapState || (window.snapState = {
       isSnapping: false,
       activeSnapTrack: null,
       activeSnapTop: null
     });
 
-    // ZAQ TASK 2 — loop guards
-    // - While a programmatic scroll/relayout is in progress, ignore scroll events for settle scheduling.
-    // - After a snap finishes, do not auto-settle again until the user scrolls again.
-    let programmaticGuard = false;
-    let userScrolledSinceLastSnap = true;
+    // Guard: Prevent double-firing, but reset instantly on interaction
+    let userScrolledSinceLastPull = true;
 
-    function withProgrammaticGuard(fn){
-      programmaticGuard = true;
-      try { fn(); } finally {
-        // Keep guard for two frames to cover relayout/scroll events (iOS especially).
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          programmaticGuard = false;
-        }));
-      }
-    }
-
-    function cancelSnap(){
-      if (snapAnimRaf) cancelAnimationFrame(snapAnimRaf);
-      snapAnimRaf = null;
+    function cancelPull(){
+      if (pullAnimRaf) cancelAnimationFrame(pullAnimRaf);
+      pullAnimRaf = null;
       snapState.isSnapping = false;
       snapState.activeSnapTrack = null;
       snapState.activeSnapTop = null;
-      // Canceling due to user input should allow future settles once the user scrolls.
-      userScrolledSinceLastSnap = true;
-      programmaticGuard = false;
     }
 
-    function easeSmootherStep(t){
-      if (t <= 0) return 0;
-      if (t >= 1) return 1;
-      return t * t * t * (t * (6 * t - 15) + 10);
-    }
-
-    function getAbsTop(el){
-      if (!el) return 0;
-      const r = el.getBoundingClientRect();
-      const y = window.scrollY || window.pageYOffset || 0;
-      return r.top + y;
+    // Easing: "Ease Out Quart" - Strong start, soft landing
+    function easeOutQuart(x) {
+      return 1 - Math.pow(1 - x, 4);
     }
 
     function computeCenterTargetTop(el){
@@ -3086,236 +3079,171 @@ document.addEventListener('keydown', (event) => {
     function maxScrollTop(){
       const doc = document.documentElement;
       const body = document.body;
-      const full = Math.max(
+      return Math.max(0, Math.max(
         doc.scrollHeight, body.scrollHeight,
         doc.offsetHeight, body.offsetHeight,
         doc.clientHeight
-      );
-      return Math.max(0, full - window.innerHeight);
+      ) - window.innerHeight);
     }
 
     let cachedBottomSpacer = 0;
-
-    function getBottomSpacer(){
-      return document.getElementById('mobile-bottom-spacer');
-    }
-
-    function baseMaxScrollTop(){
-      const currentMax = maxScrollTop();
-      return Math.max(0, currentMax - cachedBottomSpacer);
-    }
-
-    function computeBottomSpacerHeight(rowCTarget){
-      const currentMax = baseMaxScrollTop();
-      const needed = rowCTarget - currentMax;
-      if (needed > 0) {
-        // Minimal mobile-only runway to allow Row C to reach center.
-        return Math.min(MAX_SPACER_PX, Math.ceil(needed + SPACER_BUFFER_PX));
-      }
-      return 0;
-    }
+    const getBottomSpacer = () => document.getElementById('mobile-bottom-spacer');
 
     function applyBottomSpacer(heightPx){
       const spacer = getBottomSpacer();
       if (!spacer) return;
-      // Changing spacer height changes document height and can trigger scroll/relayout.
-      // Guarded to prevent mobile bottom-clamp feedback loops.
-      withProgrammaticGuard(() => {
-        // Uses a CSS variable so the spacer follows the same auto-gap styling hooks.
-        spacer.style.setProperty('--mobile-bottom-spacer-height', heightPx > 0 ? `${heightPx}px` : '0px');
-      });
+      spacer.style.setProperty('--mobile-bottom-spacer-height', heightPx > 0 ? `${heightPx}px` : '0px');
     }
 
-    function ensureRowCCanCenter(rowCTarget){
-      // Spacer prevents the browser's max-scroll clamp from snapping the
-      // last shelf back up when we try to vertically center it near the footer.
-      // Phase A: compute required spacer height (no DOM writes).
-      const nextSpacer = computeBottomSpacerHeight(rowCTarget);
-      if (nextSpacer === cachedBottomSpacer) return;
-      cachedBottomSpacer = nextSpacer;
-
-      // Phase B: apply spacer height only during layout refresh events.
-      applyBottomSpacer(nextSpacer);
-    }
-
-    // ZAQ TASK 2 — deterministic target building order:
-    // 1) Compute raw targets (hero top, Row A/B/C center targets).
-    // 2) Use cached padding (updated only on resize/orientation) and clamp targets.
-    function buildShelfTargets(){
+    function updateTargets(allowSpacerUpdate){
       const hero = document.querySelector('.hero');
       const rowA = document.querySelector('.shelf-track[data-row="A"]');
       const rowB = document.querySelector('.shelf-track[data-row="B"]');
       const rowC = document.querySelector('.shelf-track[data-row="C"]');
-      if (!hero || !rowA || !rowB || !rowC) return null;
+      
+      if (!hero || !rowA || !rowB || !rowC) return;
 
-      // (1) Raw targets
-      const heroTopRaw = getAbsTop(hero);
-      const rowATopRaw = computeCenterTargetTop(rowA);
-      const rowBTopRaw = computeCenterTargetTop(rowB);
-      const rowCTopRaw = computeCenterTargetTop(rowC);
+      if (allowSpacerUpdate) {
+        const currentMax = maxScrollTop() - cachedBottomSpacer;
+        const rowCTarget = computeCenterTargetTop(rowC);
+        const needed = rowCTarget - currentMax;
+        
+        let nextSpacer = 0;
+        if (needed > 0) nextSpacer = Math.min(MAX_SPACER_PX, Math.ceil(needed + SPACER_BUFFER_PX));
+        
+        if (nextSpacer !== cachedBottomSpacer) {
+           cachedBottomSpacer = nextSpacer;
+           applyBottomSpacer(nextSpacer);
+        }
+      }
 
-      // (2) Use cached padding value (updated on resize/orientation) and clamp targets.
-      const heroTop = heroTopRaw; // hero top is stable for our target list
-      const rowATop = rowATopRaw;
-      const rowBTop = rowBTopRaw;
-      const rowCTop = rowCTopRaw;
       const maxY = maxScrollTop();
-
-      // Clamp after recompute so Row C target is not forced below its centering position.
-      return [
-        { top: clamp(0, 0, maxY), track: rowA },       // hero top
-        { top: clamp(rowATop, 0, maxY), track: rowA }, // Row A center
-        { top: clamp(rowBTop, 0, maxY), track: rowB }, // Row B center
-        { top: clamp(rowCTop, 0, maxY), track: rowC }  // Row C center
+      const heroTop = clamp(computeCenterTargetTop(hero), 0, maxY);
+      shelfTargets = [
+        { top: heroTop, track: hero },
+        { top: clamp(computeCenterTargetTop(rowA), 0, maxY), track: rowA },
+        { top: clamp(computeCenterTargetTop(rowB), 0, maxY), track: rowB },
+        { top: clamp(computeCenterTargetTop(rowC), 0, maxY), track: rowC }
       ];
     }
 
-    function updateTargets({ allowSpacerUpdate = false } = {}){
-      if (allowSpacerUpdate) {
-        const rowC = document.querySelector('.shelf-track[data-row="C"]');
-        if (rowC) {
-          const rowCTarget = computeCenterTargetTop(rowC);
-          ensureRowCCanCenter(rowCTarget);
-        }
-      }
-      shelfTargets = buildShelfTargets();
-    }
-
-    function animateScrollTo(targetTop, targetTrack){
-      cancelSnap();
-
+    function softPullTo(targetTop, targetTrack){
+      cancelPull();
       const startY = window.scrollY || window.pageYOffset || 0;
       const delta = targetTop - startY;
-      if (!isFinite(delta) || Math.abs(delta) < 2) return;
+
+      // DEADZONE KILLER: We pull even if it's just 1px off.
+      if (!isFinite(delta) || Math.abs(delta) < 1) return;
 
       const startTime = performance.now();
       snapState.isSnapping = true;
       snapState.activeSnapTop = targetTop;
       snapState.activeSnapTrack = targetTrack || null;
-      userScrolledSinceLastSnap = true;
-      programmaticGuard = true;
+      
+      userScrolledSinceLastPull = false;
 
       function step(now){
-        const tRaw = (now - startTime) / SNAP_DURATION_MS;
+        const tRaw = (now - startTime) / PULL_DURATION_MS;
         const t = tRaw < 0 ? 0 : (tRaw > 1 ? 1 : tRaw);
-        const eased = easeSmootherStep(t);
+        
+        const eased = easeOutQuart(t);
         const nextY = startY + (delta * eased);
+        
         window.scrollTo(0, nextY);
 
         if (t < 1) {
-          snapAnimRaf = requestAnimationFrame(step);
+          pullAnimRaf = requestAnimationFrame(step);
         } else {
           window.scrollTo(0, targetTop);
           snapState.isSnapping = false;
           snapState.activeSnapTrack = null;
-          snapState.activeSnapTop = null;
-          snapAnimRaf = null;
-
-          // ZAQ TASK 2 — prevent “jump to bottom then pull up again” loops:
-          // After a programmatic snap finishes, do not schedule another settle
-          // unless the user scrolls again.
-          userScrolledSinceLastSnap = false;
-
-          // Keep guard for two frames so iOS does not re-trigger settle from the final scrollTo.
-          requestAnimationFrame(() => requestAnimationFrame(() => {
-            programmaticGuard = false;
-          }));
+          pullAnimRaf = null;
         }
       }
-
-      snapAnimRaf = requestAnimationFrame(step);
+      pullAnimRaf = requestAnimationFrame(step);
     }
 
-    function settleToNearestShelf(){
-      // Recompute targets at settle-time so dynamic mobile viewport height changes
-      // (address bar show/hide) and any required bottom spacer do not leave Row C unreachable.
-      updateTargets({ allowSpacerUpdate: true });
-      if (!shelfTargets || shelfTargets.length !== 4) return;
-
-      const y = window.scrollY || window.pageYOffset || 0;
-
-      let nearest = shelfTargets[0];
-      let bestDist = Math.abs(y - nearest.top);
-
-      for (let i = 1; i < shelfTargets.length; i++) {
-        const d = Math.abs(y - shelfTargets[i].top);
-        if (d < bestDist) {
-          bestDist = d;
-          nearest = shelfTargets[i];
-        }
-      }
-
-      animateScrollTo(nearest.top, nearest.track);
-    }
-
-    function scheduleSettle(){
-      // ZAQ TASK 2 — hard protections against snap feedback loops
+    function attemptSoftPull(){
       if (snapState.isSnapping) return;
-      if (programmaticGuard) return;
-      if (!userScrolledSinceLastSnap) return;
+      if (!userScrolledSinceLastPull) return;
 
-      if (scrollEndTimer) {
-        clearTimeout(scrollEndTimer);
-        scrollEndTimer = null;
+      updateTargets(true);
+      if (!shelfTargets || shelfTargets.length < 1) return;
+
+      // 1. Check for Visual Priority (Red Glow)
+      const activeHero = document.querySelector('.hero.hero--active');
+      const activeTrack = document.querySelector('.shelf-track--active');
+      let target = null;
+
+      if (activeHero) {
+        target = shelfTargets.find(t => t.track === activeHero);
       }
 
-      scrollEndTimer = setTimeout(() => {
-        scrollEndTimer = null;
+      if (!target && activeTrack) {
+        target = shelfTargets.find(t => t.track === activeTrack);
+      }
+      
+      // 2. Fallback: Nearest neighbor
+      if (!target) {
+         const y = window.scrollY || window.pageYOffset || 0;
+         let nearest = shelfTargets[0];
+         let bestDist = Math.abs(y - nearest.top);
+         for (let i = 1; i < shelfTargets.length; i++) {
+           const d = Math.abs(y - shelfTargets[i].top);
+           if (d < bestDist) {
+             bestDist = d;
+             nearest = shelfTargets[i];
+           }
+         }
+         target = nearest;
+      }
 
-        // Guard again at execution time
-        if (snapState.isSnapping) return;
-        if (programmaticGuard) return;
-        if (!userScrolledSinceLastSnap) return;
-
-        settleToNearestShelf();
-      }, SETTLE_DELAY_MS);
+      if (target) softPullTo(target.top, target.track);
     }
 
-    const cancelOnUserInput = () => {
-      cancelSnap();
-      if (scrollEndTimer) {
-        clearTimeout(scrollEndTimer);
-        scrollEndTimer = null;
-      }
+    function schedulePull(){
+      if (scrollEndTimer) clearTimeout(scrollEndTimer);
+      scrollEndTimer = setTimeout(attemptSoftPull, SETTLE_DELAY_MS);
+    }
+
+    // --- Interaction Handling ---
+    const onUserInteraction = () => {
+      cancelPull();
+      if (scrollEndTimer) clearTimeout(scrollEndTimer);
+      userScrolledSinceLastPull = true; 
     };
 
-    window.addEventListener('scroll', () => {
-      // ZAQ TASK 2 — Ignore scroll events caused by snapping or paddingBottom adjustments.
-      if (snapState.isSnapping) return;
-      if (programmaticGuard) return;
-
-      // Any non-guarded scroll implies user motion and allows a future settle.
-      userScrolledSinceLastSnap = true;
-
-      updateTargets({ allowSpacerUpdate: true });
-      scheduleSettle();
+    window.addEventListener('wheel', onUserInteraction, { passive: true });
+    window.addEventListener('touchstart', onUserInteraction, { passive: true });
+    window.addEventListener('touchmove', onUserInteraction, { passive: true });
+    
+    // CRITICAL: Catch the release of the finger!
+    window.addEventListener('touchend', () => {
+       userScrolledSinceLastPull = true;
+       schedulePull();
     }, { passive: true });
-
-    window.addEventListener('resize', () => {
-      cancelOnUserInput();
-      // Wait one frame for layout to settle (address-bar and orientation changes).
-      requestAnimationFrame(() => updateTargets({ allowSpacerUpdate: true }));
-    }, { passive: true });
-
-    window.addEventListener('orientationchange', () => {
-      cancelOnUserInput();
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        updateTargets({ allowSpacerUpdate: true });
-      }));
-    }, { passive: true });
-
-    window.addEventListener('wheel', cancelOnUserInput, { passive: true });
-    window.addEventListener('touchstart', cancelOnUserInput, { passive: true });
-    window.addEventListener('touchmove', cancelOnUserInput, { passive: true });
+    
     window.addEventListener('keydown', (e) => {
-      const k = e.key;
-      if (k === 'ArrowUp' || k === 'ArrowDown' || k === 'PageUp' || k === 'PageDown' || k === 'Home' || k === 'End' || k === ' ') {
-        cancelOnUserInput();
+      if (['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(e.key)) {
+        onUserInteraction();
       }
     }, { passive: true });
 
+    window.addEventListener('scroll', () => {
+      if (snapState.isSnapping) return;
+      userScrolledSinceLastPull = true;
+      schedulePull();
+    }, { passive: true });
+
+    const refresh = () => {
+      onUserInteraction();
+      requestAnimationFrame(() => updateTargets(true));
+    };
+    window.addEventListener('resize', refresh, { passive: true });
+    window.addEventListener('orientationchange', refresh, { passive: true });
+
     document.addEventListener('DOMContentLoaded', () => {
-      updateTargets({ allowSpacerUpdate: true });
+      updateTargets(true);
     });
   })();
 </script>
