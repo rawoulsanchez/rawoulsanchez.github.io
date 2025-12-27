@@ -3037,6 +3037,7 @@ document.addEventListener('keydown', (event) => {
     const SPACER_BUFFER_PX = 16;
 
     let scrollEndTimer = null;
+    let lastScrollAt = 0;
     let pullAnimRaf = null;
     let shelfTargets = null;
     
@@ -3167,6 +3168,12 @@ document.addEventListener('keydown', (event) => {
       if (snapState.isSnapping) return;
       if (!userScrolledSinceLastPull) return;
 
+      const now = performance.now();
+      if (now - lastScrollAt < SETTLE_DELAY_MS) {
+        schedulePull();
+        return;
+      }
+
       updateTargets(true);
       if (!shelfTargets || shelfTargets.length < 1) return;
 
@@ -3217,10 +3224,8 @@ document.addEventListener('keydown', (event) => {
     window.addEventListener('touchstart', onUserInteraction, { passive: true });
     window.addEventListener('touchmove', onUserInteraction, { passive: true });
     
-    // CRITICAL: Catch the release of the finger!
     window.addEventListener('touchend', () => {
        userScrolledSinceLastPull = true;
-       schedulePull();
     }, { passive: true });
     
     window.addEventListener('keydown', (e) => {
@@ -3231,6 +3236,7 @@ document.addEventListener('keydown', (event) => {
 
     window.addEventListener('scroll', () => {
       if (snapState.isSnapping) return;
+      lastScrollAt = performance.now();
       onUserInteraction();
       schedulePull();
     }, { passive: true });
