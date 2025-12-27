@@ -1535,6 +1535,7 @@ html { scrollbar-gutter: stable; }
     function updateActiveTrackFromWindowScroll() {
       if (!shelfTracks.length) return;
       const hero = document.querySelector('.hero');
+      const scrollTop = window.scrollY || window.pageYOffset || 0;
 
       let closestTrack = null;
       let smallestDistance = Infinity;
@@ -1569,6 +1570,34 @@ html { scrollbar-gutter: stable; }
       }
 
       if (!closestTrack) return;
+
+      let heroCandidate = null;
+      if (hero) {
+        const HERO_ACTIVE_HYSTERESIS_PX = 48;
+        const HERO_TOP_SAFE_PX = 140;
+        const doc = document.documentElement;
+        const body = document.body;
+        const maxScrollTop = Math.max(0, Math.max(
+          doc.scrollHeight, body.scrollHeight,
+          doc.offsetHeight, body.offsetHeight,
+          doc.clientHeight
+        ) - window.innerHeight);
+        const heroTarget = computeVerticalCenterTargetTop(hero);
+        const heroTargetTop = Math.max(0, Math.min(heroTarget, maxScrollTop));
+        const heroDistance = Math.abs(scrollTop - heroTargetTop);
+
+        if (heroDistance <= (smallestDistance - HERO_ACTIVE_HYSTERESIS_PX)) {
+          heroCandidate = hero;
+        } else if (scrollTop <= heroTargetTop + HERO_TOP_SAFE_PX) {
+          if (heroDistance <= (smallestDistance + HERO_ACTIVE_HYSTERESIS_PX)) {
+            heroCandidate = hero;
+          }
+        }
+      }
+
+      if (heroCandidate) {
+        closestTrack = heroCandidate;
+      }
 
       // Mobile-only hysteresis: avoid rapid toggling near row boundaries.
       if (isMobileView() && lastActiveTrack && lastActiveTrack !== closestTrack) {
