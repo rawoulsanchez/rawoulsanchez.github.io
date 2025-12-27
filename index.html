@@ -3031,7 +3031,7 @@ document.addEventListener('keydown', (event) => {
 <script>
   // ZAQ TASK 1 — "Zero Tolerance" Magnetic Pull
   (function(){
-    const SETTLE_DELAY_MS = 60;    // React fast
+    const SETTLE_DELAY_MS = 180;   // Wait for scroll to settle
     const PULL_DURATION_MS = 900;  // Smooth, confident glide
     const MAX_SPACER_PX = 240;
     const SPACER_BUFFER_PX = 16;
@@ -3231,7 +3231,7 @@ document.addEventListener('keydown', (event) => {
 
     window.addEventListener('scroll', () => {
       if (snapState.isSnapping) return;
-      userScrolledSinceLastPull = true;
+      onUserInteraction();
       schedulePull();
     }, { passive: true });
 
