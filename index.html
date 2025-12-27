@@ -577,6 +577,11 @@ html { scrollbar-gutter: stable; }
   opacity: 1;
 }
 
+.hero--active .hero-cta .btn--solid {
+  outline: 2px solid var(--brand);
+  box-shadow: var(--brand-glow-shadow), 0 6px 14px rgba(0,0,0,.18);
+}
+
 /* Make the poster label visible and styled */
 .poster::after {
   content: attr(data-label);
@@ -1529,6 +1534,7 @@ html { scrollbar-gutter: stable; }
 
     function updateActiveTrackFromWindowScroll() {
       if (!shelfTracks.length) return;
+      const hero = document.querySelector('.hero');
 
       let closestTrack = null;
       let smallestDistance = Infinity;
@@ -1549,7 +1555,8 @@ html { scrollbar-gutter: stable; }
       }
 
       if (!closestTrack) {
-        for (const track of shelfTracks) {
+        const candidates = hero ? [hero, ...shelfTracks] : shelfTracks;
+        for (const track of candidates) {
           const rect = track.getBoundingClientRect();
           const trackCenterY = rect.top + rect.height / 2;
           const distance = Math.abs(trackCenterY - viewportCenterY);
@@ -1583,15 +1590,23 @@ html { scrollbar-gutter: stable; }
 
       if (previousActiveTrack && previousActiveTrack !== closestTrack) {
         previousActiveTrack.classList.remove('shelf-track--active');
+        previousActiveTrack.classList.remove('hero--active');
       }
-      closestTrack.classList.add('shelf-track--active');
+      if (closestTrack.classList.contains('shelf-track')) {
+        closestTrack.classList.add('shelf-track--active');
+        if (hero) hero.classList.remove('hero--active');
+      } else if (closestTrack.classList.contains('hero')) {
+        closestTrack.classList.add('hero--active');
+      }
       lastActiveTrack = closestTrack;
 
       if (previousActiveTrack !== closestTrack) {
         if (isMobileView()) {
         } else {
-          recenterTrackActivePoster(closestTrack);
-          recenterAllOtherTracks(closestTrack);
+          if (closestTrack.classList.contains('shelf-track')) {
+            recenterTrackActivePoster(closestTrack);
+            recenterAllOtherTracks(closestTrack);
+          }
         }
       }
     }
@@ -1691,6 +1706,7 @@ html { scrollbar-gutter: stable; }
           // Toggle the active shelf-track for row-scoped neon
           if (previousActiveTrack && previousActiveTrack !== track) {
             previousActiveTrack.classList.remove('shelf-track--active');
+            previousActiveTrack.classList.remove('hero--active');
           }
           track.classList.add('shelf-track--active');
           lastActiveTrack = track;
@@ -3102,8 +3118,9 @@ document.addEventListener('keydown', (event) => {
       }
 
       const maxY = maxScrollTop();
+      const heroTop = clamp(computeCenterTargetTop(hero), 0, maxY);
       shelfTargets = [
-        { top: clamp(0, 0, maxY), track: rowA }, // Top maps to Row A track
+        { top: heroTop, track: hero },
         { top: clamp(computeCenterTargetTop(rowA), 0, maxY), track: rowA },
         { top: clamp(computeCenterTargetTop(rowB), 0, maxY), track: rowB },
         { top: clamp(computeCenterTargetTop(rowC), 0, maxY), track: rowC }
@@ -3154,10 +3171,15 @@ document.addEventListener('keydown', (event) => {
       if (!shelfTargets || shelfTargets.length < 1) return;
 
       // 1. Check for Visual Priority (Red Glow)
+      const activeHero = document.querySelector('.hero.hero--active');
       const activeTrack = document.querySelector('.shelf-track--active');
       let target = null;
 
-      if (activeTrack) {
+      if (activeHero) {
+        target = shelfTargets.find(t => t.track === activeHero);
+      }
+
+      if (!target && activeTrack) {
         target = shelfTargets.find(t => t.track === activeTrack);
       }
       
