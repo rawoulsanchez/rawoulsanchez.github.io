@@ -1556,7 +1556,8 @@ html { scrollbar-gutter: stable; }
       }
 
       if (!closestTrack) {
-        for (const track of shelfTracks) {
+        const candidates = hero ? [hero, ...shelfTracks] : shelfTracks;
+        for (const track of candidates) {
           const rect = track.getBoundingClientRect();
           const trackCenterY = rect.top + rect.height / 2;
           const distance = Math.abs(trackCenterY - viewportCenterY);
