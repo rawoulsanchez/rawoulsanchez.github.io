@@ -1536,20 +1536,39 @@ html { scrollbar-gutter: stable; }
       if (!shelfTracks.length) return;
       const hero = document.querySelector('.hero');
       const scrollTop = window.scrollY || window.pageYOffset || 0;
+      const doc = document.documentElement;
+      const body = document.body;
+      const maxScrollTop = Math.max(0, Math.max(
+        doc.scrollHeight, body.scrollHeight,
+        doc.offsetHeight, body.offsetHeight,
+        doc.clientHeight
+      ) - window.innerHeight);
 
       let closestTrack = null;
       let smallestDistance = Infinity;
-      const viewportCenterY = window.innerHeight / 2;
 
       const MOBILE_ACTIVE_TRACK_HYSTERESIS_PX = 28; // px
       const SNAP_ACTIVE_TRACK_HYSTERESIS_PX = 90; // px
 
+      const HERO_ACTIVE_HYSTERESIS_PX = 48;
+      const HERO_TOP_SAFE_PX = 140;
+
+      const heroTargetTop = hero
+        ? Math.max(0, Math.min(computeVerticalCenterTargetTop(hero), maxScrollTop))
+        : null;
+
+      function targetTopForTrack(track) {
+        if (!track) return null;
+        if (hero && track === hero) return heroTargetTop;
+        return Math.max(0, Math.min(computeVerticalCenterTargetTop(track), maxScrollTop));
+      }
+
       if (snapState.isSnapping) {
         if (snapState.activeSnapTrack) {
           closestTrack = snapState.activeSnapTrack;
-          const lockedRect = closestTrack.getBoundingClientRect();
-          const lockedCenterY = lockedRect.top + lockedRect.height / 2;
-          smallestDistance = Math.abs(lockedCenterY - viewportCenterY);
+          const lockedTargetTop = targetTopForTrack(closestTrack);
+          if (lockedTargetTop === null) return;
+          smallestDistance = Math.abs(scrollTop - lockedTargetTop);
         } else {
           return;
         }
@@ -1558,9 +1577,9 @@ html { scrollbar-gutter: stable; }
       if (!closestTrack) {
         const candidates = hero ? [hero, ...shelfTracks] : shelfTracks;
         for (const track of candidates) {
-          const rect = track.getBoundingClientRect();
-          const trackCenterY = rect.top + rect.height / 2;
-          const distance = Math.abs(trackCenterY - viewportCenterY);
+          const targetTop = targetTopForTrack(track);
+          if (targetTop === null) continue;
+          const distance = Math.abs(scrollTop - targetTop);
 
           if (distance < smallestDistance) {
             smallestDistance = distance;
@@ -1571,39 +1590,24 @@ html { scrollbar-gutter: stable; }
 
       if (!closestTrack) return;
 
-      let heroCandidate = null;
-      if (hero) {
-        const HERO_ACTIVE_HYSTERESIS_PX = 48;
-        const HERO_TOP_SAFE_PX = 140;
-        const doc = document.documentElement;
-        const body = document.body;
-        const maxScrollTop = Math.max(0, Math.max(
-          doc.scrollHeight, body.scrollHeight,
-          doc.offsetHeight, body.offsetHeight,
-          doc.clientHeight
-        ) - window.innerHeight);
-        const heroTarget = computeVerticalCenterTargetTop(hero);
-        const heroTargetTop = Math.max(0, Math.min(heroTarget, maxScrollTop));
+      if (hero && heroTargetTop !== null) {
         const heroDistance = Math.abs(scrollTop - heroTargetTop);
-
         if (heroDistance <= (smallestDistance - HERO_ACTIVE_HYSTERESIS_PX)) {
-          heroCandidate = hero;
+          closestTrack = hero;
+          smallestDistance = heroDistance;
         } else if (scrollTop <= heroTargetTop + HERO_TOP_SAFE_PX) {
           if (heroDistance <= (smallestDistance + HERO_ACTIVE_HYSTERESIS_PX)) {
-            heroCandidate = hero;
+            closestTrack = hero;
+            smallestDistance = heroDistance;
           }
         }
       }
 
-      if (heroCandidate) {
-        closestTrack = heroCandidate;
-      }
-
       // Mobile-only hysteresis: avoid rapid toggling near row boundaries.
       if (isMobileView() && lastActiveTrack && lastActiveTrack !== closestTrack) {
-        const lastRect = lastActiveTrack.getBoundingClientRect();
-        const lastCenterY = lastRect.top + lastRect.height / 2;
-        const lastDistance = Math.abs(lastCenterY - viewportCenterY);
+        const lastTargetTop = targetTopForTrack(lastActiveTrack);
+        if (lastTargetTop === null) return;
+        const lastDistance = Math.abs(scrollTop - lastTargetTop);
         const hysteresis = snapState.isSnapping
           ? SNAP_ACTIVE_TRACK_HYSTERESIS_PX
           : MOBILE_ACTIVE_TRACK_HYSTERESIS_PX;
