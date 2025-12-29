@@ -1095,7 +1095,7 @@ html { scrollbar-gutter: stable; }
     <iframe
       id="hero-yt"
       title="Hero trailer"
-      src="https://www.youtube.com/embed/VBdaOkpLe_o?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o"
+      src="https://www.youtube.com/embed/t1x7Q0IA3Os?start=0&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=t1x7Q0IA3Os"
       allow="autoplay; encrypted-media"
       allowfullscreen
     ></iframe>
@@ -1254,6 +1254,13 @@ html { scrollbar-gutter: stable; }
   // Changed alerts to console.log as alerts break the canvas environment.
   const HERO_VIDEO_ID = 'VBdaOkpLe_o';
   let ytPlayer, isMuted = true;
+  function canLoopHeroVideo() {
+    const hero = document.querySelector('.hero');
+    if (!hero || !hero.classList.contains('hero--active')) return false;
+    if (window.snapState && window.snapState.isSnapping) return false;
+    if (window.heroLoopState && window.heroLoopState.isScrolling) return false;
+    return true;
+  }
   function onYouTubeIframeAPIReady(){
     ytPlayer = new YT.Player('hero-yt', {
       playerVars: {
@@ -1322,6 +1329,20 @@ html { scrollbar-gutter: stable; }
     function isMobileView(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
 
     let lastActiveTrack = null;
+    const heroLoopState = window.heroLoopState || (window.heroLoopState = {
+      isScrolling: false,
+      scrollTimeout: null
+    });
+
+    window.addEventListener('scroll', () => {
+      heroLoopState.isScrolling = true;
+      if (heroLoopState.scrollTimeout) {
+        clearTimeout(heroLoopState.scrollTimeout);
+      }
+      heroLoopState.scrollTimeout = setTimeout(() => {
+        heroLoopState.isScrolling = false;
+      }, 180);
+    }, { passive: true });
 
     function cancelScrollAnimation(track) {
       if (!track) return;
@@ -1669,6 +1690,8 @@ html { scrollbar-gutter: stable; }
       });
     }, { passive: true });
 
+    updateActiveTrackFromWindowScroll();
+
     document.querySelectorAll('.shelf-track').forEach(track => {
       const originalPosters = Array.from(track.children);
       if (originalPosters.length === 0) return;
@@ -2005,7 +2028,109 @@ html { scrollbar-gutter: stable; }
         if (typeof ytPlayer === 'undefined' || !ytPlayer) return;
         if (!heroIsVisible || isPreviewOpen()) return;
 
+      function isPreviewOpen() {
+        return previewOverlay.classList.contains('is-visible');
+      }
+
+      function captureHeroPausedTime() {
+        try {
+          if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+            const t = ytPlayer.getCurrentTime();
+            if (typeof t === 'number' && isFinite(t)) {
+              heroPausedTime = t;
+            }
+          }
+        } catch (_) {}
+      }
+
+      function startHeroAudioFade(targetVolume, durationMs, onComplete) {
         cancelHeroAudioFade();
+        if (!ytPlayer || typeof ytPlayer.setVolume !== 'function') return;
+
+        let startVolume = 100;
+        try {
+          if (typeof ytPlayer.getVolume === 'function') {
+            const current = ytPlayer.getVolume();
+            if (typeof current === 'number' && isFinite(current)) startVolume = current;
+          }
+        } catch (_) {}
+
+        const stepMs = 100;
+        const steps = Math.max(1, Math.round(durationMs / stepMs));
+        let step = 0;
+
+        heroAudioFadeInterval = setInterval(() => {
+          step += 1;
+          const t = Math.min(step / steps, 1);
+          const vol = Math.round(startVolume + (targetVolume - startVolume) * t);
+          try {
+            ytPlayer.setVolume(vol);
+          } catch (_) {}
+          if (t >= 1) {
+            cancelHeroAudioFade();
+            if (typeof onComplete === 'function') onComplete();
+          }
+        }, stepMs);
+      }
+
+      function pauseHeroVideo({ withDelay, force } = {}) {
+        cancelHeroPause();
+
+        const pauseAction = () => {
+          try {
+            if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+              if (!force && isHeroActive()) return;
+              if (!force && isPreviewOpen()) return;
+              captureHeroPausedTime();
+              if (typeof isMuted !== 'undefined' && !isMuted) {
+                try {
+                  if (typeof ytPlayer.getVolume === 'function') {
+                    const current = ytPlayer.getVolume();
+                    if (typeof current === 'number' && isFinite(current)) {
+                      heroTargetVolume = current;
+                    }
+                  }
+                } catch (_) {}
+                startHeroAudioFade(0, HERO_AUDIO_FADE_MS, () => {
+                  try { ytPlayer.pauseVideo(); } catch (_) {}
+                  heroPausedByUs = true;
+                });
+              } else {
+                ytPlayer.pauseVideo();
+                heroPausedByUs = true;
+              }
+            }
+          } catch (_) {}
+        };
+
+        if (withDelay) {
+          heroPauseTimeout = setTimeout(() => {
+            heroPauseTimeout = null;
+            pauseAction();
+          }, HERO_PAUSE_DELAY);
+        } else {
+          pauseAction();
+        }
+      }
+
+      function resumeHeroPlayback() {
+        if (typeof ytPlayer === 'undefined' || !ytPlayer) return;
+        if (!heroIsVisible || isPreviewOpen()) return;
+
+      function resumeHeroPlayback() {
+        if (typeof ytPlayer === 'undefined' || !ytPlayer) return;
+        if (!heroIsVisible || isPreviewOpen()) return;
+
+        let playerState = null;
+        try {
+          if (typeof ytPlayer.getPlayerState === 'function') {
+            playerState = ytPlayer.getPlayerState();
+          }
+        } catch (_) {}
+
+        if (playerState === 1 || playerState === 3) {
+          return;
+        }
 
         let playerState = null;
         try {
@@ -2033,6 +2158,7 @@ html { scrollbar-gutter: stable; }
             (typeof currentHeroTime === 'number' && isFinite(currentHeroTime));
 
           const needsSeekBack =
+            heroPausedByScroll &&
             hasPausedTime &&
             hasCurrentTime &&
             (currentHeroTime < 0.5 || Math.abs(currentHeroTime - heroPausedTime) > 2.0);
