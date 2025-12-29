@@ -2117,7 +2117,7 @@ html { scrollbar-gutter: stable; }
       }
 
       function isHeroActive() {
-        return heroSection && heroSection.classList.contains('hero--active');
+        return heroSection && (heroSection.classList.contains('hero--active') || heroIsVisible);
       }
 
       function updateHeroPlaybackState({ allowDelayedPause } = {}) {
@@ -2157,7 +2157,7 @@ html { scrollbar-gutter: stable; }
       if (heroSection && 'IntersectionObserver' in window) {
         const heroObserver = new IntersectionObserver((entries) => {
           const entry = entries[0];
-          heroIsVisible = !!(entry && entry.isIntersecting && entry.intersectionRatio >= HERO_VISIBLE_RATIO);
+          heroIsVisible = !!(entry && entry.isIntersecting);
           if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
             window.updateActiveTrackFromWindowScroll();
           }
