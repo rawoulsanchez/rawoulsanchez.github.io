@@ -2043,7 +2043,7 @@ html { scrollbar-gutter: stable; }
 
       function resumeHeroPlayback() {
         if (typeof ytPlayer === 'undefined' || !ytPlayer) return;
-        if (!heroIsVisible || isPreviewOpen()) return;
+        if (isPreviewOpen()) return;
         if (!isHeroActive()) return;
 
         let playerState = null;
