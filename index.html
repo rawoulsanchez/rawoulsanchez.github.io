@@ -2055,24 +2055,23 @@ html { scrollbar-gutter: stable; }
         if (withDelay) {
           if (heroPauseScheduled) return;
           heroPauseScheduled = true;
-          heroPauseCandidate = expectedActiveShelf || null;
+          const scheduledShelf = expectedActiveShelf || document.querySelector('.shelf-track--active');
+          heroPauseCandidate = scheduledShelf || null;
           heroPauseTimeout = setTimeout(() => {
             heroPauseTimeout = null;
             heroPauseScheduled = false;
             const currentActiveShelf = document.querySelector('.shelf-track--active');
-            if (expectedActiveShelf && currentActiveShelf !== expectedActiveShelf) {
-              heroPauseCandidate = null;
+            const pauseCandidate = heroPauseCandidate;
+            heroPauseCandidate = null;
+            if (!currentActiveShelf || !pauseCandidate || currentActiveShelf !== pauseCandidate) {
               return;
             }
-            if (currentActiveShelf && currentActiveShelf.classList.contains('hero')) {
-              heroPauseCandidate = null;
+            if (currentActiveShelf.classList.contains('hero')) {
               return;
             }
             if (isHeroActive()) {
-              heroPauseCandidate = null;
               return;
             }
-            heroPauseCandidate = null;
             pauseAction();
           }, HERO_PAUSE_DELAY);
         } else {
