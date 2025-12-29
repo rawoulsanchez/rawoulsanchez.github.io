@@ -1938,6 +1938,8 @@ html { scrollbar-gutter: stable; }
         const pauseAction = () => {
           try {
             if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+              if (isHeroActive()) return;
+              if (isPreviewOpen()) return;
               captureHeroPausedTime();
               if (typeof isMuted !== 'undefined' && !isMuted) {
                 try {
@@ -1974,6 +1976,17 @@ html { scrollbar-gutter: stable; }
 
         cancelHeroAudioFade();
 
+        let playerState = null;
+        try {
+          if (typeof ytPlayer.getPlayerState === 'function') {
+            playerState = ytPlayer.getPlayerState();
+          }
+        } catch (_) {}
+
+        if (playerState === 1) {
+          return;
+        }
+
         if (heroVisual) {
           heroVisual.classList.add('is-hero-fadeout');
         }
@@ -1997,11 +2010,11 @@ html { scrollbar-gutter: stable; }
             hasCurrentTime &&
             (currentHeroTime < 0.5 || Math.abs(currentHeroTime - heroPausedTime) > 2.0);
 
-          if (needsSeekBack && typeof ytPlayer.seekTo === 'function') {
+          if (needsSeekBack && playerState !== 1 && typeof ytPlayer.seekTo === 'function') {
             try { ytPlayer.seekTo(heroPausedTime, true); } catch (_) {}
           }
 
-          if (typeof ytPlayer.playVideo === 'function') {
+          if (playerState !== 1 && typeof ytPlayer.playVideo === 'function') {
             ytPlayer.playVideo();
           }
 
