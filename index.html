@@ -1285,6 +1285,10 @@ html { scrollbar-gutter: stable; }
           }
         },
         onStateChange: e => {
+          if (e.data === YT.PlayerState.PLAYING && !isPlayNowHighlighted()) {
+            e.target.pauseVideo();
+            return;
+          }
           if (e.data === YT.PlayerState.ENDED) {
             e.target.seekTo(0, true);
             if (isPlayNowHighlighted()) {
@@ -2157,17 +2161,7 @@ html { scrollbar-gutter: stable; }
           return;
         }
         heroWasActive = false;
-        const activeShelf = document.querySelector('.shelf-track--active');
-        if (!activeShelf) return;
-        if (activeShelf.classList.contains('hero')) {
-          return;
-        }
-        if (allowDelayedPause) {
-          if (heroPauseScheduled) return;
-          pauseHeroVideo({ withDelay: true, force: true, expectedActiveShelf: activeShelf });
-        } else {
-          pauseHeroVideo({ force: true });
-        }
+        pauseHeroVideo({ force: true });
       }
 
       window.updateHeroPlaybackState = updateHeroPlaybackState;
