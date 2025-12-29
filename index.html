@@ -2036,15 +2036,13 @@ html { scrollbar-gutter: stable; }
           pauseHeroVideo();
           return;
         }
-        if (!heroIsVisible) {
-          pauseHeroVideo();
-          return;
-        }
         if (isHeroActive()) {
           cancelHeroPause();
           resumeHeroPlayback();
           return;
         }
+        const activeShelf = document.querySelector('.shelf-track--active');
+        if (!activeShelf) return;
         pauseHeroVideo({ withDelay: allowDelayedPause });
       }
 
@@ -2052,7 +2050,7 @@ html { scrollbar-gutter: stable; }
         const heroObserver = new IntersectionObserver((entries) => {
           const entry = entries[0];
           heroIsVisible = !!(entry && entry.isIntersecting && entry.intersectionRatio >= HERO_VISIBLE_RATIO);
-          updateHeroPlaybackState();
+          updateHeroPlaybackState({ allowDelayedPause: true });
         }, {
           threshold: [0, HERO_VISIBLE_RATIO, 1]
         });
