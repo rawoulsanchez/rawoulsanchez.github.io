@@ -2080,7 +2080,7 @@ html { scrollbar-gutter: stable; }
             (typeof currentHeroTime === 'number' && isFinite(currentHeroTime));
 
           const needsSeekBack =
-            heroPausedByScroll &&
+            heroPausedByUs &&
             hasPausedTime &&
             hasCurrentTime &&
             (currentHeroTime < 0.5 || Math.abs(currentHeroTime - heroPausedTime) > 2.0);
