@@ -2146,6 +2146,8 @@ html { scrollbar-gutter: stable; }
         if (!heroSection) return;
         const wasHeroActive = heroWasActive;
         const heroActive = isHeroActive();
+        const activeShelf = document.querySelector('.shelf-track--active');
+        const otherShelfActive = !!(activeShelf && !activeShelf.classList.contains('hero'));
         if (isPreviewOpen()) {
           pauseHeroVideo({ force: true });
           heroWasActive = heroActive;
@@ -2160,6 +2162,10 @@ html { scrollbar-gutter: stable; }
           return;
         }
         heroWasActive = false;
+        if (allowDelayedPause && otherShelfActive) {
+          pauseHeroVideo({ withDelay: true, expectedActiveShelf: activeShelf });
+          return;
+        }
         pauseHeroVideo({ force: true });
       }
 
