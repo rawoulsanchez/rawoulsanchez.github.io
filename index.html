@@ -1095,7 +1095,7 @@ html { scrollbar-gutter: stable; }
     <iframe
       id="hero-yt"
       title="Hero trailer"
-      src="https://www.youtube.com/embed/VBdaOkpLe_o?start=12&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=VBdaOkpLe_o"
+      src="https://www.youtube.com/embed/t1x7Q0IA3Os?start=0&autoplay=1&mute=1&controls=0&playsinline=1&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=t1x7Q0IA3Os"
       allow="autoplay; encrypted-media"
       allowfullscreen
     ></iframe>
@@ -1252,7 +1252,15 @@ html { scrollbar-gutter: stable; }
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
   // Changed alerts to console.log as alerts break the canvas environment.
+  const HERO_VIDEO_ID = 'VBdaOkpLe_o';
   let ytPlayer, isMuted = true;
+  function canLoopHeroVideo() {
+    const hero = document.querySelector('.hero');
+    if (!hero || !hero.classList.contains('hero--active')) return false;
+    if (window.snapState && window.snapState.isSnapping) return false;
+    if (window.heroLoopState && window.heroLoopState.isScrolling) return false;
+    return true;
+  }
   function onYouTubeIframeAPIReady(){
     ytPlayer = new YT.Player('hero-yt', {
       playerVars: {
@@ -1311,6 +1319,20 @@ html { scrollbar-gutter: stable; }
     function isMobileView(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
 
     let lastActiveTrack = null;
+    const heroLoopState = window.heroLoopState || (window.heroLoopState = {
+      isScrolling: false,
+      scrollTimeout: null
+    });
+
+    window.addEventListener('scroll', () => {
+      heroLoopState.isScrolling = true;
+      if (heroLoopState.scrollTimeout) {
+        clearTimeout(heroLoopState.scrollTimeout);
+      }
+      heroLoopState.scrollTimeout = setTimeout(() => {
+        heroLoopState.isScrolling = false;
+      }, 180);
+    }, { passive: true });
 
     function cancelScrollAnimation(track) {
       if (!track) return;
@@ -1658,6 +1680,8 @@ html { scrollbar-gutter: stable; }
       });
     }, { passive: true });
 
+    updateActiveTrackFromWindowScroll();
+
     document.querySelectorAll('.shelf-track').forEach(track => {
       const originalPosters = Array.from(track.children);
       if (originalPosters.length === 0) return;
@@ -1999,6 +2023,11 @@ html { scrollbar-gutter: stable; }
         if (heroVisual) {
           heroVisual.classList.add('is-hero-fadeout');
         }
+      }
+
+      function resumeHeroPlayback() {
+        if (typeof ytPlayer === 'undefined' || !ytPlayer) return;
+        if (!heroIsVisible || isPreviewOpen()) return;
 
         try {
           let currentHeroTime = null;
@@ -2015,6 +2044,7 @@ html { scrollbar-gutter: stable; }
             (typeof currentHeroTime === 'number' && isFinite(currentHeroTime));
 
           const needsSeekBack =
+            heroPausedByScroll &&
             hasPausedTime &&
             hasCurrentTime &&
             (currentHeroTime < 0.5 || Math.abs(currentHeroTime - heroPausedTime) > 2.0);
@@ -2039,6 +2069,8 @@ html { scrollbar-gutter: stable; }
             startHeroAudioFade(targetVolume, 1400);
           }
         } catch (_) {}
+        heroPausedByScroll = false;
+      }
 
         if (heroVisual) {
           requestAnimationFrame(() => {
@@ -2046,6 +2078,22 @@ html { scrollbar-gutter: stable; }
             heroVisual.classList.remove('is-hero-fadeout');
           });
         }
+        heroWasActive = false;
+      }
+
+      if (heroSection && 'IntersectionObserver' in window) {
+        const heroObserver = new IntersectionObserver((entries) => {
+          const entry = entries[0];
+          heroIsVisible = !!(entry && entry.isIntersecting && entry.intersectionRatio >= HERO_VISIBLE_RATIO);
+          updateHeroPlaybackState({ allowDelayedPause: true });
+        }, {
+          threshold: [0, HERO_VISIBLE_RATIO, 1]
+        });
+
+        heroObserver.observe(heroSection);
+      } else if (heroSection) {
+        const rect = heroSection.getBoundingClientRect();
+        heroIsVisible = rect.top < window.innerHeight && rect.bottom > 0;
       }
 
       function isHeroActive() {
