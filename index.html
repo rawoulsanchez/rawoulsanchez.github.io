@@ -1863,15 +1863,14 @@ html { scrollbar-gutter: stable; }
 
       const heroSection = document.querySelector('.hero');
       const heroVisual = document.querySelector('.hero-video');
-      const HERO_SCROLL_SETTLE_DELAY = 180;
-      const HERO_RESUME_DELAY = 1000;
+      const HERO_PAUSE_DELAY = 1000;
       const HERO_VISIBLE_RATIO = 0.6;
+      const HERO_AUDIO_FADE_MS = 1200;
 
       let heroAudioFadeInterval = null;
       let heroPausedTime = null;
-      let heroResumeTimeout = null;
-      let heroScrollSettleTimeout = null;
-      let heroIsScrolling = false;
+      let heroTargetVolume = 100;
+      let heroPauseTimeout = null;
       let heroIsVisible = false;
 
       function cancelHeroAudioFade() {
@@ -1881,10 +1880,10 @@ html { scrollbar-gutter: stable; }
         }
       }
 
-      function cancelHeroResume() {
-        if (heroResumeTimeout !== null) {
-          clearTimeout(heroResumeTimeout);
-          heroResumeTimeout = null;
+      function cancelHeroPause() {
+        if (heroPauseTimeout !== null) {
+          clearTimeout(heroPauseTimeout);
+          heroPauseTimeout = null;
         }
       }
 
@@ -1903,31 +1902,81 @@ html { scrollbar-gutter: stable; }
         } catch (_) {}
       }
 
-      function pauseHeroVideo() {
-        cancelHeroResume();
+      function startHeroAudioFade(targetVolume, durationMs, onComplete) {
         cancelHeroAudioFade();
+        if (!ytPlayer || typeof ytPlayer.setVolume !== 'function') return;
 
-        if (heroVisual) {
-          heroVisual.classList.add('is-hero-fadeout');
-        }
-
+        let startVolume = 100;
         try {
-          if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
-            captureHeroPausedTime();
-            ytPlayer.pauseVideo();
+          if (typeof ytPlayer.getVolume === 'function') {
+            const current = ytPlayer.getVolume();
+            if (typeof current === 'number' && isFinite(current)) startVolume = current;
           }
         } catch (_) {}
+
+        const stepMs = 100;
+        const steps = Math.max(1, Math.round(durationMs / stepMs));
+        let step = 0;
+
+        heroAudioFadeInterval = setInterval(() => {
+          step += 1;
+          const t = Math.min(step / steps, 1);
+          const vol = Math.round(startVolume + (targetVolume - startVolume) * t);
+          try {
+            ytPlayer.setVolume(vol);
+          } catch (_) {}
+          if (t >= 1) {
+            cancelHeroAudioFade();
+            if (typeof onComplete === 'function') onComplete();
+          }
+        }, stepMs);
+      }
+
+      function pauseHeroVideo({ withDelay } = {}) {
+        cancelHeroPause();
+
+        const pauseAction = () => {
+          try {
+            if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+              captureHeroPausedTime();
+              if (typeof isMuted !== 'undefined' && !isMuted) {
+                try {
+                  if (typeof ytPlayer.getVolume === 'function') {
+                    const current = ytPlayer.getVolume();
+                    if (typeof current === 'number' && isFinite(current)) {
+                      heroTargetVolume = current;
+                    }
+                  }
+                } catch (_) {}
+                startHeroAudioFade(0, HERO_AUDIO_FADE_MS, () => {
+                  try { ytPlayer.pauseVideo(); } catch (_) {}
+                });
+              } else {
+                ytPlayer.pauseVideo();
+              }
+            }
+          } catch (_) {}
+        };
+
+        if (withDelay) {
+          heroPauseTimeout = setTimeout(() => {
+            heroPauseTimeout = null;
+            pauseAction();
+          }, HERO_PAUSE_DELAY);
+        } else {
+          pauseAction();
+        }
       }
 
       function resumeHeroPlayback() {
         if (typeof ytPlayer === 'undefined' || !ytPlayer) return;
-        if (heroIsScrolling || !heroIsVisible || isPreviewOpen()) return;
+        if (!heroIsVisible || isPreviewOpen()) return;
+
+        cancelHeroAudioFade();
 
         if (heroVisual) {
           heroVisual.classList.add('is-hero-fadeout');
         }
-
-        cancelHeroAudioFade();
 
         try {
           let currentHeroTime = null;
@@ -1959,39 +2008,13 @@ html { scrollbar-gutter: stable; }
           if (typeof isMuted !== 'undefined' && isMuted) {
             if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
           } else {
-            let targetVolume = 100;
-            try {
-              if (typeof ytPlayer.getVolume === 'function') {
-                const v = ytPlayer.getVolume();
-                if (typeof v === 'number' && isFinite(v)) targetVolume = v;
-              }
-            } catch (_) {}
-
-            const startVolume = 1;
-            const durationMs = 1400;
-            const stepMs = 100;
-            const steps = Math.max(1, Math.round(durationMs / stepMs));
-            let step = 0;
-
-            try {
-              if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(startVolume);
-            } catch (_) {}
-
             try {
               if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
             } catch (_) {}
-
-            heroAudioFadeInterval = setInterval(() => {
-              step += 1;
-              const t = Math.min(step / steps, 1);
-              const vol = Math.round(startVolume + (targetVolume - startVolume) * t);
-              try {
-                if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(vol);
-              } catch (_) {}
-              if (t >= 1) {
-                cancelHeroAudioFade();
-              }
-            }, stepMs);
+            const targetVolume = typeof heroTargetVolume === 'number' && isFinite(heroTargetVolume)
+              ? heroTargetVolume
+              : 100;
+            startHeroAudioFade(targetVolume, 1400);
           }
         } catch (_) {}
 
@@ -2003,38 +2026,31 @@ html { scrollbar-gutter: stable; }
         }
       }
 
-      function scheduleHeroResume() {
-        cancelHeroResume();
-        heroResumeTimeout = setTimeout(() => {
-          heroResumeTimeout = null;
-          if (!heroIsScrolling && heroIsVisible && !isPreviewOpen()) {
-            resumeHeroPlayback();
-          }
-        }, HERO_RESUME_DELAY);
+      function isHeroActive() {
+        return heroSection && heroSection.classList.contains('hero--active');
       }
 
-      function updateHeroPlaybackState() {
+      function updateHeroPlaybackState({ allowDelayedPause } = {}) {
         if (!heroSection) return;
         if (isPreviewOpen()) {
           pauseHeroVideo();
           return;
         }
-        if (!heroIsVisible) {
-          pauseHeroVideo();
+        if (isHeroActive()) {
+          cancelHeroPause();
+          resumeHeroPlayback();
           return;
         }
-        if (heroIsScrolling) {
-          pauseHeroVideo();
-          return;
-        }
-        scheduleHeroResume();
+        const activeShelf = document.querySelector('.shelf-track--active');
+        if (!activeShelf) return;
+        pauseHeroVideo({ withDelay: allowDelayedPause });
       }
 
       if (heroSection && 'IntersectionObserver' in window) {
         const heroObserver = new IntersectionObserver((entries) => {
           const entry = entries[0];
           heroIsVisible = !!(entry && entry.isIntersecting && entry.intersectionRatio >= HERO_VISIBLE_RATIO);
-          updateHeroPlaybackState();
+          updateHeroPlaybackState({ allowDelayedPause: true });
         }, {
           threshold: [0, HERO_VISIBLE_RATIO, 1]
         });
@@ -2047,18 +2063,7 @@ html { scrollbar-gutter: stable; }
 
       window.addEventListener('scroll', () => {
         if (!heroSection) return;
-        heroIsScrolling = true;
-        pauseHeroVideo();
-
-        if (heroScrollSettleTimeout !== null) {
-          clearTimeout(heroScrollSettleTimeout);
-        }
-
-        heroScrollSettleTimeout = setTimeout(() => {
-          heroScrollSettleTimeout = null;
-          heroIsScrolling = false;
-          updateHeroPlaybackState();
-        }, HERO_SCROLL_SETTLE_DELAY);
+        updateHeroPlaybackState({ allowDelayedPause: true });
       }, { passive: true });
 
       const MORPH_DURATION = 520;
