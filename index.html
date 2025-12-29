@@ -1643,7 +1643,12 @@ html { scrollbar-gutter: stable; }
       if (hero && heroTargetTop !== null) {
         const heroRect = hero.getBoundingClientRect();
         const heroInView = heroRect.bottom > 0 && heroRect.top < window.innerHeight;
-        if (heroInView && heroRect.top <= HERO_TOP_SAFE_PX) {
+        const visibleTop = Math.max(0, heroRect.top);
+        const visibleBottom = Math.min(window.innerHeight, heroRect.bottom);
+        const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+        const heroVisibleRatio = heroRect.height > 0 ? (visibleHeight / heroRect.height) : 0;
+        const heroDominatesView = heroVisibleRatio >= 0.6;
+        if (heroInView && heroRect.top <= HERO_TOP_SAFE_PX && heroDominatesView) {
           closestTrack = hero;
         }
       }
