@@ -2044,6 +2044,7 @@ html { scrollbar-gutter: stable; }
       function resumeHeroPlayback() {
         if (typeof ytPlayer === 'undefined' || !ytPlayer) return;
         if (!heroIsVisible || isPreviewOpen()) return;
+        if (!isHeroActive()) return;
 
         let playerState = null;
         try {
@@ -2105,6 +2106,7 @@ html { scrollbar-gutter: stable; }
 
       function updateHeroPlaybackState({ allowDelayedPause } = {}) {
         if (!heroSection) return;
+        const wasHeroActive = heroWasActive;
         if (isPreviewOpen()) {
           pauseHeroVideo({ force: true });
           heroWasActive = isHeroActive();
@@ -2112,7 +2114,7 @@ html { scrollbar-gutter: stable; }
         }
         if (isHeroActive()) {
           cancelHeroPause();
-          if (heroPausedByUs || !heroWasActive) {
+          if (!wasHeroActive) {
             resumeHeroPlayback();
           }
           heroWasActive = true;
