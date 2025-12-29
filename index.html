@@ -1679,6 +1679,13 @@ html { scrollbar-gutter: stable; }
           }
         }
       }
+
+      if (previousActiveTrack !== closestTrack) {
+        const playbackUpdater = window.updateHeroPlaybackState;
+        if (typeof playbackUpdater === 'function') {
+          playbackUpdater({ allowDelayedPause: true });
+        }
+      }
     }
 
     window.addEventListener('scroll', () => {
@@ -1690,6 +1697,7 @@ html { scrollbar-gutter: stable; }
       });
     }, { passive: true });
 
+    window.updateActiveTrackFromWindowScroll = updateActiveTrackFromWindowScroll;
     updateActiveTrackFromWindowScroll();
 
     document.querySelectorAll('.shelf-track').forEach(track => {
@@ -2135,6 +2143,8 @@ html { scrollbar-gutter: stable; }
           pauseHeroVideo({ force: true });
         }
       }
+
+      window.updateHeroPlaybackState = updateHeroPlaybackState;
 
       if (heroSection && 'IntersectionObserver' in window) {
         const heroObserver = new IntersectionObserver((entries) => {
@@ -3090,6 +3100,9 @@ previewTitleEl.textContent = title;
           activeMorphTile = null;
           unlockScroll();
           lastOpenedCard = null;
+          if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
+            window.updateActiveTrackFromWindowScroll();
+          }
           updateHeroPlaybackState();
           return;
         }
@@ -3157,6 +3170,9 @@ previewTitleEl.textContent = title;
             lastOpenedCard.focus();
           }
           lastOpenedCard = null;
+          if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
+            window.updateActiveTrackFromWindowScroll();
+          }
           updateHeroPlaybackState();
         }, currentMorphDuration);
       }
