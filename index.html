@@ -1918,6 +1918,7 @@ html { scrollbar-gutter: stable; }
       let heroWasActive = false;
       let heroPausedByUs = false;
       let heroPauseScheduled = false;
+      let heroPauseCandidate = null;
 
       function cancelHeroAudioFade() {
         if (heroAudioFadeInterval !== null) {
@@ -1932,6 +1933,7 @@ html { scrollbar-gutter: stable; }
           heroPauseTimeout = null;
         }
         heroPauseScheduled = false;
+        heroPauseCandidate = null;
       }
 
       function isPreviewOpen() {
@@ -1979,7 +1981,7 @@ html { scrollbar-gutter: stable; }
         }, stepMs);
       }
 
-      function pauseHeroVideo({ withDelay, force } = {}) {
+      function pauseHeroVideo({ withDelay, force, expectedActiveShelf } = {}) {
         if (!withDelay) {
           cancelHeroPause();
         }
@@ -2014,9 +2016,24 @@ html { scrollbar-gutter: stable; }
         if (withDelay) {
           if (heroPauseScheduled) return;
           heroPauseScheduled = true;
+          heroPauseCandidate = expectedActiveShelf || null;
           heroPauseTimeout = setTimeout(() => {
             heroPauseTimeout = null;
             heroPauseScheduled = false;
+            const currentActiveShelf = document.querySelector('.shelf-track--active');
+            if (expectedActiveShelf && currentActiveShelf !== expectedActiveShelf) {
+              heroPauseCandidate = null;
+              return;
+            }
+            if (currentActiveShelf && currentActiveShelf.classList.contains('hero')) {
+              heroPauseCandidate = null;
+              return;
+            }
+            if (isHeroActive()) {
+              heroPauseCandidate = null;
+              return;
+            }
+            heroPauseCandidate = null;
             pauseAction();
           }, HERO_PAUSE_DELAY);
         } else {
@@ -2104,7 +2121,19 @@ html { scrollbar-gutter: stable; }
         heroWasActive = false;
         const activeShelf = document.querySelector('.shelf-track--active');
         if (!activeShelf) return;
-        pauseHeroVideo({ withDelay: allowDelayedPause, force: true });
+        if (activeShelf.classList.contains('hero')) {
+          cancelHeroPause();
+          return;
+        }
+        if (allowDelayedPause) {
+          if (heroPauseScheduled && heroPauseCandidate === activeShelf) return;
+          if (heroPauseScheduled && heroPauseCandidate !== activeShelf) {
+            cancelHeroPause();
+          }
+          pauseHeroVideo({ withDelay: true, force: true, expectedActiveShelf: activeShelf });
+        } else {
+          pauseHeroVideo({ force: true });
+        }
       }
 
       if (heroSection && 'IntersectionObserver' in window) {
