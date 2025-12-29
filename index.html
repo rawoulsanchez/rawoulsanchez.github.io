@@ -1679,6 +1679,13 @@ html { scrollbar-gutter: stable; }
           }
         }
       }
+
+      if (previousActiveTrack !== closestTrack) {
+        const playbackUpdater = window.updateHeroPlaybackState;
+        if (typeof playbackUpdater === 'function') {
+          playbackUpdater({ allowDelayedPause: true });
+        }
+      }
     }
 
     window.addEventListener('scroll', () => {
@@ -1690,6 +1697,7 @@ html { scrollbar-gutter: stable; }
       });
     }, { passive: true });
 
+    window.updateActiveTrackFromWindowScroll = updateActiveTrackFromWindowScroll;
     updateActiveTrackFromWindowScroll();
 
     document.querySelectorAll('.shelf-track').forEach(track => {
@@ -2136,10 +2144,15 @@ html { scrollbar-gutter: stable; }
         }
       }
 
+      window.updateHeroPlaybackState = updateHeroPlaybackState;
+
       if (heroSection && 'IntersectionObserver' in window) {
         const heroObserver = new IntersectionObserver((entries) => {
           const entry = entries[0];
           heroIsVisible = !!(entry && entry.isIntersecting && entry.intersectionRatio >= HERO_VISIBLE_RATIO);
+          if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
+            window.updateActiveTrackFromWindowScroll();
+          }
           updateHeroPlaybackState({ allowDelayedPause: true });
         }, {
           threshold: [0, HERO_VISIBLE_RATIO, 1]
@@ -2153,6 +2166,9 @@ html { scrollbar-gutter: stable; }
 
       window.addEventListener('scroll', () => {
         if (!heroSection) return;
+        if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
+          window.updateActiveTrackFromWindowScroll();
+        }
         updateHeroPlaybackState({ allowDelayedPause: true });
       }, { passive: true });
 
@@ -3090,6 +3106,9 @@ previewTitleEl.textContent = title;
           activeMorphTile = null;
           unlockScroll();
           lastOpenedCard = null;
+          if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
+            window.updateActiveTrackFromWindowScroll();
+          }
           updateHeroPlaybackState();
           return;
         }
@@ -3157,6 +3176,9 @@ previewTitleEl.textContent = title;
             lastOpenedCard.focus();
           }
           lastOpenedCard = null;
+          if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
+            window.updateActiveTrackFromWindowScroll();
+          }
           updateHeroPlaybackState();
         }, currentMorphDuration);
       }
