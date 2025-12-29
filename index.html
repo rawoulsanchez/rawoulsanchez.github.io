@@ -1987,10 +1987,6 @@ html { scrollbar-gutter: stable; }
           return;
         }
 
-        if (heroVisual) {
-          heroVisual.classList.add('is-hero-fadeout');
-        }
-
         try {
           let currentHeroTime = null;
           try {
@@ -2031,12 +2027,6 @@ html { scrollbar-gutter: stable; }
           }
         } catch (_) {}
 
-        if (heroVisual) {
-          requestAnimationFrame(() => {
-            heroVisual.offsetHeight;
-            heroVisual.classList.remove('is-hero-fadeout');
-          });
-        }
       }
 
       function isHeroActive() {
