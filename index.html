@@ -2123,13 +2123,16 @@ html { scrollbar-gutter: stable; }
       function updateHeroPlaybackState({ allowDelayedPause } = {}) {
         if (!heroSection) return;
         const wasHeroActive = heroWasActive;
+        const heroActive = isHeroActive();
         if (isPreviewOpen()) {
           pauseHeroVideo({ force: true });
-          heroWasActive = isHeroActive();
+          heroWasActive = heroActive;
           return;
         }
-        if (isHeroActive()) {
-          cancelHeroPause();
+        if (heroActive) {
+          if (!wasHeroActive) {
+            cancelHeroPause();
+          }
           resumeHeroPlayback();
           heroWasActive = true;
           return;
@@ -2138,14 +2141,10 @@ html { scrollbar-gutter: stable; }
         const activeShelf = document.querySelector('.shelf-track--active');
         if (!activeShelf) return;
         if (activeShelf.classList.contains('hero')) {
-          cancelHeroPause();
           return;
         }
         if (allowDelayedPause) {
-          if (heroPauseScheduled && heroPauseCandidate === activeShelf) return;
-          if (heroPauseScheduled && heroPauseCandidate !== activeShelf) {
-            cancelHeroPause();
-          }
+          if (heroPauseScheduled) return;
           pauseHeroVideo({ withDelay: true, force: true, expectedActiveShelf: activeShelf });
         } else {
           pauseHeroVideo({ force: true });
