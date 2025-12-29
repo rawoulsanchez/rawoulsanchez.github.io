@@ -1640,6 +1640,14 @@ html { scrollbar-gutter: stable; }
         }
       }
 
+      if (hero && heroTargetTop !== null) {
+        const heroRect = hero.getBoundingClientRect();
+        const heroInView = heroRect.bottom > 0 && heroRect.top < window.innerHeight;
+        if (heroInView && heroRect.top <= HERO_TOP_SAFE_PX) {
+          closestTrack = hero;
+        }
+      }
+
       // Mobile-only hysteresis: avoid rapid toggling near row boundaries.
       if (isMobileView() && lastActiveTrack && lastActiveTrack !== closestTrack) {
         const lastTargetTop = targetTopForTrack(lastActiveTrack);

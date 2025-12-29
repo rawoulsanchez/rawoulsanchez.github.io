@@ -1640,6 +1640,14 @@ html { scrollbar-gutter: stable; }
         }
       }
 
+      if (hero && heroTargetTop !== null) {
+        const heroRect = hero.getBoundingClientRect();
+        const heroInView = heroRect.bottom > 0 && heroRect.top < window.innerHeight;
+        if (heroInView && heroRect.top <= HERO_TOP_SAFE_PX) {
+          closestTrack = hero;
+        }
+      }
+
       // Mobile-only hysteresis: avoid rapid toggling near row boundaries.
       if (isMobileView() && lastActiveTrack && lastActiveTrack !== closestTrack) {
         const lastTargetTop = targetTopForTrack(lastActiveTrack);
@@ -2109,7 +2117,7 @@ html { scrollbar-gutter: stable; }
       }
 
       function isHeroActive() {
-        return heroSection && (heroSection.classList.contains('hero--active') || heroIsVisible);
+        return heroSection && heroSection.classList.contains('hero--active');
       }
 
       function updateHeroPlaybackState({ allowDelayedPause } = {}) {
@@ -2149,7 +2157,7 @@ html { scrollbar-gutter: stable; }
       if (heroSection && 'IntersectionObserver' in window) {
         const heroObserver = new IntersectionObserver((entries) => {
           const entry = entries[0];
-          heroIsVisible = !!(entry && entry.isIntersecting);
+          heroIsVisible = !!(entry && entry.isIntersecting && entry.intersectionRatio >= HERO_VISIBLE_RATIO);
           if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
             window.updateActiveTrackFromWindowScroll();
           }
