@@ -1266,9 +1266,21 @@ html { scrollbar-gutter: stable; }
       playerVars: {
         autoplay: 1,
         mute: 1,
-        playsinline: 1
+        playsinline: 1,
+        loop: 1,
+        playlist: HERO_VIDEO_ID
       },
-      events: { onReady: e => { e.target.mute(); e.target.playVideo(); } }
+      events: {
+        onReady: e => { e.target.mute(); e.target.playVideo(); },
+        onStateChange: e => {
+          if (!e || e.data !== YT.PlayerState.ENDED) return;
+          if (!canLoopHeroVideo()) return;
+          try {
+            e.target.seekTo(0, true);
+            e.target.playVideo();
+          } catch (_) {}
+        }
+      }
     });
   }
   function toggleMute(){
@@ -1901,6 +1913,8 @@ html { scrollbar-gutter: stable; }
       let heroTargetVolume = 100;
       let heroPauseTimeout = null;
       let heroIsVisible = false;
+      let heroWasActive = false;
+      let heroPausedByScroll = false;
 
       function cancelHeroAudioFade() {
         if (heroAudioFadeInterval !== null) {
@@ -2012,7 +2026,12 @@ html { scrollbar-gutter: stable; }
           }
         } catch (_) {}
 
-        if (playerState === 1) {
+        if (playerState === YT.PlayerState.PLAYING || playerState === YT.PlayerState.BUFFERING) {
+          if (typeof isMuted !== 'undefined' && isMuted) {
+            if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
+          } else if (typeof ytPlayer.unMute === 'function') {
+            ytPlayer.unMute();
+          }
           return;
         }
 
@@ -2031,38 +2050,37 @@ html { scrollbar-gutter: stable; }
             (typeof currentHeroTime === 'number' && isFinite(currentHeroTime));
 
           const needsSeekBack =
+            heroPausedByScroll &&
             hasPausedTime &&
             hasCurrentTime &&
             (currentHeroTime < 0.5 || Math.abs(currentHeroTime - heroPausedTime) > 2.0);
 
-          if (needsSeekBack && typeof ytPlayer.seekTo === 'function') {
+          const shouldResumeFromPause =
+            playerState === YT.PlayerState.PAUSED || playerState === YT.PlayerState.CUED;
+
+          if (needsSeekBack && shouldResumeFromPause && typeof ytPlayer.seekTo === 'function') {
             try { ytPlayer.seekTo(heroPausedTime, true); } catch (_) {}
           }
 
-          if (typeof ytPlayer.playVideo === 'function') {
-            ytPlayer.playVideo();
-          }
+          if (shouldResumeFromPause) {
+            if (typeof ytPlayer.playVideo === 'function') {
+              ytPlayer.playVideo();
+            }
 
-          if (typeof isMuted !== 'undefined' && isMuted) {
-            if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
-          } else {
-            try {
-              if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
-            } catch (_) {}
-            const targetVolume = typeof heroTargetVolume === 'number' && isFinite(heroTargetVolume)
-              ? heroTargetVolume
-              : 100;
-            startHeroAudioFade(targetVolume, 1400);
+            if (typeof isMuted !== 'undefined' && isMuted) {
+              if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
+            } else {
+              try {
+                if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
+              } catch (_) {}
+              const targetVolume = typeof heroTargetVolume === 'number' && isFinite(heroTargetVolume)
+                ? heroTargetVolume
+                : 100;
+              startHeroAudioFade(targetVolume, 1400);
+            }
           }
         } catch (_) {}
-
-        if (heroVisual) {
-          heroVisual.classList.add('is-hero-fadeout');
-          requestAnimationFrame(() => {
-            heroVisual.offsetHeight;
-            heroVisual.classList.remove('is-hero-fadeout');
-          });
-        }
+        heroPausedByScroll = false;
       }
 
       function isHeroActive() {
@@ -2072,17 +2090,30 @@ html { scrollbar-gutter: stable; }
       function updateHeroPlaybackState({ allowDelayedPause } = {}) {
         if (!heroSection) return;
         if (isPreviewOpen()) {
+          heroPausedByScroll = false;
           pauseHeroVideo();
           return;
         }
-        if (isHeroActive()) {
-          cancelHeroPause();
-          resumeHeroPlayback();
+        const heroActiveNow = isHeroActive();
+        if (heroActiveNow) {
+          if (!heroWasActive) {
+            cancelHeroPause();
+            heroPausedByScroll = false;
+            resumeHeroPlayback();
+          }
+          heroWasActive = true;
           return;
         }
-        const activeShelf = document.querySelector('.shelf-track--active');
-        if (!activeShelf) return;
-        pauseHeroVideo({ withDelay: allowDelayedPause });
+        if (heroWasActive) {
+          const activeShelf = document.querySelector('.shelf-track--active');
+          if (!activeShelf) {
+            heroWasActive = false;
+            return;
+          }
+          heroPausedByScroll = true;
+          pauseHeroVideo({ withDelay: allowDelayedPause });
+        }
+        heroWasActive = false;
       }
 
       if (heroSection && 'IntersectionObserver' in window) {
@@ -2102,6 +2133,7 @@ html { scrollbar-gutter: stable; }
 
       if (heroSection) {
         heroSection.classList.add('hero--active');
+        heroWasActive = true;
       }
 
       window.addEventListener('scroll', () => {
