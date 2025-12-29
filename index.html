@@ -1266,9 +1266,19 @@ html { scrollbar-gutter: stable; }
       playerVars: {
         autoplay: 1,
         mute: 1,
-        playsinline: 1
+        playsinline: 1,
+        loop: 1,
+        playlist: HERO_VIDEO_ID
       },
-      events: { onReady: e => { e.target.mute(); e.target.playVideo(); } }
+      events: {
+        onReady: e => { e.target.mute(); e.target.playVideo(); },
+        onStateChange: e => {
+          if (e.data === YT.PlayerState.ENDED) {
+            e.target.seekTo(0, true);
+            e.target.playVideo();
+          }
+        }
+      }
     });
   }
   function toggleMute(){
@@ -1905,6 +1915,8 @@ html { scrollbar-gutter: stable; }
       let heroTargetVolume = 100;
       let heroPauseTimeout = null;
       let heroIsVisible = false;
+      let heroWasActive = false;
+      let heroPausedByUs = false;
 
       function cancelHeroAudioFade() {
         if (heroAudioFadeInterval !== null) {
@@ -1965,14 +1977,14 @@ html { scrollbar-gutter: stable; }
         }, stepMs);
       }
 
-      function pauseHeroVideo({ withDelay } = {}) {
+      function pauseHeroVideo({ withDelay, force } = {}) {
         cancelHeroPause();
 
         const pauseAction = () => {
           try {
             if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
-              if (isHeroActive()) return;
-              if (isPreviewOpen()) return;
+              if (!force && isHeroActive()) return;
+              if (!force && isPreviewOpen()) return;
               captureHeroPausedTime();
               if (typeof isMuted !== 'undefined' && !isMuted) {
                 try {
@@ -1985,9 +1997,11 @@ html { scrollbar-gutter: stable; }
                 } catch (_) {}
                 startHeroAudioFade(0, HERO_AUDIO_FADE_MS, () => {
                   try { ytPlayer.pauseVideo(); } catch (_) {}
+                  heroPausedByUs = true;
                 });
               } else {
                 ytPlayer.pauseVideo();
+                heroPausedByUs = true;
               }
             }
           } catch (_) {}
@@ -2007,7 +2021,9 @@ html { scrollbar-gutter: stable; }
         if (typeof ytPlayer === 'undefined' || !ytPlayer) return;
         if (!heroIsVisible || isPreviewOpen()) return;
 
-        cancelHeroAudioFade();
+      function resumeHeroPlayback() {
+        if (typeof ytPlayer === 'undefined' || !ytPlayer) return;
+        if (!heroIsVisible || isPreviewOpen()) return;
 
         let playerState = null;
         try {
@@ -2016,18 +2032,9 @@ html { scrollbar-gutter: stable; }
           }
         } catch (_) {}
 
-        if (playerState === 1) {
+        if (playerState === 1 || playerState === 3) {
           return;
         }
-
-        if (heroVisual) {
-          heroVisual.classList.add('is-hero-fadeout');
-        }
-      }
-
-      function resumeHeroPlayback() {
-        if (typeof ytPlayer === 'undefined' || !ytPlayer) return;
-        if (!heroIsVisible || isPreviewOpen()) return;
 
         try {
           let currentHeroTime = null;
@@ -2049,11 +2056,11 @@ html { scrollbar-gutter: stable; }
             hasCurrentTime &&
             (currentHeroTime < 0.5 || Math.abs(currentHeroTime - heroPausedTime) > 2.0);
 
-          if (needsSeekBack && playerState !== 1 && typeof ytPlayer.seekTo === 'function') {
+          if (heroPausedByUs && (playerState === 2 || playerState === 5) && needsSeekBack && typeof ytPlayer.seekTo === 'function') {
             try { ytPlayer.seekTo(heroPausedTime, true); } catch (_) {}
           }
 
-          if (playerState !== 1 && typeof ytPlayer.playVideo === 'function') {
+          if (playerState !== 1 && (playerState === 2 || playerState === 5) && typeof ytPlayer.playVideo === 'function') {
             ytPlayer.playVideo();
           }
 
@@ -2069,31 +2076,7 @@ html { scrollbar-gutter: stable; }
             startHeroAudioFade(targetVolume, 1400);
           }
         } catch (_) {}
-        heroPausedByScroll = false;
-      }
-
-        if (heroVisual) {
-          requestAnimationFrame(() => {
-            heroVisual.offsetHeight;
-            heroVisual.classList.remove('is-hero-fadeout');
-          });
-        }
-        heroWasActive = false;
-      }
-
-      if (heroSection && 'IntersectionObserver' in window) {
-        const heroObserver = new IntersectionObserver((entries) => {
-          const entry = entries[0];
-          heroIsVisible = !!(entry && entry.isIntersecting && entry.intersectionRatio >= HERO_VISIBLE_RATIO);
-          updateHeroPlaybackState({ allowDelayedPause: true });
-        }, {
-          threshold: [0, HERO_VISIBLE_RATIO, 1]
-        });
-
-        heroObserver.observe(heroSection);
-      } else if (heroSection) {
-        const rect = heroSection.getBoundingClientRect();
-        heroIsVisible = rect.top < window.innerHeight && rect.bottom > 0;
+        heroPausedByUs = false;
       }
 
       function isHeroActive() {
@@ -2103,14 +2086,19 @@ html { scrollbar-gutter: stable; }
       function updateHeroPlaybackState({ allowDelayedPause } = {}) {
         if (!heroSection) return;
         if (isPreviewOpen()) {
-          pauseHeroVideo();
+          pauseHeroVideo({ force: true });
+          heroWasActive = isHeroActive();
           return;
         }
         if (isHeroActive()) {
           cancelHeroPause();
-          resumeHeroPlayback();
+          if (heroPausedByUs || !heroWasActive) {
+            resumeHeroPlayback();
+          }
+          heroWasActive = true;
           return;
         }
+        heroWasActive = false;
         const activeShelf = document.querySelector('.shelf-track--active');
         if (!activeShelf) return;
         pauseHeroVideo({ withDelay: allowDelayedPause });
@@ -2892,7 +2880,7 @@ html { scrollbar-gutter: stable; }
 
       function openPreviewFromCard(card, triggerElement = card) {
         // ZAQ TASK 1.8: Pause hero video when preview begins opening.
-        pauseHeroVideo();
+        pauseHeroVideo({ force: true });
         const title = 'Preview Placeholder Title';
         const runtime = '1h 52m';
         const tags = 'Thriller • Sci‑Fi • Action';
