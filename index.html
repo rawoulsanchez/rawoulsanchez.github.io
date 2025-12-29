@@ -1680,6 +1680,8 @@ html { scrollbar-gutter: stable; }
       });
     }, { passive: true });
 
+    updateActiveTrackFromWindowScroll();
+
     document.querySelectorAll('.shelf-track').forEach(track => {
       const originalPosters = Array.from(track.children);
       if (originalPosters.length === 0) return;
@@ -2014,15 +2016,6 @@ html { scrollbar-gutter: stable; }
           return;
         }
 
-        if (heroVisual) {
-          heroVisual.classList.add('is-hero-fadeout');
-        }
-      }
-
-      function resumeHeroPlayback() {
-        if (typeof ytPlayer === 'undefined' || !ytPlayer) return;
-        if (!heroIsVisible || isPreviewOpen()) return;
-
         try {
           let currentHeroTime = null;
           try {
@@ -2042,11 +2035,11 @@ html { scrollbar-gutter: stable; }
             hasCurrentTime &&
             (currentHeroTime < 0.5 || Math.abs(currentHeroTime - heroPausedTime) > 2.0);
 
-          if (needsSeekBack && playerState !== 1 && typeof ytPlayer.seekTo === 'function') {
+          if (needsSeekBack && typeof ytPlayer.seekTo === 'function') {
             try { ytPlayer.seekTo(heroPausedTime, true); } catch (_) {}
           }
 
-          if (playerState !== 1 && typeof ytPlayer.playVideo === 'function') {
+          if (typeof ytPlayer.playVideo === 'function') {
             ytPlayer.playVideo();
           }
 
@@ -2064,13 +2057,12 @@ html { scrollbar-gutter: stable; }
         } catch (_) {}
 
         if (heroVisual) {
+          heroVisual.classList.add('is-hero-fadeout');
           requestAnimationFrame(() => {
             heroVisual.offsetHeight;
             heroVisual.classList.remove('is-hero-fadeout');
           });
         }
-        pauseHeroVideo({ withDelay: allowDelayedPause, initiatedByScroll: true });
-        heroWasActive = false;
       }
 
       function isHeroActive() {
@@ -2106,6 +2098,10 @@ html { scrollbar-gutter: stable; }
       } else if (heroSection) {
         const rect = heroSection.getBoundingClientRect();
         heroIsVisible = rect.top < window.innerHeight && rect.bottom > 0;
+      }
+
+      if (heroSection) {
+        heroSection.classList.add('hero--active');
       }
 
       window.addEventListener('scroll', () => {
