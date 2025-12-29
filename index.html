@@ -2150,6 +2150,9 @@ html { scrollbar-gutter: stable; }
         const heroObserver = new IntersectionObserver((entries) => {
           const entry = entries[0];
           heroIsVisible = !!(entry && entry.isIntersecting && entry.intersectionRatio >= HERO_VISIBLE_RATIO);
+          if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
+            window.updateActiveTrackFromWindowScroll();
+          }
           updateHeroPlaybackState({ allowDelayedPause: true });
         }, {
           threshold: [0, HERO_VISIBLE_RATIO, 1]
@@ -2163,6 +2166,9 @@ html { scrollbar-gutter: stable; }
 
       window.addEventListener('scroll', () => {
         if (!heroSection) return;
+        if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
+          window.updateActiveTrackFromWindowScroll();
+        }
         updateHeroPlaybackState({ allowDelayedPause: true });
       }, { passive: true });
 
