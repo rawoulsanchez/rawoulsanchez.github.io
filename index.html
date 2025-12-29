@@ -2114,7 +2114,7 @@ html { scrollbar-gutter: stable; }
         }
         if (isHeroActive()) {
           cancelHeroPause();
-          if (!wasHeroActive) {
+          if (!wasHeroActive || heroPausedByUs) {
             resumeHeroPlayback();
           }
           heroWasActive = true;
