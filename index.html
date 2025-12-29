@@ -1907,6 +1907,8 @@ html { scrollbar-gutter: stable; }
       let heroTargetVolume = 100;
       let heroPauseTimeout = null;
       let heroIsVisible = false;
+      let heroWasActive = false;
+      let heroPausedByScroll = false;
 
       function cancelHeroAudioFade() {
         if (heroAudioFadeInterval !== null) {
@@ -1967,7 +1969,7 @@ html { scrollbar-gutter: stable; }
         }, stepMs);
       }
 
-      function pauseHeroVideo({ withDelay } = {}) {
+      function pauseHeroVideo({ withDelay, initiatedByScroll } = {}) {
         cancelHeroPause();
 
         const pauseAction = () => {
@@ -1975,6 +1977,7 @@ html { scrollbar-gutter: stable; }
             if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
               if (isHeroActive()) return;
               if (isPreviewOpen()) return;
+              heroPausedByScroll = !!initiatedByScroll;
               captureHeroPausedTime();
               if (typeof isMuted !== 'undefined' && !isMuted) {
                 try {
@@ -2041,17 +2044,22 @@ html { scrollbar-gutter: stable; }
             hasCurrentTime &&
             (currentHeroTime < 0.5 || Math.abs(currentHeroTime - heroPausedTime) > 2.0);
 
-          if (needsSeekBack && playerState !== 1 && typeof ytPlayer.seekTo === 'function') {
-            try { ytPlayer.seekTo(heroPausedTime, true); } catch (_) {}
-          }
+        const isPausedOrCued = playerState === 2 || playerState === 5;
+        const shouldSeekForResume = heroPausedByScroll && isPausedOrCued;
 
-          if (playerState !== 1 && typeof ytPlayer.playVideo === 'function') {
-            ytPlayer.playVideo();
-          }
+        if (needsSeekBack && shouldSeekForResume && typeof ytPlayer.seekTo === 'function') {
+          try { ytPlayer.seekTo(heroPausedTime, true); } catch (_) {}
+        }
 
-          if (typeof isMuted !== 'undefined' && isMuted) {
-            if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
-          } else {
+        if (playerState !== 1 && typeof ytPlayer.playVideo === 'function') {
+          ytPlayer.playVideo();
+        }
+
+        heroPausedByScroll = false;
+
+        if (typeof isMuted !== 'undefined' && isMuted) {
+          if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
+        } else {
             try {
               if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
             } catch (_) {}
@@ -2072,16 +2080,25 @@ html { scrollbar-gutter: stable; }
         if (!heroSection) return;
         if (isPreviewOpen()) {
           pauseHeroVideo();
+          heroWasActive = isHeroActive();
           return;
         }
-        if (isHeroActive()) {
+        const heroIsActive = isHeroActive();
+        if (heroIsActive) {
           cancelHeroPause();
-          resumeHeroPlayback();
+          if (!heroWasActive) {
+            resumeHeroPlayback();
+          }
+          heroWasActive = true;
           return;
         }
         const activeShelf = document.querySelector('.shelf-track--active');
-        if (!activeShelf) return;
-        pauseHeroVideo({ withDelay: allowDelayedPause });
+        if (!activeShelf) {
+          heroWasActive = false;
+          return;
+        }
+        pauseHeroVideo({ withDelay: allowDelayedPause, initiatedByScroll: true });
+        heroWasActive = false;
       }
 
       if (heroSection && 'IntersectionObserver' in window) {
