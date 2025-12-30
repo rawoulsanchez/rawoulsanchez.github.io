@@ -397,6 +397,8 @@ main{
     display:inline-flex;
     align-items:center;
     gap:6px;
+    position:relative;
+    flex:0 0 auto;
   }
   .hero-volume__btn {
     width:40px;
@@ -415,11 +417,14 @@ main{
     outline-offset:2px;
   }
   .hero-volume__sliderWrap {
-    width:0;
+    position:absolute;
+    top:50%;
+    left:100%;
+    transform:translateY(-50%);
+    width:96px;
     opacity:0;
-    overflow:hidden;
     pointer-events:none;
-    transition: width 180ms ease, opacity 180ms ease;
+    transition: opacity 180ms ease, transform 180ms ease;
   }
   .hero-volume__slider {
     width:96px;
@@ -427,7 +432,6 @@ main{
   }
   @media (hover: hover) and (pointer: fine) {
     .hero-volume:hover .hero-volume__sliderWrap {
-      width:96px;
       opacity:1;
       pointer-events:auto;
     }
@@ -445,9 +449,10 @@ html { scrollbar-gutter: stable; }
   max-width:420px;                   /* keep pills on one line */
   margin: calc(8px + .125rem) 0 0 0; /* FIXED gap below synopsis */
   align-items:center;
+  flex-wrap:nowrap;
 }
 .hero-cta .btn {
-  flex:1 1 0;
+  flex:0 0 auto;
 }
 .hero-cta .mute-btn {
   flex:0 0 auto;
@@ -1320,7 +1325,6 @@ html { scrollbar-gutter: stable; }
           <input class="hero-volume__slider" type="range" min="0" max="100" value="100" aria-label="Hero volume">
         </div>
       </div>
-      <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
     </div>
   </div>
 <!-- This wrapper div was limiting the width and causing the pink background to leak. -->
