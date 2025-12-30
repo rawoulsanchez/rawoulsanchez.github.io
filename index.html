@@ -1111,7 +1111,7 @@ html { scrollbar-gutter: stable; }
               left:calc((100% - 100vw)/2);
               right:calc((100% - 100vw)/2);
               z-index:2;display:flex;flex-direction:column;
-              justify-content:flex-end;pointer-events:none;overflow:hidden;">
+              justify-content:flex-end;pointer-events:auto;overflow:hidden;">
     <div class="hero-overlay-inline"
          style="pointer-events:auto;position:absolute;bottom:0;left:0;
                 max-width:720px;color:#fff;text-align:left;
@@ -1145,7 +1145,7 @@ html { scrollbar-gutter: stable; }
       </button>
 
       <!-- Details -->
-      <button type="button" class="btn btn--ghost" onclick="console.log('More info')">
+      <button type="button" class="btn btn--ghost hero-details-button">
         <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M13 16h-1v-4h-1m1-4h.01"/>
           <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -3023,6 +3023,18 @@ previewTitleEl.textContent = title;
           previewCard.style.setProperty('--preview-morph-ease', profile.easing);
         }
         runOpenMorph(card, profile);
+      }
+
+      const heroDetailsButton = document.querySelector('.hero-details-button');
+      const heroPreviewSource = heroVisual || heroSection;
+
+      if (heroDetailsButton && heroPreviewSource) {
+        heroDetailsButton.addEventListener('click', (event) => {
+          if (previewOverlay.classList.contains('is-visible')) return;
+          event.preventDefault();
+          event.stopPropagation();
+          openPreviewFromCard(heroPreviewSource, heroDetailsButton);
+        });
       }
 
       function runOpenMorph(card, profile) {
