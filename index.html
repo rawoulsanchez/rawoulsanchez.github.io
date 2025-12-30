@@ -528,7 +528,7 @@ html { scrollbar-gutter: stable; }
   left: 0;
   transform-origin: top left;
   pointer-events: none;
-  z-index: 12000;
+  z-index: 13000;
   background: #05060a;
   overflow: hidden;
   border: var(--preview-frame-border);
@@ -864,7 +864,7 @@ html { scrollbar-gutter: stable; }
     align-items: center;
     justify-content: center;
     background: radial-gradient(circle at top, rgba(0,0,0,0.80), rgba(0,0,0,0.95));
-    z-index: 999;
+    z-index: 13000;
     padding: 16px;
     opacity: 0;
     visibility: hidden;
@@ -874,7 +874,7 @@ html { scrollbar-gutter: stable; }
 
   /* Future: when we add JS, we’ll toggle this class */
   .preview-overlay.is-visible {
-    z-index: 9999;
+    z-index: 13000;
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
