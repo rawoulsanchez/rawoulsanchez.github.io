@@ -598,7 +598,8 @@ html { scrollbar-gutter: stable; }
   opacity: 1;
 }
 
-.hero--active .hero-cta .btn--solid {
+.hero--active .hero-cta .btn--solid,
+.hero.hero--active + .hero-cta-layer .hero-cta .btn--solid {
   outline: 2px solid var(--brand);
   box-shadow: var(--brand-glow-shadow), 0 6px 14px rgba(0,0,0,.18);
 }
