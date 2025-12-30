@@ -1349,7 +1349,19 @@ html { scrollbar-gutter: stable; }
     }
     window.heroPlaybackRequested = true;
     if (!ytPlayer) return;
+    if (typeof ytPlayer.seekTo === 'function') ytPlayer.seekTo(0, true);
+    if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
+    if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(100);
     ytPlayer.playVideo();
+    try {
+      const iframe = ytPlayer.getIframe();
+      if (iframe) {
+        const requestFullscreen = iframe.requestFullscreen || iframe.webkitRequestFullscreen || iframe.mozRequestFullScreen || iframe.msRequestFullscreen;
+        if (requestFullscreen) {
+          requestFullscreen.call(iframe);
+        }
+      }
+    } catch (_) {}
   }
   document.addEventListener('DOMContentLoaded', () => {
     const hero = document.querySelector('.hero');
