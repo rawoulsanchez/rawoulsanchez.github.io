@@ -1,5 +1,6 @@
 
 
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -657,7 +658,6 @@ html { scrollbar-gutter: stable; }
     left: 0;
     transform: none;
     aspect-ratio: auto;
-    z-index: 4;
   }
 
     /* Desktop-only debug overlay grid */
@@ -685,16 +685,6 @@ html { scrollbar-gutter: stable; }
      horizontal line as the bottom edge of the hero video box. */
   .after-hero{
     padding-top: 1.35rem; /* ZAQ TASK 03: lifted shelves so Row A aligns with hero text bottom */
-  }
-
-  /* Allow hero CTA clicks through the overlapping after-hero region */
-  .after-hero{
-    pointer-events:none;
-  }
-
-  .after-hero .shelf,
-  .after-hero .shelf *{
-    pointer-events:auto;
   }
 
 
@@ -726,7 +716,6 @@ html { scrollbar-gutter: stable; }
   .hero-overlay-inline{
     left:0;
     padding-left:calc(var(--space-synopsis-pills) + env(safe-area-inset-left)) !important;
-    z-index: 6;
   }
 
   .shelf-title{
