@@ -383,6 +383,11 @@ html { scrollbar-gutter: stable; }
   top:0;
   pointer-events:auto;
   will-change: transform;
+  opacity:0;
+  transition: opacity 120ms ease;
+}
+.hero-cta-layer.is-positioned{
+  opacity:1;
 }
 .hero-cta-layer .hero-cta{
   margin:0;
@@ -1374,6 +1379,7 @@ html { scrollbar-gutter: stable; }
       const top = anchorRect.top + window.scrollY;
 
       ctaLayer.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+      ctaLayer.classList.add('is-positioned');
     }
 
     function schedulePositionCta(){
