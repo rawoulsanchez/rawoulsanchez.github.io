@@ -2185,13 +2185,22 @@ html { scrollbar-gutter: stable; }
         const heroActive = isHeroActive();
         const isMobile = typeof window.isMobileView === 'function' && window.isMobileView();
         const heroPlaybackRequested = window.heroPlaybackRequested === true;
-        const heroActiveForPlayback = heroActive || (isMobile && heroIsVisible && heroPlaybackRequested);
         const activeShelf = document.querySelector('.shelf-track--active');
         const otherShelfActive = !!(activeShelf && !activeShelf.classList.contains('hero'));
+        const heroActiveForPlayback = heroActive || (isMobile && heroIsVisible && heroPlaybackRequested);
         if (isPreviewOpen()) {
           pauseHeroVideo({ force: true });
           heroWasActive = heroActiveForPlayback;
           return;
+        }
+        if (otherShelfActive && !heroActive) {
+          heroWasActive = false;
+          if (allowDelayedPause) {
+            pauseHeroVideo({ withDelay: true, expectedActiveShelf: activeShelf });
+          } else {
+            pauseHeroVideo({ force: true });
+            return;
+          }
         }
         if (heroActiveForPlayback) {
           if (!wasHeroActive) {
