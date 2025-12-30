@@ -911,6 +911,7 @@ html { scrollbar-gutter: stable; }
     visibility: hidden;
     pointer-events: none;
     transition: opacity var(--preview-morph-duration) var(--preview-morph-ease), visibility 0s linear var(--preview-morph-duration);
+    overscroll-behavior: contain;
   }
 
   /* Future: when we add JS, we’ll toggle this class */
@@ -2203,6 +2204,93 @@ html { scrollbar-gutter: stable; }
         return previewOverlay.classList.contains('is-visible');
       }
 
+      let previewSwipeHandlers = null;
+
+      function isScrollableElement(element) {
+        if (!element) return false;
+        const style = getComputedStyle(element);
+        const overflowY = style.overflowY;
+        return (overflowY === 'auto' || overflowY === 'scroll') && element.scrollHeight > element.clientHeight;
+      }
+
+      function getScrollableStartTarget(target) {
+        const candidate = target.closest('.preview-body');
+        if (candidate && isScrollableElement(candidate)) {
+          return candidate;
+        }
+        return null;
+      }
+
+      function isScrollableAtTop(element) {
+        return element.scrollTop <= 0;
+      }
+
+      function attachPreviewSwipeListeners() {
+        if (previewSwipeHandlers) return;
+        const previewCard = previewOverlay.querySelector('.preview-card');
+        if (!previewCard) return;
+
+        let startY = 0;
+        let maxDeltaY = 0;
+        let scrollableStartEl = null;
+        let swipeEligible = false;
+
+        const onTouchStart = (event) => {
+          if (!isPreviewOpen()) return;
+          if (!event.touches || event.touches.length !== 1) return;
+          startY = event.touches[0].clientY;
+          maxDeltaY = 0;
+          scrollableStartEl = getScrollableStartTarget(event.target);
+          swipeEligible = !scrollableStartEl || isScrollableAtTop(scrollableStartEl);
+        };
+
+        const onTouchMove = (event) => {
+          if (!isPreviewOpen()) return;
+          if (!event.touches || event.touches.length !== 1) return;
+          if (!swipeEligible) return;
+          const deltaY = event.touches[0].clientY - startY;
+          if (deltaY > 0) {
+            event.preventDefault();
+            if (deltaY > maxDeltaY) {
+              maxDeltaY = deltaY;
+            }
+          }
+        };
+
+        const onTouchEnd = () => {
+          if (!isPreviewOpen()) return;
+          if (maxDeltaY > 90) {
+            closePreview();
+          }
+          startY = 0;
+          maxDeltaY = 0;
+          scrollableStartEl = null;
+          swipeEligible = false;
+        };
+
+        previewSwipeHandlers = {
+          previewCard,
+          onTouchStart,
+          onTouchMove,
+          onTouchEnd
+        };
+
+        previewCard.addEventListener('touchstart', onTouchStart, { passive: true });
+        previewCard.addEventListener('touchmove', onTouchMove, { passive: false });
+        previewCard.addEventListener('touchend', onTouchEnd);
+        previewCard.addEventListener('touchcancel', onTouchEnd);
+      }
+
+      function detachPreviewSwipeListeners() {
+        if (!previewSwipeHandlers) return;
+        const { previewCard, onTouchStart, onTouchMove, onTouchEnd } = previewSwipeHandlers;
+        previewCard.removeEventListener('touchstart', onTouchStart);
+        previewCard.removeEventListener('touchmove', onTouchMove);
+        previewCard.removeEventListener('touchend', onTouchEnd);
+        previewCard.removeEventListener('touchcancel', onTouchEnd);
+        previewSwipeHandlers = null;
+      }
+
       function captureHeroPausedTime() {
         try {
           if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
@@ -3209,6 +3297,7 @@ previewTitleEl.textContent = title;
           previewCard.style.setProperty('--preview-morph-duration', `${profile.duration}ms`);
           previewCard.style.setProperty('--preview-morph-ease', profile.easing);
         }
+        attachPreviewSwipeListeners();
         runOpenMorph(card, profile);
       }
 
@@ -3361,6 +3450,7 @@ previewTitleEl.textContent = title;
 
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
+        detachPreviewSwipeListeners();
 
         const previewCardRect = previewCard.getBoundingClientRect();
         if (!lastOpenedCard) {
