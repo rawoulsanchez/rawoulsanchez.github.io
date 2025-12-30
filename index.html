@@ -1255,6 +1255,10 @@ html { scrollbar-gutter: stable; }
   const HERO_VIDEO_ID = 't1x7Q0IA3Os';
   let ytPlayer, isMuted = true;
   let hasUserGesturePlayback = false;
+  window.heroPlaybackRequested = false;
+  function isMobilePlayback() {
+    return !!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+  }
   function isPlayNowHighlighted() {
     const hero = document.querySelector('.hero');
     const playButton = document.querySelector('.hero-cta .btn--solid');
@@ -1283,7 +1287,7 @@ html { scrollbar-gutter: stable; }
       events: {
         onReady: e => {
           e.target.mute();
-          if (isPlayNowHighlighted()) {
+          if (isPlayNowHighlighted() && (!isMobilePlayback() || window.heroPlaybackRequested)) {
             e.target.playVideo();
           } else {
             e.target.pauseVideo();
@@ -1292,6 +1296,7 @@ html { scrollbar-gutter: stable; }
         onStateChange: e => {
           if (e.data === YT.PlayerState.PLAYING) {
             hasUserGesturePlayback = true;
+            window.heroPlaybackRequested = true;
           }
           if (e.data === YT.PlayerState.PLAYING && !isPlayNowHighlighted()) {
             e.target.pauseVideo();
@@ -1317,6 +1322,7 @@ html { scrollbar-gutter: stable; }
     if (hero) {
       hero.classList.add('hero--active');
     }
+    window.heroPlaybackRequested = true;
     if (!ytPlayer) return;
     ytPlayer.playVideo();
   }
@@ -1375,6 +1381,7 @@ html { scrollbar-gutter: stable; }
     // ZAQ TASK 1 — Mobile breakpoint helper (matches existing CSS @media max-width:640px)
     const MOBILE_MQ = window.matchMedia('(max-width: 768px)');
     function isMobileView(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
+    window.isMobileView = isMobileView;
 
     let lastActiveTrack = null;
     const heroLoopState = window.heroLoopState || (window.heroLoopState = {
@@ -2176,14 +2183,17 @@ html { scrollbar-gutter: stable; }
         if (!heroSection) return;
         const wasHeroActive = heroWasActive;
         const heroActive = isHeroActive();
+        const isMobile = typeof window.isMobileView === 'function' && window.isMobileView();
+        const heroPlaybackRequested = window.heroPlaybackRequested === true;
+        const heroActiveForPlayback = heroActive || (isMobile && heroIsVisible && heroPlaybackRequested);
         const activeShelf = document.querySelector('.shelf-track--active');
         const otherShelfActive = !!(activeShelf && !activeShelf.classList.contains('hero'));
         if (isPreviewOpen()) {
           pauseHeroVideo({ force: true });
-          heroWasActive = heroActive;
+          heroWasActive = heroActiveForPlayback;
           return;
         }
-        if (heroActive) {
+        if (heroActiveForPlayback) {
           if (!wasHeroActive) {
             cancelHeroPause();
           }
