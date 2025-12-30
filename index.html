@@ -1412,6 +1412,7 @@ html { scrollbar-gutter: stable; }
     window.addEventListener('load', alignCta);
     window.addEventListener('resize', alignCta);
     window.addEventListener('orientationchange', alignCta);
+    window.addEventListener('scroll', schedulePositionCta, { passive: true });
   })();
 </script>
 <script>
