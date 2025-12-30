@@ -1287,7 +1287,7 @@ html { scrollbar-gutter: stable; }
       events: {
         onReady: e => {
           e.target.mute();
-          if (isPlayNowHighlighted() && (!isMobilePlayback() || window.heroPlaybackRequested)) {
+          if (isPlayNowHighlighted()) {
             e.target.playVideo();
           } else {
             e.target.pauseVideo();
@@ -2187,7 +2187,7 @@ html { scrollbar-gutter: stable; }
         const heroPlaybackRequested = window.heroPlaybackRequested === true;
         const activeShelf = document.querySelector('.shelf-track--active');
         const otherShelfActive = !!(activeShelf && !activeShelf.classList.contains('hero'));
-        const heroActiveForPlayback = heroActive || (isMobile && heroIsVisible && heroPlaybackRequested);
+        const heroActiveForPlayback = heroActive || (isMobile && heroIsVisible);
         if (isPreviewOpen()) {
           pauseHeroVideo({ force: true });
           heroWasActive = heroActiveForPlayback;
