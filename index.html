@@ -1046,6 +1046,8 @@ html { scrollbar-gutter: stable; }
     width: 100%;
     height: 100%;
     z-index: 2;
+    opacity: 1;
+    transition: opacity 700ms ease;
   }
   .preview-teaser-player iframe {
     width: 100%;
@@ -1054,7 +1056,6 @@ html { scrollbar-gutter: stable; }
   }
   .preview-teaser-player.teaser-fadeout {
     opacity: 0;
-    transition: opacity 700ms ease;
   }
 
   .preview-info {
