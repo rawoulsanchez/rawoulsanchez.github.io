@@ -377,7 +377,7 @@ html { scrollbar-gutter: stable; }
   height:0;
 }
 .hero-cta-layer{
-  position:fixed;
+  position:absolute;
   z-index:9999;
   left:0;
   top:0;
@@ -1370,8 +1370,8 @@ html { scrollbar-gutter: stable; }
       if(!ctaLayer || !anchor) return;
 
       const anchorRect = anchor.getBoundingClientRect();
-      const left = Math.round(anchorRect.left);
-      const top = Math.round(anchorRect.top);
+      const left = anchorRect.left + window.scrollX;
+      const top = anchorRect.top + window.scrollY;
 
       ctaLayer.style.transform = `translate3d(${left}px, ${top}px, 0)`;
     }
