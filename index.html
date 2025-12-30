@@ -2480,7 +2480,7 @@ html { scrollbar-gutter: stable; }
       function startCardPreviewTeaser(card) {
         if (!isPreviewOpen()) return;
         if (!previewMedia || !window.YT || typeof window.YT.Player !== 'function') return;
-        const teaserUrl = card ? card.getAttribute('data-youtube-url') : '';
+        const teaserUrl = currentPreviewCardEl ? currentPreviewCardEl.getAttribute('data-youtube-url') : '';
         const teaserData = parseYouTubeUrl(teaserUrl);
         if (!teaserData || !teaserData.videoId) return;
         stopPreviewTeaser();
@@ -2833,6 +2833,7 @@ html { scrollbar-gutter: stable; }
       const PREVIEW_EASING = 'cubic-bezier(0.25, 0.1, 0.25, 1)';
       const FILL_FADE_DURATION = 220;
       let lastOpenedCard = null;
+      let currentPreviewCardEl = null;
 
       function showPreviewPoster(card) {
         if (!previewPlaceholder || !card) return;
@@ -3607,6 +3608,7 @@ previewTitleEl.textContent = title;
         previewDescriptionEl.textContent = description;
 
         lastOpenedCard = triggerElement;
+        currentPreviewCardEl = card;
         lockScroll();
         previewOverlay.setAttribute('aria-hidden', 'false');
         const profile = getOpenMorphProfileForCard(card);
@@ -3650,10 +3652,12 @@ previewTitleEl.textContent = title;
           stopPreviewTeaser();
           closePreview();
           if (typeof openFullscreenPlayback === 'function') {
-            const playUrl = lastOpenedCard
-              ? (lastOpenedCard.getAttribute('data-youtube-play-url') || lastOpenedCard.getAttribute('data-youtube-url'))
+            const playUrl = currentPreviewCardEl
+              ? (currentPreviewCardEl.getAttribute('data-youtube-play-url') || currentPreviewCardEl.getAttribute('data-youtube-url'))
               : '';
-            openFullscreenPlayback(playUrl);
+            const playVideoId = getYouTubeVideoId(playUrl);
+            const resolvedPlayUrl = playVideoId ? `https://youtu.be/${playVideoId}` : playUrl;
+            openFullscreenPlayback(resolvedPlayUrl);
           }
         });
       }
@@ -3812,6 +3816,7 @@ previewTitleEl.textContent = title;
           activeMorphTile = null;
           unlockScroll();
           lastOpenedCard = null;
+          currentPreviewCardEl = null;
           if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
             window.updateActiveTrackFromWindowScroll();
           }
@@ -3882,6 +3887,7 @@ previewTitleEl.textContent = title;
             lastOpenedCard.focus();
           }
           lastOpenedCard = null;
+          currentPreviewCardEl = null;
           if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
             window.updateActiveTrackFromWindowScroll();
           }
