@@ -2195,12 +2195,12 @@ html { scrollbar-gutter: stable; }
         }
         if (otherShelfActive && !heroActive) {
           heroWasActive = false;
-          if (allowDelayedPause) {
+          if (allowDelayedPause || heroPlaybackRequested) {
             pauseHeroVideo({ withDelay: true, expectedActiveShelf: activeShelf });
-          } else {
-            pauseHeroVideo({ force: true });
             return;
           }
+          pauseHeroVideo({ force: true });
+          return;
         }
         if (heroActiveForPlayback) {
           if (!wasHeroActive) {
