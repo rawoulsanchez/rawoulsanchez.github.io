@@ -339,9 +339,6 @@ main{
 
 /* Mute button */
   .mute-btn {
-    position:absolute;
-    right:12px;
-    bottom:12px;
     width:40px;
     height:40px;
     border-radius:999px;
@@ -364,12 +361,18 @@ html { scrollbar-gutter: stable; }
 
 /* CTA row under the hero video */
 .hero-cta{
-  display:grid;
-  grid-template-columns: 1fr 1fr;   /* always two columns */
+  display:flex;
   gap:8px;
   width:100%;
-  max-width:340px;                   /* keep pills on one line */
+  max-width:420px;                   /* keep pills on one line */
   margin: calc(8px + .125rem) 0 0 0; /* FIXED gap below synopsis */
+  align-items:center;
+}
+.hero-cta .btn {
+  flex:1 1 0;
+}
+.hero-cta .mute-btn {
+  flex:0 0 auto;
 }
 
 /* Smaller buttons */
@@ -1164,11 +1167,10 @@ html { scrollbar-gutter: stable; }
         </svg>
         <span>Details</span>
       </button>
+      <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
     </div>
     </div>
   </div>
-
-  <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
 </section>
 <!-- This wrapper div was limiting the width and causing the pink background to leak. -->
 <!-- OLD: <div class="wrap wrap--flush"> -->
