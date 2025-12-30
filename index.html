@@ -1249,7 +1249,7 @@ html { scrollbar-gutter: stable; }
     </div>
     <div class="shelf-outer">
       <div class="shelf-track" data-row="A" role="list" aria-label="Row A posters">
-        <a class="poster" role="listitem" aria-label="A1" data-label="A1" data-title="TBD Title A1" data-description="TBD Description A1" data-runtime="TBD Runtime A1" data-tags="TBD Tags A1" data-youtube-url="TBD YouTube URL A1" data-poster-vert="images/poster-vert-A1.png" data-poster-wide="images/poster-wide-A1.png" data-morph-id="morph-01"><img src="images/poster-vert-A1.png" alt="Sanchez Ninjah A1 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A1" data-label="A1" data-title="TBD Title A1" data-description="TBD Description A1" data-runtime="TBD Runtime A1" data-tags="TBD Tags A1" data-youtube-url="https://youtu.be/OePuntIsxk4?si=VzYQU06cIrBOrsEt&t=236" data-youtube-play-url="https://youtu.be/OePuntIsxk4?si=7Xiba4A2-NUJ-dqT" data-poster-vert="images/poster-vert-A1.png" data-poster-wide="images/poster-wide-A1.png" data-morph-id="morph-01"><img src="images/poster-vert-A1.png" alt="Sanchez Ninjah A1 poster"><button class="poster-preview-button" type="button">Preview</button></a>
         <a class="poster" role="listitem" aria-label="A2" data-label="A2" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A2.png" data-poster-wide="images/poster-wide-A2.png" data-morph-id="morph-02"><img src="images/poster-vert-A2.png" alt="A2 poster"><button class="poster-preview-button" type="button">Preview</button></a>
         <a class="poster" role="listitem" aria-label="A3" data-label="A3" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A3.png" data-poster-wide="images/poster-wide-A3.png" data-morph-id="morph-03"><img src="images/poster-vert-A3.png" alt="A3 poster"><button class="poster-preview-button" type="button">Preview</button></a>
         <a class="poster" role="listitem" aria-label="A4" data-label="A4" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A4.png" data-poster-wide="images/poster-wide-A4.png" data-morph-id="morph-04"><img src="images/poster-vert-A4.png" alt="A4 poster"><button class="poster-preview-button" type="button">Preview</button></a>
@@ -1424,10 +1424,34 @@ html { scrollbar-gutter: stable; }
       }
     } catch (_) {}
   }
-  function openFullscreenPlayback(){
+  function getYouTubeVideoId(url) {
+    if (!url || typeof url !== 'string') return '';
+    let parsed = null;
+    try {
+      parsed = new URL(url);
+    } catch (_) {
+      return '';
+    }
+    if (parsed.hostname.includes('youtu.be')) {
+      const id = parsed.pathname.replace(/^\/+/, '').split('/')[0];
+      return id || '';
+    }
+    if (parsed.pathname.includes('/embed/')) {
+      const id = parsed.pathname.split('/embed/')[1];
+      return id ? id.split('/')[0] : '';
+    }
+    if (parsed.pathname.includes('/shorts/')) {
+      const id = parsed.pathname.split('/shorts/')[1];
+      return id ? id.split('/')[0] : '';
+    }
+    return parsed.searchParams.get('v') || '';
+  }
+  function openFullscreenPlayback(playbackUrl){
     const wrapper = document.getElementById('fullscreen-player-wrapper');
     const container = document.getElementById('fullscreen-player');
     if (!wrapper || !container || !window.YT) return;
+    const resolvedVideoId = playbackUrl ? getYouTubeVideoId(playbackUrl) : '';
+    const videoId = resolvedVideoId || HERO_VIDEO_ID;
     wrapper.hidden = false;
     document.body.classList.add('no-scroll');
     if (fullscreenPlayer) {
@@ -1446,7 +1470,7 @@ html { scrollbar-gutter: stable; }
           if (typeof e.target.unMute === 'function') e.target.unMute();
           if (typeof e.target.setVolume === 'function') e.target.setVolume(100);
           if (typeof e.target.loadVideoById === 'function') {
-            e.target.loadVideoById({ videoId: HERO_VIDEO_ID, startSeconds: 0 });
+            e.target.loadVideoById({ videoId, startSeconds: 0 });
           }
           if (typeof e.target.playVideo === 'function') e.target.playVideo();
           try {
@@ -1479,7 +1503,7 @@ html { scrollbar-gutter: stable; }
     const playButton = document.querySelector('.hero-cta .btn--solid');
     const closeButton = document.querySelector('.fullscreen-player-close');
     if (playButton) {
-      playButton.addEventListener('click', openFullscreenPlayback);
+      playButton.addEventListener('click', () => openFullscreenPlayback());
     }
     if (closeButton) {
       closeButton.addEventListener('click', closeFullscreenPlayback);
@@ -2188,6 +2212,7 @@ html { scrollbar-gutter: stable; }
       const HERO_PREVIEW_START_SECONDS = 154;
       const HERO_PREVIEW_DURATION_MS = 15000;
       const previewMedia = previewOverlay.querySelector('.preview-media');
+      const previewPlaceholder = previewMedia ? previewMedia.querySelector('.preview-media-placeholder') : null;
 
       let heroAudioFadeInterval = null;
       let heroPausedTime = null;
@@ -2222,6 +2247,73 @@ html { scrollbar-gutter: stable; }
       let previewTeaserPlayer = null;
       let previewTeaserTimer = null;
       let previewTeaserContainer = null;
+
+      function parseYouTubeTimecode(value) {
+        if (!value) return null;
+        if (/^\d+$/.test(value)) return parseInt(value, 10);
+        const match = value.match(/(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?/i);
+        if (!match) return null;
+        const hours = match[1] ? parseInt(match[1], 10) : 0;
+        const minutes = match[2] ? parseInt(match[2], 10) : 0;
+        const seconds = match[3] ? parseInt(match[3], 10) : 0;
+        const total = (hours * 3600) + (minutes * 60) + seconds;
+        return total > 0 ? total : null;
+      }
+
+      function parseYouTubeUrl(url) {
+        if (!url || typeof url !== 'string') return null;
+        let parsed = null;
+        try {
+          parsed = new URL(url);
+        } catch (_) {
+          return null;
+        }
+        let videoId = '';
+        if (parsed.hostname.includes('youtu.be')) {
+          videoId = parsed.pathname.replace(/^\/+/, '').split('/')[0];
+        } else if (parsed.pathname.includes('/embed/')) {
+          videoId = parsed.pathname.split('/embed/')[1] || '';
+        } else if (parsed.pathname.includes('/shorts/')) {
+          videoId = parsed.pathname.split('/shorts/')[1] || '';
+        } else {
+          videoId = parsed.searchParams.get('v') || '';
+        }
+        if (videoId.includes('/')) videoId = videoId.split('/')[0];
+        if (videoId.includes('?')) videoId = videoId.split('?')[0];
+        if (videoId.includes('&')) videoId = videoId.split('&')[0];
+        if (!videoId) return null;
+
+        let startSeconds = null;
+        const tParam = parsed.searchParams.get('t') || parsed.searchParams.get('start');
+        if (tParam) {
+          startSeconds = parseYouTubeTimecode(tParam);
+        }
+        if (startSeconds === null && parsed.hash) {
+          const hash = parsed.hash.replace(/^#/, '');
+          const hashParams = new URLSearchParams(hash);
+          const hashTime = hashParams.get('t') || hashParams.get('start');
+          if (hashTime) {
+            startSeconds = parseYouTubeTimecode(hashTime);
+          }
+        }
+        if (startSeconds === null) startSeconds = 0;
+        return { videoId, startSeconds };
+      }
+
+      function resetPreviewPlaceholder() {
+        if (!previewPlaceholder) return;
+        previewPlaceholder.style.backgroundImage = '';
+        previewPlaceholder.style.backgroundSize = '';
+        previewPlaceholder.style.backgroundPosition = '';
+        previewPlaceholder.style.opacity = '';
+        previewPlaceholder.style.transition = '';
+      }
+
+      function hidePreviewPlaceholder() {
+        if (!previewPlaceholder) return;
+        previewPlaceholder.style.transition = '';
+        previewPlaceholder.style.opacity = '0';
+      }
 
       function clearPreviewTeaserTimer() {
         if (previewTeaserTimer !== null) {
@@ -2279,6 +2371,45 @@ html { scrollbar-gutter: stable; }
               if (typeof e.target.playVideo === 'function') e.target.playVideo();
               previewTeaserTimer = setTimeout(() => {
                 stopPreviewTeaser();
+              }, HERO_PREVIEW_DURATION_MS);
+            }
+          }
+        });
+      }
+
+      function startCardPreviewTeaser(card) {
+        if (!isPreviewOpen()) return;
+        if (!previewMedia || !window.YT || typeof window.YT.Player !== 'function') return;
+        const teaserUrl = card ? card.getAttribute('data-youtube-url') : '';
+        const teaserData = parseYouTubeUrl(teaserUrl);
+        if (!teaserData || !teaserData.videoId) return;
+        stopPreviewTeaser();
+        hidePreviewPlaceholder();
+        previewTeaserContainer = document.createElement('div');
+        previewTeaserContainer.className = 'preview-teaser-player';
+        previewMedia.appendChild(previewTeaserContainer);
+        previewTeaserPlayer = new YT.Player(previewTeaserContainer, {
+          playerVars: {
+            autoplay: 1,
+            mute: 1,
+            playsinline: 1,
+            controls: 0,
+            modestbranding: 1,
+            rel: 0,
+            start: teaserData.startSeconds
+          },
+          events: {
+            onReady: e => {
+              if (typeof e.target.mute === 'function') e.target.mute();
+              if (typeof e.target.loadVideoById === 'function') {
+                e.target.loadVideoById({ videoId: teaserData.videoId, startSeconds: teaserData.startSeconds });
+              } else if (typeof e.target.seekTo === 'function') {
+                e.target.seekTo(teaserData.startSeconds, true);
+              }
+              if (typeof e.target.playVideo === 'function') e.target.playVideo();
+              previewTeaserTimer = setTimeout(() => {
+                stopPreviewTeaser();
+                showPreviewPoster(card);
               }, HERO_PREVIEW_DURATION_MS);
             }
           }
@@ -2602,6 +2733,17 @@ html { scrollbar-gutter: stable; }
       const PREVIEW_EASING = 'cubic-bezier(0.25, 0.1, 0.25, 1)';
       const FILL_FADE_DURATION = 220;
       let lastOpenedCard = null;
+
+      function showPreviewPoster(card) {
+        if (!previewPlaceholder || !card) return;
+        const posterWide = card.getAttribute('data-poster-wide');
+        if (!posterWide) return;
+        previewPlaceholder.style.backgroundImage = `url(${posterWide})`;
+        previewPlaceholder.style.backgroundSize = 'cover';
+        previewPlaceholder.style.backgroundPosition = 'center';
+        previewPlaceholder.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
+        previewPlaceholder.style.opacity = '1';
+      }
 
       let scrollLockState = null;
 
@@ -3384,7 +3526,7 @@ previewTitleEl.textContent = title;
           if (isHeroPreview) {
             startHeroPreviewTeaser();
           } else {
-            stopPreviewTeaser();
+            startCardPreviewTeaser(card);
           }
         });
       }
@@ -3408,7 +3550,10 @@ previewTitleEl.textContent = title;
           stopPreviewTeaser();
           closePreview();
           if (typeof openFullscreenPlayback === 'function') {
-            openFullscreenPlayback();
+            const playUrl = lastOpenedCard
+              ? (lastOpenedCard.getAttribute('data-youtube-play-url') || lastOpenedCard.getAttribute('data-youtube-url'))
+              : '';
+            openFullscreenPlayback(playUrl);
           }
         });
       }
@@ -3548,6 +3693,7 @@ previewTitleEl.textContent = title;
       function closePreview() {
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
         stopPreviewTeaser();
+        resetPreviewPlaceholder();
 
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
