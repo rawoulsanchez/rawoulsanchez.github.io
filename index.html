@@ -1026,20 +1026,36 @@ html { scrollbar-gutter: stable; }
   .preview-media-placeholder {
     position: absolute;
     inset: 0;
+    z-index: 0;
     background:
       radial-gradient(circle at top, rgba(255,255,255,0.10), transparent 55%),
       linear-gradient(135deg, #222632, #11131a);
+  }
+  .preview-media-poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    z-index: 1;
   }
   .preview-teaser-player {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
+    z-index: 2;
+    opacity: 1;
+    transition: opacity 700ms ease;
   }
   .preview-teaser-player iframe {
     width: 100%;
     height: 100%;
     border: 0;
+  }
+  .preview-teaser-player.teaser-fadeout {
+    opacity: 0;
   }
 
   .preview-info {
@@ -2356,6 +2372,10 @@ html { scrollbar-gutter: stable; }
       const HERO_PREVIEW_DURATION_MS = 15000;
       const previewMedia = previewOverlay.querySelector('.preview-media');
       const previewPlaceholder = previewMedia ? previewMedia.querySelector('.preview-media-placeholder') : null;
+      const previewPosterImage = previewMedia ? previewMedia.querySelector('.preview-media-poster') : null;
+      const A1_PREVIEW_LABEL = 'A1';
+      const PREVIEW_TEASER_FADE_MS = 700;
+      const PREVIEW_TEASER_AUDIO_STEP_MS = 50;
 
       let heroAudioFadeInterval = null;
       let heroPausedTime = null;
@@ -2389,6 +2409,8 @@ html { scrollbar-gutter: stable; }
 
       let previewTeaserPlayer = null;
       let previewTeaserTimer = null;
+      let previewTeaserFadeTimeout = null;
+      let previewTeaserFadeInterval = null;
       let previewTeaserContainer = null;
       let previewVolume = 100;
 
@@ -2510,6 +2532,26 @@ html { scrollbar-gutter: stable; }
         previewPlaceholder.style.transition = '';
       }
 
+      function resetPreviewPosterImage() {
+        if (!previewPosterImage) return;
+        previewPosterImage.src = '';
+        previewPosterImage.alt = '';
+        previewPosterImage.style.opacity = '0';
+      }
+
+      function setPreviewPosterImage(card) {
+        if (!previewPosterImage || !card) return;
+        const posterSrc = card.getAttribute('data-poster-vert') || '';
+        if (!posterSrc) return;
+        previewPosterImage.src = posterSrc;
+        previewPosterImage.alt = `${card.getAttribute('data-label') || 'Preview'} poster`;
+        previewPosterImage.style.opacity = '1';
+      }
+
+      function isA1PreviewCard(card) {
+        return !!(card && card.getAttribute('data-label') === A1_PREVIEW_LABEL);
+      }
+
       function hidePreviewPlaceholder() {
         if (!previewPlaceholder) return;
         previewPlaceholder.style.transition = '';
@@ -2523,8 +2565,42 @@ html { scrollbar-gutter: stable; }
         }
       }
 
+      function clearPreviewTeaserFadeTimeout() {
+        if (previewTeaserFadeTimeout !== null) {
+          clearTimeout(previewTeaserFadeTimeout);
+          previewTeaserFadeTimeout = null;
+        }
+      }
+
+      function clearPreviewTeaserFadeInterval() {
+        if (previewTeaserFadeInterval !== null) {
+          clearInterval(previewTeaserFadeInterval);
+          previewTeaserFadeInterval = null;
+        }
+      }
+
+      function fadeOutPreviewTeaserAudio(player) {
+        if (!player || typeof player.setVolume !== 'function') return;
+        const current = typeof player.getVolume === 'function' ? player.getVolume() : previewVolume;
+        const startVolume = clampPreviewVolume(Number.isFinite(current) ? current : previewVolume);
+        const totalSteps = Math.max(1, Math.ceil(PREVIEW_TEASER_FADE_MS / PREVIEW_TEASER_AUDIO_STEP_MS));
+        const volumeStep = startVolume / totalSteps;
+        let step = 0;
+        clearPreviewTeaserFadeInterval();
+        previewTeaserFadeInterval = setInterval(() => {
+          step += 1;
+          const nextVolume = clampPreviewVolume(Math.round(startVolume - (volumeStep * step)));
+          player.setVolume(nextVolume);
+          if (nextVolume <= 0 || step >= totalSteps) {
+            clearPreviewTeaserFadeInterval();
+          }
+        }, PREVIEW_TEASER_AUDIO_STEP_MS);
+      }
+
       function stopPreviewTeaser() {
         clearPreviewTeaserTimer();
+        clearPreviewTeaserFadeTimeout();
+        clearPreviewTeaserFadeInterval();
         if (previewTeaserPlayer) {
           try {
             if (typeof previewTeaserPlayer.stopVideo === 'function') {
@@ -2539,6 +2615,7 @@ html { scrollbar-gutter: stable; }
           previewTeaserPlayer = null;
         }
         if (previewTeaserContainer && previewTeaserContainer.parentNode) {
+          previewTeaserContainer.classList.remove('teaser-fadeout');
           previewTeaserContainer.parentNode.removeChild(previewTeaserContainer);
         }
         previewTeaserContainer = null;
@@ -2609,6 +2686,17 @@ html { scrollbar-gutter: stable; }
               }
               if (typeof e.target.playVideo === 'function') e.target.playVideo();
               previewTeaserTimer = setTimeout(() => {
+                if (isA1PreviewCard(card)) {
+                  if (previewTeaserContainer) {
+                    previewTeaserContainer.classList.add('teaser-fadeout');
+                  }
+                  fadeOutPreviewTeaserAudio(previewTeaserPlayer);
+                  clearPreviewTeaserFadeTimeout();
+                  previewTeaserFadeTimeout = setTimeout(() => {
+                    stopPreviewTeaser();
+                  }, PREVIEW_TEASER_FADE_MS);
+                  return;
+                }
                 stopPreviewTeaser();
                 showPreviewPoster(card);
               }, HERO_PREVIEW_DURATION_MS);
@@ -3710,6 +3798,11 @@ previewTitleEl.textContent = title;
 
         lastOpenedCard = triggerElement;
         currentPreviewCardEl = card;
+        if (isA1PreviewCard(card)) {
+          setPreviewPosterImage(card);
+        } else {
+          resetPreviewPosterImage();
+        }
         lockScroll();
         previewOverlay.setAttribute('aria-hidden', 'false');
         const profile = getOpenMorphProfileForCard(card);
@@ -3899,6 +3992,7 @@ previewTitleEl.textContent = title;
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
         stopPreviewTeaser();
         resetPreviewPlaceholder();
+        resetPreviewPosterImage();
 
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
@@ -4047,6 +4141,7 @@ document.addEventListener('keydown', (event) => {
       <div class="preview-media">
         <!-- Later: video or wide poster goes here -->
         <div class="preview-media-placeholder"></div>
+        <img class="preview-media-poster" alt="">
       </div>
       <div class="preview-info">
         <header class="preview-header">
