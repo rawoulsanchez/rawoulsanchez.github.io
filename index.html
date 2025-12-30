@@ -2195,14 +2195,10 @@ html { scrollbar-gutter: stable; }
         }
         if (otherShelfActive && !heroActive) {
           heroWasActive = false;
-          if (allowDelayedPause || heroPlaybackRequested) {
-            pauseHeroVideo({ withDelay: true, expectedActiveShelf: activeShelf });
-            return;
-          }
-          pauseHeroVideo({ force: true });
+          pauseHeroVideo({ withDelay: true, expectedActiveShelf: activeShelf });
           return;
         }
-        if (heroActiveForPlayback) {
+        if (heroActiveForPlayback && isPlayNowHighlighted()) {
           if (!wasHeroActive) {
             cancelHeroPause();
           }
