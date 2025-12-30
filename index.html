@@ -377,7 +377,7 @@ html { scrollbar-gutter: stable; }
   height:0;
 }
 .hero-cta-layer{
-  position:absolute;
+  position:fixed;
   z-index:9999;
   left:0;
   top:0;
@@ -1154,6 +1154,8 @@ html { scrollbar-gutter: stable; }
     </div>
   </div>
 
+  <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
+</section>
   <div class="hero-cta-layer" aria-label="Hero actions">
     <div class="hero-cta">
       <!-- Play Now -->
@@ -1174,9 +1176,6 @@ html { scrollbar-gutter: stable; }
       </button>
     </div>
   </div>
-
-  <button class="mute-btn" type="button" aria-pressed="true" onclick="toggleMute()" aria-label="Mute or unmute">🔇</button>
-</section>
 <!-- This wrapper div was limiting the width and causing the pink background to leak. -->
 <!-- OLD: <div class="wrap wrap--flush"> -->
 <section class="after-hero" aria-label="Actions">
@@ -1366,13 +1365,11 @@ html { scrollbar-gutter: stable; }
     function positionCta(){
       const ctaLayer = document.querySelector('.hero-cta-layer');
       const anchor = document.querySelector('.hero-cta-anchor');
-      const hero = document.querySelector('.hero');
-      if(!ctaLayer || !anchor || !hero) return;
+      if(!ctaLayer || !anchor) return;
 
       const anchorRect = anchor.getBoundingClientRect();
-      const heroRect = hero.getBoundingClientRect();
-      const left = Math.round(anchorRect.left - heroRect.left);
-      const top = Math.round(anchorRect.top - heroRect.top);
+      const left = Math.round(anchorRect.left);
+      const top = Math.round(anchorRect.top);
 
       ctaLayer.style.transform = `translate(${left}px, ${top}px)`;
     }
@@ -1398,6 +1395,7 @@ html { scrollbar-gutter: stable; }
     window.addEventListener('load', alignCta);
     window.addEventListener('resize', alignCta);
     window.addEventListener('orientationchange', alignCta);
+    window.addEventListener('scroll', positionCta, { passive: true });
   })();
 </script>
 <script>
