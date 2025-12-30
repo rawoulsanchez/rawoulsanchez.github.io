@@ -687,6 +687,16 @@ html { scrollbar-gutter: stable; }
     padding-top: 1.35rem; /* ZAQ TASK 03: lifted shelves so Row A aligns with hero text bottom */
   }
 
+  /* Allow hero CTA clicks through the overlapping after-hero region */
+  .after-hero{
+    pointer-events:none;
+  }
+
+  .after-hero .shelf,
+  .after-hero .shelf *{
+    pointer-events:auto;
+  }
+
 
   .hero-overlay-inline{
     padding-left: 40px !important;
