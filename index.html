@@ -1027,12 +1027,18 @@ html { scrollbar-gutter: stable; }
     background:
       radial-gradient(circle at top, rgba(255,255,255,0.10), transparent 55%),
       linear-gradient(135deg, #222632, #11131a);
+    z-index: 0;
   }
   .preview-teaser-player {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
+    z-index: 1;
+    transition: opacity 700ms ease;
+  }
+  .preview-teaser-player.teaser-fadeout {
+    opacity: 0;
   }
   .preview-teaser-player iframe {
     width: 100%;
@@ -2388,7 +2394,10 @@ html { scrollbar-gutter: stable; }
       let previewTeaserPlayer = null;
       let previewTeaserTimer = null;
       let previewTeaserContainer = null;
+      let previewTeaserFadeInterval = null;
       let previewVolume = 100;
+      const TEASER_FADE_DURATION = 700;
+      const TEASER_FADE_STEP_MS = 50;
 
       const previewVolumeControl = previewOverlay.querySelector('.preview-volume');
       const previewVolumeSlider = previewOverlay.querySelector('.preview-volume__slider');
@@ -2521,8 +2530,16 @@ html { scrollbar-gutter: stable; }
         }
       }
 
+      function clearPreviewTeaserFade() {
+        if (previewTeaserFadeInterval !== null) {
+          clearInterval(previewTeaserFadeInterval);
+          previewTeaserFadeInterval = null;
+        }
+      }
+
       function stopPreviewTeaser() {
         clearPreviewTeaserTimer();
+        clearPreviewTeaserFade();
         if (previewTeaserPlayer) {
           try {
             if (typeof previewTeaserPlayer.stopVideo === 'function') {
@@ -2537,9 +2554,42 @@ html { scrollbar-gutter: stable; }
           previewTeaserPlayer = null;
         }
         if (previewTeaserContainer && previewTeaserContainer.parentNode) {
+          previewTeaserContainer.classList.remove('teaser-fadeout');
           previewTeaserContainer.parentNode.removeChild(previewTeaserContainer);
         }
         previewTeaserContainer = null;
+      }
+
+      function beginPreviewTeaserFade({ card }) {
+        if (!previewTeaserContainer) {
+          stopPreviewTeaser();
+          return;
+        }
+        if (card) {
+          showPreviewPoster(card);
+        }
+        previewTeaserContainer.classList.add('teaser-fadeout');
+        if (previewTeaserPlayer && typeof previewTeaserPlayer.setVolume === 'function') {
+          const startVolume = typeof previewTeaserPlayer.getVolume === 'function'
+            ? previewTeaserPlayer.getVolume()
+            : previewVolume;
+          const clampedStart = clampPreviewVolume(startVolume);
+          const steps = Math.max(1, Math.ceil(TEASER_FADE_DURATION / TEASER_FADE_STEP_MS));
+          let step = 0;
+          clearPreviewTeaserFade();
+          previewTeaserFadeInterval = setInterval(() => {
+            step += 1;
+            const ratio = 1 - (step / steps);
+            const nextVolume = clampPreviewVolume(Math.round(clampedStart * ratio));
+            previewTeaserPlayer.setVolume(nextVolume);
+            if (step >= steps) {
+              clearPreviewTeaserFade();
+            }
+          }, TEASER_FADE_STEP_MS);
+        }
+        setTimeout(() => {
+          stopPreviewTeaser();
+        }, TEASER_FADE_DURATION);
       }
 
       function startHeroPreviewTeaser() {
@@ -2569,7 +2619,7 @@ html { scrollbar-gutter: stable; }
               }
               if (typeof e.target.playVideo === 'function') e.target.playVideo();
               previewTeaserTimer = setTimeout(() => {
-                stopPreviewTeaser();
+                beginPreviewTeaserFade({ card: currentPreviewCardEl });
               }, HERO_PREVIEW_DURATION_MS);
             }
           }
@@ -2607,8 +2657,7 @@ html { scrollbar-gutter: stable; }
               }
               if (typeof e.target.playVideo === 'function') e.target.playVideo();
               previewTeaserTimer = setTimeout(() => {
-                stopPreviewTeaser();
-                showPreviewPoster(card);
+                beginPreviewTeaserFade({ card });
               }, HERO_PREVIEW_DURATION_MS);
             }
           }
@@ -2936,9 +2985,9 @@ html { scrollbar-gutter: stable; }
 
       function showPreviewPoster(card) {
         if (!previewPlaceholder || !card) return;
-        const posterWide = card.getAttribute('data-poster-wide');
-        if (!posterWide) return;
-        previewPlaceholder.style.backgroundImage = `url(${posterWide})`;
+        const posterVert = card.getAttribute('data-poster-vert');
+        if (!posterVert) return;
+        previewPlaceholder.style.backgroundImage = `url(${posterVert})`;
         previewPlaceholder.style.backgroundSize = 'cover';
         previewPlaceholder.style.backgroundPosition = 'center';
         previewPlaceholder.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
