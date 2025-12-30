@@ -266,7 +266,7 @@ main{
   .fullscreen-player-wrapper{
     position:fixed;
     inset:0;
-    z-index:20000;
+    z-index:21000;
     background:rgba(0,0,0,0.95);
     display:flex;
     align-items:center;
@@ -1641,6 +1641,16 @@ html { scrollbar-gutter: stable; }
     if (container) container.innerHTML = '';
     if (wrapper) wrapper.hidden = true;
     document.body.classList.remove('no-scroll');
+    const previewOverlay = document.querySelector('.preview-overlay');
+    if (previewOverlay && previewOverlay.classList.contains('is-visible')) {
+      previewOverlay.setAttribute('aria-hidden', 'false');
+      const previewPlayButton = previewOverlay.querySelector('.preview-play-button');
+      const previewCloseButton = previewOverlay.querySelector('.preview-close-btn');
+      const focusTarget = previewPlayButton || previewCloseButton;
+      if (focusTarget && typeof focusTarget.focus === 'function') {
+        focusTarget.focus();
+      }
+    }
   }
   document.addEventListener('DOMContentLoaded', () => {
     const hero = document.querySelector('.hero');
@@ -3844,7 +3854,6 @@ previewTitleEl.textContent = title;
           event.preventDefault();
           event.stopPropagation();
           stopPreviewTeaser();
-          closePreview();
           if (typeof openFullscreenPlayback === 'function') {
             const playUrl = currentPreviewCardEl
               ? (currentPreviewCardEl.getAttribute('data-youtube-play-url') || currentPreviewCardEl.getAttribute('data-youtube-url'))
