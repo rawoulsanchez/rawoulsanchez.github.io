@@ -2484,6 +2484,8 @@ html { scrollbar-gutter: stable; }
       let previewTeaserFadeTimeout = null;
       let previewTeaserFadeInterval = null;
       let previewTeaserContainer = null;
+      let previewAutounmuteHandler = null;
+      let previewAutounmuteRoot = null;
       let previewVolume = 100;
       let previewMuted = false;
       let initialPreviewVolume = previewVolume;
@@ -2511,6 +2513,62 @@ html { scrollbar-gutter: stable; }
         } else if (typeof player.unMute === 'function') {
           player.unMute();
         }
+      }
+
+      function attemptPreviewUnmute(player, desiredVolume) {
+        if (!player) return false;
+        const clamped = clampPreviewVolume(desiredVolume);
+        if (typeof player.unMute === 'function') {
+          player.unMute();
+        }
+        if (typeof player.setVolume === 'function') {
+          player.setVolume(clamped);
+        }
+        if (typeof player.isMuted === 'function') {
+          return player.isMuted();
+        }
+        return false;
+      }
+
+      function attemptPreviewAutounmuteIfPlaying(player) {
+        if (!player) return;
+        const playingState = (window.YT && window.YT.PlayerState) ? window.YT.PlayerState.PLAYING : 1;
+        const state = typeof player.getPlayerState === 'function' ? player.getPlayerState() : playingState;
+        if (typeof state === 'number' && state !== playingState) {
+          return;
+        }
+        const desiredVolume = (() => {
+          const clamped = clampPreviewVolume(desiredPreviewVolume);
+          return clamped === 0 ? 50 : clamped;
+        })();
+        const stillMuted = attemptPreviewUnmute(player, desiredVolume);
+        const shouldInstallAutounmute = isMobile && (typeof player.isMuted === 'function' ? stillMuted : true);
+        if (shouldInstallAutounmute) {
+          installPreviewAutounmuteOnFirstInteraction({
+            rootEl: previewOverlay,
+            playerGetter: () => previewTeaserPlayer,
+            desiredVolume
+          });
+        }
+      }
+
+      function removePreviewAutounmuteListener() {
+        if (!previewAutounmuteRoot || !previewAutounmuteHandler) return;
+        previewAutounmuteRoot.removeEventListener('pointerdown', previewAutounmuteHandler);
+        previewAutounmuteRoot = null;
+        previewAutounmuteHandler = null;
+      }
+
+      function installPreviewAutounmuteOnFirstInteraction({ rootEl, playerGetter, desiredVolume }) {
+        if (!rootEl || typeof playerGetter !== 'function') return;
+        removePreviewAutounmuteListener();
+        previewAutounmuteRoot = rootEl;
+        previewAutounmuteHandler = () => {
+          const player = playerGetter();
+          attemptPreviewUnmute(player, desiredVolume);
+          removePreviewAutounmuteListener();
+        };
+        previewAutounmuteRoot.addEventListener('pointerdown', previewAutounmuteHandler, { once: true });
       }
 
       function updatePreviewVolumeUI({ muted, volume }) {
@@ -2729,6 +2787,7 @@ html { scrollbar-gutter: stable; }
         clearPreviewTeaserTimer();
         clearPreviewTeaserFadeTimeout();
         clearPreviewTeaserFadeInterval();
+        removePreviewAutounmuteListener();
         if (previewTeaserPlayer) {
           try {
             if (typeof previewTeaserPlayer.stopVideo === 'function') {
@@ -2787,6 +2846,9 @@ html { scrollbar-gutter: stable; }
                 if (typeof e.target.playVideo === 'function') {
                   e.target.playVideo();
                 }
+                setTimeout(() => {
+                  attemptPreviewAutounmuteIfPlaying(e.target);
+                }, 0);
               };
               setTimeout(attemptPlay, 0);
               setTimeout(() => {
@@ -2794,7 +2856,9 @@ html { scrollbar-gutter: stable; }
                 const playingState = (window.YT && window.YT.PlayerState) ? window.YT.PlayerState.PLAYING : 1;
                 if (e.target.getPlayerState() !== playingState) {
                   attemptPlay();
+                  return;
                 }
+                attemptPreviewAutounmuteIfPlaying(e.target);
               }, 600);
               previewTeaserTimer = setTimeout(() => {
                 stopPreviewTeaser();
@@ -2846,6 +2910,9 @@ html { scrollbar-gutter: stable; }
                 if (typeof e.target.playVideo === 'function') {
                   e.target.playVideo();
                 }
+                setTimeout(() => {
+                  attemptPreviewAutounmuteIfPlaying(e.target);
+                }, 0);
               };
               setTimeout(attemptPlay, 0);
               setTimeout(() => {
@@ -2853,7 +2920,9 @@ html { scrollbar-gutter: stable; }
                 const playingState = (window.YT && window.YT.PlayerState) ? window.YT.PlayerState.PLAYING : 1;
                 if (e.target.getPlayerState() !== playingState) {
                   attemptPlay();
+                  return;
                 }
+                attemptPreviewAutounmuteIfPlaying(e.target);
               }, 600);
               previewTeaserTimer = setTimeout(() => {
                 if (isA1PreviewCard(card)) {
@@ -4178,6 +4247,7 @@ previewTitleEl.textContent = title;
         stopPreviewTeaser();
         resetPreviewPlaceholder();
         resetPreviewPosterImage();
+        removePreviewAutounmuteListener();
 
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
