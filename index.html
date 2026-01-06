@@ -424,10 +424,13 @@ main{
     top:50%;
     left:100%;
     transform:translateY(-50%);
-    width:96px;
+    display:flex;
+    align-items:center;
+    width:0;
     opacity:0;
+    overflow:hidden;
     pointer-events:none;
-    transition: opacity 180ms ease, transform 180ms ease;
+    transition: width 0.2s ease, opacity 0.2s ease;
   }
   .hero-volume__slider {
     width:96px;
@@ -435,11 +438,13 @@ main{
   }
   @media (hover: hover) and (pointer: fine) {
     .hero-volume:hover .hero-volume__sliderWrap {
+      width:100px;
       opacity:1;
       pointer-events:auto;
     }
   }
   .hero-volume.is-open .hero-volume__sliderWrap {
+    width:100px;
     opacity:1;
     pointer-events:auto;
   }
@@ -1748,7 +1753,7 @@ html { scrollbar-gutter: stable; }
       heroVolume.classList.add('is-open');
       window.setTimeout(() => {
         heroVolume.classList.remove('is-open');
-      }, 30000);
+      }, 10000);
     }
     updateHeroMuteUi();
   });
