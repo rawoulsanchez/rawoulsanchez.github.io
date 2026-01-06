@@ -436,6 +436,16 @@ main{
       pointer-events:auto;
     }
   }
+  .hero-volume.is-open .hero-volume__sliderWrap {
+    opacity:1;
+    pointer-events:auto;
+  }
+  .hero-volume.is-muted .hero-volume__btn {
+    box-shadow: 0 0 0 2px rgba(255, 42, 42, 0.85), 0 0 12px rgba(255, 42, 42, 0.9);
+  }
+  .hero-volume.is-unmuted .hero-volume__btn {
+    box-shadow: 0 0 0 2px rgba(57, 255, 20, 0.9), 0 0 14px rgba(57, 255, 20, 0.95);
+  }
   /* commit: no-horizontal-scroll */
 html { overflow-x: hidden; }
 /* ZAQ TASK — PREVIEW SCROLL LOCK: reserve scrollbar space to prevent layout shift */
@@ -1340,7 +1350,7 @@ html { scrollbar-gutter: stable; }
       <div class="hero-volume" aria-label="Hero volume control">
         <button class="hero-volume__btn" type="button" aria-label="Hero volume">🔊</button>
         <div class="hero-volume__sliderWrap">
-          <input class="hero-volume__slider" type="range" min="0" max="100" value="100" aria-label="Hero volume">
+          <input class="hero-volume__slider" type="range" min="0" max="100" value="50" aria-label="Hero volume">
         </div>
       </div>
     </div>
@@ -1448,7 +1458,7 @@ html { scrollbar-gutter: stable; }
   // Changed alerts to console.log as alerts break the canvas environment.
   const HERO_VIDEO_ID = 't1x7Q0IA3Os';
   let ytPlayer, isMuted = true;
-  let heroUiVolume = 100;
+  let heroUiVolume = 50;
   let fullscreenPlayer = null;
   let hasUserGesturePlayback = false;
   window.heroPlaybackRequested = false;
@@ -1485,14 +1495,10 @@ html { scrollbar-gutter: stable; }
           if (typeof e.target.setVolume === 'function') {
             e.target.setVolume(heroUiVolume);
           }
-          if (heroUiVolume === 0) {
-            e.target.mute();
-            isMuted = true;
-          } else if (!isMuted) {
-            e.target.unMute();
-          } else {
+          if (typeof e.target.mute === 'function') {
             e.target.mute();
           }
+          isMuted = true;
           updateHeroMuteUi();
           if (isPlayNowHighlighted()) {
             e.target.playVideo();
@@ -1521,9 +1527,20 @@ html { scrollbar-gutter: stable; }
   }
   function updateHeroMuteUi() {
     const muteButton = document.querySelector('.mute-btn');
-    if (!muteButton) return;
-    muteButton.textContent = isMuted ? '🔇' : '🔊';
-    muteButton.setAttribute('aria-pressed', isMuted ? 'true' : 'false');
+    const heroVolume = document.querySelector('.hero-volume');
+    const heroVolumeButton = document.querySelector('.hero-volume__btn');
+    if (muteButton) {
+      muteButton.textContent = isMuted ? '🔇' : '🔊';
+      muteButton.setAttribute('aria-pressed', isMuted ? 'true' : 'false');
+    }
+    if (heroVolume) {
+      heroVolume.classList.toggle('is-muted', isMuted);
+      heroVolume.classList.toggle('is-unmuted', !isMuted);
+    }
+    if (heroVolumeButton) {
+      heroVolumeButton.textContent = isMuted ? '🔇' : '🔊';
+      heroVolumeButton.setAttribute('aria-pressed', isMuted ? 'true' : 'false');
+    }
   }
   function setHeroVolume(value) {
     const nextVolume = Math.max(0, Math.min(100, Math.round(value)));
@@ -1705,6 +1722,13 @@ html { scrollbar-gutter: stable; }
         setHeroVolume(heroUiVolume + delta);
       }, { passive: false });
     }
+    if (heroVolume && window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      heroVolume.classList.add('is-open');
+      window.setTimeout(() => {
+        heroVolume.classList.remove('is-open');
+      }, 30000);
+    }
+    updateHeroMuteUi();
   });
 </script>
 <script>
