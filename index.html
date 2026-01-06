@@ -1561,6 +1561,12 @@ html { scrollbar-gutter: stable; }
       heroVolumeButton.setAttribute('aria-pressed', isMuted ? 'true' : 'false');
     }
   }
+  function getHeroAudioState() {
+    const slider = document.querySelector('.hero-volume__slider');
+    const sliderValue = slider ? Number(slider.value) : heroUiVolume;
+    const volume = Math.max(0, Math.min(100, Math.round(Number.isFinite(sliderValue) ? sliderValue : heroUiVolume)));
+    return { volume, muted: isMuted };
+  }
   function setHeroVolume(value) {
     const nextVolume = Math.max(0, Math.min(100, Math.round(value)));
     heroUiVolume = nextVolume;
@@ -2480,6 +2486,7 @@ html { scrollbar-gutter: stable; }
       let previewTeaserContainer = null;
       let previewVolume = 100;
       let previewMuted = false;
+      let initialPreviewVolume = previewVolume;
       let previewLastNonZeroVolume = previewVolume || 100;
 
       const previewVolumeControl = previewOverlay.querySelector('.preview-volume');
@@ -2750,7 +2757,7 @@ html { scrollbar-gutter: stable; }
         previewTeaserPlayer = new YT.Player(previewTeaserContainer, {
           playerVars: {
             autoplay: 1,
-            mute: 1,
+            mute: 0,
             playsinline: 1,
             controls: 0,
             modestbranding: 1,
@@ -2759,11 +2766,12 @@ html { scrollbar-gutter: stable; }
           },
           events: {
             onReady: e => {
-              applyPreviewVolumeToPlayer(e.target, previewVolume, previewMuted);
-              if (typeof e.target.mute === 'function') {
-                e.target.mute();
+              applyPreviewVolumeToPlayer(e.target, initialPreviewVolume, false);
+              if (typeof e.target.unMute === 'function') {
+                e.target.unMute();
               }
-              previewMuted = true;
+              previewMuted = false;
+              previewVolume = initialPreviewVolume;
               if (typeof e.target.loadVideoById === 'function') {
                 e.target.loadVideoById({ videoId: HERO_VIDEO_ID, startSeconds: HERO_PREVIEW_START_SECONDS });
               } else if (typeof e.target.seekTo === 'function') {
@@ -2805,7 +2813,7 @@ html { scrollbar-gutter: stable; }
         previewTeaserPlayer = new YT.Player(previewTeaserContainer, {
           playerVars: {
             autoplay: 1,
-            mute: 1,
+            mute: 0,
             playsinline: 1,
             controls: 0,
             modestbranding: 1,
@@ -2814,11 +2822,12 @@ html { scrollbar-gutter: stable; }
           },
           events: {
             onReady: e => {
-              applyPreviewVolumeToPlayer(e.target, previewVolume, previewMuted);
-              if (typeof e.target.mute === 'function') {
-                e.target.mute();
+              applyPreviewVolumeToPlayer(e.target, initialPreviewVolume, false);
+              if (typeof e.target.unMute === 'function') {
+                e.target.unMute();
               }
-              previewMuted = true;
+              previewMuted = false;
+              previewVolume = initialPreviewVolume;
               if (typeof e.target.loadVideoById === 'function') {
                 e.target.loadVideoById({ videoId: teaserData.videoId, startSeconds: teaserData.startSeconds });
               } else if (typeof e.target.seekTo === 'function') {
@@ -3945,6 +3954,16 @@ html { scrollbar-gutter: stable; }
       function openPreviewFromCard(card, triggerElement = card) {
         // ZAQ TASK 1.8: Pause hero video when preview begins opening.
         pauseHeroVideo({ force: true });
+        const heroAudioState = getHeroAudioState();
+        const syncedVolume = clampPreviewVolume(heroAudioState.volume);
+        initialPreviewVolume = syncedVolume === 0 ? 50 : syncedVolume;
+        previewVolume = initialPreviewVolume;
+        previewMuted = false;
+        previewLastNonZeroVolume = previewVolume || 50;
+        if (previewVolumeSlider) {
+          previewVolumeSlider.value = String(previewVolume);
+        }
+        updatePreviewVolumeUI({ muted: previewMuted, volume: previewVolume });
         const title = 'Preview Placeholder Title';
         const runtime = '1h 52m';
         const tags = 'Thriller • Sci‑Fi • Action';
