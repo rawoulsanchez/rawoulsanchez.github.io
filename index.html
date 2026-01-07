@@ -1279,6 +1279,14 @@ html { scrollbar-gutter: stable; }
   .preview-volume.is-unmuted .preview-volume__btn {
     animation: volume-breathe 3.6s ease-in-out infinite;
   }
+  .preview-volume.is-muted {
+    --volume-glow-rgb: 255 66 66;
+    --volume-glow-opacity: 1;
+  }
+  .preview-volume.is-unmuted {
+    --volume-glow-rgb: 70 255 140;
+    --volume-glow-opacity: 1;
+  }
 
   .preview-volume__sliderWrap {
     display: flex;
