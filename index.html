@@ -409,8 +409,8 @@ main{
     pointer-events:none;
     transition:opacity 0.2s ease;
     box-shadow:
-      0 0 0 2px rgba(var(--volume-glow-rgb, 255 255 255), 0.75),
-      0 0 18px rgba(var(--volume-glow-rgb, 255 255 255), 0.65);
+      0 0 0 2px rgb(var(--volume-glow-rgb, 255 255 255) / 0.75),
+      0 0 18px rgb(var(--volume-glow-rgb, 255 255 255) / 0.65);
   }
   .hero-volume__btn {
     width:auto;
@@ -436,8 +436,8 @@ main{
     border-radius:999px;
     background:conic-gradient(from 0deg,
       transparent 0deg,
-      rgba(var(--volume-glow-rgb, 255 255 255), 0.0) 30deg,
-      rgba(var(--volume-glow-rgb, 255 255 255), 0.65) 70deg,
+      rgb(var(--volume-glow-rgb, 255 255 255) / 0.0) 30deg,
+      rgb(var(--volume-glow-rgb, 255 255 255) / 0.65) 70deg,
       transparent 120deg);
     opacity:0;
     animation:volume-sweep 1.2s ease-out 0.1s 1 both;
@@ -500,13 +500,13 @@ main{
   @keyframes volume-breathe {
     0%, 100% {
       box-shadow:
-        0 0 0 2px rgba(var(--volume-glow-rgb, 255 255 255), 0.75),
-        0 0 16px rgba(var(--volume-glow-rgb, 255 255 255), 0.55);
+        0 0 0 2px rgb(var(--volume-glow-rgb, 255 255 255) / 0.75),
+        0 0 16px rgb(var(--volume-glow-rgb, 255 255 255) / 0.55);
     }
     50% {
       box-shadow:
-        0 0 0 2px rgba(var(--volume-glow-rgb, 255 255 255), 1),
-        0 0 24px rgba(var(--volume-glow-rgb, 255 255 255), 0.75);
+        0 0 0 2px rgb(var(--volume-glow-rgb, 255 255 255) / 1),
+        0 0 24px rgb(var(--volume-glow-rgb, 255 255 255) / 0.75);
     }
   }
   @keyframes volume-sweep {
@@ -1261,8 +1261,8 @@ html { scrollbar-gutter: stable; }
     pointer-events:none;
     transition:opacity 0.2s ease;
     box-shadow:
-      0 0 0 2px rgba(var(--volume-glow-rgb, 255 255 255), 0.75),
-      0 0 18px rgba(var(--volume-glow-rgb, 255 255 255), 0.65);
+      0 0 0 2px rgb(var(--volume-glow-rgb, 255 255 255) / 0.75),
+      0 0 18px rgb(var(--volume-glow-rgb, 255 255 255) / 0.65);
   }
   .preview-volume.volume-sweep::after {
     content: "";
@@ -1271,8 +1271,8 @@ html { scrollbar-gutter: stable; }
     border-radius: 999px;
     background: conic-gradient(from 0deg,
       transparent 0deg,
-      rgba(var(--volume-glow-rgb, 255 255 255), 0.0) 30deg,
-      rgba(var(--volume-glow-rgb, 255 255 255), 0.65) 70deg,
+      rgb(var(--volume-glow-rgb, 255 255 255) / 0.0) 30deg,
+      rgb(var(--volume-glow-rgb, 255 255 255) / 0.65) 70deg,
       transparent 120deg);
     opacity: 0;
     animation: volume-sweep 1.2s ease-out 0.1s 1 both;
