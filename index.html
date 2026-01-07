@@ -412,6 +412,39 @@ main{
     justify-content:center;
     font:700 .80rem/1 var(--font-ui);
     cursor:pointer;
+    position:relative;
+    z-index:0;
+    isolation:isolate;
+  }
+  .hero-volume__btn::before {
+    content:"";
+    position:absolute;
+    inset:var(--volume-glow-inset, -5px);
+    border-radius:999px;
+    box-shadow:
+      0 0 0 1px rgba(var(--volume-glow-rgb, 255 255 255), 0.3),
+      0 0 10px rgba(var(--volume-glow-rgb, 255 255 255), 0.35);
+    opacity:var(--volume-glow-opacity, 0);
+    animation:volume-breathe 3.6s ease-in-out infinite;
+    pointer-events:none;
+    z-index:-1;
+  }
+  .hero-volume.volume-sweep .hero-volume__btn::after {
+    content:"";
+    position:absolute;
+    inset:var(--volume-glow-inset, -5px);
+    border-radius:999px;
+    background:conic-gradient(from 0deg,
+      transparent 0deg,
+      rgba(var(--volume-glow-rgb, 255 255 255), 0.0) 30deg,
+      rgba(var(--volume-glow-rgb, 255 255 255), 0.65) 70deg,
+      transparent 120deg);
+    opacity:0;
+    animation:volume-sweep 1.2s ease-out 0.4s 1 both;
+    pointer-events:none;
+    z-index:-1;
+    -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - var(--volume-ring-width, 3px)), #000 calc(100% - var(--volume-ring-width, 3px) + 1px));
+            mask:radial-gradient(farthest-side, transparent calc(100% - var(--volume-ring-width, 3px)), #000 calc(100% - var(--volume-ring-width, 3px) + 1px));
   }
   .hero-volume__btn:focus {
     outline:none;
@@ -449,16 +482,37 @@ main{
     pointer-events:auto;
   }
   .hero-volume.is-muted .hero-volume__btn {
-    box-shadow: 0 0 0 2px rgba(255, 42, 42, 0.85), 0 0 12px rgba(255, 42, 42, 0.9);
-  }
-  .hero-volume.is-muted .hero-volume__btn:focus-visible {
-    box-shadow: 0 0 0 3px rgba(255, 42, 42, 0.85), 0 0 16px rgba(255, 42, 42, 0.95);
+    --volume-glow-rgb:255 66 66;
+    --volume-glow-opacity:1;
   }
   .hero-volume.is-unmuted .hero-volume__btn {
-    box-shadow: 0 0 0 2px rgba(57, 255, 20, 0.9), 0 0 14px rgba(57, 255, 20, 0.95);
+    --volume-glow-rgb:70 255 140;
+    --volume-glow-opacity:1;
   }
-  .hero-volume.is-unmuted .hero-volume__btn:focus-visible {
-    box-shadow: 0 0 0 3px rgba(57, 255, 20, 0.9), 0 0 18px rgba(57, 255, 20, 0.95);
+  @keyframes volume-breathe {
+    0%, 100% {
+      box-shadow:
+        0 0 0 1px rgba(var(--volume-glow-rgb, 255 255 255), 0.28),
+        0 0 10px rgba(var(--volume-glow-rgb, 255 255 255), 0.28);
+    }
+    50% {
+      box-shadow:
+        0 0 0 2px rgba(var(--volume-glow-rgb, 255 255 255), 0.55),
+        0 0 16px rgba(var(--volume-glow-rgb, 255 255 255), 0.5);
+    }
+  }
+  @keyframes volume-sweep {
+    0% {
+      opacity:0;
+      transform:rotate(-40deg);
+    }
+    25% {
+      opacity:0.75;
+    }
+    100% {
+      opacity:0;
+      transform:rotate(320deg);
+    }
   }
   /* commit: no-horizontal-scroll */
 html { overflow-x: hidden; }
@@ -1186,6 +1240,39 @@ html { scrollbar-gutter: stable; }
     background: rgba(255,255,255,0.06);
     color: #eaeaf0;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+    position: relative;
+    z-index: 0;
+    isolation: isolate;
+  }
+  .preview-volume::before {
+    content: "";
+    position: absolute;
+    inset: var(--volume-glow-inset, -6px);
+    border-radius: 999px;
+    box-shadow:
+      0 0 0 1px rgba(var(--volume-glow-rgb, 255 255 255), 0.3),
+      0 0 10px rgba(var(--volume-glow-rgb, 255 255 255), 0.35);
+    opacity: var(--volume-glow-opacity, 0);
+    animation: volume-breathe 3.6s ease-in-out infinite;
+    pointer-events: none;
+    z-index: -1;
+  }
+  .preview-volume.volume-sweep::after {
+    content: "";
+    position: absolute;
+    inset: var(--volume-glow-inset, -6px);
+    border-radius: 999px;
+    background: conic-gradient(from 0deg,
+      transparent 0deg,
+      rgba(var(--volume-glow-rgb, 255 255 255), 0.0) 30deg,
+      rgba(var(--volume-glow-rgb, 255 255 255), 0.65) 70deg,
+      transparent 120deg);
+    opacity: 0;
+    animation: volume-sweep 1.2s ease-out 0.4s 1 both;
+    pointer-events: none;
+    z-index: -1;
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--volume-ring-width, 3px)), #000 calc(100% - var(--volume-ring-width, 3px) + 1px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - var(--volume-ring-width, 3px)), #000 calc(100% - var(--volume-ring-width, 3px) + 1px));
   }
 
   .preview-volume__btn {
@@ -1198,6 +1285,14 @@ html { scrollbar-gutter: stable; }
     line-height: 1;
     padding: 4px 0;
     touch-action: manipulation;
+  }
+  .preview-volume.is-muted {
+    --volume-glow-rgb: 255 66 66;
+    --volume-glow-opacity: 1;
+  }
+  .preview-volume.is-unmuted {
+    --volume-glow-rgb: 70 255 140;
+    --volume-glow-opacity: 1;
   }
 
   .preview-volume__sliderWrap {
@@ -1561,6 +1656,12 @@ html { scrollbar-gutter: stable; }
       heroVolumeButton.setAttribute('aria-pressed', isMuted ? 'true' : 'false');
     }
   }
+  function triggerVolumeSweep(control) {
+    if (!control) return;
+    control.classList.remove('volume-sweep');
+    control.offsetWidth;
+    control.classList.add('volume-sweep');
+  }
   function getHeroAudioState() {
     const slider = document.querySelector('.hero-volume__slider');
     const sliderValue = slider ? Number(slider.value) : heroUiVolume;
@@ -1767,6 +1868,7 @@ html { scrollbar-gutter: stable; }
       }, 10000);
     }
     updateHeroMuteUi();
+    triggerVolumeSweep(heroVolume);
   });
 </script>
 <script>
@@ -4042,6 +4144,7 @@ html { scrollbar-gutter: stable; }
           previewVolumeSlider.value = String(previewVolume);
         }
         updatePreviewVolumeUI({ muted: previewMuted, volume: previewVolume });
+        triggerVolumeSweep(previewVolumeControl);
         const title = 'Preview Placeholder Title';
         const runtime = '1h 52m';
         const tags = 'Thriller • Sci‑Fi • Action';
