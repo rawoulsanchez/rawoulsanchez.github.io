@@ -1909,12 +1909,13 @@ html { scrollbar-gutter: stable; }
       const anchor = document.querySelector('.hero-cta-anchor');
       if(!ctaLayer || !anchor) return;
 
+      ctaLayer.classList.add('is-positioned');
+
       const anchorRect = anchor.getBoundingClientRect();
       const left = anchorRect.left + window.scrollX;
       const top = anchorRect.top + window.scrollY;
 
       ctaLayer.style.transform = `translate3d(${left}px, ${top}px, 0)`;
-      ctaLayer.classList.add('is-positioned');
     }
 
     function schedulePositionCta(){
@@ -1943,6 +1944,9 @@ html { scrollbar-gutter: stable; }
       anchor.style.height = Math.round(cta.getBoundingClientRect().height) + 'px';
       positionCta();
     }
+    document.addEventListener('DOMContentLoaded', () => {
+      alignCta();
+    });
     window.addEventListener('load', alignCta);
     window.addEventListener('resize', alignCta);
     window.addEventListener('orientationchange', alignCta);
