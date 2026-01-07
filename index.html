@@ -400,7 +400,7 @@ main{
     position:relative;
     flex:0 0 auto;
   }
-  .hero-volume::before {
+  .hero-volume__btn::before {
     content:"";
     position:absolute;
     inset:-6px;
@@ -486,7 +486,7 @@ main{
     --volume-glow-opacity:1;
     animation:volume-breathe 3.6s ease-in-out infinite;
   }
-  .hero-volume.is-muted::before {
+  .hero-volume.is-muted .hero-volume__btn::before {
     opacity:1;
   }
   .hero-volume.is-unmuted .hero-volume__btn {
@@ -494,7 +494,7 @@ main{
     --volume-glow-opacity:1;
     animation:volume-breathe 3.6s ease-in-out infinite;
   }
-  .hero-volume.is-unmuted::before {
+  .hero-volume.is-unmuted .hero-volume__btn::before {
     opacity:1;
   }
   @keyframes volume-breathe {
@@ -1252,7 +1252,7 @@ html { scrollbar-gutter: stable; }
     z-index: 0;
     isolation: isolate;
   }
-  .preview-volume::before {
+  .preview-volume__btn::before {
     content:"";
     position:absolute;
     inset:-6px;
@@ -1264,7 +1264,7 @@ html { scrollbar-gutter: stable; }
       0 0 0 2px rgb(var(--volume-glow-rgb, 255 255 255) / 0.75),
       0 0 18px rgb(var(--volume-glow-rgb, 255 255 255) / 0.65);
   }
-  .preview-volume.volume-sweep::after {
+  .preview-volume.volume-sweep .preview-volume__btn::after {
     content: "";
     position: absolute;
     inset: var(--volume-glow-inset, -6px);
@@ -1301,14 +1301,14 @@ html { scrollbar-gutter: stable; }
     --volume-glow-rgb: 255 66 66;
     --volume-glow-opacity: 1;
   }
-  .preview-volume.is-muted::before {
+  .preview-volume.is-muted .preview-volume__btn::before {
     opacity:1;
   }
   .preview-volume.is-unmuted {
     --volume-glow-rgb: 70 255 140;
     --volume-glow-opacity: 1;
   }
-  .preview-volume.is-unmuted::before {
+  .preview-volume.is-unmuted .preview-volume__btn::before {
     opacity:1;
   }
   .preview-volume.is-muted .preview-volume__btn,
