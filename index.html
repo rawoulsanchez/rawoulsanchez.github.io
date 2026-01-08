@@ -1674,7 +1674,6 @@ html { scrollbar-gutter: stable; }
   let ytPlayer, isMuted = true;
   let heroUiVolume = 50;
   let heroLastNonZeroVolume = 50;
-  let heroPosterFadeTimeout = null;
   let fullscreenPlayer = null;
   let hasUserGesturePlayback = false;
   window.heroPlaybackRequested = false;
@@ -1962,6 +1961,7 @@ html { scrollbar-gutter: stable; }
       }
       heroVolumeSliderIdleTimeout = window.setTimeout(() => {
         heroVolume.classList.remove('is-open');
+        isHeroVolumeInteracting = false;
       }, 1500);
     }
     function endHeroVolumeInteraction() {
@@ -2014,17 +2014,11 @@ html { scrollbar-gutter: stable; }
         setHeroVolume(event.target.value);
         openHeroVolume();
         scheduleHeroSliderIdleClose();
-        if (!isHeroVolumeHovering) {
-          scheduleHeroVolumeClose(volumeHoverCloseDelay);
-        }
       });
       heroVolumeSlider.addEventListener('change', event => {
         setHeroVolume(event.target.value);
         openHeroVolume();
         scheduleHeroSliderIdleClose();
-        if (!isHeroVolumeHovering) {
-          scheduleHeroVolumeClose(volumeHoverCloseDelay);
-        }
       });
     }
     if (heroVolumeButton) {
@@ -2828,6 +2822,7 @@ html { scrollbar-gutter: stable; }
         }
         previewVolumeSliderIdleTimeout = window.setTimeout(() => {
           previewVolumeControl.classList.remove('is-open');
+          isPreviewVolumeInteracting = false;
         }, 1500);
       }
       function endPreviewVolumeInteraction() {
@@ -2951,9 +2946,6 @@ html { scrollbar-gutter: stable; }
           }
           openPreviewVolume();
           schedulePreviewSliderIdleClose();
-          if (!isPreviewVolumeHovering) {
-            schedulePreviewVolumeClose(previewVolumeCloseDelay);
-          }
         });
         previewVolumeSlider.addEventListener('change', (event) => {
           const value = Number(event.target.value);
@@ -2962,9 +2954,6 @@ html { scrollbar-gutter: stable; }
           }
           openPreviewVolume();
           schedulePreviewSliderIdleClose();
-          if (!isPreviewVolumeHovering) {
-            schedulePreviewVolumeClose(previewVolumeCloseDelay);
-          }
         });
       }
       updatePreviewVolumeUI({ muted: previewMuted, volume: previewVolume });
