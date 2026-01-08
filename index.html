@@ -1674,7 +1674,6 @@ html { scrollbar-gutter: stable; }
   let ytPlayer, isMuted = true;
   let heroUiVolume = 50;
   let heroLastNonZeroVolume = 50;
-  let heroPosterFadeTimeout = null;
   let fullscreenPlayer = null;
   let hasUserGesturePlayback = false;
   window.heroPlaybackRequested = false;
@@ -1938,6 +1937,7 @@ html { scrollbar-gutter: stable; }
     const volumeAutoCloseDelay = 1000;
     const volumeHoverCloseDelay = 1000;
     let heroVolumeCloseTimeout = null;
+    let heroVolumeSliderIdleTimeout = null;
     let isHeroVolumeHovering = false;
     let isHeroVolumeInteracting = false;
     function openHeroVolume() {
@@ -1953,6 +1953,15 @@ html { scrollbar-gutter: stable; }
         if (isHeroVolumeHovering || isHeroVolumeInteracting) return;
         heroVolume.classList.remove('is-open');
       }, delay);
+    }
+    function scheduleHeroSliderIdleClose() {
+      if (!heroVolume) return;
+      if (heroVolumeSliderIdleTimeout) {
+        window.clearTimeout(heroVolumeSliderIdleTimeout);
+      }
+      heroVolumeSliderIdleTimeout = window.setTimeout(() => {
+        heroVolume.classList.remove('is-open');
+      }, 1500);
     }
     function endHeroVolumeInteraction() {
       if (!isHeroVolumeInteracting) return;
@@ -2000,6 +2009,7 @@ html { scrollbar-gutter: stable; }
       heroVolumeSlider.addEventListener('input', event => {
         setHeroVolume(event.target.value);
         openHeroVolume();
+        scheduleHeroSliderIdleClose();
         if (!isHeroVolumeHovering) {
           scheduleHeroVolumeClose(volumeHoverCloseDelay);
         }
@@ -2007,6 +2017,7 @@ html { scrollbar-gutter: stable; }
       heroVolumeSlider.addEventListener('change', event => {
         setHeroVolume(event.target.value);
         openHeroVolume();
+        scheduleHeroSliderIdleClose();
         if (!isHeroVolumeHovering) {
           scheduleHeroVolumeClose(volumeHoverCloseDelay);
         }
@@ -2787,6 +2798,7 @@ html { scrollbar-gutter: stable; }
       const previewVolumeSlider = previewOverlay.querySelector('.preview-volume__slider');
       const previewVolumeCloseDelay = 1000;
       let previewVolumeCloseTimeout = null;
+      let previewVolumeSliderIdleTimeout = null;
       let isPreviewVolumeHovering = false;
       let isPreviewVolumeInteracting = false;
 
@@ -2804,6 +2816,15 @@ html { scrollbar-gutter: stable; }
           if (isPreviewVolumeHovering || isPreviewVolumeInteracting) return;
           previewVolumeControl.classList.remove('is-open');
         }, delay);
+      }
+      function schedulePreviewSliderIdleClose() {
+        if (!previewVolumeControl) return;
+        if (previewVolumeSliderIdleTimeout) {
+          window.clearTimeout(previewVolumeSliderIdleTimeout);
+        }
+        previewVolumeSliderIdleTimeout = window.setTimeout(() => {
+          previewVolumeControl.classList.remove('is-open');
+        }, 1500);
       }
       function endPreviewVolumeInteraction() {
         if (!isPreviewVolumeInteracting) return;
@@ -2925,6 +2946,7 @@ html { scrollbar-gutter: stable; }
             setPreviewVolume(value);
           }
           openPreviewVolume();
+          schedulePreviewSliderIdleClose();
           if (!isPreviewVolumeHovering) {
             schedulePreviewVolumeClose(previewVolumeCloseDelay);
           }
@@ -2935,6 +2957,7 @@ html { scrollbar-gutter: stable; }
             setPreviewVolume(value);
           }
           openPreviewVolume();
+          schedulePreviewSliderIdleClose();
           if (!isPreviewVolumeHovering) {
             schedulePreviewVolumeClose(previewVolumeCloseDelay);
           }
