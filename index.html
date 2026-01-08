@@ -1761,30 +1761,34 @@ html { scrollbar-gutter: stable; }
     heroUiVolume = nextVolume;
     const slider = document.querySelector('.hero-volume__slider');
     if (slider) slider.value = String(nextVolume);
+    const shouldMute = nextVolume === 0;
+    isMuted = shouldMute;
+    updateHeroMuteUi();
     if (!ytPlayer || typeof ytPlayer.setVolume !== 'function') return;
-    ytPlayer.setVolume(nextVolume);
-    if (nextVolume > 0) {
-      if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
-      isMuted = false;
-    } else {
+    try {
+      ytPlayer.setVolume(nextVolume);
+    } catch (_) {}
+    if (shouldMute) {
       if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
-      isMuted = true;
+    } else {
+      if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
     }
     updateHeroMuteUi();
   }
   function toggleMute(){
-    if (!ytPlayer) return;
     const slider = document.querySelector('.hero-volume__slider');
     const currentSliderValue = slider ? Number(slider.value) : heroUiVolume;
-    if (isMuted) {
-      if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
-      if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(currentSliderValue);
-      heroUiVolume = currentSliderValue;
-      isMuted = false;
-    } else {
+    const nextMutedState = !isMuted;
+    isMuted = nextMutedState;
+    updateHeroMuteUi();
+    if (!ytPlayer) return;
+    if (nextMutedState) {
       if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
-      isMuted = true;
+      return;
     }
+    if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
+    if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(currentSliderValue);
+    heroUiVolume = currentSliderValue;
     updateHeroMuteUi();
   }
   function requestHeroPlayback(){
