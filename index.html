@@ -1661,6 +1661,7 @@ html { scrollbar-gutter: stable; }
   const HERO_VIDEO_ID = 't1x7Q0IA3Os';
   let ytPlayer, isMuted = true;
   let heroUiVolume = 50;
+  let heroLastNonZeroVolume = 50;
   let fullscreenPlayer = null;
   let hasUserGesturePlayback = false;
   window.heroPlaybackRequested = false;
@@ -1759,32 +1760,41 @@ html { scrollbar-gutter: stable; }
   function setHeroVolume(value) {
     const nextVolume = Math.max(0, Math.min(100, Math.round(value)));
     heroUiVolume = nextVolume;
+    if (nextVolume > 0) {
+      heroLastNonZeroVolume = nextVolume;
+    }
     const slider = document.querySelector('.hero-volume__slider');
     if (slider) slider.value = String(nextVolume);
+    const shouldMute = nextVolume === 0;
+    isMuted = shouldMute;
+    updateHeroMuteUi();
     if (!ytPlayer || typeof ytPlayer.setVolume !== 'function') return;
-    ytPlayer.setVolume(nextVolume);
-    if (nextVolume > 0) {
-      if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
-      isMuted = false;
-    } else {
+    try {
+      ytPlayer.setVolume(nextVolume);
+    } catch (_) {}
+    if (shouldMute) {
       if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
-      isMuted = true;
+    } else {
+      if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
     }
     updateHeroMuteUi();
   }
   function toggleMute(){
-    if (!ytPlayer) return;
     const slider = document.querySelector('.hero-volume__slider');
     const currentSliderValue = slider ? Number(slider.value) : heroUiVolume;
-    if (isMuted) {
-      if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
-      if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(currentSliderValue);
-      heroUiVolume = currentSliderValue;
-      isMuted = false;
-    } else {
+    const nextMutedState = !isMuted;
+    isMuted = nextMutedState;
+    updateHeroMuteUi();
+    if (!ytPlayer) return;
+    if (nextMutedState) {
       if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
-      isMuted = true;
+      return;
     }
+    const unmuteVolume = currentSliderValue > 0 ? currentSliderValue : heroLastNonZeroVolume;
+    if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
+    if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(unmuteVolume);
+    heroUiVolume = unmuteVolume;
+    if (slider) slider.value = String(unmuteVolume);
     updateHeroMuteUi();
   }
   function requestHeroPlayback(){
@@ -1899,6 +1909,22 @@ html { scrollbar-gutter: stable; }
     const heroVolume = document.querySelector('.hero-volume');
     const heroVolumeSlider = document.querySelector('.hero-volume__slider');
     const heroVolumeButton = document.querySelector('.hero-volume__btn');
+    const volumeAutoCloseDelay = 16000;
+    const volumeHoverCloseDelay = 2500;
+    let heroVolumeCloseTimeout = null;
+    function openHeroVolume() {
+      if (!heroVolume) return;
+      heroVolume.classList.add('is-open');
+    }
+    function scheduleHeroVolumeClose(delay) {
+      if (!heroVolume) return;
+      if (heroVolumeCloseTimeout) {
+        window.clearTimeout(heroVolumeCloseTimeout);
+      }
+      heroVolumeCloseTimeout = window.setTimeout(() => {
+        heroVolume.classList.remove('is-open');
+      }, delay);
+    }
     if (playButton) {
       playButton.addEventListener('click', () => openFullscreenPlayback());
     }
@@ -1948,12 +1974,20 @@ html { scrollbar-gutter: stable; }
         const delta = event.deltaY > 0 ? -5 : 5;
         setHeroVolume(heroUiVolume + delta);
       }, { passive: false });
+      heroVolume.addEventListener('pointerenter', () => {
+        openHeroVolume();
+        if (heroVolumeCloseTimeout) {
+          window.clearTimeout(heroVolumeCloseTimeout);
+          heroVolumeCloseTimeout = null;
+        }
+      });
+      heroVolume.addEventListener('pointerleave', () => {
+        scheduleHeroVolumeClose(volumeHoverCloseDelay);
+      });
     }
     if (heroVolume && window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      heroVolume.classList.add('is-open');
-      window.setTimeout(() => {
-        heroVolume.classList.remove('is-open');
-      }, 10000);
+      openHeroVolume();
+      scheduleHeroVolumeClose(volumeAutoCloseDelay);
     }
     updateHeroMuteUi();
     triggerVolumeSweep(heroVolume);
