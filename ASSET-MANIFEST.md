@@ -2,6 +2,10 @@
 
 This file lists all poster files the site expects.
 
+## Hero Poster (16:9)
+
+hero-poster.png
+
 ## Vertical Posters (9:16)
 
 A1–A10
