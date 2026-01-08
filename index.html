@@ -250,7 +250,17 @@ main{
   border-top:0;
 }
 
-.hero-video { position:absolute; inset:0; opacity:1; transition: opacity 400ms ease; }
+.hero-poster{
+  position:absolute;
+  inset:0;
+  width:170vw;
+  height:112%;
+  left:50%;
+  transform:translate(-50%, -6%);
+  object-fit:cover;
+  z-index:0;
+}
+.hero-video { position:absolute; inset:0; opacity:1; transition: opacity 400ms ease; z-index:1; }
 .hero-video.is-hero-fadeout{ opacity:0; }
 
 /* Cover + crop bottom WITHOUT clip-path */
@@ -325,7 +335,7 @@ main{
 .hero-gradient{
   position:absolute;
   inset:0;                    /* cover full hero box */
-  z-index:1;                  /* video (0) < gradient (1) < overlay (2) */
+  z-index:2;                  /* poster (0) < video (1) < gradient (2) */
   pointer-events:none;
   transform:translateZ(0);
   backface-visibility:hidden;
@@ -1482,6 +1492,7 @@ html { scrollbar-gutter: stable; }
   </header>
   <main>
 <section class="hero hero--active" id="hero">
+  <img class="hero-poster" src="images/hero-poster.png" alt="Sanchez Ninjah hero poster">
   <div class="hero-video">
     <iframe
       id="hero-yt"
@@ -1659,6 +1670,7 @@ html { scrollbar-gutter: stable; }
 <script>
   // Changed alerts to console.log as alerts break the canvas environment.
   const HERO_VIDEO_ID = 't1x7Q0IA3Os';
+  const HERO_POSTER_FADE_MS = 15000;
   let ytPlayer, isMuted = true;
   let heroUiVolume = 50;
   let heroLastNonZeroVolume = 50;
@@ -1679,6 +1691,17 @@ html { scrollbar-gutter: stable; }
     if (window.snapState && window.snapState.isSnapping) return false;
     if (window.heroLoopState && window.heroLoopState.isScrolling) return false;
     return true;
+  }
+  function scheduleHeroPosterFade() {
+    const heroVideo = document.querySelector('.hero-video');
+    if (!heroVideo) return;
+    heroVideo.classList.remove('is-hero-fadeout');
+    if (heroPosterFadeTimeout) {
+      window.clearTimeout(heroPosterFadeTimeout);
+    }
+    heroPosterFadeTimeout = window.setTimeout(() => {
+      heroVideo.classList.add('is-hero-fadeout');
+    }, HERO_POSTER_FADE_MS);
   }
   function onYouTubeIframeAPIReady(){
     ytPlayer = new YT.Player('hero-yt', {
@@ -1713,6 +1736,7 @@ html { scrollbar-gutter: stable; }
           if (e.data === YT.PlayerState.PLAYING) {
             hasUserGesturePlayback = true;
             window.heroPlaybackRequested = true;
+            scheduleHeroPosterFade();
           }
           if (e.data === YT.PlayerState.PLAYING && !isPlayNowHighlighted()) {
             e.target.pauseVideo();
@@ -1803,6 +1827,7 @@ html { scrollbar-gutter: stable; }
       hero.classList.add('hero--active');
     }
     window.heroPlaybackRequested = true;
+    scheduleHeroPosterFade();
     if (!ytPlayer) return;
     if (typeof ytPlayer.seekTo === 'function') ytPlayer.seekTo(0, true);
     if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
@@ -1979,6 +2004,9 @@ html { scrollbar-gutter: stable; }
           requestHeroPlayback();
         }
       });
+    }
+    if (hero) {
+      scheduleHeroPosterFade();
     }
     if (heroVolumeSlider) {
       heroVolumeSlider.value = String(heroUiVolume);
