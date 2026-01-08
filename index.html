@@ -1913,6 +1913,7 @@ html { scrollbar-gutter: stable; }
     const volumeHoverCloseDelay = 1000;
     let heroVolumeCloseTimeout = null;
     let isHeroVolumeHovering = false;
+    let isHeroVolumeInteracting = false;
     function openHeroVolume() {
       if (!heroVolume) return;
       heroVolume.classList.add('is-open');
@@ -1923,7 +1924,7 @@ html { scrollbar-gutter: stable; }
         window.clearTimeout(heroVolumeCloseTimeout);
       }
       heroVolumeCloseTimeout = window.setTimeout(() => {
-        if (isHeroVolumeHovering || heroVolume.matches(':focus-within')) return;
+        if (isHeroVolumeHovering || isHeroVolumeInteracting) return;
         heroVolume.classList.remove('is-open');
       }, delay);
     }
@@ -1970,6 +1971,13 @@ html { scrollbar-gutter: stable; }
           scheduleHeroVolumeClose(volumeHoverCloseDelay);
         }
       });
+      heroVolumeSlider.addEventListener('change', event => {
+        setHeroVolume(event.target.value);
+        openHeroVolume();
+        if (!isHeroVolumeHovering) {
+          scheduleHeroVolumeClose(volumeHoverCloseDelay);
+        }
+      });
     }
     if (heroVolumeButton) {
       heroVolumeButton.addEventListener('click', toggleMute);
@@ -1992,15 +2000,19 @@ html { scrollbar-gutter: stable; }
         isHeroVolumeHovering = false;
         scheduleHeroVolumeClose(volumeHoverCloseDelay);
       });
-      heroVolume.addEventListener('focusin', () => {
+      heroVolume.addEventListener('pointerdown', () => {
+        isHeroVolumeInteracting = true;
         openHeroVolume();
         if (heroVolumeCloseTimeout) {
           window.clearTimeout(heroVolumeCloseTimeout);
           heroVolumeCloseTimeout = null;
         }
       });
-      heroVolume.addEventListener('focusout', () => {
-        scheduleHeroVolumeClose(volumeHoverCloseDelay);
+      heroVolume.addEventListener('pointerup', () => {
+        isHeroVolumeInteracting = false;
+        if (!isHeroVolumeHovering) {
+          scheduleHeroVolumeClose(volumeHoverCloseDelay);
+        }
       });
     }
     if (heroVolume && window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
@@ -2745,6 +2757,7 @@ html { scrollbar-gutter: stable; }
       const previewVolumeCloseDelay = 1000;
       let previewVolumeCloseTimeout = null;
       let isPreviewVolumeHovering = false;
+      let isPreviewVolumeInteracting = false;
 
       function openPreviewVolume() {
         if (!previewVolumeControl) return;
@@ -2757,7 +2770,7 @@ html { scrollbar-gutter: stable; }
           window.clearTimeout(previewVolumeCloseTimeout);
         }
         previewVolumeCloseTimeout = window.setTimeout(() => {
-          if (isPreviewVolumeHovering || previewVolumeControl.matches(':focus-within')) return;
+          if (isPreviewVolumeHovering || isPreviewVolumeInteracting) return;
           previewVolumeControl.classList.remove('is-open');
         }, delay);
       }
@@ -2915,15 +2928,19 @@ html { scrollbar-gutter: stable; }
           isPreviewVolumeHovering = false;
           schedulePreviewVolumeClose(previewVolumeCloseDelay);
         });
-        previewVolumeControl.addEventListener('focusin', () => {
+        previewVolumeControl.addEventListener('pointerdown', () => {
+          isPreviewVolumeInteracting = true;
           openPreviewVolume();
           if (previewVolumeCloseTimeout) {
             window.clearTimeout(previewVolumeCloseTimeout);
             previewVolumeCloseTimeout = null;
           }
         });
-        previewVolumeControl.addEventListener('focusout', () => {
-          schedulePreviewVolumeClose(previewVolumeCloseDelay);
+        previewVolumeControl.addEventListener('pointerup', () => {
+          isPreviewVolumeInteracting = false;
+          if (!isPreviewVolumeHovering) {
+            schedulePreviewVolumeClose(previewVolumeCloseDelay);
+          }
         });
       }
 
