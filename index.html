@@ -1909,9 +1909,10 @@ html { scrollbar-gutter: stable; }
     const heroVolume = document.querySelector('.hero-volume');
     const heroVolumeSlider = document.querySelector('.hero-volume__slider');
     const heroVolumeButton = document.querySelector('.hero-volume__btn');
-    const volumeAutoCloseDelay = 16000;
-    const volumeHoverCloseDelay = 2500;
+    const volumeAutoCloseDelay = 1000;
+    const volumeHoverCloseDelay = 1000;
     let heroVolumeCloseTimeout = null;
+    let isHeroVolumeHovering = false;
     function openHeroVolume() {
       if (!heroVolume) return;
       heroVolume.classList.add('is-open');
@@ -1922,6 +1923,7 @@ html { scrollbar-gutter: stable; }
         window.clearTimeout(heroVolumeCloseTimeout);
       }
       heroVolumeCloseTimeout = window.setTimeout(() => {
+        if (isHeroVolumeHovering || heroVolume.matches(':focus-within')) return;
         heroVolume.classList.remove('is-open');
       }, delay);
     }
@@ -1963,6 +1965,10 @@ html { scrollbar-gutter: stable; }
       heroVolumeSlider.value = String(heroUiVolume);
       heroVolumeSlider.addEventListener('input', event => {
         setHeroVolume(event.target.value);
+        openHeroVolume();
+        if (!isHeroVolumeHovering) {
+          scheduleHeroVolumeClose(volumeHoverCloseDelay);
+        }
       });
     }
     if (heroVolumeButton) {
@@ -1975,6 +1981,7 @@ html { scrollbar-gutter: stable; }
         setHeroVolume(heroUiVolume + delta);
       }, { passive: false });
       heroVolume.addEventListener('pointerenter', () => {
+        isHeroVolumeHovering = true;
         openHeroVolume();
         if (heroVolumeCloseTimeout) {
           window.clearTimeout(heroVolumeCloseTimeout);
@@ -1982,6 +1989,17 @@ html { scrollbar-gutter: stable; }
         }
       });
       heroVolume.addEventListener('pointerleave', () => {
+        isHeroVolumeHovering = false;
+        scheduleHeroVolumeClose(volumeHoverCloseDelay);
+      });
+      heroVolume.addEventListener('focusin', () => {
+        openHeroVolume();
+        if (heroVolumeCloseTimeout) {
+          window.clearTimeout(heroVolumeCloseTimeout);
+          heroVolumeCloseTimeout = null;
+        }
+      });
+      heroVolume.addEventListener('focusout', () => {
         scheduleHeroVolumeClose(volumeHoverCloseDelay);
       });
     }
@@ -2724,6 +2742,25 @@ html { scrollbar-gutter: stable; }
       const previewVolumeControl = previewOverlay.querySelector('.preview-volume');
       const previewVolumeButton = previewOverlay.querySelector('.preview-volume__btn');
       const previewVolumeSlider = previewOverlay.querySelector('.preview-volume__slider');
+      const previewVolumeCloseDelay = 1000;
+      let previewVolumeCloseTimeout = null;
+      let isPreviewVolumeHovering = false;
+
+      function openPreviewVolume() {
+        if (!previewVolumeControl) return;
+        previewVolumeControl.classList.add('is-open');
+      }
+
+      function schedulePreviewVolumeClose(delay) {
+        if (!previewVolumeControl) return;
+        if (previewVolumeCloseTimeout) {
+          window.clearTimeout(previewVolumeCloseTimeout);
+        }
+        previewVolumeCloseTimeout = window.setTimeout(() => {
+          if (isPreviewVolumeHovering || previewVolumeControl.matches(':focus-within')) return;
+          previewVolumeControl.classList.remove('is-open');
+        }, delay);
+      }
 
       function clampPreviewVolume(value) {
         return Math.max(0, Math.min(100, value));
@@ -2836,11 +2873,19 @@ html { scrollbar-gutter: stable; }
           if (!Number.isNaN(value)) {
             setPreviewVolume(value);
           }
+          openPreviewVolume();
+          if (!isPreviewVolumeHovering) {
+            schedulePreviewVolumeClose(previewVolumeCloseDelay);
+          }
         });
         previewVolumeSlider.addEventListener('change', (event) => {
           const value = Number(event.target.value);
           if (!Number.isNaN(value)) {
             setPreviewVolume(value);
+          }
+          openPreviewVolume();
+          if (!isPreviewVolumeHovering) {
+            schedulePreviewVolumeClose(previewVolumeCloseDelay);
           }
         });
       }
@@ -2853,7 +2898,33 @@ html { scrollbar-gutter: stable; }
           if (delta === 0) return;
           const step = delta > 0 ? -5 : 5;
           setPreviewVolume(previewVolume + step);
+          openPreviewVolume();
+          if (!isPreviewVolumeHovering) {
+            schedulePreviewVolumeClose(previewVolumeCloseDelay);
+          }
         }, { passive: false });
+        previewVolumeControl.addEventListener('pointerenter', () => {
+          isPreviewVolumeHovering = true;
+          openPreviewVolume();
+          if (previewVolumeCloseTimeout) {
+            window.clearTimeout(previewVolumeCloseTimeout);
+            previewVolumeCloseTimeout = null;
+          }
+        });
+        previewVolumeControl.addEventListener('pointerleave', () => {
+          isPreviewVolumeHovering = false;
+          schedulePreviewVolumeClose(previewVolumeCloseDelay);
+        });
+        previewVolumeControl.addEventListener('focusin', () => {
+          openPreviewVolume();
+          if (previewVolumeCloseTimeout) {
+            window.clearTimeout(previewVolumeCloseTimeout);
+            previewVolumeCloseTimeout = null;
+          }
+        });
+        previewVolumeControl.addEventListener('focusout', () => {
+          schedulePreviewVolumeClose(previewVolumeCloseDelay);
+        });
       }
 
       if (previewVolumeButton) {
@@ -2882,6 +2953,10 @@ html { scrollbar-gutter: stable; }
             }
           }
           updatePreviewVolumeUI({ muted: previewMuted, volume: previewVolume });
+          openPreviewVolume();
+          if (!isPreviewVolumeHovering) {
+            schedulePreviewVolumeClose(previewVolumeCloseDelay);
+          }
         });
       }
 
