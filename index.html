@@ -1928,6 +1928,13 @@ html { scrollbar-gutter: stable; }
         heroVolume.classList.remove('is-open');
       }, delay);
     }
+    function endHeroVolumeInteraction() {
+      if (!isHeroVolumeInteracting) return;
+      isHeroVolumeInteracting = false;
+      if (!isHeroVolumeHovering) {
+        scheduleHeroVolumeClose(volumeHoverCloseDelay);
+      }
+    }
     if (playButton) {
       playButton.addEventListener('click', () => openFullscreenPlayback());
     }
@@ -2008,13 +2015,11 @@ html { scrollbar-gutter: stable; }
           heroVolumeCloseTimeout = null;
         }
       });
-      heroVolume.addEventListener('pointerup', () => {
-        isHeroVolumeInteracting = false;
-        if (!isHeroVolumeHovering) {
-          scheduleHeroVolumeClose(volumeHoverCloseDelay);
-        }
-      });
+      heroVolume.addEventListener('pointerup', endHeroVolumeInteraction);
+      heroVolume.addEventListener('pointercancel', endHeroVolumeInteraction);
     }
+    window.addEventListener('pointerup', endHeroVolumeInteraction);
+    window.addEventListener('pointercancel', endHeroVolumeInteraction);
     if (heroVolume && window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
       openHeroVolume();
       scheduleHeroVolumeClose(volumeAutoCloseDelay);
@@ -2774,6 +2779,13 @@ html { scrollbar-gutter: stable; }
           previewVolumeControl.classList.remove('is-open');
         }, delay);
       }
+      function endPreviewVolumeInteraction() {
+        if (!isPreviewVolumeInteracting) return;
+        isPreviewVolumeInteracting = false;
+        if (!isPreviewVolumeHovering) {
+          schedulePreviewVolumeClose(previewVolumeCloseDelay);
+        }
+      }
 
       function clampPreviewVolume(value) {
         return Math.max(0, Math.min(100, value));
@@ -2936,13 +2948,11 @@ html { scrollbar-gutter: stable; }
             previewVolumeCloseTimeout = null;
           }
         });
-        previewVolumeControl.addEventListener('pointerup', () => {
-          isPreviewVolumeInteracting = false;
-          if (!isPreviewVolumeHovering) {
-            schedulePreviewVolumeClose(previewVolumeCloseDelay);
-          }
-        });
+        previewVolumeControl.addEventListener('pointerup', endPreviewVolumeInteraction);
+        previewVolumeControl.addEventListener('pointercancel', endPreviewVolumeInteraction);
       }
+      window.addEventListener('pointerup', endPreviewVolumeInteraction);
+      window.addEventListener('pointercancel', endPreviewVolumeInteraction);
 
       if (previewVolumeButton) {
         previewVolumeButton.addEventListener('click', () => {
