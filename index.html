@@ -1674,6 +1674,7 @@ html { scrollbar-gutter: stable; }
   let ytPlayer, isMuted = true;
   let heroUiVolume = 50;
   let heroLastNonZeroVolume = 50;
+  let heroPosterFadeTimeout = null;
   let fullscreenPlayer = null;
   let hasUserGesturePlayback = false;
   window.heroPlaybackRequested = false;
@@ -2003,6 +2004,9 @@ html { scrollbar-gutter: stable; }
           requestHeroPlayback();
         }
       });
+    }
+    if (hero) {
+      scheduleHeroPosterFade();
     }
     if (heroVolumeSlider) {
       heroVolumeSlider.value = String(heroUiVolume);
