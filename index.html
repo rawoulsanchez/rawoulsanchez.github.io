@@ -1411,6 +1411,19 @@ html { scrollbar-gutter: stable; }
     transform: translateY(-50%) scale(1);
   }
 
+  @media (hover: none) and (pointer: coarse) {
+    .hero-volume__sliderWrap,
+    .preview-volume__sliderWrap {
+      display: none;
+    }
+
+    .hero-volume.is-open::before,
+    .preview-volume.is-open::before,
+    .preview-volume:focus-within::before {
+      width: 100%;
+    }
+  }
+
   @media (max-width: 640px) {
     .preview-card {
       max-width: 100%;
