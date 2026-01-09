@@ -426,6 +426,15 @@ main{
     pointer-events:none;
     z-index:0;
   }
+  .hero-volume::after {
+    content:"";
+    position:absolute;
+    top:0;
+    left:100%;
+    width:8px;
+    height:100%;
+    pointer-events:auto;
+  }
   .hero-volume__btn {
     width:auto;
     padding:.42rem .56rem;
@@ -469,22 +478,10 @@ main{
     appearance:none;
     background:transparent;
   }
-  @media (hover: hover) and (pointer: fine) {
-    .hero-volume:hover::before {
-      width: calc(100% + var(--volume-pill-grow));
-    }
-    .hero-volume:hover .hero-volume__sliderWrap {
-      opacity:1;
-      pointer-events:auto;
-      transform:translateY(-50%) scale(1);
-    }
-  }
-  .hero-volume.is-open::before,
-  .hero-volume:focus-within::before {
+  .hero-volume.is-open::before {
     width: calc(100% + var(--volume-pill-grow));
   }
-  .hero-volume.is-open .hero-volume__sliderWrap,
-  .hero-volume:focus-within .hero-volume__sliderWrap {
+  .hero-volume.is-open .hero-volume__sliderWrap {
     opacity:1;
     pointer-events:auto;
     transform:translateY(-50%) scale(1);
@@ -1935,10 +1932,18 @@ html { scrollbar-gutter: stable; }
     const heroVolumeSlider = document.querySelector('.hero-volume__slider');
     const heroVolumeButton = document.querySelector('.hero-volume__btn');
     const volumeIdleCloseDelay = 1500;
+    const initialHeroVolumeOpenDelay = 5000;
     let heroVolumeCloseTimeout = null;
+    let heroVolumeInitialTimeout = null;
     function openHeroVolume() {
       if (!heroVolume) return;
       heroVolume.classList.add('is-open');
+    }
+    function clearHeroVolumeInitialClose() {
+      if (heroVolumeInitialTimeout) {
+        window.clearTimeout(heroVolumeInitialTimeout);
+        heroVolumeInitialTimeout = null;
+      }
     }
     function resetHeroVolumeIdleClose() {
       if (!heroVolume) return;
@@ -1990,11 +1995,13 @@ html { scrollbar-gutter: stable; }
       heroVolumeSlider.value = String(heroUiVolume);
       heroVolumeSlider.addEventListener('input', event => {
         setHeroVolume(event.target.value);
+        clearHeroVolumeInitialClose();
         openHeroVolume();
         resetHeroVolumeIdleClose();
       });
       heroVolumeSlider.addEventListener('change', event => {
         setHeroVolume(event.target.value);
+        clearHeroVolumeInitialClose();
         openHeroVolume();
         resetHeroVolumeIdleClose();
       });
@@ -2007,10 +2014,12 @@ html { scrollbar-gutter: stable; }
         event.preventDefault();
         const delta = event.deltaY > 0 ? -5 : 5;
         setHeroVolume(heroUiVolume + delta);
+        clearHeroVolumeInitialClose();
         openHeroVolume();
         resetHeroVolumeIdleClose();
       }, { passive: false });
       heroVolume.addEventListener('pointerenter', () => {
+        clearHeroVolumeInitialClose();
         openHeroVolume();
         if (heroVolumeCloseTimeout) {
           window.clearTimeout(heroVolumeCloseTimeout);
@@ -2021,9 +2030,12 @@ html { scrollbar-gutter: stable; }
         resetHeroVolumeIdleClose();
       });
     }
-    if (heroVolume && window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    if (heroVolume) {
       openHeroVolume();
-      resetHeroVolumeIdleClose();
+      heroVolumeInitialTimeout = window.setTimeout(() => {
+        heroVolume.classList.remove('is-open');
+        heroVolumeInitialTimeout = null;
+      }, initialHeroVolumeOpenDelay);
     }
     updateHeroMuteUi();
     triggerVolumeSweep(heroVolume);
