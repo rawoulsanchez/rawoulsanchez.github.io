@@ -462,7 +462,8 @@ main{
     position:absolute;
     top:50%;
     left:100%;
-    margin-left:8px;
+    margin-left:0;
+    padding-left:8px;
     transform:translateY(-50%) scale(0.96);
     display:flex;
     align-items:center;
@@ -1934,6 +1935,7 @@ html { scrollbar-gutter: stable; }
     const volumeIdleCloseDelay = 1500;
     const initialHeroVolumeOpenDelay = 5000;
     let heroVolumeCloseTimeout = null;
+    let heroVolumeCloseReason = null;
     let heroVolumeInitialTimeout = null;
     function openHeroVolume() {
       if (!heroVolume) return;
@@ -1945,13 +1947,15 @@ html { scrollbar-gutter: stable; }
         heroVolumeInitialTimeout = null;
       }
     }
-    function resetHeroVolumeIdleClose() {
+    function resetHeroVolumeIdleClose(reason) {
       if (!heroVolume) return;
       if (heroVolumeCloseTimeout) {
         window.clearTimeout(heroVolumeCloseTimeout);
       }
+      heroVolumeCloseReason = reason;
       heroVolumeCloseTimeout = window.setTimeout(() => {
         heroVolume.classList.remove('is-open');
+        heroVolumeCloseReason = null;
       }, volumeIdleCloseDelay);
     }
     if (playButton) {
@@ -1997,13 +2001,13 @@ html { scrollbar-gutter: stable; }
         setHeroVolume(event.target.value);
         clearHeroVolumeInitialClose();
         openHeroVolume();
-        resetHeroVolumeIdleClose();
+        resetHeroVolumeIdleClose('slider');
       });
       heroVolumeSlider.addEventListener('change', event => {
         setHeroVolume(event.target.value);
         clearHeroVolumeInitialClose();
         openHeroVolume();
-        resetHeroVolumeIdleClose();
+        resetHeroVolumeIdleClose('slider');
       });
     }
     if (heroVolumeButton) {
@@ -2016,24 +2020,28 @@ html { scrollbar-gutter: stable; }
         setHeroVolume(heroUiVolume + delta);
         clearHeroVolumeInitialClose();
         openHeroVolume();
-        resetHeroVolumeIdleClose();
+        resetHeroVolumeIdleClose('slider');
       }, { passive: false });
       heroVolume.addEventListener('pointerenter', () => {
         clearHeroVolumeInitialClose();
         openHeroVolume();
-        if (heroVolumeCloseTimeout) {
+        if (heroVolumeCloseTimeout && heroVolumeCloseReason === 'leave') {
           window.clearTimeout(heroVolumeCloseTimeout);
           heroVolumeCloseTimeout = null;
+          heroVolumeCloseReason = null;
         }
       });
       heroVolume.addEventListener('pointerleave', () => {
-        resetHeroVolumeIdleClose();
+        resetHeroVolumeIdleClose('leave');
       });
     }
     if (heroVolume) {
       openHeroVolume();
       heroVolumeInitialTimeout = window.setTimeout(() => {
-        heroVolume.classList.remove('is-open');
+        if (heroVolumeCloseReason !== 'slider') {
+          heroVolume.classList.remove('is-open');
+          heroVolumeCloseReason = null;
+        }
         heroVolumeInitialTimeout = null;
       }, initialHeroVolumeOpenDelay);
     }
