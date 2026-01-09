@@ -1932,17 +1932,39 @@ html { scrollbar-gutter: stable; }
     const heroVolume = document.querySelector('.hero-volume');
     const heroVolumeSlider = document.querySelector('.hero-volume__slider');
     const heroVolumeButton = document.querySelector('.hero-volume__btn');
+    const heroVolumeSliderWrap = heroVolume ? heroVolume.querySelector('.hero-volume__sliderWrap') : null;
     const volumeIdleCloseDelay = 1500;
     const initialHeroVolumeOpenDelay = 5000;
     let heroVolumeCloseTimeout = null;
     let heroVolumeCloseReason = null;
     let heroVolumeInitialTimeout = null;
+    const HERO_VOL_DEBUG = true;
+    function hvLog(label, extra) {
+      if (!HERO_VOL_DEBUG) return;
+      const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+      const payload = {
+        label,
+        t: now,
+        isOpen: heroVolume ? heroVolume.classList.contains('is-open') : false,
+        hasFocus: heroVolume ? heroVolume.contains(document.activeElement) : false,
+        timers: {
+          idleClose: heroVolumeCloseTimeout ?? 'none',
+          initialClose: heroVolumeInitialTimeout ?? 'none'
+        }
+      };
+      if (extra) {
+        payload.extra = extra;
+      }
+      console.log('[HeroVolume]', payload);
+    }
     function openHeroVolume() {
       if (!heroVolume) return;
       heroVolume.classList.add('is-open');
+      hvLog('open', { source: 'openHeroVolume' });
     }
     function clearHeroVolumeInitialClose() {
       if (heroVolumeInitialTimeout) {
+        hvLog('initial-close:clear', { id: heroVolumeInitialTimeout });
         window.clearTimeout(heroVolumeInitialTimeout);
         heroVolumeInitialTimeout = null;
       }
@@ -1950,13 +1972,16 @@ html { scrollbar-gutter: stable; }
     function resetHeroVolumeIdleClose(reason) {
       if (!heroVolume) return;
       if (heroVolumeCloseTimeout) {
+        hvLog('idle-close:clear', { id: heroVolumeCloseTimeout, reason });
         window.clearTimeout(heroVolumeCloseTimeout);
       }
       heroVolumeCloseReason = reason;
       heroVolumeCloseTimeout = window.setTimeout(() => {
+        hvLog('idle-close:fire', { reason, id: heroVolumeCloseTimeout });
         heroVolume.classList.remove('is-open');
         heroVolumeCloseReason = null;
       }, volumeIdleCloseDelay);
+      hvLog('idle-close:set', { delay: volumeIdleCloseDelay, id: heroVolumeCloseTimeout, reason });
     }
     if (playButton) {
       playButton.addEventListener('click', () => openFullscreenPlayback());
@@ -1998,12 +2023,14 @@ html { scrollbar-gutter: stable; }
     if (heroVolumeSlider) {
       heroVolumeSlider.value = String(heroUiVolume);
       heroVolumeSlider.addEventListener('input', event => {
+        hvLog('slider:input');
         setHeroVolume(event.target.value);
         clearHeroVolumeInitialClose();
         openHeroVolume();
         resetHeroVolumeIdleClose('slider');
       });
       heroVolumeSlider.addEventListener('change', event => {
+        hvLog('slider:change');
         setHeroVolume(event.target.value);
         clearHeroVolumeInitialClose();
         openHeroVolume();
@@ -2011,11 +2038,15 @@ html { scrollbar-gutter: stable; }
       });
     }
     if (heroVolumeButton) {
-      heroVolumeButton.addEventListener('click', toggleMute);
+      heroVolumeButton.addEventListener('click', event => {
+        hvLog('button:click', { type: event.type });
+        toggleMute();
+      });
     }
     if (heroVolume) {
       heroVolume.addEventListener('wheel', event => {
         event.preventDefault();
+        hvLog('wheel');
         const delta = event.deltaY > 0 ? -5 : 5;
         setHeroVolume(heroUiVolume + delta);
         clearHeroVolumeInitialClose();
@@ -2023,27 +2054,51 @@ html { scrollbar-gutter: stable; }
         resetHeroVolumeIdleClose('slider');
       }, { passive: false });
       heroVolume.addEventListener('pointerenter', () => {
+        hvLog('pill:pointerenter');
         clearHeroVolumeInitialClose();
         openHeroVolume();
         if (heroVolumeCloseTimeout && heroVolumeCloseReason === 'leave') {
+          hvLog('idle-close:clear', { id: heroVolumeCloseTimeout, reason: 'leave' });
           window.clearTimeout(heroVolumeCloseTimeout);
           heroVolumeCloseTimeout = null;
           heroVolumeCloseReason = null;
         }
       });
       heroVolume.addEventListener('pointerleave', () => {
+        hvLog('pill:pointerleave');
         resetHeroVolumeIdleClose('leave');
+      });
+    }
+    if (heroVolumeSliderWrap) {
+      heroVolumeSliderWrap.addEventListener('pointerenter', () => {
+        hvLog('sliderWrap:pointerenter');
+      });
+      heroVolumeSliderWrap.addEventListener('pointerleave', () => {
+        hvLog('sliderWrap:pointerleave');
+      });
+    }
+    if (heroVolumeSlider) {
+      heroVolumeSlider.addEventListener('pointerdown', () => {
+        hvLog('slider:pointerdown');
+      });
+      heroVolumeSlider.addEventListener('pointerup', () => {
+        hvLog('slider:pointerup');
+      });
+      heroVolumeSlider.addEventListener('pointercancel', () => {
+        hvLog('slider:pointercancel');
       });
     }
     if (heroVolume) {
       openHeroVolume();
       heroVolumeInitialTimeout = window.setTimeout(() => {
         if (heroVolumeCloseReason !== 'slider') {
+          hvLog('initial-close:fire', { reason: heroVolumeCloseReason, id: heroVolumeInitialTimeout });
           heroVolume.classList.remove('is-open');
           heroVolumeCloseReason = null;
         }
         heroVolumeInitialTimeout = null;
       }, initialHeroVolumeOpenDelay);
+      hvLog('initial-close:set', { delay: initialHeroVolumeOpenDelay, id: heroVolumeInitialTimeout });
     }
     updateHeroMuteUi();
     triggerVolumeSweep(heroVolume);
