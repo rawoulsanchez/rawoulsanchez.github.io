@@ -3007,6 +3007,7 @@ html { scrollbar-gutter: stable; }
       }
 
       if (previewVolumeSlider) {
+        let previewSliderPointerActive = false;
         previewVolumeSlider.value = String(previewVolume);
         previewVolumeSlider.addEventListener('input', (event) => {
           const value = Number(event.target.value);
@@ -3022,9 +3023,32 @@ html { scrollbar-gutter: stable; }
           if (!Number.isNaN(value)) {
             setPreviewVolume(value);
           }
+          if (previewSliderPointerActive) {
+            const slider = previewVolumeSlider;
+            window.setTimeout(() => {
+              slider.blur();
+            }, 0);
+          }
           clearPreviewVolumeInitialClose();
           openPreviewVolume();
           resetPreviewVolumeIdleClose('slider');
+        });
+        previewVolumeSlider.addEventListener('pointerdown', () => {
+          previewSliderPointerActive = true;
+        });
+        previewVolumeSlider.addEventListener('pointerup', () => {
+          const slider = previewVolumeSlider;
+          window.setTimeout(() => {
+            slider.blur();
+          }, 0);
+          previewSliderPointerActive = false;
+        });
+        previewVolumeSlider.addEventListener('pointercancel', () => {
+          const slider = previewVolumeSlider;
+          window.setTimeout(() => {
+            slider.blur();
+          }, 0);
+          previewSliderPointerActive = false;
         });
       }
       updatePreviewVolumeUI({ muted: previewMuted, volume: previewVolume });
