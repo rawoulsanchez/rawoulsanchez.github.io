@@ -2881,6 +2881,10 @@ html { scrollbar-gutter: stable; }
             activeElement.blur();
             pvLog('idle-close:blur', { target: 'preview-volume__slider' });
           }
+          if (containsActive && activeElement && activeElement.matches('.preview-volume__btn')) {
+            activeElement.blur();
+            pvLog('idle-close:blur', { target: 'preview-volume__btn' });
+          }
           previewVolumeControl.classList.remove('is-open');
           pvLog('idle-close:remove-open', { reason });
           previewVolumeCloseReason = null;
@@ -3103,6 +3107,8 @@ html { scrollbar-gutter: stable; }
       if (previewVolumeButton) {
         previewVolumeButton.addEventListener('click', () => {
           togglePreviewMute();
+          clearPreviewVolumeInitialClose();
+          resetPreviewVolumeIdleClose('button');
         });
       }
 
