@@ -1326,13 +1326,14 @@ html { scrollbar-gutter: stable; }
     position: absolute;
     top: 50%;
     left: 100%;
-    margin-left: 8px;
+    margin-left: 0;
+    padding-left: 8px;
     transform: translateY(-50%) scale(0.96);
     display: flex;
     align-items: center;
     width: 100px;
     opacity: 0;
-    overflow: hidden;
+    overflow: visible;
     pointer-events: none;
     transition: opacity 0.2s ease, transform 0.2s ease;
     z-index: 1;
