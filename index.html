@@ -2836,43 +2836,43 @@ html { scrollbar-gutter: stable; }
       const previewVolumeControl = previewOverlay.querySelector('.preview-volume');
       const previewVolumeButton = previewOverlay.querySelector('.preview-volume__btn');
       const previewVolumeSlider = previewOverlay.querySelector('.preview-volume__slider');
-      const previewVolumeCloseDelay = 1000;
+      const previewVolumeIdleCloseDelay = 1500;
+      const initialPreviewVolumeOpenDelay = 5000;
       let previewVolumeCloseTimeout = null;
-      let previewVolumeSliderIdleTimeout = null;
-      let isPreviewVolumeHovering = false;
-      let isPreviewVolumeInteracting = false;
+      let previewVolumeCloseReason = null;
+      let previewVolumeInitialTimeout = null;
 
       function openPreviewVolume() {
         if (!previewVolumeControl) return;
         previewVolumeControl.classList.add('is-open');
       }
 
-      function schedulePreviewVolumeClose(delay) {
+      function clearPreviewVolumeInitialClose() {
+        if (previewVolumeInitialTimeout) {
+          window.clearTimeout(previewVolumeInitialTimeout);
+          previewVolumeInitialTimeout = null;
+        }
+      }
+
+      function resetPreviewVolumeIdleClose(reason) {
         if (!previewVolumeControl) return;
         if (previewVolumeCloseTimeout) {
           window.clearTimeout(previewVolumeCloseTimeout);
         }
+        previewVolumeCloseReason = reason;
         previewVolumeCloseTimeout = window.setTimeout(() => {
-          if (isPreviewVolumeHovering || isPreviewVolumeInteracting) return;
           previewVolumeControl.classList.remove('is-open');
-        }, delay);
+          previewVolumeCloseReason = null;
+        }, previewVolumeIdleCloseDelay);
       }
-      function schedulePreviewSliderIdleClose() {
-        if (!previewVolumeControl) return;
-        if (previewVolumeSliderIdleTimeout) {
-          window.clearTimeout(previewVolumeSliderIdleTimeout);
+
+      function clearPreviewVolumeTimers() {
+        clearPreviewVolumeInitialClose();
+        if (previewVolumeCloseTimeout) {
+          window.clearTimeout(previewVolumeCloseTimeout);
+          previewVolumeCloseTimeout = null;
         }
-        previewVolumeSliderIdleTimeout = window.setTimeout(() => {
-          previewVolumeControl.classList.remove('is-open');
-          isPreviewVolumeInteracting = false;
-        }, 1500);
-      }
-      function endPreviewVolumeInteraction() {
-        if (!isPreviewVolumeInteracting) return;
-        isPreviewVolumeInteracting = false;
-        if (!isPreviewVolumeHovering) {
-          schedulePreviewVolumeClose(previewVolumeCloseDelay);
-        }
+        previewVolumeCloseReason = null;
       }
 
       function clampPreviewVolume(value) {
@@ -2979,6 +2979,33 @@ html { scrollbar-gutter: stable; }
         updatePreviewVolumeUI({ muted: previewMuted, volume: previewVolume });
       }
 
+      function togglePreviewMute() {
+        const playerMuted = previewTeaserPlayer && typeof previewTeaserPlayer.isMuted === 'function'
+          ? previewTeaserPlayer.isMuted()
+          : previewMuted;
+        if (playerMuted || previewVolume === 0) {
+          previewMuted = false;
+          if (previewVolume === 0) {
+            previewVolume = previewLastNonZeroVolume || 50;
+          }
+          if (previewVolumeSlider) {
+            previewVolumeSlider.value = String(previewVolume);
+          }
+          if (previewTeaserPlayer && typeof previewTeaserPlayer.unMute === 'function') {
+            previewTeaserPlayer.unMute();
+          }
+          if (previewTeaserPlayer && typeof previewTeaserPlayer.setVolume === 'function') {
+            previewTeaserPlayer.setVolume(previewVolume);
+          }
+        } else {
+          previewMuted = true;
+          if (previewTeaserPlayer && typeof previewTeaserPlayer.mute === 'function') {
+            previewTeaserPlayer.mute();
+          }
+        }
+        updatePreviewVolumeUI({ muted: previewMuted, volume: previewVolume });
+      }
+
       if (previewVolumeSlider) {
         previewVolumeSlider.value = String(previewVolume);
         previewVolumeSlider.addEventListener('input', (event) => {
@@ -2986,16 +3013,18 @@ html { scrollbar-gutter: stable; }
           if (!Number.isNaN(value)) {
             setPreviewVolume(value);
           }
+          clearPreviewVolumeInitialClose();
           openPreviewVolume();
-          schedulePreviewSliderIdleClose();
+          resetPreviewVolumeIdleClose('slider');
         });
         previewVolumeSlider.addEventListener('change', (event) => {
           const value = Number(event.target.value);
           if (!Number.isNaN(value)) {
             setPreviewVolume(value);
           }
+          clearPreviewVolumeInitialClose();
           openPreviewVolume();
-          schedulePreviewSliderIdleClose();
+          resetPreviewVolumeIdleClose('slider');
         });
       }
       updatePreviewVolumeUI({ muted: previewMuted, volume: previewVolume });
@@ -3007,67 +3036,27 @@ html { scrollbar-gutter: stable; }
           if (delta === 0) return;
           const step = delta > 0 ? -5 : 5;
           setPreviewVolume(previewVolume + step);
+          clearPreviewVolumeInitialClose();
           openPreviewVolume();
-          if (!isPreviewVolumeHovering) {
-            schedulePreviewVolumeClose(previewVolumeCloseDelay);
-          }
+          resetPreviewVolumeIdleClose('slider');
         }, { passive: false });
         previewVolumeControl.addEventListener('pointerenter', () => {
-          isPreviewVolumeHovering = true;
+          clearPreviewVolumeInitialClose();
           openPreviewVolume();
-          if (previewVolumeCloseTimeout) {
+          if (previewVolumeCloseTimeout && previewVolumeCloseReason === 'leave') {
             window.clearTimeout(previewVolumeCloseTimeout);
             previewVolumeCloseTimeout = null;
+            previewVolumeCloseReason = null;
           }
         });
         previewVolumeControl.addEventListener('pointerleave', () => {
-          isPreviewVolumeHovering = false;
-          schedulePreviewVolumeClose(previewVolumeCloseDelay);
+          resetPreviewVolumeIdleClose('leave');
         });
-        previewVolumeControl.addEventListener('pointerdown', () => {
-          isPreviewVolumeInteracting = true;
-          openPreviewVolume();
-          if (previewVolumeCloseTimeout) {
-            window.clearTimeout(previewVolumeCloseTimeout);
-            previewVolumeCloseTimeout = null;
-          }
-        });
-        previewVolumeControl.addEventListener('pointerup', endPreviewVolumeInteraction);
-        previewVolumeControl.addEventListener('pointercancel', endPreviewVolumeInteraction);
       }
-      window.addEventListener('pointerup', endPreviewVolumeInteraction);
-      window.addEventListener('pointercancel', endPreviewVolumeInteraction);
 
       if (previewVolumeButton) {
         previewVolumeButton.addEventListener('click', () => {
-          const playerMuted = previewTeaserPlayer && typeof previewTeaserPlayer.isMuted === 'function'
-            ? previewTeaserPlayer.isMuted()
-            : previewMuted;
-          if (playerMuted || previewVolume === 0) {
-            previewMuted = false;
-            if (previewVolume === 0) {
-              previewVolume = previewLastNonZeroVolume || 50;
-            }
-            if (previewVolumeSlider) {
-              previewVolumeSlider.value = String(previewVolume);
-            }
-            if (previewTeaserPlayer && typeof previewTeaserPlayer.unMute === 'function') {
-              previewTeaserPlayer.unMute();
-            }
-            if (previewTeaserPlayer && typeof previewTeaserPlayer.setVolume === 'function') {
-              previewTeaserPlayer.setVolume(previewVolume);
-            }
-          } else {
-            previewMuted = true;
-            if (previewTeaserPlayer && typeof previewTeaserPlayer.mute === 'function') {
-              previewTeaserPlayer.mute();
-            }
-          }
-          updatePreviewVolumeUI({ muted: previewMuted, volume: previewVolume });
-          openPreviewVolume();
-          if (!isPreviewVolumeHovering) {
-            schedulePreviewVolumeClose(previewVolumeCloseDelay);
-          }
+          togglePreviewMute();
         });
       }
 
@@ -4456,6 +4445,15 @@ html { scrollbar-gutter: stable; }
           previewVolumeSlider.value = String(previewVolume);
         }
         updatePreviewVolumeUI({ muted: previewMuted, volume: previewVolume });
+        clearPreviewVolumeInitialClose();
+        openPreviewVolume();
+        previewVolumeInitialTimeout = window.setTimeout(() => {
+          if (previewVolumeCloseReason !== 'slider' && previewVolumeControl) {
+            previewVolumeControl.classList.remove('is-open');
+            previewVolumeCloseReason = null;
+          }
+          previewVolumeInitialTimeout = null;
+        }, initialPreviewVolumeOpenDelay);
         triggerVolumeSweep(previewVolumeControl);
         const title = 'Preview Placeholder Title';
         const runtime = '1h 52m';
@@ -4663,6 +4661,7 @@ previewTitleEl.textContent = title;
         resetPreviewPlaceholder();
         resetPreviewPosterImage();
         removePreviewAutounmuteListener();
+        clearPreviewVolumeTimers();
 
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
