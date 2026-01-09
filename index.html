@@ -2842,6 +2842,10 @@ html { scrollbar-gutter: stable; }
       let previewVolumeCloseReason = null;
       let previewVolumeInitialTimeout = null;
 
+      function pvLog(message, details = {}) {
+        console.log('[PREVIEW-VOL]', message, details);
+      }
+
       function openPreviewVolume() {
         if (!previewVolumeControl) return;
         previewVolumeControl.classList.add('is-open');
@@ -2856,14 +2860,32 @@ html { scrollbar-gutter: stable; }
 
       function resetPreviewVolumeIdleClose(reason) {
         if (!previewVolumeControl) return;
+        pvLog('idle-close:call', { reason });
         if (previewVolumeCloseTimeout) {
+          pvLog('idle-close:clear', { id: previewVolumeCloseTimeout, reason });
           window.clearTimeout(previewVolumeCloseTimeout);
         }
         previewVolumeCloseReason = reason;
         previewVolumeCloseTimeout = window.setTimeout(() => {
+          const activeElement = document.activeElement;
+          const containsActive = previewVolumeControl.contains(activeElement);
+          pvLog('idle-close:fire', {
+            reason,
+            id: previewVolumeCloseTimeout,
+            activeElement: activeElement
+              ? `${activeElement.tagName.toLowerCase()}${activeElement.className ? `.${String(activeElement.className).trim().replace(/\s+/g, '.')}` : ''}`
+              : null,
+            containsActive
+          });
+          if (containsActive && activeElement && activeElement.matches('.preview-volume__slider[type="range"]')) {
+            activeElement.blur();
+            pvLog('idle-close:blur', { target: 'preview-volume__slider' });
+          }
           previewVolumeControl.classList.remove('is-open');
+          pvLog('idle-close:remove-open', { reason });
           previewVolumeCloseReason = null;
         }, previewVolumeIdleCloseDelay);
+        pvLog('idle-close:set', { delay: previewVolumeIdleCloseDelay, id: previewVolumeCloseTimeout, reason });
       }
 
       function clearPreviewVolumeTimers() {
