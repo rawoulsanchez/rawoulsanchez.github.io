@@ -17,6 +17,7 @@
   * { box-sizing:border-box; }
   body { margin:0; font-family:var(--font-ui); background:var(--bg); color:var(--fg); line-height:1.5; overflow-x:hidden; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
   body.no-scroll { overflow:hidden; }
+  html.nav-open,
   body.nav-open { overflow:hidden; overscroll-behavior:none; touch-action:none; }
   .nav-scrim {
     position:fixed;
@@ -263,7 +264,9 @@ border-bottom:0;
     width:100%;
     height:calc(100dvh - (var(--nav-height) + env(safe-area-inset-top)));
     background:rgba(0,0,0,0.92);
-    overflow:hidden;
+    overflow-x:hidden;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
     z-index:9900;
     opacity:0;
     transform:translateY(-12px);
@@ -5527,11 +5530,13 @@ document.addEventListener('keydown', (event) => {
     const navBar = document.querySelector('.nav-bar');
     const scrim = document.querySelector('.nav-scrim');
     const body = document.body;
+    const root = document.documentElement;
 
     if (!toggle || !dropdown || !navBar || !scrim) return;
 
     const openMenu = () => {
       body.classList.add('nav-open');
+      root.classList.add('nav-open');
       toggle.setAttribute('aria-expanded', 'true');
       dropdown.setAttribute('aria-hidden', 'false');
       scrim.setAttribute('aria-hidden', 'false');
@@ -5539,6 +5544,7 @@ document.addEventListener('keydown', (event) => {
 
     const closeMenu = () => {
       body.classList.remove('nav-open');
+      root.classList.remove('nav-open');
       toggle.setAttribute('aria-expanded', 'false');
       dropdown.setAttribute('aria-hidden', 'true');
       scrim.setAttribute('aria-hidden', 'true');
