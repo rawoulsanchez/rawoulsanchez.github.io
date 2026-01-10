@@ -17,7 +17,6 @@
   * { box-sizing:border-box; }
   body { margin:0; font-family:var(--font-ui); background:var(--bg); color:var(--fg); line-height:1.5; overflow-x:hidden; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
   body.no-scroll { overflow:hidden; }
-  body.nav-open { overflow:hidden; }
 
   /* Fixed black nav */
 .nav-bar{
@@ -77,7 +76,7 @@ border-bottom:0;
     color:#fff;
     background:rgba(255,255,255,0.10);
   }
-  .nav-burger {
+  .nav-toggle {
     display:none;
     width:40px;
     height:40px;
@@ -87,11 +86,12 @@ border-bottom:0;
     color:#eaeaf0;
     position:relative;
     cursor:pointer;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    gap:4px;
   }
-  .nav-burger span,
-  .nav-burger span::before,
-  .nav-burger span::after {
-    content:"";
+  .nav-toggle .burger-line {
     position:absolute;
     left:50%;
     width:18px;
@@ -99,10 +99,23 @@ border-bottom:0;
     background:currentColor;
     transform:translateX(-50%);
     border-radius:999px;
+    transition:transform 220ms ease, opacity 220ms ease;
   }
-  .nav-burger span { top:50%; transform:translate(-50%, -50%); }
-  .nav-burger span::before { top:-6px; }
-  .nav-burger span::after { top:6px; }
+  .nav-toggle .line1 { top:14px; }
+  .nav-toggle .line2 { top:19px; }
+  .nav-toggle .line3 { top:24px; }
+  body.nav-open .nav-toggle{
+    box-shadow:0 0 0 1px rgba(255,0,0,0.35), 0 0 18px rgba(255,0,0,0.35);
+  }
+  body.nav-open .nav-toggle .line1{
+    transform:translateX(-50%) translateY(5px) rotate(45deg);
+  }
+  body.nav-open .nav-toggle .line2{
+    opacity:0;
+  }
+  body.nav-open .nav-toggle .line3{
+    transform:translateX(-50%) translateY(-5px) rotate(-45deg);
+  }
   @media (max-width:640px){
     .nav-links{
       gap:12px;
@@ -124,7 +137,7 @@ border-bottom:0;
     .nav-actions .icon-btn{
       display:none;
     }
-    .nav-burger{
+    .nav-toggle{
       display:inline-grid;
       place-items:center;
     }
@@ -213,6 +226,48 @@ border-bottom:0;
   .nav-overlay.is-open .nav-overlay-menu a{
     opacity:1;
     transform:translateY(0);
+  }
+  .nav-dropdown{
+    position:fixed;
+    top:calc(var(--nav-height) + env(safe-area-inset-top));
+    left:0;
+    right:0;
+    background:rgba(0,0,0,0.92);
+    z-index:11000;
+    transform:translateY(-8px);
+    opacity:0;
+    pointer-events:none;
+    transition:transform 240ms ease, opacity 240ms ease;
+  }
+  .nav-dropdown-menu{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding:18px 24px 24px;
+  }
+  .nav-dropdown-menu a{
+    color:#fff;
+    text-decoration:none;
+    font-size:1.15rem;
+    font-weight:600;
+    padding:12px 0;
+    opacity:0;
+    transform:translateY(-8px);
+    transition:opacity 220ms ease 120ms, transform 220ms ease 120ms;
+  }
+  body.nav-open .nav-dropdown{
+    transform:translateY(0);
+    opacity:1;
+    pointer-events:auto;
+  }
+  body.nav-open .nav-dropdown-menu a{
+    opacity:1;
+    transform:translateY(0);
+  }
+  @media (max-width:768px){
+    .nav-overlay{
+      display:none;
+    }
   }
   .title-chip{
   display:inline-flex; align-items:center; justify-content:center;
@@ -1618,12 +1673,24 @@ html { scrollbar-gutter: stable; }
           <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a4 4 0 00-4 4v1.1C6.2 8 5 9.7 5 11.6V17l-1.5 1.5v1h17v-1L19 17v-5.4c0-1.9-1.2-3.6-3-4.5V6a4 4 0 00-4-4zm0 20a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
         </button>
         <button class="icon-btn" id="debugToggleButton" type="button" aria-label="Toggle layout debug" aria-pressed="false">Debug</button>
-        <button class="nav-burger" type="button" aria-label="Open menu">
-          <span aria-hidden="true"></span>
+        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false">
+          <span class="burger-line line1" aria-hidden="true"></span>
+          <span class="burger-line line2" aria-hidden="true"></span>
+          <span class="burger-line line3" aria-hidden="true"></span>
         </button>
       </div>
     </div>
   </header>
+  <div class="nav-dropdown" aria-hidden="true">
+    <nav class="nav-dropdown-menu" aria-label="Mobile navigation">
+      <a href="#hero">Film</a>
+      <a href="#photography">Photography</a>
+      <a href="#social-media">Social Media</a>
+      <a href="#side-quests">Side Quests</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
   <div class="nav-overlay" aria-hidden="true">
     <button class="nav-overlay-close" type="button" aria-label="Close menu">×</button>
     <nav class="nav-overlay-menu" aria-label="Mobile navigation">
@@ -5395,36 +5462,45 @@ document.addEventListener('keydown', (event) => {
 
 <script>
   (function(){
-    const burger = document.querySelector('.nav-burger');
-    const overlay = document.querySelector('.nav-overlay');
-    const closeButton = document.querySelector('.nav-overlay-close');
+    const toggle = document.querySelector('.nav-toggle');
+    const dropdown = document.querySelector('.nav-dropdown');
+    const navBar = document.querySelector('.nav-bar');
     const body = document.body;
 
-    if (!burger || !overlay || !closeButton) return;
+    if (!toggle || !dropdown || !navBar) return;
 
     const openMenu = () => {
-      overlay.classList.add('is-open');
       body.classList.add('nav-open');
-      overlay.setAttribute('aria-hidden', 'false');
+      toggle.setAttribute('aria-expanded', 'true');
+      dropdown.setAttribute('aria-hidden', 'false');
     };
 
     const closeMenu = () => {
-      overlay.classList.remove('is-open');
       body.classList.remove('nav-open');
-      overlay.setAttribute('aria-hidden', 'true');
+      toggle.setAttribute('aria-expanded', 'false');
+      dropdown.setAttribute('aria-hidden', 'true');
     };
 
-    burger.addEventListener('click', openMenu);
-    closeButton.addEventListener('click', closeMenu);
+    const toggleMenu = () => {
+      if (body.classList.contains('nav-open')) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    };
 
-    overlay.addEventListener('click', (event) => {
-      if (event.target === overlay) {
+    toggle.addEventListener('click', toggleMenu);
+
+    document.addEventListener('click', (event) => {
+      if (!body.classList.contains('nav-open')) return;
+      const target = event.target;
+      if (!navBar.contains(target) && !dropdown.contains(target)) {
         closeMenu();
       }
     });
 
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && overlay.classList.contains('is-open')) {
+      if (event.key === 'Escape' && body.classList.contains('nav-open')) {
         closeMenu();
       }
     });
