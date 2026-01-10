@@ -95,6 +95,14 @@ border-bottom:0;
     color:#fff;
     background:rgba(255,255,255,0.10);
   }
+  .footer-nav-link--active{
+    color:var(--fg);
+  }
+  .section-anchor{
+    display:block;
+    height:0;
+    scroll-margin-top:calc(var(--nav-height) + env(safe-area-inset-top) + 12px);
+  }
   .nav-toggle {
     display:none;
     width:40px;
@@ -1909,6 +1917,11 @@ html { scrollbar-gutter: stable; }
 <!-- OLD: </div> -->
 
   </main>
+  <div class="section-anchor" id="photography"></div>
+  <div class="section-anchor" id="social-media"></div>
+  <div class="section-anchor" id="side-quests"></div>
+  <div class="section-anchor" id="about"></div>
+  <div class="section-anchor" id="contact"></div>
 
   <div id="fullscreen-player-wrapper" class="fullscreen-player-wrapper" hidden>
     <button type="button" class="fullscreen-player-close" aria-label="Close fullscreen playback">×</button>
@@ -5602,6 +5615,76 @@ document.addEventListener('keydown', (event) => {
         closeMenu();
       }
     });
+  })();
+</script>
+
+
+<script>
+  (function(){
+    const desktopLinks = Array.from(document.querySelectorAll('.nav-links .nav-link[href^="#"]'));
+    const mobileLinks = Array.from(document.querySelectorAll('.nav-dropdown-menu a[href^="#"], .nav-overlay-menu a[href^="#"]'));
+    const footerLinks = Array.from(document.querySelectorAll('.footer-nav-link[href^="#"]'));
+    const allLinks = [...desktopLinks, ...mobileLinks];
+    const allHashes = Array.from(new Set([...allLinks, ...footerLinks].map((link) => link.getAttribute('href'))));
+    const sections = allHashes
+      .map((hash) => document.querySelector(hash))
+      .filter((section) => section && section.id);
+
+    if (!sections.length) return;
+
+    const navBar = document.querySelector('.nav-bar');
+    const buffer = 12;
+
+    const getNavOffset = () => {
+      const cssValue = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-height'));
+      if (!Number.isNaN(cssValue) && navBar) {
+        const measured = navBar.offsetHeight || 0;
+        const safeArea = Math.max(0, measured - cssValue);
+        return cssValue + safeArea + buffer;
+      }
+      return (navBar ? navBar.offsetHeight : 0) + buffer;
+    };
+
+    const setActive = (hash) => {
+      if (!hash || !allHashes.includes(hash)) return;
+      allLinks.forEach((link) => link.classList.remove('nav-link--active'));
+      footerLinks.forEach((link) => link.classList.remove('footer-nav-link--active'));
+      allLinks.forEach((link) => {
+        if (link.getAttribute('href') === hash) {
+          link.classList.add('nav-link--active');
+        }
+      });
+      footerLinks.forEach((link) => {
+        if (link.getAttribute('href') === hash) {
+          link.classList.add('footer-nav-link--active');
+        }
+      });
+    };
+
+    const getCurrentHash = () => {
+      const offset = getNavOffset();
+      let currentHash = '#hero';
+      sections.forEach((section) => {
+        if (section.getBoundingClientRect().top <= offset) {
+          currentHash = `#${section.id}`;
+        }
+      });
+      return currentHash;
+    };
+
+    let scheduled = false;
+    const scheduleUpdate = () => {
+      if (scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(() => {
+        scheduled = false;
+        setActive(getCurrentHash());
+      });
+    };
+
+    scheduleUpdate();
+    window.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', scheduleUpdate, { passive: true });
   })();
 </script>
 
