@@ -248,7 +248,10 @@ main{
   background-size:cover;
   background-position:center;
   background-repeat:no-repeat;
+  opacity:0;
+  transition: opacity 600ms ease;
 }
+.hero-bleed-poster.is-visible{ opacity:1; }
 @media (min-width:1024px){
   .hero-bleed-poster{
     height:calc(80vh - 3px);
@@ -1524,12 +1527,12 @@ html { scrollbar-gutter: stable; }
   <main>
 <div class="hero-bleed-poster" aria-hidden="true"></div>
 <section class="hero hero--active" id="hero">
-  <img class="hero-poster" src="images/hero-test-pattern-16x9.png" alt="Sanchez Ninjah hero poster">
+  <img class="hero-poster" src="images/hero-poster-2x1.jpg" alt="Sanchez Ninjah hero poster">
   <div class="hero-video">
     <iframe
       id="hero-yt"
       title="Hero trailer"
-      src="https://www.youtube.com/embed/t1x7Q0IA3Os?autoplay=1&mute=1&playsinline=1&controls=0&loop=1&modestbranding=1&rel=0&enablejsapi=1&playlist=t1x7Q0IA3Os&start=0"
+      src="https://www.youtube.com/embed/t1x7Q0IA3Os?autoplay=1&mute=1&playsinline=1&controls=0&modestbranding=1&rel=0&enablejsapi=1&start=0"
       allow="autoplay; encrypted-media"
       allowfullscreen
     ></iframe>
@@ -1741,6 +1744,24 @@ html { scrollbar-gutter: stable; }
       heroVideo.classList.add('is-hero-fadeout');
     }, delayMs);
   }
+  function revealHeroBleedPoster() {
+    const heroVideo = document.querySelector('.hero-video');
+    const heroBleedPoster = document.querySelector('.hero-bleed-poster');
+    if (heroVideo) {
+      heroVideo.classList.add('is-hero-fadeout');
+    }
+    if (heroBleedPoster) {
+      heroBleedPoster.classList.add('is-visible');
+    }
+    try {
+      if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+        ytPlayer.pauseVideo();
+      }
+      if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
+        ytPlayer.stopVideo();
+      }
+    } catch (_) {}
+  }
   function cancelHeroPreviewTimer() {
     if (heroTenSecondTimer) {
       window.clearTimeout(heroTenSecondTimer);
@@ -1786,8 +1807,7 @@ html { scrollbar-gutter: stable; }
         modestbranding: 1,
         rel: 0,
         start: 0,
-        loop: 1,
-        playlist: HERO_VIDEO_ID
+        loop: 0
       },
       events: {
         onReady: e => {
@@ -1827,10 +1847,7 @@ html { scrollbar-gutter: stable; }
             return;
           }
           if (e.data === YT.PlayerState.ENDED) {
-            e.target.seekTo(0, true);
-            if (isPlayNowHighlighted() && !heroPreviewDone) {
-              e.target.playVideo();
-            }
+            revealHeroBleedPoster();
           }
         }
       }
