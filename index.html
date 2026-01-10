@@ -17,6 +17,8 @@
   * { box-sizing:border-box; }
   body { margin:0; font-family:var(--font-ui); background:var(--bg); color:var(--fg); line-height:1.5; overflow-x:hidden; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
   body.no-scroll { overflow:hidden; }
+  body.nav-open { overflow:hidden; }
+  .nav-scrim { display:none; }
 
   /* Fixed black nav */
 .nav-bar{
@@ -264,6 +266,27 @@ border-bottom:0;
   body.nav-open .nav-dropdown-menu a{
     opacity:1;
     transform:translateY(0);
+  }
+  @media (max-width:768px){
+    .nav-scrim{
+      display:block;
+      position:fixed;
+      top:calc(var(--nav-height) + env(safe-area-inset-top));
+      left:0;
+      right:0;
+      bottom:0;
+      background:rgba(0,0,0,0.65);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity 200ms ease;
+      z-index:9400;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    body.nav-open .nav-scrim{
+      opacity:1;
+      pointer-events:auto;
+    }
   }
   @media (max-width:768px){
     .nav-overlay{
@@ -1682,6 +1705,7 @@ html { scrollbar-gutter: stable; }
       </div>
     </div>
   </header>
+  <div class="nav-scrim" aria-hidden="true"></div>
   <div class="nav-dropdown" aria-hidden="true">
     <nav class="nav-dropdown-menu" aria-label="Mobile navigation">
       <a href="#hero">Film</a>
@@ -5466,20 +5490,23 @@ document.addEventListener('keydown', (event) => {
     const toggle = document.querySelector('.nav-toggle');
     const dropdown = document.querySelector('.nav-dropdown');
     const navBar = document.querySelector('.nav-bar');
+    const scrim = document.querySelector('.nav-scrim');
     const body = document.body;
 
-    if (!toggle || !dropdown || !navBar) return;
+    if (!toggle || !dropdown || !navBar || !scrim) return;
 
     const openMenu = () => {
       body.classList.add('nav-open');
       toggle.setAttribute('aria-expanded', 'true');
       dropdown.setAttribute('aria-hidden', 'false');
+      scrim.setAttribute('aria-hidden', 'false');
     };
 
     const closeMenu = () => {
       body.classList.remove('nav-open');
       toggle.setAttribute('aria-expanded', 'false');
       dropdown.setAttribute('aria-hidden', 'true');
+      scrim.setAttribute('aria-hidden', 'true');
     };
 
     const toggleMenu = () => {
@@ -5492,6 +5519,12 @@ document.addEventListener('keydown', (event) => {
 
     toggle.addEventListener('click', toggleMenu);
 
+    scrim.addEventListener('click', () => {
+      if (body.classList.contains('nav-open')) {
+        closeMenu();
+      }
+    });
+
     document.addEventListener('click', (event) => {
       if (!body.classList.contains('nav-open')) return;
       const target = event.target;
@@ -5499,6 +5532,29 @@ document.addEventListener('keydown', (event) => {
         closeMenu();
       }
     });
+
+    let touchStartY = null;
+    const handleTouchStart = (event) => {
+      if (!body.classList.contains('nav-open')) return;
+      if (!event.touches || event.touches.length === 0) return;
+      touchStartY = event.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (event) => {
+      if (!body.classList.contains('nav-open') || touchStartY === null) return;
+      const touch = event.changedTouches && event.changedTouches.length ? event.changedTouches[0] : null;
+      const endY = touch ? touch.clientY : touchStartY;
+      const deltaY = touchStartY - endY;
+      touchStartY = null;
+      if (deltaY >= 60) {
+        closeMenu();
+      }
+    };
+
+    dropdown.addEventListener('touchstart', handleTouchStart, { passive: true });
+    dropdown.addEventListener('touchend', handleTouchEnd, { passive: true });
+    scrim.addEventListener('touchstart', handleTouchStart, { passive: true });
+    scrim.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && body.classList.contains('nav-open')) {
