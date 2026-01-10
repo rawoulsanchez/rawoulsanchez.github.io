@@ -1639,6 +1639,16 @@ html { scrollbar-gutter: stable; }
     }
   }
 
+  @media (max-width: 768px) {
+    .hero-volume__sliderWrap,
+    .hero-volume__slider {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+  }
+
   @media (max-width: 640px) {
     .preview-card {
       max-width: 100%;
@@ -2295,8 +2305,16 @@ html { scrollbar-gutter: stable; }
       }
       console.log('[HeroVolume]', payload);
     }
+    function isHeroVolumeMobile() {
+      return window.matchMedia('(max-width: 768px)').matches;
+    }
     function openHeroVolume() {
       if (!heroVolume) return;
+      if (isHeroVolumeMobile()) {
+        heroVolume.classList.remove('is-open');
+        hvLog('open:blocked', { source: 'openHeroVolume', reason: 'mobile' });
+        return;
+      }
       heroVolume.classList.add('is-open');
       hvLog('open', { source: 'openHeroVolume' });
     }
