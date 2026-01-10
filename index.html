@@ -236,6 +236,24 @@ main{
   p  { margin:8px 0; color:var(--muted); }
 
 /* HERO */
+.hero-bleed-poster{
+  position:absolute;
+  top:calc(var(--nav-height) + env(safe-area-inset-top));
+  left:0;
+  right:0;
+  width:100vw;
+  height:calc((170vw * 9 / 16) - 3px);
+  z-index:0;
+  background-image:url("images/hero-poster-2x1.jpg");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+}
+@media (min-width:1024px){
+  .hero-bleed-poster{
+    height:calc(80vh - 3px);
+  }
+}
 .hero{
   position:relative;
   height:auto;
@@ -1504,6 +1522,7 @@ html { scrollbar-gutter: stable; }
     </div>
   </header>
   <main>
+<div class="hero-bleed-poster" aria-hidden="true"></div>
 <section class="hero hero--active" id="hero">
   <img class="hero-poster" src="images/hero-test-pattern-16x9.png" alt="Sanchez Ninjah hero poster">
   <div class="hero-video">
