@@ -238,10 +238,12 @@ border-bottom:0;
     background:rgba(0,0,0,0.92);
     overflow:hidden;
     z-index:9500;
-    transform:translateY(-8px);
+    max-height:0;
+    overflow:hidden;
     opacity:0;
+    transform:translateY(-6px);
     pointer-events:none;
-    transition:transform 240ms ease, opacity 240ms ease;
+    transition:max-height 280ms ease, opacity 200ms ease, transform 280ms ease;
   }
   .nav-dropdown::after{
     content:"";
@@ -270,8 +272,9 @@ border-bottom:0;
     transition:opacity 220ms ease 120ms, transform 220ms ease 120ms;
   }
   body.nav-open .nav-dropdown{
-    transform:translateY(0);
+    max-height:70vh;
     opacity:1;
+    transform:translateY(0);
     pointer-events:auto;
   }
   body.nav-open .nav-dropdown-menu a{
