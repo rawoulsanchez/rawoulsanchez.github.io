@@ -3960,7 +3960,13 @@ html { scrollbar-gutter: stable; }
         };
 
         if (withDelay) {
-          if (heroPauseScheduled) return;
+          if (heroPauseScheduled) {
+            if (heroPauseTimeout) {
+              clearTimeout(heroPauseTimeout);
+            }
+            heroPauseTimeout = null;
+            heroPauseScheduled = false;
+          }
           heroPauseScheduled = true;
           const scheduledShelf = expectedActiveShelf || document.querySelector('.shelf-track--active');
           heroPauseCandidate = scheduledShelf || null;
