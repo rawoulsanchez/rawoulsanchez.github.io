@@ -3974,9 +3974,8 @@ html { scrollbar-gutter: stable; }
             heroPauseTimeout = null;
             heroPauseScheduled = false;
             const currentActiveShelf = document.querySelector('.shelf-track--active');
-            const pauseCandidate = heroPauseCandidate;
             heroPauseCandidate = null;
-            if (!currentActiveShelf || !pauseCandidate || currentActiveShelf !== pauseCandidate) {
+            if (!currentActiveShelf) {
               return;
             }
             if (currentActiveShelf.classList.contains('hero')) {
