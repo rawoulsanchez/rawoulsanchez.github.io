@@ -3031,6 +3031,10 @@ html { scrollbar-gutter: stable; }
 
           if (previousActiveTrack !== track) {
             recenterAllOtherTracks(track);
+            const updateHeroPlaybackState = window.updateHeroPlaybackState;
+            if (typeof updateHeroPlaybackState === 'function') {
+              updateHeroPlaybackState({ allowDelayedPause: true });
+            }
           }
 
           // Same-row behavior: when the user scrolls away and then stops,
