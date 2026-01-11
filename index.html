@@ -3021,6 +3021,7 @@ html { scrollbar-gutter: stable; }
           if (previousActiveTrack && previousActiveTrack !== track) {
             previousActiveTrack.classList.remove('shelf-track--active');
             previousActiveTrack.classList.remove('hero--active');
+            updateHeroPlaybackState({ allowDelayedPause: true });
           }
           track.classList.add('shelf-track--active');
           lastActiveTrack = track;
