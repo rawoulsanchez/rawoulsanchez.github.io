@@ -3025,6 +3025,9 @@ html { scrollbar-gutter: stable; }
           }
           track.classList.add('shelf-track--active');
           lastActiveTrack = track;
+          if (previousActiveTrack && previousActiveTrack !== track) {
+            updateHeroPlaybackState({ allowDelayedPause: true });
+          }
 
           if (previousActiveTrack !== track) {
             recenterAllOtherTracks(track);
