@@ -1354,7 +1354,7 @@ html { scrollbar-gutter: stable; }
   .preview-media-placeholder {
     position: absolute;
     inset: 0;
-    z-index: 2;
+    z-index: 0;
     background:
       radial-gradient(circle at top, rgba(255,255,255,0.10), transparent 55%),
       linear-gradient(135deg, #222632, #11131a);
@@ -1365,7 +1365,7 @@ html { scrollbar-gutter: stable; }
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0;
+    opacity: 1;
     z-index: 1;
   }
   .preview-teaser-player {
@@ -5263,21 +5263,19 @@ document.addEventListener('keydown', (event) => {
       <div class="preview-media">
         <!-- Later: video or wide poster goes here -->
         <div class="preview-media-placeholder"></div>
-        <img class="preview-media-poster" alt="">
+        <img class="preview-media-poster" src="images/poster-wide-A1.png" alt="Wide poster for preview">
       </div>
       <div class="preview-info">
         <header class="preview-header">
-          <h2 id="preview-title" class="preview-title">Preview Placeholder Title</h2>
+          <h2 id="preview-title" class="preview-title">The Unreasonably Long and Impossible-to-Skip Title That Spills Across Multiple Lines to Stress Test the Preview Header Layout</h2>
           <div class="preview-meta">
-            <span class="preview-runtime">1h 52m</span>
-            <span class="preview-tags">Thriller • Sci‑Fi • Action</span>
+            <span class="preview-runtime">2h 14m</span>
+            <span class="preview-tags">Prestige Drama • Mythic Noir • Alt‑History • Neo‑Western • Psychological Thriller • Courtroom Chaos • Cyber Romance • Cosmic Horror • Folk Mystery • Retro Futurism • Experimental Soundscape</span>
           </div>
         </header>
         <div class="preview-body">
           <p class="preview-description">
-            
-            This is a static placeholder description used for layout validation only. It is intentionally long so the text wraps across multiple lines and reveals spacing, rhythm, and hierarchy inside the Preview Modal. Replace this copy with real content in a later task once the layout has been visually approved.
-          
+            This is an intentionally overlong description designed to push the limits of the preview body container, wrapping across many lines and forcing the scroll behavior to reveal how the layout handles dense narrative blocks. It layers multiple sentences with varied cadence, mentions a sweeping saga of rival archivists, and references a cross‑continental chase that spans decades, climates, and shifting alliances. Even when the plot drifts into speculative territory and tangents about lost signals, the copy keeps flowing to ensure the text area is sufficiently stressed. Finally, the paragraph closes with a lingering note about unresolved mysteries, prompting the reader to keep scrolling just to see the end.
           </p>
         </div>
         <div class="preview-actions">
