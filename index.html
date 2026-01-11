@@ -4046,6 +4046,9 @@ html { scrollbar-gutter: stable; }
         heroPausedByUs = false;
       }
 
+      window.pauseHeroVideo = pauseHeroVideo;
+      window.resumeHeroPlayback = resumeHeroPlayback;
+
       function isHeroActive() {
         return heroSection && heroSection.classList.contains('hero--active');
       }
@@ -5137,6 +5140,7 @@ previewTitleEl.textContent = title;
           if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
             window.updateActiveTrackFromWindowScroll();
           }
+          resumeHeroPlayback();
           updateHeroPlaybackState();
           return;
         }
@@ -5173,6 +5177,7 @@ previewTitleEl.textContent = title;
 
         previewOverlay.classList.remove('is-visible');
         previewOverlay.setAttribute('aria-hidden', 'true');
+        resumeHeroPlayback();
 
         const targetRadius = getComputedStyle(lastOpenedCard).borderRadius;
 
@@ -5551,6 +5556,9 @@ document.addEventListener('keydown', (event) => {
       toggle.setAttribute('aria-expanded', 'true');
       dropdown.setAttribute('aria-hidden', 'false');
       scrim.setAttribute('aria-hidden', 'false');
+      if (typeof window.pauseHeroVideo === 'function') {
+        window.pauseHeroVideo({ force: true });
+      }
     };
 
     const closeMenu = () => {
@@ -5559,6 +5567,9 @@ document.addEventListener('keydown', (event) => {
       toggle.setAttribute('aria-expanded', 'false');
       dropdown.setAttribute('aria-hidden', 'true');
       scrim.setAttribute('aria-hidden', 'true');
+      if (typeof window.resumeHeroPlayback === 'function') {
+        window.resumeHeroPlayback();
+      }
     };
 
     const toggleMenu = () => {
