@@ -3982,14 +3982,7 @@ html { scrollbar-gutter: stable; }
           heroPauseTimeout = setTimeout(() => {
             heroPauseTimeout = null;
             heroPauseScheduled = false;
-            const currentActiveShelf = document.querySelector('.shelf-track--active');
             heroPauseCandidate = null;
-            if (!currentActiveShelf) {
-              return;
-            }
-            if (currentActiveShelf.classList.contains('hero')) {
-              return;
-            }
             if (isHeroActive()) {
               return;
             }
@@ -4100,7 +4093,7 @@ html { scrollbar-gutter: stable; }
           return;
         }
         heroWasActive = false;
-        if (allowDelayedPause && otherShelfActive) {
+        if (allowDelayedPause && !heroActive) {
           pauseHeroVideo({ withDelay: true, expectedActiveShelf: activeShelf });
           return;
         }
