@@ -4137,8 +4137,9 @@ html { scrollbar-gutter: stable; }
         if (!heroSection) return;
         if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
           window.updateActiveTrackFromWindowScroll();
+        } else {
+          updateHeroPlaybackState({ allowDelayedPause: true });
         }
-        updateHeroPlaybackState({ allowDelayedPause: true });
       }, { passive: true });
 
       const MORPH_DURATION = 520;
