@@ -2916,6 +2916,9 @@ html { scrollbar-gutter: stable; }
       }
 
       if (previousActiveTrack !== closestTrack) {
+        if (typeof stopPreviewTeaser === 'function' && isPreviewOpen()) {
+          stopPreviewTeaser();
+        }
         const playbackUpdater = window.updateHeroPlaybackState;
         if (typeof playbackUpdater === 'function') {
           playbackUpdater({ allowDelayedPause: true });
@@ -3196,8 +3199,10 @@ html { scrollbar-gutter: stable; }
         heroPauseCandidate = null;
       }
 
+      let previewOpening = false;
+
       function isPreviewOpen() {
-        return previewOverlay.classList.contains('is-visible');
+        return previewOpening || previewOverlay.classList.contains('is-visible');
       }
 
       let previewTeaserPlayer = null;
@@ -3982,14 +3987,7 @@ html { scrollbar-gutter: stable; }
           heroPauseTimeout = setTimeout(() => {
             heroPauseTimeout = null;
             heroPauseScheduled = false;
-            const currentActiveShelf = document.querySelector('.shelf-track--active');
             heroPauseCandidate = null;
-            if (!currentActiveShelf) {
-              return;
-            }
-            if (currentActiveShelf.classList.contains('hero')) {
-              return;
-            }
             if (isHeroActive()) {
               return;
             }
@@ -4100,7 +4098,7 @@ html { scrollbar-gutter: stable; }
           return;
         }
         heroWasActive = false;
-        if (allowDelayedPause && otherShelfActive) {
+        if (allowDelayedPause && !heroActive) {
           pauseHeroVideo({ withDelay: true, expectedActiveShelf: activeShelf });
           return;
         }
@@ -4903,6 +4901,7 @@ html { scrollbar-gutter: stable; }
 
       function openPreviewFromCard(card, triggerElement = card) {
         // ZAQ TASK 1.8: Pause hero video when preview begins opening.
+        previewOpening = true;
         pauseHeroVideo({ force: true });
         const heroAudioState = getHeroAudioState();
         const syncedVolume = clampPreviewVolume(heroAudioState.volume);
@@ -4957,6 +4956,7 @@ previewTitleEl.textContent = title;
         attachPreviewSwipeListeners();
         const isHeroPreview = !!(heroPreviewSource && (card === heroPreviewSource || card === heroSection || card === heroVisual || card.classList.contains('hero') || card.classList.contains('hero-video')));
         runOpenMorph(card, profile).then(() => {
+          previewOpening = false;
           if (isHeroPreview) {
             startHeroPreviewTeaser();
           } else {
@@ -5127,6 +5127,7 @@ previewTitleEl.textContent = title;
 
       function closePreview() {
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
+        previewOpening = false;
         stopPreviewTeaser();
         resetPreviewPlaceholder();
         resetPreviewPosterImage();
