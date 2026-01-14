@@ -2935,6 +2935,11 @@ html { scrollbar-gutter: stable; }
 
     window.updateActiveTrackFromWindowScroll = updateActiveTrackFromWindowScroll;
     updateActiveTrackFromWindowScroll();
+    window.addEventListener('pageshow', () => {
+      requestAnimationFrame(() => {
+        updateActiveTrackFromWindowScroll();
+      });
+    });
 
     document.querySelectorAll('.shelf-track').forEach(track => {
       const originalPosters = Array.from(track.children);
