@@ -1,6 +1,7 @@
 
 
 
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -3173,7 +3174,6 @@ html { scrollbar-gutter: stable; }
       let heroPausedTime = null;
       let heroTargetVolume = 100;
       let heroPauseTimeout = null;
-      let heroResumeTimeout = null;
       let heroIsVisible = false;
       let heroWasActive = false;
       let heroPausedByUs = false;
@@ -3194,13 +3194,6 @@ html { scrollbar-gutter: stable; }
         }
         heroPauseScheduled = false;
         heroPauseCandidate = null;
-      }
-
-      function cancelHeroResume() {
-        if (heroResumeTimeout !== null) {
-          clearTimeout(heroResumeTimeout);
-          heroResumeTimeout = null;
-        }
       }
 
       function isPreviewOpen() {
@@ -4010,10 +4003,8 @@ html { scrollbar-gutter: stable; }
       function resumeHeroPlayback() {
         if (typeof ytPlayer === 'undefined' || !ytPlayer) return;
         if (isPreviewOpen()) return;
-        if (isMenuOpen()) return;
         if (window.heroPreviewDone) return;
         if (!isHeroActive()) return;
-        if (!isHeroInView()) return;
 
         let playerState = null;
         try {
@@ -4076,20 +4067,9 @@ html { scrollbar-gutter: stable; }
         return heroSection && heroSection.classList.contains('hero--active');
       }
 
-      function isMenuOpen() {
-        return document.body.classList.contains('nav-open') || document.documentElement.classList.contains('nav-open');
-      }
-
-      function isHeroInView() {
-        if (typeof heroIsVisible === 'boolean') return heroIsVisible;
-        const rect = heroSection.getBoundingClientRect();
-        return rect.top < window.innerHeight && rect.bottom > 0;
-      }
-
       function updateHeroPlaybackState({ allowDelayedPause } = {}) {
         if (!heroSection) return;
         if (window.heroPreviewDone) {
-          cancelHeroResume();
           pauseHeroVideo({ force: true });
           heroWasActive = false;
           return;
@@ -4101,49 +4081,23 @@ html { scrollbar-gutter: stable; }
         const activeShelf = document.querySelector('.shelf-track--active');
         const otherShelfActive = !!(activeShelf && !activeShelf.classList.contains('hero'));
         const heroActiveForPlayback = heroActive || (isMobile && heroIsVisible);
-        if (!heroActive) {
-          cancelHeroResume();
-        }
         if (isPreviewOpen()) {
-          cancelHeroResume();
           pauseHeroVideo({ force: true });
           heroWasActive = heroActiveForPlayback;
           return;
-        }
-        if (isMenuOpen()) {
-          cancelHeroResume();
         }
         if (otherShelfActive && !heroActive) {
           heroWasActive = false;
           pauseHeroVideo({ withDelay: true, expectedActiveShelf: activeShelf });
           return;
         }
-        if (heroActive) {
+        if (heroActiveForPlayback && isPlayNowHighlighted()) {
           if (!wasHeroActive) {
             cancelHeroPause();
-            if (isMenuOpen()) {
-              heroWasActive = true;
-              return;
-            }
-            if (window.heroLoopState && window.heroLoopState.isScrolling === true) {
-              cancelHeroResume();
-              heroResumeTimeout = setTimeout(() => {
-                heroResumeTimeout = null;
-                resumeHeroPlayback();
-              }, 1000);
-              heroWasActive = true;
-              return;
-            }
-            cancelHeroResume();
-            resumeHeroPlayback();
-            heroWasActive = true;
-            return;
           }
-          if (heroActiveForPlayback && isPlayNowHighlighted()) {
-            resumeHeroPlayback();
-            heroWasActive = true;
-            return;
-          }
+          resumeHeroPlayback();
+          heroWasActive = true;
+          return;
         }
         heroWasActive = false;
         if (allowDelayedPause && otherShelfActive) {
