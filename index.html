@@ -3997,7 +3997,11 @@ html { scrollbar-gutter: stable; }
             heroPauseTimeout = null;
             heroPauseScheduled = false;
             heroPauseCandidate = null;
+            const currentActiveShelf = document.querySelector('.shelf-track--active');
             if (isHeroActive()) {
+              return;
+            }
+            if (currentActiveShelf && currentActiveShelf.classList.contains('hero')) {
               return;
             }
             pauseAction();
