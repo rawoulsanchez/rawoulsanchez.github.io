@@ -2815,6 +2815,7 @@ html { scrollbar-gutter: stable; }
       const heroTargetTop = hero
         ? Math.max(0, Math.min(computeVerticalCenterTargetTop(hero), maxScrollTop))
         : null;
+      const wasHeroActive = hero && hero.classList.contains('hero--active');
 
       function targetTopForTrack(track) {
         if (!track) return null;
@@ -2915,7 +2916,8 @@ html { scrollbar-gutter: stable; }
         }
       }
 
-      if (previousActiveTrack !== closestTrack) {
+      const heroActiveChanged = hero && hero.classList.contains('hero--active') !== wasHeroActive;
+      if (previousActiveTrack !== closestTrack || heroActiveChanged) {
         if (typeof stopPreviewTeaser === 'function' && isPreviewOpen()) {
           stopPreviewTeaser();
         }
