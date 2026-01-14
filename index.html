@@ -1,7 +1,3 @@
-
-
-
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -1355,7 +1351,7 @@ html { scrollbar-gutter: stable; }
   .preview-media-placeholder {
     position: absolute;
     inset: 0;
-    z-index: 2;
+    z-index: 0;
     background:
       radial-gradient(circle at top, rgba(255,255,255,0.10), transparent 55%),
       linear-gradient(135deg, #222632, #11131a);
@@ -1366,7 +1362,7 @@ html { scrollbar-gutter: stable; }
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0;
+    opacity: 1;
     z-index: 1;
   }
   .preview-teaser-player {
@@ -2815,6 +2811,7 @@ html { scrollbar-gutter: stable; }
       const heroTargetTop = hero
         ? Math.max(0, Math.min(computeVerticalCenterTargetTop(hero), maxScrollTop))
         : null;
+      const wasHeroActive = hero && hero.classList.contains('hero--active');
 
       function targetTopForTrack(track) {
         if (!track) return null;
@@ -2915,7 +2912,11 @@ html { scrollbar-gutter: stable; }
         }
       }
 
-      if (previousActiveTrack !== closestTrack) {
+      const heroActiveChanged = hero && hero.classList.contains('hero--active') !== wasHeroActive;
+      if (previousActiveTrack !== closestTrack || heroActiveChanged) {
+        if (typeof stopPreviewTeaser === 'function' && isPreviewOpen()) {
+          stopPreviewTeaser();
+        }
         const playbackUpdater = window.updateHeroPlaybackState;
         if (typeof playbackUpdater === 'function') {
           playbackUpdater({ allowDelayedPause: true });
@@ -3022,12 +3023,20 @@ html { scrollbar-gutter: stable; }
           if (previousActiveTrack && previousActiveTrack !== track) {
             previousActiveTrack.classList.remove('shelf-track--active');
             previousActiveTrack.classList.remove('hero--active');
+            updateHeroPlaybackState({ allowDelayedPause: true });
           }
           track.classList.add('shelf-track--active');
           lastActiveTrack = track;
+          if (previousActiveTrack && previousActiveTrack !== track) {
+            updateHeroPlaybackState({ allowDelayedPause: true });
+          }
 
           if (previousActiveTrack !== track) {
             recenterAllOtherTracks(track);
+            const updateHeroPlaybackState = window.updateHeroPlaybackState;
+            if (typeof updateHeroPlaybackState === 'function') {
+              updateHeroPlaybackState({ allowDelayedPause: true });
+            }
           }
 
           // Same-row behavior: when the user scrolls away and then stops,
@@ -3188,8 +3197,10 @@ html { scrollbar-gutter: stable; }
         heroPauseCandidate = null;
       }
 
+      let previewOpening = false;
+
       function isPreviewOpen() {
-        return previewOverlay.classList.contains('is-visible');
+        return previewOpening || previewOverlay.classList.contains('is-visible');
       }
 
       let previewTeaserPlayer = null;
@@ -3936,6 +3947,12 @@ html { scrollbar-gutter: stable; }
         const pauseAction = () => {
           try {
             if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+              if (force) {
+                captureHeroPausedTime();
+                ytPlayer.pauseVideo();
+                heroPausedByUs = true;
+                return;
+              }
               if (!force && isHeroActive()) return;
               if (!force && isPreviewOpen()) return;
               captureHeroPausedTime();
@@ -3961,22 +3978,20 @@ html { scrollbar-gutter: stable; }
         };
 
         if (withDelay) {
-          if (heroPauseScheduled) return;
+          if (heroPauseScheduled) {
+            if (heroPauseTimeout) {
+              clearTimeout(heroPauseTimeout);
+            }
+            heroPauseTimeout = null;
+            heroPauseScheduled = false;
+          }
           heroPauseScheduled = true;
           const scheduledShelf = expectedActiveShelf || document.querySelector('.shelf-track--active');
           heroPauseCandidate = scheduledShelf || null;
           heroPauseTimeout = setTimeout(() => {
             heroPauseTimeout = null;
             heroPauseScheduled = false;
-            const currentActiveShelf = document.querySelector('.shelf-track--active');
-            const pauseCandidate = heroPauseCandidate;
             heroPauseCandidate = null;
-            if (!currentActiveShelf || !pauseCandidate || currentActiveShelf !== pauseCandidate) {
-              return;
-            }
-            if (currentActiveShelf.classList.contains('hero')) {
-              return;
-            }
             if (isHeroActive()) {
               return;
             }
@@ -4047,6 +4062,9 @@ html { scrollbar-gutter: stable; }
         heroPausedByUs = false;
       }
 
+      window.pauseHeroVideo = pauseHeroVideo;
+      window.resumeHeroPlayback = resumeHeroPlayback;
+
       function isHeroActive() {
         return heroSection && heroSection.classList.contains('hero--active');
       }
@@ -4064,7 +4082,7 @@ html { scrollbar-gutter: stable; }
         const heroPlaybackRequested = window.heroPlaybackRequested === true;
         const activeShelf = document.querySelector('.shelf-track--active');
         const otherShelfActive = !!(activeShelf && !activeShelf.classList.contains('hero'));
-        const heroActiveForPlayback = heroActive || (isMobile && heroIsVisible);
+        const heroActiveForPlayback = heroActive;
         if (isPreviewOpen()) {
           pauseHeroVideo({ force: true });
           heroWasActive = heroActiveForPlayback;
@@ -4084,7 +4102,7 @@ html { scrollbar-gutter: stable; }
           return;
         }
         heroWasActive = false;
-        if (allowDelayedPause && otherShelfActive) {
+        if (allowDelayedPause && !heroActive) {
           pauseHeroVideo({ withDelay: true, expectedActiveShelf: activeShelf });
           return;
         }
@@ -4115,8 +4133,9 @@ html { scrollbar-gutter: stable; }
         if (!heroSection) return;
         if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
           window.updateActiveTrackFromWindowScroll();
+        } else {
+          updateHeroPlaybackState({ allowDelayedPause: true });
         }
-        updateHeroPlaybackState({ allowDelayedPause: true });
       }, { passive: true });
 
       const MORPH_DURATION = 520;
@@ -4887,6 +4906,7 @@ html { scrollbar-gutter: stable; }
 
       function openPreviewFromCard(card, triggerElement = card) {
         // ZAQ TASK 1.8: Pause hero video when preview begins opening.
+        previewOpening = true;
         pauseHeroVideo({ force: true });
         const heroAudioState = getHeroAudioState();
         const syncedVolume = clampPreviewVolume(heroAudioState.volume);
@@ -4941,6 +4961,7 @@ previewTitleEl.textContent = title;
         attachPreviewSwipeListeners();
         const isHeroPreview = !!(heroPreviewSource && (card === heroPreviewSource || card === heroSection || card === heroVisual || card.classList.contains('hero') || card.classList.contains('hero-video')));
         runOpenMorph(card, profile).then(() => {
+          previewOpening = false;
           if (isHeroPreview) {
             startHeroPreviewTeaser();
           } else {
@@ -5111,6 +5132,7 @@ previewTitleEl.textContent = title;
 
       function closePreview() {
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
+        previewOpening = false;
         stopPreviewTeaser();
         resetPreviewPlaceholder();
         resetPreviewPosterImage();
@@ -5138,6 +5160,7 @@ previewTitleEl.textContent = title;
           if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
             window.updateActiveTrackFromWindowScroll();
           }
+          resumeHeroPlayback();
           updateHeroPlaybackState();
           return;
         }
@@ -5174,6 +5197,7 @@ previewTitleEl.textContent = title;
 
         previewOverlay.classList.remove('is-visible');
         previewOverlay.setAttribute('aria-hidden', 'true');
+        resumeHeroPlayback();
 
         const targetRadius = getComputedStyle(lastOpenedCard).borderRadius;
 
@@ -5264,21 +5288,19 @@ document.addEventListener('keydown', (event) => {
       <div class="preview-media">
         <!-- Later: video or wide poster goes here -->
         <div class="preview-media-placeholder"></div>
-        <img class="preview-media-poster" alt="">
+        <img class="preview-media-poster" src="images/poster-wide-A1.png" alt="Wide poster for preview">
       </div>
       <div class="preview-info">
         <header class="preview-header">
-          <h2 id="preview-title" class="preview-title">Preview Placeholder Title</h2>
+          <h2 id="preview-title" class="preview-title">The Unreasonably Long and Impossible-to-Skip Title That Spills Across Multiple Lines to Stress Test the Preview Header Layout</h2>
           <div class="preview-meta">
-            <span class="preview-runtime">1h 52m</span>
-            <span class="preview-tags">Thriller • Sci‑Fi • Action</span>
+            <span class="preview-runtime">2h 14m</span>
+            <span class="preview-tags">Prestige Drama • Mythic Noir • Alt‑History • Neo‑Western • Psychological Thriller • Courtroom Chaos • Cyber Romance • Cosmic Horror • Folk Mystery • Retro Futurism • Experimental Soundscape</span>
           </div>
         </header>
         <div class="preview-body">
           <p class="preview-description">
-            
-            This is a static placeholder description used for layout validation only. It is intentionally long so the text wraps across multiple lines and reveals spacing, rhythm, and hierarchy inside the Preview Modal. Replace this copy with real content in a later task once the layout has been visually approved.
-          
+            This is an intentionally overlong description designed to push the limits of the preview body container, wrapping across many lines and forcing the scroll behavior to reveal how the layout handles dense narrative blocks. It layers multiple sentences with varied cadence, mentions a sweeping saga of rival archivists, and references a cross‑continental chase that spans decades, climates, and shifting alliances. Even when the plot drifts into speculative territory and tangents about lost signals, the copy keeps flowing to ensure the text area is sufficiently stressed. Finally, the paragraph closes with a lingering note about unresolved mysteries, prompting the reader to keep scrolling just to see the end.
           </p>
         </div>
         <div class="preview-actions">
@@ -5554,6 +5576,9 @@ document.addEventListener('keydown', (event) => {
       toggle.setAttribute('aria-expanded', 'true');
       dropdown.setAttribute('aria-hidden', 'false');
       scrim.setAttribute('aria-hidden', 'false');
+      if (typeof window.pauseHeroVideo === 'function') {
+        window.pauseHeroVideo({ force: true });
+      }
     };
 
     const closeMenu = () => {
@@ -5562,6 +5587,9 @@ document.addEventListener('keydown', (event) => {
       toggle.setAttribute('aria-expanded', 'false');
       dropdown.setAttribute('aria-hidden', 'true');
       scrim.setAttribute('aria-hidden', 'true');
+      if (typeof window.resumeHeroPlayback === 'function') {
+        window.resumeHeroPlayback();
+      }
     };
 
     const toggleMenu = () => {
