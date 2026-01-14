@@ -4084,7 +4084,7 @@ html { scrollbar-gutter: stable; }
         const heroPlaybackRequested = window.heroPlaybackRequested === true;
         const activeShelf = document.querySelector('.shelf-track--active');
         const otherShelfActive = !!(activeShelf && !activeShelf.classList.contains('hero'));
-        const heroActiveForPlayback = heroIsVisible && (heroActive || isMobile);
+        const heroActiveForPlayback = heroActive;
         if (isPreviewOpen()) {
           pauseHeroVideo({ force: true });
           heroWasActive = heroActiveForPlayback;
