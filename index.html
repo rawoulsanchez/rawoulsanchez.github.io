@@ -3949,6 +3949,12 @@ html { scrollbar-gutter: stable; }
         const pauseAction = () => {
           try {
             if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+              if (force) {
+                captureHeroPausedTime();
+                ytPlayer.pauseVideo();
+                heroPausedByUs = true;
+                return;
+              }
               if (!force && isHeroActive()) return;
               if (!force && isPreviewOpen()) return;
               captureHeroPausedTime();
@@ -4078,7 +4084,7 @@ html { scrollbar-gutter: stable; }
         const heroPlaybackRequested = window.heroPlaybackRequested === true;
         const activeShelf = document.querySelector('.shelf-track--active');
         const otherShelfActive = !!(activeShelf && !activeShelf.classList.contains('hero'));
-        const heroActiveForPlayback = heroActive || (isMobile && heroIsVisible);
+        const heroActiveForPlayback = heroIsVisible && (heroActive || isMobile);
         if (isPreviewOpen()) {
           pauseHeroVideo({ force: true });
           heroWasActive = heroActiveForPlayback;
