@@ -4083,12 +4083,11 @@ html { scrollbar-gutter: stable; }
         }
         const wasHeroActive = heroWasActive;
         const heroActive = isHeroActive();
-        const isMobile = typeof window.isMobileView === 'function' && window.isMobileView();
-        const heroPlaybackRequested = window.heroPlaybackRequested === true;
         const activeShelf = document.querySelector('.shelf-track--active');
         const otherShelfActive = !!(activeShelf && !activeShelf.classList.contains('hero'));
         const heroActiveForPlayback = heroActive;
-        if (isPreviewOpen()) {
+        const isMenuOpen = document.body && document.body.classList.contains('nav-open');
+        if (isPreviewOpen() || isMenuOpen) {
           pauseHeroVideo({ force: true });
           heroWasActive = heroActiveForPlayback;
           return;
@@ -4120,10 +4119,6 @@ html { scrollbar-gutter: stable; }
         const heroObserver = new IntersectionObserver((entries) => {
           const entry = entries[0];
           heroIsVisible = !!(entry && entry.isIntersecting);
-          if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
-            window.updateActiveTrackFromWindowScroll();
-          }
-          updateHeroPlaybackState({ allowDelayedPause: true });
         }, {
           threshold: [0, HERO_VISIBLE_RATIO, 1]
         });
