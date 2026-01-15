@@ -2933,8 +2933,29 @@ html { scrollbar-gutter: stable; }
     updateActiveTrackFromWindowScroll();
     window.addEventListener('pageshow', () => {
       requestAnimationFrame(() => {
-        updateActiveTrackFromWindowScroll();
+        if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
+          window.updateActiveTrackFromWindowScroll();
+        }
+        if (typeof window.updateHeroPlaybackState === 'function') {
+          window.updateHeroPlaybackState({ allowDelayedPause: true });
+        }
       });
+      setTimeout(() => {
+        if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
+          window.updateActiveTrackFromWindowScroll();
+        }
+        if (typeof window.updateHeroPlaybackState === 'function') {
+          window.updateHeroPlaybackState({ allowDelayedPause: true });
+        }
+      }, 50);
+      setTimeout(() => {
+        if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
+          window.updateActiveTrackFromWindowScroll();
+        }
+        if (typeof window.updateHeroPlaybackState === 'function') {
+          window.updateHeroPlaybackState({ allowDelayedPause: true });
+        }
+      }, 250);
     });
 
     document.querySelectorAll('.shelf-track').forEach(track => {
