@@ -2898,15 +2898,6 @@ html { scrollbar-gutter: stable; }
       }
 
       const heroActiveChanged = hero && hero.classList.contains('hero--active') !== wasHeroActive;
-      if (previousActiveTrack !== closestTrack || heroActiveChanged) {
-        if (typeof stopPreviewTeaser === 'function' && isPreviewOpen()) {
-          stopPreviewTeaser();
-        }
-        const playbackUpdater = window.syncHeroPlayback;
-        if (typeof playbackUpdater === 'function') {
-          playbackUpdater();
-        }
-      }
     }
 
     window.addEventListener('scroll', () => {
