@@ -1949,7 +1949,7 @@ html { scrollbar-gutter: stable; }
   // Changed alerts to console.log as alerts break the canvas environment.
   const HERO_VIDEO_ID = 't1x7Q0IA3Os';
   const HERO_END_FADE_OFFSET_SECONDS = 2;
-  let ytPlayer, isMuted = true;
+  let ytPlayer, heroPlayer = null, isMuted = true;
   let heroUiVolume = 50;
   let heroLastNonZeroVolume = 50;
   let heroPosterFadeTimeout = null;
@@ -2012,16 +2012,17 @@ html { scrollbar-gutter: stable; }
       heroBleedPoster.classList.add('is-visible');
     }
     try {
-      if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
-        ytPlayer.pauseVideo();
+      if (!heroPlayer) return;
+      if (typeof heroPlayer.pauseVideo === 'function') {
+        heroPlayer.pauseVideo();
       }
-      if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
-        ytPlayer.stopVideo();
+      if (typeof heroPlayer.stopVideo === 'function') {
+        heroPlayer.stopVideo();
       }
     } catch (_) {}
   }
   function onYouTubeIframeAPIReady(){
-    ytPlayer = new YT.Player('hero-yt', {
+    heroPlayer = new YT.Player('hero-yt', {
       playerVars: {
         autoplay: 0,
         mute: 1,
@@ -2101,14 +2102,14 @@ html { scrollbar-gutter: stable; }
     const shouldMute = nextVolume === 0;
     isMuted = shouldMute;
     updateHeroMuteUi();
-    if (!ytPlayer || typeof ytPlayer.setVolume !== 'function') return;
+    if (!heroPlayer || typeof heroPlayer.setVolume !== 'function') return;
     try {
-      ytPlayer.setVolume(nextVolume);
+      heroPlayer.setVolume(nextVolume);
     } catch (_) {}
     if (shouldMute) {
-      if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
+      if (typeof heroPlayer.mute === 'function') heroPlayer.mute();
     } else {
-      if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
+      if (typeof heroPlayer.unMute === 'function') heroPlayer.unMute();
     }
     updateHeroMuteUi();
   }
@@ -2118,14 +2119,14 @@ html { scrollbar-gutter: stable; }
     const nextMutedState = !isMuted;
     isMuted = nextMutedState;
     updateHeroMuteUi();
-    if (!ytPlayer) return;
+    if (!heroPlayer) return;
     if (nextMutedState) {
-      if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
+      if (typeof heroPlayer.mute === 'function') heroPlayer.mute();
       return;
     }
     const unmuteVolume = currentSliderValue > 0 ? currentSliderValue : heroLastNonZeroVolume;
-    if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
-    if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(unmuteVolume);
+    if (typeof heroPlayer.unMute === 'function') heroPlayer.unMute();
+    if (typeof heroPlayer.setVolume === 'function') heroPlayer.setVolume(unmuteVolume);
     heroUiVolume = unmuteVolume;
     if (slider) slider.value = String(unmuteVolume);
     updateHeroMuteUi();
@@ -3118,13 +3119,13 @@ html { scrollbar-gutter: stable; }
       window.isPreviewOpen = isPreviewOpen;
 
       function pauseHeroNow() {
-        if (!ytPlayer || typeof ytPlayer.pauseVideo !== 'function') return;
-        ytPlayer.pauseVideo();
+        if (!heroPlayer || typeof heroPlayer.pauseVideo !== 'function') return;
+        heroPlayer.pauseVideo();
       }
 
       function playHeroNow() {
-        if (!ytPlayer || typeof ytPlayer.playVideo !== 'function') return;
-        ytPlayer.playVideo();
+        if (!heroPlayer || typeof heroPlayer.playVideo !== 'function') return;
+        heroPlayer.playVideo();
       }
 
       function updateHeroPlaybackState({ allowDelayedPause } = {}) {
@@ -3837,8 +3838,8 @@ html { scrollbar-gutter: stable; }
 
       function captureHeroPausedTime() {
         try {
-          if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
-            const t = ytPlayer.getCurrentTime();
+          if (heroPlayer && typeof heroPlayer.getCurrentTime === 'function') {
+            const t = heroPlayer.getCurrentTime();
             if (typeof t === 'number' && isFinite(t)) {
               heroPausedTime = t;
             }
