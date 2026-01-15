@@ -2063,7 +2063,7 @@ html { scrollbar-gutter: stable; }
   function onYouTubeIframeAPIReady(){
     ytPlayer = new YT.Player('hero-yt', {
       playerVars: {
-        autoplay: 1,
+        autoplay: 0,
         mute: 1,
         playsinline: 1,
         controls: 0,
@@ -2082,9 +2082,6 @@ html { scrollbar-gutter: stable; }
           }
           isMuted = true;
           updateHeroMuteUi();
-          if (typeof window.syncHeroPlayback === 'function') {
-            window.syncHeroPlayback();
-          }
         },
         onStateChange: e => {
           if (e.data === YT.PlayerState.PLAYING) {
