@@ -2165,28 +2165,6 @@ html { scrollbar-gutter: stable; }
     if (slider) slider.value = String(unmuteVolume);
     updateHeroMuteUi();
   }
-  function requestHeroPlayback(){
-    const hero = document.querySelector('.hero');
-    if (hero) {
-      hero.classList.add('hero--active');
-    }
-    window.heroPlaybackRequested = true;
-    if (ytPlayer) {
-      if (typeof ytPlayer.seekTo === 'function') ytPlayer.seekTo(0, true);
-      if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
-      if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(heroUiVolume);
-      scheduleHeroPosterFadeNearEnd(ytPlayer);
-    }
-    try {
-      const iframe = ytPlayer ? ytPlayer.getIframe() : null;
-      if (iframe) {
-        const requestFullscreen = iframe.requestFullscreen || iframe.webkitRequestFullscreen || iframe.mozRequestFullScreen || iframe.msRequestFullscreen;
-        if (requestFullscreen) {
-          requestFullscreen.call(iframe);
-        }
-      }
-    } catch (_) {}
-  }
   function getYouTubeVideoId(url) {
     if (!url || typeof url !== 'string') return '';
     let parsed = null;
@@ -2272,7 +2250,6 @@ html { scrollbar-gutter: stable; }
     }
   }
   document.addEventListener('DOMContentLoaded', () => {
-    const hero = document.querySelector('.hero');
     const playButton = document.querySelector('.hero-cta .btn--solid');
     const closeButton = document.querySelector('.fullscreen-player-close');
     const heroVolume = document.querySelector('.hero-volume');
@@ -2364,13 +2341,6 @@ html { scrollbar-gutter: stable; }
         }
       }
     });
-    if (hero) {
-      hero.addEventListener('click', event => {
-        if (!hasUserGesturePlayback && event.target.closest('.hero-overlay-inline, .hero-video')) {
-          requestHeroPlayback();
-        }
-      });
-    }
     // Fade timing is scheduled when playback starts so it aligns with duration.
     if (heroVolumeSlider) {
       heroVolumeSlider.value = String(heroUiVolume);
