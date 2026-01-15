@@ -1949,18 +1949,13 @@ html { scrollbar-gutter: stable; }
   // Changed alerts to console.log as alerts break the canvas environment.
   const HERO_VIDEO_ID = 't1x7Q0IA3Os';
   const HERO_END_FADE_OFFSET_SECONDS = 2;
-  const HERO_PREVIEW_DURATION_MS = 10000;
   let ytPlayer, isMuted = true;
   let heroUiVolume = 50;
   let heroLastNonZeroVolume = 50;
   let heroPosterFadeTimeout = null;
-  let heroTenSecondTimer = null;
-  let heroPreviewTimerStarted = false;
-  let heroPreviewDone = false;
   let fullscreenPlayer = null;
   let hasUserGesturePlayback = false;
   window.heroPlaybackRequested = false;
-  window.heroPreviewDone = false;
   window.heroPlaybackPending = false;
   function isMobilePlayback() {
     return !!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
@@ -2024,41 +2019,6 @@ html { scrollbar-gutter: stable; }
         ytPlayer.stopVideo();
       }
     } catch (_) {}
-  }
-  function cancelHeroPreviewTimer() {
-    if (heroTenSecondTimer) {
-      window.clearTimeout(heroTenSecondTimer);
-      heroTenSecondTimer = null;
-    }
-  }
-  function markHeroPreviewDone() {
-    heroPreviewDone = true;
-    window.heroPreviewDone = true;
-    cancelHeroPreviewTimer();
-  }
-  window.markHeroPreviewDone = markHeroPreviewDone;
-  function startHeroPreviewTimerIfNeeded() {
-    if (heroPreviewTimerStarted || heroPreviewDone) return;
-    heroPreviewTimerStarted = true;
-    console.log('[HERO-10S] started timer');
-    heroTenSecondTimer = window.setTimeout(() => {
-      console.log('[HERO-10S] firing fade-to-poster');
-      fadeHeroToPosterNow();
-      if (typeof window.triggerHeroPreviewFade === 'function') {
-        window.triggerHeroPreviewFade();
-      } else {
-        try {
-          if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
-            ytPlayer.pauseVideo();
-          }
-          if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
-            ytPlayer.stopVideo();
-          }
-        } catch (_) {}
-        console.log('[HERO-10S] pausing/stopping hero after fade');
-        markHeroPreviewDone();
-      }
-    }, HERO_PREVIEW_DURATION_MS);
   }
   function onYouTubeIframeAPIReady(){
     ytPlayer = new YT.Player('hero-yt', {
@@ -3113,7 +3073,6 @@ html { scrollbar-gutter: stable; }
       const heroPreviewSource = heroVisual || heroSection;
       const HERO_PAUSE_DELAY = 1000;
       const HERO_VISIBLE_RATIO = 0.6;
-      const HERO_AUDIO_FADE_MS = 1200;
       const HERO_PREVIEW_START_SECONDS = 154;
       const HERO_PREVIEW_DURATION_MS = 15000;
       const previewMedia = previewOverlay.querySelector('.preview-media');
@@ -3123,23 +3082,15 @@ html { scrollbar-gutter: stable; }
       const PREVIEW_TEASER_FADE_MS = 700;
       const PREVIEW_TEASER_AUDIO_STEP_MS = 50;
 
-      let heroAudioFadeInterval = null;
       let heroPausedTime = null;
       let heroTargetVolume = 100;
       let heroPauseTimeout = null;
       let heroIsVisible = false;
       let heroWasActive = false;
-      let heroPausedByUs = false;
       let heroPauseScheduled = false;
       let heroPauseCandidate = null;
       let heroPlaybackPending = false;
 
-      function cancelHeroAudioFade() {
-        if (heroAudioFadeInterval !== null) {
-          clearInterval(heroAudioFadeInterval);
-          heroAudioFadeInterval = null;
-        }
-      }
 
       function cancelHeroPause() {
         if (heroPauseTimeout !== null) {
@@ -3838,59 +3789,6 @@ html { scrollbar-gutter: stable; }
           }
         } catch (_) {}
       }
-
-      function startHeroAudioFade(targetVolume, durationMs, onComplete) {
-        cancelHeroAudioFade();
-        if (!ytPlayer || typeof ytPlayer.setVolume !== 'function') return;
-
-        let startVolume = 100;
-        try {
-          if (typeof ytPlayer.getVolume === 'function') {
-            const current = ytPlayer.getVolume();
-            if (typeof current === 'number' && isFinite(current)) startVolume = current;
-          }
-        } catch (_) {}
-
-        const stepMs = 100;
-        const steps = Math.max(1, Math.round(durationMs / stepMs));
-        let step = 0;
-
-        heroAudioFadeInterval = setInterval(() => {
-          step += 1;
-          const t = Math.min(step / steps, 1);
-          const vol = Math.round(startVolume + (targetVolume - startVolume) * t);
-          try {
-            ytPlayer.setVolume(vol);
-          } catch (_) {}
-          if (t >= 1) {
-            cancelHeroAudioFade();
-            if (typeof onComplete === 'function') onComplete();
-          }
-        }, stepMs);
-      }
-
-      function triggerHeroPreviewFade() {
-        if (window.heroPreviewDone) return;
-        fadeHeroToPosterNow();
-        startHeroAudioFade(0, HERO_AUDIO_FADE_MS, () => {
-          try {
-            if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
-              ytPlayer.pauseVideo();
-            }
-            if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
-              ytPlayer.stopVideo();
-            }
-          } catch (_) {}
-          heroPausedByUs = true;
-          console.log('[HERO-10S] pausing/stopping hero after fade');
-          if (typeof window.markHeroPreviewDone === 'function') {
-            window.markHeroPreviewDone();
-          } else {
-            window.heroPreviewDone = true;
-          }
-        });
-      }
-      window.triggerHeroPreviewFade = triggerHeroPreviewFade;
 
       function isHeroActive() {
         return isPlayNowHighlighted();
