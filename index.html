@@ -2042,6 +2042,11 @@ html { scrollbar-gutter: stable; }
           }
           isMuted = true;
           updateHeroMuteUi();
+          if (typeof window.updateHeroPlaybackState === 'function') {
+            window.updateHeroPlaybackState({ allowDelayedPause: false });
+          } else {
+            window.heroPlaybackPending = true;
+          }
         },
         onStateChange: e => {
           if (e.data === YT.PlayerState.PLAYING) {
@@ -2825,6 +2830,9 @@ html { scrollbar-gutter: stable; }
       }
 
       const heroActiveChanged = hero && hero.classList.contains('hero--active') !== wasHeroActive;
+      if (typeof window.updateHeroPlaybackState === 'function') {
+        window.updateHeroPlaybackState({ allowDelayedPause: true });
+      }
     }
 
     window.addEventListener('scroll', () => {
@@ -3105,6 +3113,53 @@ html { scrollbar-gutter: stable; }
 
       function isPreviewOpen() {
         return previewOpening || previewOverlay.classList.contains('is-visible');
+      }
+
+      window.isPreviewOpen = isPreviewOpen;
+
+      function pauseHeroNow() {
+        if (!ytPlayer || typeof ytPlayer.pauseVideo !== 'function') return;
+        ytPlayer.pauseVideo();
+      }
+
+      function playHeroNow() {
+        if (!ytPlayer || typeof ytPlayer.playVideo !== 'function') return;
+        ytPlayer.playVideo();
+      }
+
+      function updateHeroPlaybackState({ allowDelayedPause } = {}) {
+        if (isPreviewOpen()) {
+          cancelHeroPause();
+          pauseHeroNow();
+          return;
+        }
+        if (isPlayNowHighlighted()) {
+          cancelHeroPause();
+          playHeroNow();
+          return;
+        }
+        if (allowDelayedPause) {
+          cancelHeroPause();
+          heroPauseTimeout = window.setTimeout(() => {
+            if (isPreviewOpen()) {
+              pauseHeroNow();
+              return;
+            }
+            if (isPlayNowHighlighted()) {
+              return;
+            }
+            pauseHeroNow();
+          }, HERO_PAUSE_DELAY);
+          return;
+        }
+        cancelHeroPause();
+        pauseHeroNow();
+      }
+
+      window.updateHeroPlaybackState = updateHeroPlaybackState;
+      if (window.heroPlaybackPending) {
+        window.heroPlaybackPending = false;
+        updateHeroPlaybackState({ allowDelayedPause: false });
       }
 
       let previewTeaserPlayer = null;
@@ -4585,6 +4640,7 @@ html { scrollbar-gutter: stable; }
       function openPreviewFromCard(card, triggerElement = card) {
         // ZAQ TASK 1.8: Pause hero video when preview begins opening.
         previewOpening = true;
+        updateHeroPlaybackState({ allowDelayedPause: false });
         const heroAudioState = getHeroAudioState();
         const syncedVolume = clampPreviewVolume(heroAudioState.volume);
         initialPreviewVolume = syncedVolume === 0 ? 50 : syncedVolume;
@@ -4827,6 +4883,7 @@ previewTitleEl.textContent = title;
           previewCard.classList.remove('is-active');
           previewCard.style.opacity = '';
           previewCard.style.pointerEvents = '';
+          updateHeroPlaybackState({ allowDelayedPause: false });
           if (activeMorphTile && activeMorphTile.parentNode) {
             activeMorphTile.parentNode.removeChild(activeMorphTile);
           }
@@ -4872,6 +4929,7 @@ previewTitleEl.textContent = title;
 
         previewOverlay.classList.remove('is-visible');
         previewOverlay.setAttribute('aria-hidden', 'true');
+        updateHeroPlaybackState({ allowDelayedPause: false });
 
         const targetRadius = getComputedStyle(lastOpenedCard).borderRadius;
 
