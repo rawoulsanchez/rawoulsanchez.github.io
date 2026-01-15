@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -1949,7 +1950,7 @@ html { scrollbar-gutter: stable; }
   // Changed alerts to console.log as alerts break the canvas environment.
   const HERO_VIDEO_ID = 't1x7Q0IA3Os';
   const HERO_END_FADE_OFFSET_SECONDS = 2;
-  let ytPlayer, heroPlayer = null, isMuted = true;
+  let ytPlayer, isMuted = true;
   let heroUiVolume = 50;
   let heroLastNonZeroVolume = 50;
   let heroPosterFadeTimeout = null;
@@ -2012,17 +2013,16 @@ html { scrollbar-gutter: stable; }
       heroBleedPoster.classList.add('is-visible');
     }
     try {
-      if (!heroPlayer) return;
-      if (typeof heroPlayer.pauseVideo === 'function') {
-        heroPlayer.pauseVideo();
+      if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+        ytPlayer.pauseVideo();
       }
-      if (typeof heroPlayer.stopVideo === 'function') {
-        heroPlayer.stopVideo();
+      if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
+        ytPlayer.stopVideo();
       }
     } catch (_) {}
   }
   function onYouTubeIframeAPIReady(){
-    heroPlayer = new YT.Player('hero-yt', {
+    ytPlayer = new YT.Player('hero-yt', {
       playerVars: {
         autoplay: 0,
         mute: 1,
@@ -2043,11 +2043,6 @@ html { scrollbar-gutter: stable; }
           }
           isMuted = true;
           updateHeroMuteUi();
-          if (typeof window.updateHeroPlaybackState === 'function') {
-            window.updateHeroPlaybackState({ allowDelayedPause: false });
-          } else {
-            window.heroPlaybackPending = true;
-          }
         },
         onStateChange: e => {
           if (e.data === YT.PlayerState.PLAYING) {
@@ -2102,14 +2097,14 @@ html { scrollbar-gutter: stable; }
     const shouldMute = nextVolume === 0;
     isMuted = shouldMute;
     updateHeroMuteUi();
-    if (!heroPlayer || typeof heroPlayer.setVolume !== 'function') return;
+    if (!ytPlayer || typeof ytPlayer.setVolume !== 'function') return;
     try {
-      heroPlayer.setVolume(nextVolume);
+      ytPlayer.setVolume(nextVolume);
     } catch (_) {}
     if (shouldMute) {
-      if (typeof heroPlayer.mute === 'function') heroPlayer.mute();
+      if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
     } else {
-      if (typeof heroPlayer.unMute === 'function') heroPlayer.unMute();
+      if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
     }
     updateHeroMuteUi();
   }
@@ -2119,14 +2114,14 @@ html { scrollbar-gutter: stable; }
     const nextMutedState = !isMuted;
     isMuted = nextMutedState;
     updateHeroMuteUi();
-    if (!heroPlayer) return;
+    if (!ytPlayer) return;
     if (nextMutedState) {
-      if (typeof heroPlayer.mute === 'function') heroPlayer.mute();
+      if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
       return;
     }
     const unmuteVolume = currentSliderValue > 0 ? currentSliderValue : heroLastNonZeroVolume;
-    if (typeof heroPlayer.unMute === 'function') heroPlayer.unMute();
-    if (typeof heroPlayer.setVolume === 'function') heroPlayer.setVolume(unmuteVolume);
+    if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
+    if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(unmuteVolume);
     heroUiVolume = unmuteVolume;
     if (slider) slider.value = String(unmuteVolume);
     updateHeroMuteUi();
@@ -2831,9 +2826,6 @@ html { scrollbar-gutter: stable; }
       }
 
       const heroActiveChanged = hero && hero.classList.contains('hero--active') !== wasHeroActive;
-      if (typeof window.updateHeroPlaybackState === 'function') {
-        window.updateHeroPlaybackState({ allowDelayedPause: true });
-      }
     }
 
     window.addEventListener('scroll', () => {
@@ -3115,54 +3107,6 @@ html { scrollbar-gutter: stable; }
       function isPreviewOpen() {
         return previewOpening || previewOverlay.classList.contains('is-visible');
       }
-
-      window.isPreviewOpen = isPreviewOpen;
-
-      function pauseHeroNow() {
-        if (!heroPlayer || typeof heroPlayer.pauseVideo !== 'function') return;
-        heroPlayer.pauseVideo();
-      }
-
-      function playHeroNow() {
-        if (!heroPlayer || typeof heroPlayer.playVideo !== 'function') return;
-        heroPlayer.playVideo();
-      }
-
-      function updateHeroPlaybackState({ allowDelayedPause } = {}) {
-        if (isPreviewOpen()) {
-          cancelHeroPause();
-          pauseHeroNow();
-          return;
-        }
-        if (isPlayNowHighlighted()) {
-          cancelHeroPause();
-          playHeroNow();
-          return;
-        }
-        if (allowDelayedPause) {
-          cancelHeroPause();
-          heroPauseTimeout = window.setTimeout(() => {
-            if (isPreviewOpen()) {
-              pauseHeroNow();
-              return;
-            }
-            if (isPlayNowHighlighted()) {
-              return;
-            }
-            pauseHeroNow();
-          }, HERO_PAUSE_DELAY);
-          return;
-        }
-        cancelHeroPause();
-        pauseHeroNow();
-      }
-
-      window.updateHeroPlaybackState = updateHeroPlaybackState;
-      if (window.heroPlaybackPending) {
-        window.heroPlaybackPending = false;
-        updateHeroPlaybackState({ allowDelayedPause: false });
-      }
-      updateHeroPlaybackState({ allowDelayedPause: true });
 
       let previewTeaserPlayer = null;
       let previewTeaserTimer = null;
@@ -3838,8 +3782,8 @@ html { scrollbar-gutter: stable; }
 
       function captureHeroPausedTime() {
         try {
-          if (heroPlayer && typeof heroPlayer.getCurrentTime === 'function') {
-            const t = heroPlayer.getCurrentTime();
+          if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+            const t = ytPlayer.getCurrentTime();
             if (typeof t === 'number' && isFinite(t)) {
               heroPausedTime = t;
             }
@@ -4642,7 +4586,6 @@ html { scrollbar-gutter: stable; }
       function openPreviewFromCard(card, triggerElement = card) {
         // ZAQ TASK 1.8: Pause hero video when preview begins opening.
         previewOpening = true;
-        updateHeroPlaybackState({ allowDelayedPause: false });
         const heroAudioState = getHeroAudioState();
         const syncedVolume = clampPreviewVolume(heroAudioState.volume);
         initialPreviewVolume = syncedVolume === 0 ? 50 : syncedVolume;
@@ -4885,7 +4828,6 @@ previewTitleEl.textContent = title;
           previewCard.classList.remove('is-active');
           previewCard.style.opacity = '';
           previewCard.style.pointerEvents = '';
-          updateHeroPlaybackState({ allowDelayedPause: false });
           if (activeMorphTile && activeMorphTile.parentNode) {
             activeMorphTile.parentNode.removeChild(activeMorphTile);
           }
@@ -4931,7 +4873,6 @@ previewTitleEl.textContent = title;
 
         previewOverlay.classList.remove('is-visible');
         previewOverlay.setAttribute('aria-hidden', 'true');
-        updateHeroPlaybackState({ allowDelayedPause: false });
 
         const targetRadius = getComputedStyle(lastOpenedCard).borderRadius;
 
@@ -5558,6 +5499,184 @@ document.addEventListener('keydown', (event) => {
 
   // If fonts/images shift layout after load, recompute once more.
   window.addEventListener('load', onResize, { passive:true });
+})();
+</script>
+
+
+<script>
+/* ZAQ TASK: Hero glow truth → YouTube playback (preview override wins) */
+(function(){
+  var heroEl = document.querySelector('.hero');
+  var previewEl = document.querySelector('.preview-overlay');
+
+  var pauseTimer = null;          // single shared delayed-pause timer
+  var pendingIntent = null;       // 'play' | 'pause' | null
+  var flushTimer = null;          // polls until yt player is ready
+
+  var lastHeroActive = null;
+  var lastPreviewOpen = null;
+
+  function isHeroActive(){
+    return !!(heroEl && heroEl.classList.contains('hero--active'));
+  }
+
+  function isPreviewOpen(){
+    return !!(previewEl && previewEl.classList.contains('is-visible'));
+  }
+
+  function clearPauseTimer(){
+    if (pauseTimer){
+      clearTimeout(pauseTimer);
+      pauseTimer = null;
+    }
+  }
+
+  function getPlayer(){
+    try{
+      if (typeof ytPlayer !== 'undefined' && ytPlayer) return ytPlayer;
+    }catch(e){
+      /* ignore */
+    }
+    try{
+      if (window.ytPlayer) return window.ytPlayer;
+    }catch(e){
+      /* ignore */
+    }
+    return null;
+  }
+
+  function canControl(p){
+    return !!(p && typeof p.playVideo === 'function' && typeof p.pauseVideo === 'function');
+  }
+
+  function stopFlushTimer(){
+    if (flushTimer){
+      clearInterval(flushTimer);
+      flushTimer = null;
+    }
+  }
+
+  function ensureFlushTimer(){
+    if (flushTimer) return;
+    flushTimer = setInterval(function(){
+      var p = getPlayer();
+      if (!canControl(p)) return;
+      stopFlushTimer();
+      // apply current truth state as soon as the player becomes controllable
+      syncToTruth({ initial:true, force:true });
+    }, 200);
+  }
+
+  function applyIntent(intent){
+    pendingIntent = intent;
+    var p = getPlayer();
+
+    if (!canControl(p)){
+      ensureFlushTimer();
+      return;
+    }
+
+    try{
+      if (pendingIntent === 'play'){
+        p.playVideo();
+      } else if (pendingIntent === 'pause'){
+        p.pauseVideo();
+      }
+    }catch(e){
+      /* no-op */
+    }
+  }
+
+  function scheduleDelayedPause(){
+    clearPauseTimer();
+    pauseTimer = setTimeout(function(){
+      pauseTimer = null;
+      // only pause if preview still closed AND glow still inactive
+      if (!isPreviewOpen() && !isHeroActive()){
+        applyIntent('pause');
+      }
+    }, 1000);
+  }
+
+  function syncToTruth(opts){
+    opts = opts || {};
+    var previewOpen = isPreviewOpen();
+    var heroActive = isHeroActive();
+
+    // Preview override (always wins)
+    if (previewOpen){
+      clearPauseTimer();
+      applyIntent('pause');
+      lastHeroActive = heroActive;
+      lastPreviewOpen = previewOpen;
+      return;
+    }
+
+    // Page load / pageshow rule
+    if (opts.initial){
+      clearPauseTimer();
+      if (heroActive){
+        applyIntent('play');
+      } else {
+        applyIntent('pause');
+      }
+      lastHeroActive = heroActive;
+      lastPreviewOpen = previewOpen;
+      return;
+    }
+
+    // Scroll back rule (returning to hero): active => play immediately
+    if (heroActive){
+      clearPauseTimer();
+      applyIntent('play');
+      lastHeroActive = heroActive;
+      lastPreviewOpen = previewOpen;
+      return;
+    }
+
+    // Scroll down rule (leaving hero): active -> inactive triggers ~1s delayed pause
+    if (lastHeroActive === true && heroActive === false){
+      scheduleDelayedPause();
+    } else if (opts.force && heroActive === false){
+      // safety: if player becomes ready while inactive, do not let it keep playing
+      scheduleDelayedPause();
+    }
+
+    lastHeroActive = heroActive;
+    lastPreviewOpen = previewOpen;
+  }
+
+  function installObservers(){
+    if (heroEl){
+      new MutationObserver(function(){
+        syncToTruth({ initial:false });
+      }).observe(heroEl, { attributes:true, attributeFilter:['class'] });
+    }
+
+    if (previewEl){
+      new MutationObserver(function(){
+        syncToTruth({ initial:false });
+      }).observe(previewEl, { attributes:true, attributeFilter:['class'] });
+    }
+  }
+
+  function requeryElements(){
+    heroEl = document.querySelector('.hero');
+    previewEl = document.querySelector('.preview-overlay');
+  }
+
+  // Initial wiring
+  installObservers();
+
+  // Initial load rule (run now; script is placed at end of body)
+  syncToTruth({ initial:true });
+
+  // BFCache restore / refresh consistency
+  window.addEventListener('pageshow', function(){
+    requeryElements();
+    installObservers();
+    syncToTruth({ initial:true });
+  });
 })();
 </script>
 
