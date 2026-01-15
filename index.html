@@ -3922,77 +3922,6 @@ html { scrollbar-gutter: stable; }
       }
       window.triggerHeroPreviewFade = triggerHeroPreviewFade;
 
-      function pauseHeroVideo({ withDelay, force, expectedActiveShelf } = {}) {
-        cancelHeroPause();
-        try {
-          if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
-            captureHeroPausedTime();
-            ytPlayer.pauseVideo();
-            heroPausedByUs = true;
-          }
-        } catch (_) {}
-      }
-
-      function resumeHeroPlayback() {
-        if (typeof ytPlayer === 'undefined' || !ytPlayer) return;
-
-        let playerState = null;
-        try {
-          if (typeof ytPlayer.getPlayerState === 'function') {
-            playerState = ytPlayer.getPlayerState();
-          }
-        } catch (_) {}
-
-        if (playerState === 1 || playerState === 3) {
-          return;
-        }
-
-        try {
-          let currentHeroTime = null;
-          try {
-            if (typeof ytPlayer.getCurrentTime === 'function') {
-              const ct = ytPlayer.getCurrentTime();
-              if (typeof ct === 'number' && isFinite(ct)) currentHeroTime = ct;
-            }
-          } catch (_) {}
-
-          const hasPausedTime =
-            (typeof heroPausedTime === 'number' && isFinite(heroPausedTime) && heroPausedTime > 0.25);
-          const hasCurrentTime =
-            (typeof currentHeroTime === 'number' && isFinite(currentHeroTime));
-
-          const needsSeekBack =
-            heroPausedByUs &&
-            hasPausedTime &&
-            hasCurrentTime &&
-            (currentHeroTime < 0.5 || Math.abs(currentHeroTime - heroPausedTime) > 2.0);
-
-          if (heroPausedByUs && (playerState === 2 || playerState === 5) && needsSeekBack && typeof ytPlayer.seekTo === 'function') {
-            try { ytPlayer.seekTo(heroPausedTime, true); } catch (_) {}
-          }
-
-          if ((playerState === 2 || playerState === 5) && typeof ytPlayer.playVideo === 'function') {
-            ytPlayer.playVideo();
-          }
-
-          if (typeof isMuted !== 'undefined' && isMuted) {
-            if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
-          } else {
-            try {
-              if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
-            } catch (_) {}
-            const targetVolume = typeof heroTargetVolume === 'number' && isFinite(heroTargetVolume)
-              ? heroTargetVolume
-              : 100;
-            startHeroAudioFade(targetVolume, 1400);
-          }
-        } catch (_) {}
-        heroPausedByUs = false;
-      }
-
-      window.pauseHeroVideo = pauseHeroVideo;
-      window.resumeHeroPlayback = resumeHeroPlayback;
-
       function isHeroActive() {
         return isPlayNowHighlighted();
       }
@@ -4788,7 +4717,6 @@ html { scrollbar-gutter: stable; }
       function openPreviewFromCard(card, triggerElement = card) {
         // ZAQ TASK 1.8: Pause hero video when preview begins opening.
         previewOpening = true;
-        pauseHeroVideo({ force: true });
         const heroAudioState = getHeroAudioState();
         const syncedVolume = clampPreviewVolume(heroAudioState.volume);
         initialPreviewVolume = syncedVolume === 0 ? 50 : syncedVolume;
