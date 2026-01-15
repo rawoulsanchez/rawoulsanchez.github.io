@@ -2082,12 +2082,6 @@ html { scrollbar-gutter: stable; }
           }
           isMuted = true;
           updateHeroMuteUi();
-          if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
-            window.updateActiveTrackFromWindowScroll();
-          }
-          if (typeof window.syncHeroPlayback === 'function') {
-            window.syncHeroPlayback();
-          }
         },
         onStateChange: e => {
           if (e.data === YT.PlayerState.PLAYING) {
