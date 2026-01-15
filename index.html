@@ -1948,9 +1948,8 @@ html { scrollbar-gutter: stable; }
 <script>
   // Changed alerts to console.log as alerts break the canvas environment.
   const HERO_VIDEO_ID = 't1x7Q0IA3Os';
-  const HERO_POSTER_FADE_MS = 15000;
+  const HERO_END_FADE_OFFSET_SECONDS = 2;
   const HERO_PREVIEW_DURATION_MS = 10000;
-  const HERO_REVEAL_DELAY_MS = 10000;
   let ytPlayer, isMuted = true;
   let heroUiVolume = 50;
   let heroLastNonZeroVolume = 50;
@@ -1963,20 +1962,6 @@ html { scrollbar-gutter: stable; }
   window.heroPlaybackRequested = false;
   window.heroPreviewDone = false;
   window.heroPlaybackPending = false;
-  function startHeroRevealTimer() {
-    const heroVideo = document.querySelector('.hero-video');
-    const heroBleedPoster = document.querySelector('.hero-bleed-poster');
-    if (!heroVideo || !heroBleedPoster) return;
-    window.setTimeout(() => {
-      heroVideo.classList.add('is-hero-fadeout');
-      heroBleedPoster.classList.add('is-visible');
-    }, HERO_REVEAL_DELAY_MS);
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startHeroRevealTimer);
-  } else {
-    startHeroRevealTimer();
-  }
   function isMobilePlayback() {
     return !!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
   }
@@ -1988,16 +1973,39 @@ html { scrollbar-gutter: stable; }
   function canLoopHeroVideo() {
     return isPlayNowHighlighted();
   }
-  function scheduleHeroPosterFade(delayMs = HERO_POSTER_FADE_MS) {
+  function showHeroBleedPoster() {
+    const heroBleedPoster = document.querySelector('.hero-bleed-poster');
+    if (heroBleedPoster) {
+      heroBleedPoster.classList.add('is-visible');
+    }
+  }
+  function scheduleHeroPosterFadeNearEnd(player, attempt = 0) {
     const heroVideo = document.querySelector('.hero-video');
-    if (!heroVideo) return;
+    if (!heroVideo || !player || typeof player.getDuration !== 'function') return;
     heroVideo.classList.remove('is-hero-fadeout');
     if (heroPosterFadeTimeout) {
       window.clearTimeout(heroPosterFadeTimeout);
     }
+    const duration = player.getDuration();
+    const currentTime = typeof player.getCurrentTime === 'function' ? player.getCurrentTime() : 0;
+    if (!Number.isFinite(duration) || duration <= 0) {
+      if (attempt < 4) {
+        window.setTimeout(() => scheduleHeroPosterFadeNearEnd(player, attempt + 1), 500);
+      }
+      return;
+    }
+    const remainingSeconds = Math.max(0, duration - HERO_END_FADE_OFFSET_SECONDS - currentTime);
     heroPosterFadeTimeout = window.setTimeout(() => {
       heroVideo.classList.add('is-hero-fadeout');
-    }, delayMs);
+      showHeroBleedPoster();
+    }, remainingSeconds * 1000);
+  }
+  function fadeHeroToPosterNow() {
+    const heroVideo = document.querySelector('.hero-video');
+    if (heroVideo) {
+      heroVideo.classList.add('is-hero-fadeout');
+    }
+    showHeroBleedPoster();
   }
   function revealHeroBleedPoster() {
     const heroVideo = document.querySelector('.hero-video');
@@ -2035,7 +2043,7 @@ html { scrollbar-gutter: stable; }
     console.log('[HERO-10S] started timer');
     heroTenSecondTimer = window.setTimeout(() => {
       console.log('[HERO-10S] firing fade-to-poster');
-      scheduleHeroPosterFade(0);
+      fadeHeroToPosterNow();
       if (typeof window.triggerHeroPreviewFade === 'function') {
         window.triggerHeroPreviewFade();
       } else {
@@ -2082,7 +2090,7 @@ html { scrollbar-gutter: stable; }
           if (e.data === YT.PlayerState.PLAYING) {
             hasUserGesturePlayback = true;
             window.heroPlaybackRequested = true;
-            scheduleHeroPosterFade();
+            scheduleHeroPosterFadeNearEnd(e.target);
           }
           if (e.data === YT.PlayerState.ENDED) {
             revealHeroBleedPoster();
@@ -2166,11 +2174,11 @@ html { scrollbar-gutter: stable; }
       hero.classList.add('hero--active');
     }
     window.heroPlaybackRequested = true;
-    scheduleHeroPosterFade();
     if (ytPlayer) {
       if (typeof ytPlayer.seekTo === 'function') ytPlayer.seekTo(0, true);
       if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
       if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(heroUiVolume);
+      scheduleHeroPosterFadeNearEnd(ytPlayer);
     }
     if (typeof window.syncHeroPlayback === 'function') {
       window.syncHeroPlayback();
@@ -2369,9 +2377,7 @@ html { scrollbar-gutter: stable; }
         }
       });
     }
-    if (hero) {
-      scheduleHeroPosterFade();
-    }
+    // Fade timing is scheduled when playback starts so it aligns with duration.
     if (heroVolumeSlider) {
       heroVolumeSlider.value = String(heroUiVolume);
       heroVolumeSlider.addEventListener('input', event => {
@@ -3918,7 +3924,7 @@ html { scrollbar-gutter: stable; }
 
       function triggerHeroPreviewFade() {
         if (window.heroPreviewDone) return;
-        scheduleHeroPosterFade(0);
+        fadeHeroToPosterNow();
         startHeroAudioFade(0, HERO_AUDIO_FADE_MS, () => {
           try {
             if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
