@@ -2063,7 +2063,7 @@ html { scrollbar-gutter: stable; }
   function onYouTubeIframeAPIReady(){
     ytPlayer = new YT.Player('hero-yt', {
       playerVars: {
-        autoplay: 1,
+        autoplay: 0,
         mute: 1,
         playsinline: 1,
         controls: 0,
@@ -2082,9 +2082,6 @@ html { scrollbar-gutter: stable; }
           }
           isMuted = true;
           updateHeroMuteUi();
-          if (typeof window.syncHeroPlayback === 'function') {
-            window.syncHeroPlayback();
-          }
         },
         onStateChange: e => {
           if (e.data === YT.PlayerState.PLAYING) {
@@ -2179,9 +2176,6 @@ html { scrollbar-gutter: stable; }
       if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
       if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(heroUiVolume);
       scheduleHeroPosterFadeNearEnd(ytPlayer);
-    }
-    if (typeof window.syncHeroPlayback === 'function') {
-      window.syncHeroPlayback();
     }
     try {
       const iframe = ytPlayer ? ytPlayer.getIframe() : null;
@@ -2901,15 +2895,6 @@ html { scrollbar-gutter: stable; }
       }
 
       const heroActiveChanged = hero && hero.classList.contains('hero--active') !== wasHeroActive;
-      if (previousActiveTrack !== closestTrack || heroActiveChanged) {
-        if (typeof stopPreviewTeaser === 'function' && isPreviewOpen()) {
-          stopPreviewTeaser();
-        }
-        const playbackUpdater = window.syncHeroPlayback;
-        if (typeof playbackUpdater === 'function') {
-          playbackUpdater();
-        }
-      }
     }
 
     window.addEventListener('scroll', () => {
@@ -3028,20 +3013,12 @@ html { scrollbar-gutter: stable; }
           if (previousActiveTrack && previousActiveTrack !== track) {
             previousActiveTrack.classList.remove('shelf-track--active');
             previousActiveTrack.classList.remove('hero--active');
-            syncHeroPlayback();
           }
           track.classList.add('shelf-track--active');
           lastActiveTrack = track;
-          if (previousActiveTrack && previousActiveTrack !== track) {
-            syncHeroPlayback();
-          }
 
           if (previousActiveTrack !== track) {
             recenterAllOtherTracks(track);
-            const syncHeroPlayback = window.syncHeroPlayback;
-            if (typeof syncHeroPlayback === 'function') {
-              syncHeroPlayback();
-            }
           }
 
           // Same-row behavior: when the user scrolls away and then stops,
@@ -4020,37 +3997,6 @@ html { scrollbar-gutter: stable; }
         return isPlayNowHighlighted();
       }
 
-      function syncHeroPlayback() {
-        if (!ytPlayer || typeof ytPlayer.playVideo !== 'function') {
-          heroPlaybackPending = true;
-          window.heroPlaybackPending = true;
-          return;
-        }
-        heroPlaybackPending = false;
-        window.heroPlaybackPending = false;
-        if (isPreviewOpen()) {
-          cancelHeroPause();
-          pauseHeroVideo({ force: true });
-          return;
-        }
-        if (isPlayNowHighlighted()) {
-          cancelHeroPause();
-          resumeHeroPlayback();
-          return;
-        }
-        cancelHeroPause();
-        heroPauseScheduled = true;
-        heroPauseTimeout = setTimeout(() => {
-          heroPauseTimeout = null;
-          heroPauseScheduled = false;
-          heroPauseCandidate = null;
-          if (isPreviewOpen()) return;
-          if (isPlayNowHighlighted()) return;
-          pauseHeroVideo();
-        }, HERO_PAUSE_DELAY);
-      }
-
-      window.syncHeroPlayback = syncHeroPlayback;
 
       if (heroSection && 'IntersectionObserver' in window) {
         const heroObserver = new IntersectionObserver((entries) => {
@@ -4843,9 +4789,6 @@ html { scrollbar-gutter: stable; }
         // ZAQ TASK 1.8: Pause hero video when preview begins opening.
         previewOpening = true;
         pauseHeroVideo({ force: true });
-        if (typeof window.syncHeroPlayback === 'function') {
-          window.syncHeroPlayback();
-        }
         const heroAudioState = getHeroAudioState();
         const syncedVolume = clampPreviewVolume(heroAudioState.volume);
         initialPreviewVolume = syncedVolume === 0 ? 50 : syncedVolume;
@@ -5098,9 +5041,6 @@ previewTitleEl.textContent = title;
           if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
             window.updateActiveTrackFromWindowScroll();
           }
-          if (typeof window.syncHeroPlayback === 'function') {
-            window.syncHeroPlayback();
-          }
           return;
         }
         const cardRect = lastOpenedCard.getBoundingClientRect();
@@ -5136,9 +5076,6 @@ previewTitleEl.textContent = title;
 
         previewOverlay.classList.remove('is-visible');
         previewOverlay.setAttribute('aria-hidden', 'true');
-        if (typeof window.syncHeroPlayback === 'function') {
-          window.syncHeroPlayback();
-        }
 
         const targetRadius = getComputedStyle(lastOpenedCard).borderRadius;
 
@@ -5173,9 +5110,6 @@ previewTitleEl.textContent = title;
           currentPreviewCardEl = null;
           if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
             window.updateActiveTrackFromWindowScroll();
-          }
-          if (typeof window.syncHeroPlayback === 'function') {
-            window.syncHeroPlayback();
           }
         }, currentMorphDuration);
       }
