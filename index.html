@@ -1343,6 +1343,39 @@ html { scrollbar-gutter: stable; }
     touch-action: manipulation;
   }
 
+  /* Preview nav arrows */
+  .preview-nav-arrow {
+    position: fixed;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%);
+    z-index: 11001;
+    touch-action: manipulation;
+  }
+  .preview-nav-arrow:hover {
+    background: rgba(255,255,255,0.10);
+  }
+  .preview-nav-arrow--left { left: 16px; }
+  .preview-nav-arrow--right { right: 16px; }
+  @media (min-width: 769px) {
+    .preview-overlay.is-visible .preview-nav-arrow {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
   .preview-media {
     position: relative;
     background: #000;
@@ -3087,6 +3120,8 @@ html { scrollbar-gutter: stable; }
       const previewRuntimeEl = document.querySelector('.preview-runtime');
       const previewTagsEl = document.querySelector('.preview-tags');
       const previewDescriptionEl = document.querySelector('.preview-description');
+      const previewPrevButton = previewOverlay ? previewOverlay.querySelector('.preview-nav-arrow--left') : null;
+      const previewNextButton = previewOverlay ? previewOverlay.querySelector('.preview-nav-arrow--right') : null;
 
       if (
         !morphCards.length ||
@@ -3513,6 +3548,25 @@ html { scrollbar-gutter: stable; }
         return !!(card && card.getAttribute('data-label') === A1_PREVIEW_LABEL);
       }
 
+      const previewFallbackCopy = {
+        title: 'Preview Placeholder Title',
+        runtime: '1h 52m',
+        tags: 'Thriller • Sci‑Fi • Action',
+        description: 'This is a static placeholder description used for layout validation only. It is intentionally long so the text wraps across multiple lines and reveals spacing, rhythm, and hierarchy inside the Preview Modal. Replace this copy with real content in a later task once the layout has been visually approved.'
+      };
+
+      function applyPreviewCopyFromCard(card) {
+        if (!previewTitleEl || !previewRuntimeEl || !previewTagsEl || !previewDescriptionEl) return;
+        const title = (card && card.getAttribute('data-title')) || previewFallbackCopy.title;
+        const runtime = (card && card.getAttribute('data-runtime')) || previewFallbackCopy.runtime;
+        const tags = (card && card.getAttribute('data-tags')) || previewFallbackCopy.tags;
+        const description = (card && card.getAttribute('data-description')) || previewFallbackCopy.description;
+        previewTitleEl.textContent = title;
+        previewRuntimeEl.textContent = runtime;
+        previewTagsEl.textContent = tags;
+        previewDescriptionEl.textContent = description;
+      }
+
       function hidePreviewPlaceholder() {
         if (!previewPlaceholder) return;
         previewPlaceholder.style.transition = '';
@@ -3720,6 +3774,8 @@ html { scrollbar-gutter: stable; }
       }
 
       let previewSwipeHandlers = null;
+      const SWIPE_NAV_THRESHOLD_PX = 80;
+      const SWIPE_INTENT_PX = 12;
 
       function isScrollableElement(element) {
         if (!element) return false;
@@ -3745,10 +3801,13 @@ html { scrollbar-gutter: stable; }
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
 
+        let startX = 0;
         let startY = 0;
+        let maxDeltaX = 0;
         let maxDeltaY = 0;
         let scrollableStartEl = null;
         let swipeEligible = false;
+        let swipeDirection = null;
 
         const onTouchStart = (event) => {
           if (!isPreviewOpen()) return;
@@ -3758,18 +3817,35 @@ html { scrollbar-gutter: stable; }
             scrollableStartEl = null;
             return;
           }
+          startX = event.touches[0].clientX;
           startY = event.touches[0].clientY;
+          maxDeltaX = 0;
           maxDeltaY = 0;
           scrollableStartEl = getScrollableStartTarget(event.target);
           swipeEligible = !scrollableStartEl || isScrollableAtTop(scrollableStartEl);
+          swipeDirection = null;
         };
 
         const onTouchMove = (event) => {
           if (!isPreviewOpen()) return;
           if (!event.touches || event.touches.length !== 1) return;
           if (!swipeEligible) return;
+          const deltaX = event.touches[0].clientX - startX;
           const deltaY = event.touches[0].clientY - startY;
-          if (deltaY > 0) {
+          const absX = Math.abs(deltaX);
+          const absY = Math.abs(deltaY);
+
+          if (!swipeDirection) {
+            if (absX < SWIPE_INTENT_PX && absY < SWIPE_INTENT_PX) return;
+            swipeDirection = absX > absY ? 'h' : 'v';
+          }
+
+          if (swipeDirection === 'h') {
+            event.preventDefault();
+            if (absX > Math.abs(maxDeltaX)) {
+              maxDeltaX = deltaX;
+            }
+          } else if (swipeDirection === 'v' && deltaY > 0) {
             event.preventDefault();
             if (deltaY > maxDeltaY) {
               maxDeltaY = deltaY;
@@ -3779,13 +3855,22 @@ html { scrollbar-gutter: stable; }
 
         const onTouchEnd = () => {
           if (!isPreviewOpen()) return;
-          if (maxDeltaY > 90) {
+          if (swipeDirection === 'h' && Math.abs(maxDeltaX) > SWIPE_NAV_THRESHOLD_PX) {
+            if (maxDeltaX < 0) {
+              goToNextPreviewCard();
+            } else {
+              goToPreviousPreviewCard();
+            }
+          } else if (maxDeltaY > 90) {
             closePreview();
           }
+          startX = 0;
           startY = 0;
+          maxDeltaX = 0;
           maxDeltaY = 0;
           scrollableStartEl = null;
           swipeEligible = false;
+          swipeDirection = null;
         };
 
         previewSwipeHandlers = {
@@ -4682,6 +4767,62 @@ previewTitleEl.textContent = title;
       const heroDetailsButton = document.querySelector('.hero-details-button');
       const previewPlayButton = document.querySelector('.preview-play-button');
 
+      function getPreviewNavCards(anchorCard) {
+        const sourceTrack = anchorCard && typeof anchorCard.closest === 'function'
+          ? anchorCard.closest('.shelf-track')
+          : null;
+        const selector = ':scope > .poster[data-morph-id]';
+        const cards = sourceTrack
+          ? Array.from(sourceTrack.querySelectorAll(selector))
+          : Array.from(document.querySelectorAll('.poster[data-morph-id]'));
+        return cards.filter((card) => !!card.querySelector('.poster-preview-button'));
+      }
+
+      function getPreviewNavTarget(direction) {
+        const cards = getPreviewNavCards(currentPreviewCardEl || lastOpenedCard);
+        if (!cards.length) return null;
+        const current = currentPreviewCardEl || lastOpenedCard;
+        const currentIndex = current ? cards.indexOf(current) : -1;
+        if (currentIndex === -1) {
+          return direction === 'next' ? cards[0] : cards[cards.length - 1];
+        }
+        const delta = direction === 'next' ? 1 : -1;
+        const nextIndex = (currentIndex + delta + cards.length) % cards.length;
+        return cards[nextIndex];
+      }
+
+      function swapPreviewContentToCard(card) {
+        if (!card) return;
+        stopPreviewTeaser();
+        resetPreviewPlaceholder();
+        applyPreviewCopyFromCard(card);
+        if (isA1PreviewCard(card)) {
+          setPreviewPosterImage(card);
+        } else {
+          resetPreviewPosterImage();
+        }
+        lastOpenedCard = card;
+        currentPreviewCardEl = card;
+        const isHeroPreview = !!(heroPreviewSource && (card === heroPreviewSource || card === heroSection || card === heroVisual || card.classList.contains('hero') || card.classList.contains('hero-video')));
+        if (isHeroPreview) {
+          startHeroPreviewTeaser();
+        } else {
+          startCardPreviewTeaser(card);
+        }
+      }
+
+      function goToNextPreviewCard() {
+        if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
+        const nextCard = getPreviewNavTarget('next');
+        if (nextCard) swapPreviewContentToCard(nextCard);
+      }
+
+      function goToPreviousPreviewCard() {
+        if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
+        const prevCard = getPreviewNavTarget('prev');
+        if (prevCard) swapPreviewContentToCard(prevCard);
+      }
+
       if (heroDetailsButton && heroPreviewSource) {
         heroDetailsButton.addEventListener('click', (event) => {
           if (previewOverlay.classList.contains('is-visible')) return;
@@ -4949,9 +5090,26 @@ previewTitleEl.textContent = title;
       previewOverlay.addEventListener('click', (event) => {
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
+        if (event.target && event.target.closest('.preview-nav-arrow')) return;
         if (previewCard.contains(event.target)) return;
         closePreview();
       });
+
+      if (previewPrevButton) {
+        previewPrevButton.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          goToPreviousPreviewCard();
+        });
+      }
+
+      if (previewNextButton) {
+        previewNextButton.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          goToNextPreviewCard();
+        });
+      }
 
       document.addEventListener('click', (event) => {
         const previewButton = event.target.closest('.poster-preview-button');
@@ -4977,10 +5135,19 @@ previewTitleEl.textContent = title;
         }
       });
 
-document.addEventListener('keydown', (event) => {
+      document.addEventListener('keydown', (event) => {
         if ((event.key === 'Escape' || event.key === 'Esc') && previewOverlay.classList.contains('is-visible')) {
           event.preventDefault();
           closePreview();
+        }
+        if (!previewOverlay.classList.contains('is-visible')) return;
+        if (event.key === 'ArrowRight') {
+          event.preventDefault();
+          goToNextPreviewCard();
+        }
+        if (event.key === 'ArrowLeft') {
+          event.preventDefault();
+          goToPreviousPreviewCard();
         }
       });
     });
@@ -4988,6 +5155,8 @@ document.addEventListener('keydown', (event) => {
 
   <!-- Preview Overlay (static skeleton) -->
   <div class="preview-overlay" aria-hidden="true">
+    <button class="preview-nav-arrow preview-nav-arrow--left" type="button" aria-label="Previous">‹</button>
+    <button class="preview-nav-arrow preview-nav-arrow--right" type="button" aria-label="Next">›</button>
     <div class="preview-card" role="dialog" aria-modal="true" aria-labelledby="preview-title">
       <button class="preview-close-btn" type="button" aria-label="Close preview">×</button>
       <div class="preview-media">
