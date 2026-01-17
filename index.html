@@ -4723,7 +4723,14 @@ html { scrollbar-gutter: stable; }
           previewVolumeInitialTimeout = null;
         }, initialPreviewVolumeOpenDelay);
         triggerVolumeSweep(previewVolumeControl);
-        applyPreviewCopyFromCard(card);
+        const title = 'Preview Placeholder Title';
+        const runtime = '1h 52m';
+        const tags = 'Thriller • Sci‑Fi • Action';
+        const description = 'This is a static placeholder description used for layout validation only. It is intentionally long so the text wraps across multiple lines and reveals spacing, rhythm, and hierarchy inside the Preview Modal. Replace this copy with real content in a later task once the layout has been visually approved.';
+previewTitleEl.textContent = title;
+        previewRuntimeEl.textContent = runtime;
+        previewTagsEl.textContent = tags;
+        previewDescriptionEl.textContent = description;
 
         lastOpenedCard = triggerElement;
         currentPreviewCardEl = card;
