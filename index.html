@@ -1741,7 +1741,7 @@ html { scrollbar-gutter: stable; }
     justify-content: stretch;
     transform-origin: center center;
     opacity: 0.86;
-    transition: opacity 220ms ease;
+    transition: transform 220ms ease, opacity 220ms ease;
   }
   .preview-slide.is-active{
     opacity: 1;
@@ -3571,6 +3571,7 @@ html { scrollbar-gutter: stable; }
           const currentSlide = previewCardEl.closest('.preview-slide');
           if (currentSlide !== closest) {
             placePreviewCardIntoSlide(closest);
+            schedulePreviewFitUpdate();
           }
         }
       }
@@ -3611,6 +3612,16 @@ html { scrollbar-gutter: stable; }
 
       // ZAQ TASK 2.4 (REFINEMENT) — Preview carousel magnifier scaling (continuous, row-style)
       let previewCarouselMagnifierRafId = null;
+      let previewFitRafId = null;
+
+      function schedulePreviewFitUpdate() {
+        if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
+        if (previewFitRafId !== null) return;
+        previewFitRafId = requestAnimationFrame(() => {
+          previewFitRafId = null;
+          fitPreviewToViewport();
+        });
+      }
 
       function updatePreviewMagnifierScales() {
         if (!previewCarousel) return;
@@ -3630,9 +3641,11 @@ html { scrollbar-gutter: stable; }
           const center = rect.left + (rect.width / 2);
           const distance = Math.abs(center - carouselCenter);
           const t = Math.min(distance / halfWidth, 1);
-          const scale = maxScale - (maxScale - minScale) * t;
+          const holdsPreviewCard = !!slide.querySelector('.preview-card');
+          const scale = holdsPreviewCard ? 1 : (maxScale - (maxScale - minScale) * t);
           slide.style.transform = `scale(${scale.toFixed(3)})`;
         }
+        schedulePreviewFitUpdate();
       }
 
       function schedulePreviewMagnifierUpdate() {
@@ -3666,6 +3679,14 @@ html { scrollbar-gutter: stable; }
         if (previewCarouselMagnifierRafId !== null) {
           cancelAnimationFrame(previewCarouselMagnifierRafId);
           previewCarouselMagnifierRafId = null;
+        }
+        if (previewFitRafId !== null) {
+          cancelAnimationFrame(previewFitRafId);
+          previewFitRafId = null;
+        }
+        const slides = previewCarousel.querySelectorAll('.preview-slide');
+        for (const slide of slides) {
+          slide.style.transform = '';
         }
       }
 
@@ -5366,7 +5387,7 @@ function detachPreviewSwipeListeners() {
         tile.style.transform = `translate(${targetRect.left}px, ${targetRect.top}px)`;
       }
       function fitPreviewToViewport() {
-        if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
+        if (!previewOverlay) return;
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
 
@@ -5379,32 +5400,12 @@ function detachPreviewSwipeListeners() {
         const availableHeight = Math.max(0, window.innerHeight - (padTop * 2) - glowAllowance);
         const availableWidth = Math.max(0, window.innerWidth - (padLeft * 2) - glowAllowance);
 
-        const rect = previewCard.getBoundingClientRect();
-
-        const fitScaleRaw = getComputedStyle(previewOverlay).getPropertyValue('--preview-fit-scale');
-        let fitScale = parseFloat((fitScaleRaw || '').trim());
-        if (!Number.isFinite(fitScale) || fitScale <= 0) fitScale = 1;
-
-        const previewSlide = previewCard.closest('.preview-slide');
-        let slideScale = 1;
-        if (previewSlide) {
-          const t = getComputedStyle(previewSlide).transform;
-          if (t && t !== 'none') {
-            const m2 = t.match(/^matrix\(([^)]+)\)$/);
-            if (m2) {
-              const parts = m2[1].split(',').map(s => parseFloat(s.trim()));
-              const a = parts[0];
-              if (Number.isFinite(a) && a > 0) slideScale = a;
-            }
-          }
-        }
-
-        const denom = fitScale * slideScale;
-        let baseWidth = rect.width;
-        let baseHeight = rect.height;
-        if (Number.isFinite(denom) && denom > 0) {
-          baseWidth = rect.width / denom;
-          baseHeight = rect.height / denom;
+        let baseWidth = previewCard.offsetWidth;
+        let baseHeight = previewCard.offsetHeight;
+        if (baseWidth <= 0 || baseHeight <= 0) {
+          const rect = previewCard.getBoundingClientRect();
+          baseWidth = rect.width;
+          baseHeight = rect.height;
         }
 
         if (!Number.isFinite(baseWidth) || baseWidth <= 0) baseWidth = 1;
@@ -5489,7 +5490,7 @@ function detachPreviewSwipeListeners() {
         applyPreviewCopyFromCard(nextCard);
         setPreviewPosterImageFromCard(nextCard);
         movePreviewCardIntoSlideForCard(nextCard, true);
-        fitPreviewToViewport();
+        schedulePreviewFitUpdate();
         const isHeroPreview = !!(heroPreviewSource && (nextCard === heroPreviewSource || nextCard === heroSection || nextCard === heroVisual || nextCard.classList.contains('hero') || nextCard.classList.contains('hero-video')));
         if (isHeroPreview) {
           startHeroPreviewTeaser();
@@ -5557,7 +5558,7 @@ function detachPreviewSwipeListeners() {
           previewOverlay.classList.add('is-visible');
           previewOverlay.setAttribute('aria-hidden', 'false');
           previewCard.classList.add('is-active');
-          fitPreviewToViewport();
+          schedulePreviewFitUpdate();
           previewCard.style.opacity = '0';
           previewCard.style.transition = '';
           previewCard.style.transform = '';
