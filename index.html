@@ -5390,9 +5390,9 @@ function detachPreviewSwipeListeners() {
         tile.style.height = `${targetRect.height}px`;
         tile.style.transform = `translate(${targetRect.left}px, ${targetRect.top}px)`;
       }
-      function fitPreviewToViewport() {
+      function fitPreviewToViewport(force = false) {
         if (!previewOverlay) return;
-        if (previewFitLocked) return;
+        if (previewFitLocked && !force) return;
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
 
@@ -5564,7 +5564,7 @@ function detachPreviewSwipeListeners() {
           previewOverlay.setAttribute('aria-hidden', 'false');
           previewCard.classList.add('is-active');
           previewFitLocked = true;
-          schedulePreviewFitUpdate();
+          fitPreviewToViewport(true);
           previewCard.style.opacity = '0';
           previewCard.style.transition = '';
           previewCard.style.transform = '';
