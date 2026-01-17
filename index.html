@@ -3613,9 +3613,11 @@ html { scrollbar-gutter: stable; }
       // ZAQ TASK 2.4 (REFINEMENT) — Preview carousel magnifier scaling (continuous, row-style)
       let previewCarouselMagnifierRafId = null;
       let previewFitRafId = null;
+      let previewFitLocked = false;
 
       function schedulePreviewFitUpdate() {
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
+        if (previewFitLocked) return;
         if (previewFitRafId !== null) return;
         previewFitRafId = requestAnimationFrame(() => {
           previewFitRafId = null;
@@ -3645,7 +3647,9 @@ html { scrollbar-gutter: stable; }
           const scale = holdsPreviewCard ? 1 : (maxScale - (maxScale - minScale) * t);
           slide.style.transform = `scale(${scale.toFixed(3)})`;
         }
-        schedulePreviewFitUpdate();
+        if (!previewFitLocked) {
+          schedulePreviewFitUpdate();
+        }
       }
 
       function schedulePreviewMagnifierUpdate() {
@@ -5388,6 +5392,7 @@ function detachPreviewSwipeListeners() {
       }
       function fitPreviewToViewport() {
         if (!previewOverlay) return;
+        if (previewFitLocked) return;
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
 
@@ -5558,6 +5563,7 @@ function detachPreviewSwipeListeners() {
           previewOverlay.classList.add('is-visible');
           previewOverlay.setAttribute('aria-hidden', 'false');
           previewCard.classList.add('is-active');
+          previewFitLocked = true;
           schedulePreviewFitUpdate();
           previewCard.style.opacity = '0';
           previewCard.style.transition = '';
@@ -5620,6 +5626,8 @@ function detachPreviewSwipeListeners() {
             }
             previewCard.style.transition = '';
             previewCard.style.opacity = '';
+            previewFitLocked = false;
+            schedulePreviewFitUpdate();
             resolve();
           };
 
