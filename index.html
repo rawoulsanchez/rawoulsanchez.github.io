@@ -3641,7 +3641,8 @@ html { scrollbar-gutter: stable; }
           const center = rect.left + (rect.width / 2);
           const distance = Math.abs(center - carouselCenter);
           const t = Math.min(distance / halfWidth, 1);
-          const scale = maxScale - (maxScale - minScale) * t;
+          const holdsPreviewCard = !!slide.querySelector('.preview-card');
+          const scale = holdsPreviewCard ? 1 : (maxScale - (maxScale - minScale) * t);
           slide.style.transform = `scale(${scale.toFixed(3)})`;
         }
         schedulePreviewFitUpdate();
