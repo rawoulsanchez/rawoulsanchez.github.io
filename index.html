@@ -1,5 +1,3 @@
-
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -1304,7 +1302,7 @@ html { scrollbar-gutter: stable; }
     box-shadow: var(--preview-frame-shadow);
     overflow: hidden;
     display: grid;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
     position: relative;
     transform: scale(var(--preview-fit-scale, 1));
     transform-origin: center center;
@@ -1382,6 +1380,7 @@ html { scrollbar-gutter: stable; }
     position: relative;
     background: #000;
     aspect-ratio: 16 / 9;
+    overflow: hidden;
   }
 
   .preview-media-placeholder {
@@ -1424,6 +1423,13 @@ html { scrollbar-gutter: stable; }
     display: grid;
     grid-template-rows: auto 1fr auto;
     gap: 12px;
+    min-height: 0;
+  }
+
+  @media (min-width: 769px) {
+    .preview-info {
+      min-height: 240px;
+    }
   }
 
   .preview-header {
@@ -1465,6 +1471,7 @@ html { scrollbar-gutter: stable; }
     font-size: 0.88rem;
     color: var(--muted);
     overflow: auto;
+    min-height: 0;
   }
 
   .preview-description {
@@ -1741,7 +1748,7 @@ html { scrollbar-gutter: stable; }
     justify-content: stretch;
     transform-origin: center center;
     opacity: 0.86;
-    transition: transform 220ms ease, opacity 220ms ease;
+    transition: opacity 220ms ease;
   }
   .preview-slide.is-active{
     opacity: 1;
@@ -3613,11 +3620,11 @@ html { scrollbar-gutter: stable; }
       // ZAQ TASK 2.4 (REFINEMENT) — Preview carousel magnifier scaling (continuous, row-style)
       let previewCarouselMagnifierRafId = null;
       let previewFitRafId = null;
-      let previewFitLocked = false;
 
       function schedulePreviewFitUpdate() {
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
-        if (previewFitLocked) return;
+        // Avoid fitting while the morph tile temporarily owns the preview card.
+        if (previewOpening || activeMorphTile) return;
         if (previewFitRafId !== null) return;
         previewFitRafId = requestAnimationFrame(() => {
           previewFitRafId = null;
@@ -3639,17 +3646,21 @@ html { scrollbar-gutter: stable; }
         const minScale = 0.78;
 
         for (const slide of slides) {
+          // Do not magnify the slide that currently holds the real preview card.
+          // Otherwise the card will jump in size when the magnifier updates.
+          if (previewCardEl && slide.contains(previewCardEl)) {
+            slide.style.transform = '';
+            continue;
+          }
+
           const rect = slide.getBoundingClientRect();
           const center = rect.left + (rect.width / 2);
           const distance = Math.abs(center - carouselCenter);
           const t = Math.min(distance / halfWidth, 1);
-          const holdsPreviewCard = !!slide.querySelector('.preview-card');
-          const scale = holdsPreviewCard ? 1 : (maxScale - (maxScale - minScale) * t);
+          const scale = maxScale - (maxScale - minScale) * t;
           slide.style.transform = `scale(${scale.toFixed(3)})`;
         }
-        if (!previewFitLocked) {
-          schedulePreviewFitUpdate();
-        }
+        schedulePreviewFitUpdate();
       }
 
       function schedulePreviewMagnifierUpdate() {
@@ -5390,9 +5401,8 @@ function detachPreviewSwipeListeners() {
         tile.style.height = `${targetRect.height}px`;
         tile.style.transform = `translate(${targetRect.left}px, ${targetRect.top}px)`;
       }
-      function fitPreviewToViewport(force = false) {
+      function fitPreviewToViewport() {
         if (!previewOverlay) return;
-        if (previewFitLocked && !force) return;
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
 
@@ -5479,6 +5489,14 @@ function detachPreviewSwipeListeners() {
         const isHeroPreview = !!(heroPreviewSource && (card === heroPreviewSource || card === heroSection || card === heroVisual || card.classList.contains('hero') || card.classList.contains('hero-video')));
         runOpenMorph(card, profile).then(() => {
           previewOpening = false;
+          // Apply any buffered swap requested while the morph tile owned the preview card.
+          if (pendingPreviewSwapCard && pendingPreviewSwapCard !== currentPreviewCardEl) {
+            const toSwap = pendingPreviewSwapCard;
+            pendingPreviewSwapCard = null;
+            swapPreviewContentToCard(toSwap);
+          } else {
+            pendingPreviewSwapCard = null;
+          }
           window.addEventListener('resize', handlePreviewResize, { passive: true });
           if (isHeroPreview) {
             startHeroPreviewTeaser();
@@ -5504,11 +5522,23 @@ function detachPreviewSwipeListeners() {
         }
       }
 
+      // During the open morph, the preview card is temporarily "owned" by the morph tile.
+      // If the carousel publishes an active-card-change during that window, moving/swapping
+      // the preview card will yank it out of the morph tile and cause the visible "jump".
+      // We buffer the latest requested card change and apply it after the morph finishes.
+      let pendingPreviewSwapCard = null;
+
       document.addEventListener('zaq-active-card-change', (event) => {
         const nextCard = event && event.detail ? event.detail.card : null;
         if (!nextCard) return;
         if (!isPreviewOpen()) return;
         if (nextCard === currentPreviewCardEl) return;
+
+        if (previewOpening || activeMorphTile) {
+          pendingPreviewSwapCard = nextCard;
+          return;
+        }
+
         swapPreviewContentToCard(nextCard);
       });
 
@@ -5549,11 +5579,13 @@ function detachPreviewSwipeListeners() {
             previewCard.style.transition = '';
             previewCard.classList.remove('is-hidden');
           }
+          // Compute fit scale BEFORE measuring the end rect so we don't resize after the morph.
+          fitPreviewToViewport();
           const endRect = measurePreviewRect();
 
           if (!previewCard || !endRect) {
             previewOverlay.classList.add('is-visible');
-            previewCard.classList.add('is-active');
+            if (previewCard) previewCard.classList.add('is-active');
             resolve();
             return;
           }
@@ -5562,9 +5594,6 @@ function detachPreviewSwipeListeners() {
           previewOverlay.style.pointerEvents = '';
           previewOverlay.classList.add('is-visible');
           previewOverlay.setAttribute('aria-hidden', 'false');
-          previewCard.classList.add('is-active');
-          previewFitLocked = true;
-          fitPreviewToViewport(true);
           previewCard.style.opacity = '0';
           previewCard.style.transition = '';
           previewCard.style.transform = '';
@@ -5572,22 +5601,12 @@ function detachPreviewSwipeListeners() {
           const previewShadow = getComputedStyle(previewCard).boxShadow;
           const previewBorderColor = getComputedStyle(previewCard).borderColor;
 
+          // IMPORTANT: One-container strategy.
+          // The real .preview-card must never be reparented into the morph tile.
+          // The tile is purely a visual clone that animates from the poster to the
+          // preview destination. The real card stays in its normal DOM container
+          // (the centered slide) and only crossfades in.
           const { tile, fill } = createGlowTileFromCard(card, startRect);
-
-          const originalPreviewParent = previewCard.parentElement;
-          const originalPreviewNextSibling = previewCard.nextSibling;
-
-          tile.appendChild(previewCard);
-
-          previewCard.style.position = 'absolute';
-          previewCard.style.inset = '0';
-          previewCard.style.width = '100%';
-          previewCard.style.height = '100%';
-          previewCard.style.margin = '0';
-          previewCard.style.border = '0';
-          previewCard.style.boxShadow = 'none';
-          previewCard.style.borderRadius = 'inherit';
-          previewCard.style.overflow = 'hidden';
 
           activeMorphTile = tile;
           const cardRadius = getComputedStyle(card).borderRadius;
@@ -5602,32 +5621,13 @@ function detachPreviewSwipeListeners() {
           const finishCrossfade = () => {
             if (!hasCrossfaded) return;
 
-            if (originalPreviewParent) {
-              if (originalPreviewNextSibling && originalPreviewNextSibling.parentNode === originalPreviewParent) {
-                originalPreviewParent.insertBefore(previewCard, originalPreviewNextSibling);
-              } else {
-                originalPreviewParent.appendChild(previewCard);
-              }
-            }
-
-            previewCard.style.position = '';
-            previewCard.style.inset = '';
-            previewCard.style.width = '';
-            previewCard.style.height = '';
-            previewCard.style.margin = '';
-            previewCard.style.border = '';
-            previewCard.style.boxShadow = '';
-            previewCard.style.borderRadius = '';
-            previewCard.style.overflow = '';
-
             tile.remove();
             if (activeMorphTile === tile) {
               activeMorphTile = null;
             }
             previewCard.style.transition = '';
             previewCard.style.opacity = '';
-            previewFitLocked = false;
-            schedulePreviewFitUpdate();
+
             resolve();
           };
 
@@ -5643,6 +5643,7 @@ function detachPreviewSwipeListeners() {
             previewCard.addEventListener('transitionend', handleCardFadeInEnd);
             previewCard.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
             fill.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
+            previewCard.classList.add('is-active');
             previewCard.style.opacity = '1';
             fill.style.opacity = '0';
 
