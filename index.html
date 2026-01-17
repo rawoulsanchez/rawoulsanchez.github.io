@@ -3528,18 +3528,17 @@ html { scrollbar-gutter: stable; }
         if (currentSlide && currentSlide !== targetSlide) {
           const oldMorphId = currentSlide.getAttribute('data-morph-id');
           const alreadyHasGhost = !!currentSlide.querySelector('.preview-slide-ghost');
-          if (oldMorphId && !alreadyHasGhost) {
-            const sourceCard = document.querySelector('.poster[data-morph-id="' + oldMorphId + '"]');
-            if (sourceCard) {
-              const ghost = document.createElement('div');
-              ghost.className = 'preview-slide-ghost';
-              const img = document.createElement('img');
-              const src = sourceCard.getAttribute('data-poster-wide') || sourceCard.getAttribute('data-poster-vert') || '';
-              img.src = src;
-              img.alt = (sourceCard.getAttribute('data-title') || sourceCard.getAttribute('data-label') || 'Preview').trim();
-              ghost.appendChild(img);
-              currentSlide.appendChild(ghost);
-            }
+          const sourceCard = currentSlide.__sourcePoster
+            || (oldMorphId ? document.querySelector('.poster[data-morph-id="' + oldMorphId + '"]') : null);
+          if (sourceCard && !alreadyHasGhost) {
+            const ghost = document.createElement('div');
+            ghost.className = 'preview-slide-ghost';
+            const img = document.createElement('img');
+            const src = sourceCard.getAttribute('data-poster-wide') || sourceCard.getAttribute('data-poster-vert') || '';
+            img.src = src;
+            img.alt = (sourceCard.getAttribute('data-title') || sourceCard.getAttribute('data-label') || 'Preview').trim();
+            ghost.appendChild(img);
+            currentSlide.appendChild(ghost);
           }
         }
       }
@@ -5509,10 +5508,13 @@ function detachPreviewSwipeListeners() {
       function swapPreviewContentToCard(nextCard) {
         if (!nextCard) return;
         stopPreviewTeaser();
+        const targetSlide = movePreviewCardIntoSlideForCard(nextCard, true);
+        if (targetSlide && previewCardEl && previewCardEl.closest('.preview-slide') !== targetSlide) {
+          placePreviewCardIntoSlide(targetSlide);
+        }
         currentPreviewCardEl = nextCard;
         applyPreviewCopyFromCard(nextCard);
         setPreviewPosterImageFromCard(nextCard);
-        movePreviewCardIntoSlideForCard(nextCard, true);
         schedulePreviewFitUpdate();
         const isHeroPreview = !!(heroPreviewSource && (nextCard === heroPreviewSource || nextCard === heroSection || nextCard === heroVisual || nextCard.classList.contains('hero') || nextCard.classList.contains('hero-video')));
         if (isHeroPreview) {
