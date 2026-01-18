@@ -4618,50 +4618,19 @@ function detachPreviewSwipeListeners() {
       const FILL_FADE_DURATION = 220;
       let lastOpenedCard = null;
       let currentPreviewCardEl = null;
-      const ALIGN_CENTER_DEADZONE = 2;
+      function resetPreviewCarousel() {
+        if (!previewCarousel || !previewCardEl) return;
+        previewCarousel.__built = false;
+        previewCarouselSourceTrack = null;
+        previewCarouselSourceCards = null;
+        previewSlideMap.clear();
+        previewCarouselActiveLastSlide = null;
 
-      function isCardCenteredInTrack(card) {
-        if (!card || typeof card.closest !== 'function') return true;
-        const track = card.closest('.shelf-track');
-        if (!track) return true;
-
-        const trackWidth = track.clientWidth;
-        const cardWidth = card.offsetWidth || 1;
-        const cardLeft = card.offsetLeft;
-        const cardCenter = cardLeft + (cardWidth / 2);
-        const trackCenter = trackWidth / 2;
-        const target = cardCenter - trackCenter;
-        const delta = target - track.scrollLeft;
-        return Math.abs(delta) <= ALIGN_CENTER_DEADZONE;
-      }
-
-      function alignRowToCard(card, durationMs = RECENTER_DURATION) {
-        if (!card || typeof card.closest !== 'function') return Promise.resolve();
-        const track = card.closest('.shelf-track');
-        if (!track) return Promise.resolve();
-        if (track.classList.contains('is-dragging')) return Promise.resolve();
-        if (isCardCenteredInTrack(card)) return Promise.resolve();
-
-        if (track.__alignPromise) return track.__alignPromise;
-
-        const trackWidth = track.clientWidth;
-        const cardWidth = card.offsetWidth || 1;
-        const cardLeft = card.offsetLeft;
-        const cardCenter = cardLeft + (cardWidth / 2);
-        const trackCenter = trackWidth / 2;
-        const target = cardCenter - trackCenter;
-
-        cancelScrollAnimation(track);
-        animateScrollLeftSlow(track, target, durationMs);
-
-        track.__alignPromise = new Promise((resolve) => {
-          window.setTimeout(() => {
-            track.__alignPromise = null;
-            resolve();
-          }, Math.max(0, durationMs) + 60);
-        });
-
-        return track.__alignPromise;
+        previewCarousel.innerHTML = '';
+        const slide = document.createElement('div');
+        slide.className = 'preview-slide is-active';
+        slide.appendChild(previewCardEl);
+        previewCarousel.appendChild(slide);
       }
 
       function showPreviewPoster(card) {
@@ -5462,12 +5431,6 @@ function detachPreviewSwipeListeners() {
       };
       function openPreviewFromCard(card, triggerElement = card) {
         if (!card) return;
-        if (!isCardCenteredInTrack(card)) {
-          alignRowToCard(card).then(() => {
-            openPreviewFromCard(card, triggerElement);
-          });
-          return;
-        }
         // ZAQ TASK 1.8: Pause hero video when preview begins opening.
         previewOpening = true;
         const heroAudioState = getHeroAudioState();
@@ -5499,6 +5462,7 @@ function detachPreviewSwipeListeners() {
           window.setActiveCardAuthority(card);
         }
         setPreviewPosterImageFromCard(card);
+        resetPreviewCarousel();
         movePreviewCardIntoSlideForCard(card, true, true);
         startPreviewCarouselMagnifier();
         lockScroll();
@@ -5718,6 +5682,7 @@ function detachPreviewSwipeListeners() {
         removePreviewAutounmuteListener();
         clearPreviewVolumeTimers();
 
+        stopPreviewCarouselActiveTracking();
         stopPreviewCarouselMagnifier();
 
         window.removeEventListener('resize', handlePreviewResize);
@@ -5737,13 +5702,6 @@ function detachPreviewSwipeListeners() {
           : ((currentPreviewCardEl && currentPreviewCardEl.classList && currentPreviewCardEl.classList.contains('poster'))
             ? currentPreviewCardEl
             : lastOpenedCard);
-
-        if (exitCard && !isCardCenteredInTrack(exitCard)) {
-          alignRowToCard(exitCard).then(() => {
-            closePreview();
-          });
-          return;
-        }
 
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
@@ -5766,6 +5724,7 @@ function detachPreviewSwipeListeners() {
           if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
             window.updateActiveTrackFromWindowScroll();
           }
+          resetPreviewCarousel();
           return;
         }
         const cardRect = exitCard.getBoundingClientRect();
@@ -5801,6 +5760,7 @@ function detachPreviewSwipeListeners() {
 
         previewOverlay.classList.remove('is-visible');
         previewOverlay.setAttribute('aria-hidden', 'true');
+        resetPreviewCarousel();
 
         const targetRadius = getComputedStyle(exitCard).borderRadius;
 
