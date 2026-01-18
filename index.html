@@ -3364,6 +3364,13 @@ html { scrollbar-gutter: stable; }
 
             previewCarousel.addEventListener('mousedown', (event) => {
               if (event.button !== 0) return;
+              if (event.target && event.target.closest('button, input, a, .preview-actions, .preview-volume, .preview-close-btn')) {
+                return;
+              }
+              const scrollBlock = event.target ? event.target.closest('.preview-body') : null;
+              if (scrollBlock && isScrollableElement(scrollBlock)) {
+                return;
+              }
               isDragging = true;
               previewCarousel.classList.add('is-dragging');
               startX = event.pageX - previewCarousel.getBoundingClientRect().left;
