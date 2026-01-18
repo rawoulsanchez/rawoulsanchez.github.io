@@ -4296,6 +4296,13 @@ html { scrollbar-gutter: stable; }
           previewTeaserContainer.classList.add('teaser-fadeout');
           previewTeaserContainer.style.transition = `opacity ${PREVIEW_CLOSE_FADE_MS}ms ease`;
         }
+        if (previewTeaserPlayer && typeof previewTeaserPlayer.getIframe === 'function') {
+          const iframe = previewTeaserPlayer.getIframe();
+          if (iframe) {
+            iframe.style.transition = `opacity ${PREVIEW_CLOSE_FADE_MS}ms ease`;
+            iframe.style.opacity = '0';
+          }
+        }
         fadeOutPreviewTeaserAudio(previewTeaserPlayer, PREVIEW_CLOSE_FADE_MS);
         clearPreviewTeaserFadeTimeout();
         previewTeaserFadeTimeout = setTimeout(() => {
