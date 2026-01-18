@@ -4618,7 +4618,51 @@ function detachPreviewSwipeListeners() {
       const FILL_FADE_DURATION = 220;
       let lastOpenedCard = null;
       let currentPreviewCardEl = null;
-      let previewCloseDeferStart = null;
+      const ALIGN_CENTER_DEADZONE = 2;
+
+      function isCardCenteredInTrack(card) {
+        if (!card || typeof card.closest !== 'function') return true;
+        const track = card.closest('.shelf-track');
+        if (!track) return true;
+
+        const trackWidth = track.clientWidth;
+        const cardWidth = card.offsetWidth || 1;
+        const cardLeft = card.offsetLeft;
+        const cardCenter = cardLeft + (cardWidth / 2);
+        const trackCenter = trackWidth / 2;
+        const target = cardCenter - trackCenter;
+        const delta = target - track.scrollLeft;
+        return Math.abs(delta) <= ALIGN_CENTER_DEADZONE;
+      }
+
+      function alignRowToCard(card, durationMs = RECENTER_DURATION) {
+        if (!card || typeof card.closest !== 'function') return Promise.resolve();
+        const track = card.closest('.shelf-track');
+        if (!track) return Promise.resolve();
+        if (track.classList.contains('is-dragging')) return Promise.resolve();
+        if (isCardCenteredInTrack(card)) return Promise.resolve();
+
+        if (track.__alignPromise) return track.__alignPromise;
+
+        const trackWidth = track.clientWidth;
+        const cardWidth = card.offsetWidth || 1;
+        const cardLeft = card.offsetLeft;
+        const cardCenter = cardLeft + (cardWidth / 2);
+        const trackCenter = trackWidth / 2;
+        const target = cardCenter - trackCenter;
+
+        cancelScrollAnimation(track);
+        animateScrollLeftSlow(track, target, durationMs);
+
+        track.__alignPromise = new Promise((resolve) => {
+          window.setTimeout(() => {
+            track.__alignPromise = null;
+            resolve();
+          }, Math.max(0, durationMs) + 60);
+        });
+
+        return track.__alignPromise;
+      }
 
       function showPreviewPoster(card) {
         if (!previewPlaceholder || !card) return;
@@ -5417,6 +5461,13 @@ function detachPreviewSwipeListeners() {
         fitPreviewToViewport();
       };
       function openPreviewFromCard(card, triggerElement = card) {
+        if (!card) return;
+        if (!isCardCenteredInTrack(card)) {
+          alignRowToCard(card).then(() => {
+            openPreviewFromCard(card, triggerElement);
+          });
+          return;
+        }
         // ZAQ TASK 1.8: Pause hero video when preview begins opening.
         previewOpening = true;
         const heroAudioState = getHeroAudioState();
@@ -5687,17 +5738,12 @@ function detachPreviewSwipeListeners() {
             ? currentPreviewCardEl
             : lastOpenedCard);
 
-        // Ensure the underlying row is already aligned on the active card before starting the close morph.
-        const exitTrack = (exitCard && typeof exitCard.closest === 'function') ? exitCard.closest('.shelf-track') : null;
-        if (exitTrack && exitTrack.__scrollAnimating) {
-          const now = performance.now();
-          if (previewCloseDeferStart === null) previewCloseDeferStart = now;
-          if ((now - previewCloseDeferStart) < 2100) {
-            requestAnimationFrame(closePreview);
-            return;
-          }
+        if (exitCard && !isCardCenteredInTrack(exitCard)) {
+          alignRowToCard(exitCard).then(() => {
+            closePreview();
+          });
+          return;
         }
-        previewCloseDeferStart = null;
 
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
