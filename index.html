@@ -2736,6 +2736,28 @@ html { scrollbar-gutter: stable; }
 
     const shelfTracks = Array.from(document.querySelectorAll('.shelf-track'));
 
+    // ZAQ TASK 2.3 — Row scroll sync to active card (center match)
+    // When the authoritative active-card changes (e.g., from preview navigation),
+    // scroll ONLY the containing row so the matching card becomes centered.
+    document.addEventListener('zaq-active-card-change', (e) => {
+      const detail = e && e.detail ? e.detail : null;
+      const nextCard = detail && detail.card ? detail.card : null;
+      if (!nextCard) return;
+
+      const track = (typeof nextCard.closest === 'function') ? nextCard.closest('.shelf-track') : null;
+      if (!track) return;
+
+      if (track.classList.contains('is-dragging')) return;
+
+      // Ensure the track's existing centering logic targets the active card.
+      const prevActive = track.querySelector('.poster.is-active');
+      if (prevActive && prevActive !== nextCard) prevActive.classList.remove('is-active');
+      nextCard.classList.add('is-active');
+
+      cancelScrollAnimation(track);
+      recenterTrackActivePoster(track);
+    });
+
     function recenterAllOtherTracks(currentTrack) {
       if (!shelfTracks.length) return;
       for (const track of shelfTracks) {
