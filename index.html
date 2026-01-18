@@ -4276,6 +4276,7 @@ html { scrollbar-gutter: stable; }
       }
 
       let previewCloseFadeTimeout = null;
+      let previewClosePending = false;
       function startPreviewCloseFade() {
         if (previewCloseFadeTimeout) return;
         if (!previewTeaserPlayer && !previewTeaserContainer) return;
@@ -5691,6 +5692,17 @@ function detachPreviewSwipeListeners() {
 
       function closePreview() {
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
+        if (previewClosePending) return;
+        if (!previewClosePending && (previewTeaserPlayer || previewTeaserContainer)) {
+          previewClosePending = true;
+          startPreviewCloseFade();
+          window.setTimeout(() => {
+            previewClosePending = false;
+            closePreview();
+          }, PREVIEW_CLOSE_FADE_MS);
+          return;
+        }
+        previewClosePending = false;
         previewOpening = false;
         if (previewTeaserPlayer || previewTeaserContainer) {
           startPreviewCloseFade();
