@@ -4291,6 +4291,21 @@ html { scrollbar-gutter: stable; }
         }, PREVIEW_CLOSE_FADE_MS);
       }
 
+      function startPreviewTimedFade(card) {
+        if (previewTeaserContainer) {
+          previewTeaserContainer.classList.add('teaser-fadeout');
+          previewTeaserContainer.style.transition = `opacity ${PREVIEW_CLOSE_FADE_MS}ms ease`;
+        }
+        fadeOutPreviewTeaserAudio(previewTeaserPlayer, PREVIEW_CLOSE_FADE_MS);
+        clearPreviewTeaserFadeTimeout();
+        previewTeaserFadeTimeout = setTimeout(() => {
+          stopPreviewTeaser();
+          if (card) {
+            showPreviewPoster(card);
+          }
+        }, PREVIEW_CLOSE_FADE_MS);
+      }
+
       function startHeroPreviewTeaser() {
         if (!isPreviewOpen()) return;
         if (!previewMedia || !window.YT || typeof window.YT.Player !== 'function') return;
@@ -4344,7 +4359,7 @@ html { scrollbar-gutter: stable; }
                 attemptPreviewAutounmuteIfPlaying(e.target);
               }, 600);
               previewTeaserTimer = setTimeout(() => {
-                stopPreviewTeaser();
+                startPreviewTimedFade();
               }, HERO_PREVIEW_DURATION_MS);
             }
           }
@@ -4408,19 +4423,7 @@ html { scrollbar-gutter: stable; }
                 attemptPreviewAutounmuteIfPlaying(e.target);
               }, 600);
               previewTeaserTimer = setTimeout(() => {
-                if (isA1PreviewCard(card)) {
-                  if (previewTeaserContainer) {
-                    previewTeaserContainer.classList.add('teaser-fadeout');
-                  }
-                  fadeOutPreviewTeaserAudio(previewTeaserPlayer);
-                  clearPreviewTeaserFadeTimeout();
-                  previewTeaserFadeTimeout = setTimeout(() => {
-                    stopPreviewTeaser();
-                  }, PREVIEW_TEASER_FADE_MS);
-                  return;
-                }
-                stopPreviewTeaser();
-                showPreviewPoster(card);
+                startPreviewTimedFade(card);
               }, HERO_PREVIEW_DURATION_MS);
             }
           }
