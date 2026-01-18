@@ -1710,6 +1710,70 @@ html { scrollbar-gutter: stable; }
     }
   }
 
+  /* =============================
+     Preview Carousel Layout (TASK 2.7)
+     ============================= */
+  .preview-carousel{
+    --preview-card-width: min(960px, 78vw);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 calc(50vw - (var(--preview-card-width) / 2));
+    scrollbar-width: none;
+    cursor: grab;
+  }
+  .preview-carousel::-webkit-scrollbar{ display: none; }
+  .preview-carousel.is-dragging{ cursor: grabbing; user-select: none; }
+  .preview-slide{
+    flex: 0 0 auto;
+    width: var(--preview-card-width);
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    transform-origin: center center;
+    opacity: 0.86;
+    transition: opacity 220ms ease;
+  }
+  .preview-slide.is-active{
+    opacity: 1;
+  }
+  .preview-slide-ghost{
+    width: 100%;
+    border-radius: var(--preview-frame-radius);
+    border: 1px solid #262b33;
+    background: #05060a;
+    box-shadow: 0 18px 44px rgba(0,0,0,0.62), 0 0 0 1px rgba(255,255,255,0.02);
+    overflow: hidden;
+    display: block;
+  }
+  .preview-slide-ghost img{
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: 16 / 9;
+  }
+  @media (max-width: 640px){
+    .preview-carousel{
+      padding: 0;
+      overflow-x: hidden;
+      cursor: default;
+    }
+    .preview-carousel.is-dragging{ cursor: default; }
+    .preview-slide{
+      width: 100%;
+      transform: none;
+      opacity: 1;
+    }
+    .preview-slide:not(.is-active){
+      display: none;
+    }
+  }
+
 
   /* =============================
      Poster Preview Button (A1 only)
@@ -1888,7 +1952,7 @@ html { scrollbar-gutter: stable; }
     </div>
     <div class="shelf-outer">
       <div class="shelf-track" data-row="A" role="list" aria-label="Row A posters">
-        <a class="poster" role="listitem" aria-label="A1" data-label="A1" data-title="TBD Title A1" data-description="TBD Description A1" data-runtime="TBD Runtime A1" data-tags="TBD Tags A1" data-youtube-url="https://youtu.be/OePuntIsxk4?si=VzYQU06cIrBOrsEt&t=236" data-youtube-play-url="https://youtu.be/OePuntIsxk4?si=7Xiba4A2-NUJ-dqT" data-poster-vert="images/poster-vert-A1.png" data-poster-wide="images/poster-wide-A1.png" data-morph-id="morph-01"><img src="images/poster-vert-A1.png" alt="Sanchez Ninjah A1 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A1" data-label="A1" data-title="A1" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-youtube-play-url="" data-poster-vert="images/poster-vert-A1.png" data-poster-wide="images/poster-wide-A1.png" data-morph-id="morph-01"><img src="images/poster-vert-A1.png" alt="Sanchez Ninjah A1 poster"><button class="poster-preview-button" type="button">Preview</button></a>
         <a class="poster" role="listitem" aria-label="A2" data-label="A2" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A2.png" data-poster-wide="images/poster-wide-A2.png" data-morph-id="morph-02"><img src="images/poster-vert-A2.png" alt="A2 poster"><button class="poster-preview-button" type="button">Preview</button></a>
         <a class="poster" role="listitem" aria-label="A3" data-label="A3" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A3.png" data-poster-wide="images/poster-wide-A3.png" data-morph-id="morph-03"><img src="images/poster-vert-A3.png" alt="A3 poster"><button class="poster-preview-button" type="button">Preview</button></a>
         <a class="poster" role="listitem" aria-label="A4" data-label="A4" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A4.png" data-poster-wide="images/poster-wide-A4.png" data-morph-id="morph-04"><img src="images/poster-vert-A4.png" alt="A4 poster"><button class="poster-preview-button" type="button">Preview</button></a>
@@ -2523,6 +2587,60 @@ html { scrollbar-gutter: stable; }
     function isMobileView(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
     window.isMobileView = isMobileView;
 
+    // ZAQ TASK 2.0 — Active Card Authority (foundational)
+    // Single, explicit source of truth for the currently focused card.
+    if (!window.__activeCardAuthority) {
+      window.__activeCardAuthority = { current: null };
+    }
+    window.setActiveCardAuthority = function(cardEl){
+      const prev = window.__activeCardAuthority.current || null;
+      const next = cardEl || null;
+      window.__activeCardAuthority.current = next;
+      if (prev !== next) {
+        try {
+          document.dispatchEvent(new CustomEvent('zaq-active-card-change', { detail: { card: next, previous: prev } }));
+        } catch (_) {}
+      }
+    };
+    window.getActiveCardAuthority = function(){
+      return window.__activeCardAuthority.current || null;
+    };
+
+    // ZAQ TASK 2.1 — Next / Previous Navigation Core (DOM order + WRAP)
+    function getNavCardsInDomOrder(){
+      return Array.from(document.querySelectorAll('.poster'));
+    }
+    function computeNextCardByDomOrder(currentCard){
+      const cards = getNavCardsInDomOrder();
+      if (!cards.length) return null;
+
+      const idx = cards.indexOf(currentCard);
+      if (idx < 0) return cards[0];
+
+      const nextIdx = (idx + 1) % cards.length;
+      return cards[nextIdx];
+    }
+    function computePreviousCardByDomOrder(currentCard){
+      const cards = getNavCardsInDomOrder();
+      if (!cards.length) return null;
+
+      const idx = cards.indexOf(currentCard);
+      if (idx < 0) return cards[cards.length - 1];
+
+      const prevIdx = (idx - 1 + cards.length) % cards.length;
+      return cards[prevIdx];
+    }
+    window.goToNextCardByDomOrder = function(){
+      const next = computeNextCardByDomOrder(window.getActiveCardAuthority());
+      window.setActiveCardAuthority(next);
+      return next;
+    };
+    window.goToPreviousCardByDomOrder = function(){
+      const prev = computePreviousCardByDomOrder(window.getActiveCardAuthority());
+      window.setActiveCardAuthority(prev);
+      return prev;
+    };
+
     let lastActiveTrack = null;
     const heroLoopState = window.heroLoopState || (window.heroLoopState = {
       isScrolling: false,
@@ -2614,6 +2732,28 @@ html { scrollbar-gutter: stable; }
     }
 
     const shelfTracks = Array.from(document.querySelectorAll('.shelf-track'));
+
+    // ZAQ TASK 2.3 — Row scroll sync to active card (center match)
+    // When the authoritative active-card changes (e.g., from preview navigation),
+    // scroll ONLY the containing row so the matching card becomes centered.
+    document.addEventListener('zaq-active-card-change', (e) => {
+      const detail = e && e.detail ? e.detail : null;
+      const nextCard = detail && detail.card ? detail.card : null;
+      if (!nextCard) return;
+
+      const track = (typeof nextCard.closest === 'function') ? nextCard.closest('.shelf-track') : null;
+      if (!track) return;
+
+      if (track.classList.contains('is-dragging')) return;
+
+      // Ensure the track's existing centering logic targets the active card.
+      const prevActive = track.querySelector('.poster.is-active');
+      if (prevActive && prevActive !== nextCard) prevActive.classList.remove('is-active');
+      nextCard.classList.add('is-active');
+
+      cancelScrollAnimation(track);
+      recenterTrackActivePoster(track);
+    });
 
     function recenterAllOtherTracks(currentTrack) {
       if (!shelfTracks.length) return;
@@ -3115,13 +3255,473 @@ html { scrollbar-gutter: stable; }
       // Note: shelves clone posters for infinite scrolling. We use event delegation
       // and per-card data-morph-id so both originals and clones open correctly.
       const previewOverlay = document.querySelector('.preview-overlay');
-      const previewCloseButton = document.querySelector('.preview-close-btn');
-      const previewTitleEl = document.querySelector('.preview-title');
-      const previewRuntimeEl = document.querySelector('.preview-runtime');
-      const previewTagsEl = document.querySelector('.preview-tags');
-      const previewDescriptionEl = document.querySelector('.preview-description');
-      const previewPrevButton = previewOverlay ? previewOverlay.querySelector('.preview-nav-arrow--left') : null;
-      const previewNextButton = previewOverlay ? previewOverlay.querySelector('.preview-nav-arrow--right') : null;
+      const previewCloseButton = previewOverlay ? previewOverlay.querySelector('.preview-close-btn') : null;
+      // ZAQ TASK 2.3/2.4 — Preview template authority: bind fields from the preview overlay template.
+      const previewTitleEl = previewOverlay ? previewOverlay.querySelector('h2#preview-title.preview-title') : null;
+      const previewRuntimeEl = previewOverlay ? previewOverlay.querySelector('.preview-runtime') : null;
+      const previewTagsEl = previewOverlay ? previewOverlay.querySelector('.preview-tags') : null;
+      const previewDescriptionEl = previewOverlay ? previewOverlay.querySelector('.preview-description') : null;
+
+      // TASK 2.7 — Preview carousel scaffolding (center large, sides smaller)
+      const previewCarousel = previewOverlay ? previewOverlay.querySelector('.preview-carousel') : null;
+      const previewCardEl = previewOverlay ? previewOverlay.querySelector('.preview-card') : null;
+
+      const previewSlideMap = new Map();
+      const previewPosterToSlide = new WeakMap();
+      let previewCarouselSourceTrack = null;
+      let previewCarouselSourceCards = null;
+
+      function buildPreviewCarouselSlides(activeCard) {
+        if (!previewCarousel || !previewCardEl) return;
+
+        const sourceCard = activeCard || window.getActiveCardAuthority && window.getActiveCardAuthority();
+        const sourceTrack = sourceCard && typeof sourceCard.closest === 'function' ? sourceCard.closest('.shelf-track') : null;
+
+        // Rebuild when the source track changes, or when the cached slide list is missing the active card instance.
+        const shouldRebuild = (previewCarouselSourceTrack !== sourceTrack) || !previewCarouselSourceCards || (sourceCard && sourceTrack && previewCarouselSourceCards.indexOf(sourceCard) === -1);
+
+        if (!shouldRebuild && previewCarousel.__built) return;
+        previewCarousel.__built = true;
+
+        // Pick the card list in DOM order from the active row track (includes clones).
+        // This mirrors the shelf's left/right clone distribution.
+        const cards = sourceTrack
+          ? Array.from(sourceTrack.querySelectorAll(':scope > .poster[data-morph-id]')).filter((card) => !!card.querySelector('.poster-preview-button'))
+          : Array.from(document.querySelectorAll('.poster[data-morph-id]')).filter((card) => !!card.querySelector('.poster-preview-button'));
+
+        if (!cards.length) return;
+
+        previewCarouselSourceTrack = sourceTrack;
+        previewCarouselSourceCards = cards;
+
+        // Detach the single real preview card so we can rebuild slides without duplicates.
+        if (previewCardEl.parentNode) {
+          previewCardEl.parentNode.removeChild(previewCardEl);
+        }
+
+        // Remove any placeholder/extra slides and rebuild a strict 1:1 slide list
+        // that mirrors the source track DOM order (including clones).
+        previewCarousel.innerHTML = '';
+        previewSlideMap.clear();
+
+        // WeakMap is per rebuild; clear by creating a new one via local mutation pattern.
+        // (We keep the same instance but overwrite entries by rebuilding.)
+        // Note: WeakMap has no clear(); we simply create fresh mappings below.
+
+        const activeIndex = sourceCard ? cards.indexOf(sourceCard) : -1;
+        const hostIndex = activeIndex >= 0 ? activeIndex : 0;
+
+        for (let i = 0; i < cards.length; i++) {
+          const c = cards[i];
+          const morphId = c.getAttribute('data-morph-id');
+          if (!morphId) continue;
+
+          const slide = document.createElement('div');
+          slide.className = 'preview-slide';
+          slide.setAttribute('data-morph-id', morphId);
+
+          if (i == hostIndex) {
+            slide.classList.add('is-active');
+            slide.__holdsPreviewCard = true;
+            slide.appendChild(previewCardEl);
+          } else {
+            const ghost = document.createElement('div');
+            ghost.className = 'preview-slide-ghost';
+
+            const img = document.createElement('img');
+            const src = c.getAttribute('data-poster-wide') || c.getAttribute('data-poster-vert') || '';
+            img.src = src;
+            img.alt = (c.getAttribute('data-title') || c.getAttribute('data-label') || 'Preview').trim();
+            ghost.appendChild(img);
+            slide.appendChild(ghost);
+          }
+
+          previewCarousel.appendChild(slide);
+
+          // Link each preview slide instance to the exact poster instance (including clones).
+          slide.__sourcePoster = c;
+
+          // Map the specific poster instance (including clones) to its matching slide instance.
+          try { previewPosterToSlide.set(c, slide); } catch (_) {}
+
+          // Maintain a morphId -> first slide mapping for legacy lookups.
+          if (!previewSlideMap.has(morphId)) {
+            previewSlideMap.set(morphId, slide);
+          }
+        }
+
+        // Desktop-only grab-to-drag behavior (match shelf-track behavior)
+        if (window.matchMedia && window.matchMedia('(pointer: fine)').matches) {
+          if (!previewCarousel.__dragInstalled) {
+            previewCarousel.__dragInstalled = true;
+
+            let isDragging = false;
+            let startX = 0;
+            let startScrollLeft = 0;
+
+            previewCarousel.addEventListener('mousedown', (event) => {
+              if (event.button !== 0) return;
+              isDragging = true;
+              previewCarousel.classList.add('is-dragging');
+              startX = event.pageX - previewCarousel.getBoundingClientRect().left;
+              startScrollLeft = previewCarousel.scrollLeft;
+            });
+
+            previewCarousel.addEventListener('mousemove', (event) => {
+              if (!isDragging) return;
+              event.preventDefault();
+              const x = event.pageX - previewCarousel.getBoundingClientRect().left;
+              const walk = x - startX;
+              previewCarousel.scrollLeft = startScrollLeft - walk;
+            });
+
+            const stop = () => {
+              if (!isDragging) return;
+              isDragging = false;
+              previewCarousel.classList.remove('is-dragging');
+            };
+            previewCarousel.addEventListener('mouseleave', stop);
+            previewCarousel.addEventListener('mouseup', stop);
+          }
+        }
+      }
+
+      // ZAQ TASK 2.4 — Preview navigation must move the carousel (row-style center shift)
+      let previewCarouselScrollAnim = null;
+      function cancelPreviewCarouselScrollAnimation() {
+        if (previewCarouselScrollAnim && typeof previewCarouselScrollAnim.frameId === 'number') {
+          cancelAnimationFrame(previewCarouselScrollAnim.frameId);
+        }
+        previewCarouselScrollAnim = null;
+      }
+
+      function animatePreviewCarouselScrollLeftTo(target, durationMs) {
+        if (!previewCarousel || typeof target !== 'number' || !isFinite(target)) return;
+
+        cancelPreviewCarouselScrollAnimation();
+
+        const start = previewCarousel.scrollLeft;
+        const distance = target - start;
+        if (distance === 0 || !durationMs || durationMs <= 0) {
+          previewCarousel.scrollLeft = target;
+          return;
+        }
+
+        const startTime = performance.now();
+        function easeInOutCubic(t) {
+          if (t <= 0) return 0;
+          if (t >= 1) return 1;
+          return t * t * t * (t * (6 * t - 15) + 10);
+        }
+
+        function step(now) {
+          const elapsed = now - startTime;
+          let t = elapsed / durationMs;
+          if (t < 0) t = 0;
+          if (t > 1) t = 1;
+          const eased = easeInOutCubic(t);
+          previewCarousel.scrollLeft = start + (distance * eased);
+          schedulePreviewMagnifierUpdate();
+          if (t < 1 && previewCarouselScrollAnim && previewCarouselScrollAnim.step === step) {
+            previewCarouselScrollAnim.frameId = requestAnimationFrame(step);
+          } else {
+            previewCarousel.scrollLeft = target;
+            cancelPreviewCarouselScrollAnimation();
+          }
+        }
+
+        previewCarouselScrollAnim = { frameId: requestAnimationFrame(step), step };
+      }
+
+      function centerPreviewSlideWithAnimation(slide) {
+        if (!previewCarousel || !slide) return;
+
+        const carouselRect = previewCarousel.getBoundingClientRect();
+        const slideRect = slide.getBoundingClientRect();
+        const carouselCenter = carouselRect.left + (carouselRect.width / 2);
+        const slideCenter = slideRect.left + (slideRect.width / 2);
+        const delta = slideCenter - carouselCenter;
+
+        const target = previewCarousel.scrollLeft + delta;
+        animatePreviewCarouselScrollLeftTo(target, 520);
+      }
+
+      function centerPreviewSlideInstant(slide) {
+        if (!previewCarousel || !slide) return;
+
+        cancelPreviewCarouselScrollAnimation();
+
+        const carouselRect = previewCarousel.getBoundingClientRect();
+        const slideRect = slide.getBoundingClientRect();
+        const carouselCenter = carouselRect.left + (carouselRect.width / 2);
+        const slideCenter = slideRect.left + (slideRect.width / 2);
+        const delta = slideCenter - carouselCenter;
+
+        previewCarousel.scrollLeft = previewCarousel.scrollLeft + delta;
+        schedulePreviewMagnifierUpdate();
+      }
+
+      // ZAQ TASK 2.4 FIX — Active preview slide must follow carousel center during scrolling
+      let previewCarouselActiveRafId = null;
+      let previewCarouselActiveLastSlide = null;
+
+      function getClosestPreviewSlideToCenter() {
+        if (!previewCarousel) return null;
+        const slides = previewCarousel.querySelectorAll('.preview-slide');
+        if (!slides || !slides.length) return null;
+
+        const carouselRect = previewCarousel.getBoundingClientRect();
+        const carouselCenter = carouselRect.left + (carouselRect.width / 2);
+
+        let closest = null;
+        let closestDist = Infinity;
+        for (const slide of slides) {
+          const rect = slide.getBoundingClientRect();
+          const center = rect.left + (rect.width / 2);
+          const dist = Math.abs(center - carouselCenter);
+          if (dist < closestDist) {
+            closestDist = dist;
+            closest = slide;
+          }
+        }
+        return closest;
+      }
+
+      function placePreviewCardIntoSlide(targetSlide) {
+        if (!previewCarousel || !previewCardEl || !targetSlide) return;
+
+        const currentSlide = previewCardEl.closest('.preview-slide');
+        if (currentSlide === targetSlide) return;
+
+        // Remove any ghost in the target and place the real preview card.
+        const existingGhost = targetSlide.querySelector('.preview-slide-ghost');
+        if (existingGhost) {
+          existingGhost.remove();
+        }
+        targetSlide.appendChild(previewCardEl);
+
+        // Restore ghost into the slide we moved from (if needed).
+        if (currentSlide && currentSlide !== targetSlide) {
+          const oldMorphId = currentSlide.getAttribute('data-morph-id');
+          const alreadyHasGhost = !!currentSlide.querySelector('.preview-slide-ghost');
+          const sourceCard = currentSlide.__sourcePoster
+            || (oldMorphId ? document.querySelector('.poster[data-morph-id="' + oldMorphId + '"]') : null);
+          if (sourceCard && !alreadyHasGhost) {
+            const ghost = document.createElement('div');
+            ghost.className = 'preview-slide-ghost';
+            const img = document.createElement('img');
+            const src = sourceCard.getAttribute('data-poster-wide') || sourceCard.getAttribute('data-poster-vert') || '';
+            img.src = src;
+            img.alt = (sourceCard.getAttribute('data-title') || sourceCard.getAttribute('data-label') || 'Preview').trim();
+            ghost.appendChild(img);
+            currentSlide.appendChild(ghost);
+          }
+        }
+      }
+
+      function updatePreviewActiveSlideFromCenter() {
+        if (!previewCarousel) return;
+        const closest = getClosestPreviewSlideToCenter();
+        if (!closest) return;
+
+        // Apply .is-active ONLY to the slide closest to the carousel center.
+        if (closest !== previewCarouselActiveLastSlide) {
+          const slides = previewCarousel.querySelectorAll('.preview-slide');
+          for (const s of slides) {
+            if (s === closest) continue;
+            s.classList.remove('is-active');
+          }
+          closest.classList.add('is-active');
+          previewCarouselActiveLastSlide = closest;
+
+          // When the centered slide changes, update the active preview card authority
+          // to the exact poster instance that this slide represents. This ensures the
+          // close morph targets the currently centered card (not the originally opened one).
+          const sourcePoster = closest.__sourcePoster || null;
+          if (sourcePoster && sourcePoster !== currentPreviewCardEl) {
+            currentPreviewCardEl = sourcePoster;
+            applyPreviewCopyFromCard(sourcePoster);
+            setPreviewPosterImageFromCard(sourcePoster);
+            if (typeof window.setActiveCardAuthority === 'function') {
+              window.setActiveCardAuthority(sourcePoster);
+            }
+          }
+        }
+
+        // Keep the single real preview card housed in the currently centered slide.
+        if (previewCardEl) {
+          const currentSlide = previewCardEl.closest('.preview-slide');
+          if (currentSlide !== closest) {
+            placePreviewCardIntoSlide(closest);
+            schedulePreviewFitUpdate();
+          }
+        }
+      }
+
+      function schedulePreviewActiveSlideUpdate() {
+        if (!previewCarousel) return;
+        if (previewCarouselActiveRafId !== null) return;
+        previewCarouselActiveRafId = requestAnimationFrame(() => {
+          previewCarouselActiveRafId = null;
+          updatePreviewActiveSlideFromCenter();
+        });
+      }
+
+      function startPreviewCarouselActiveTracking() {
+        if (!previewCarousel) return;
+        if (previewCarousel.__activeTrackingInstalled) return;
+        previewCarousel.__activeTrackingInstalled = true;
+
+        previewCarousel.addEventListener('scroll', schedulePreviewActiveSlideUpdate, { passive: true });
+        window.addEventListener('resize', schedulePreviewActiveSlideUpdate, { passive: true });
+
+        schedulePreviewActiveSlideUpdate();
+      }
+
+      function stopPreviewCarouselActiveTracking() {
+        if (!previewCarousel || !previewCarousel.__activeTrackingInstalled) return;
+        previewCarousel.__activeTrackingInstalled = false;
+
+        previewCarousel.removeEventListener('scroll', schedulePreviewActiveSlideUpdate);
+        window.removeEventListener('resize', schedulePreviewActiveSlideUpdate);
+
+        if (previewCarouselActiveRafId !== null) {
+          cancelAnimationFrame(previewCarouselActiveRafId);
+          previewCarouselActiveRafId = null;
+        }
+        previewCarouselActiveLastSlide = null;
+      }
+
+      // ZAQ TASK 2.4 (REFINEMENT) — Preview carousel magnifier scaling (continuous, row-style)
+      let previewCarouselMagnifierRafId = null;
+      let previewFitRafId = null;
+
+      function schedulePreviewFitUpdate() {
+        if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
+        // Avoid fitting while the morph tile temporarily owns the preview card.
+        if (previewOpening || activeMorphTile) return;
+        if (previewFitRafId !== null) return;
+        previewFitRafId = requestAnimationFrame(() => {
+          previewFitRafId = null;
+          fitPreviewToViewport();
+        });
+      }
+
+      function updatePreviewMagnifierScales() {
+        if (!previewCarousel) return;
+        const slides = previewCarousel.querySelectorAll('.preview-slide');
+        if (!slides || !slides.length) return;
+
+        const carouselRect = previewCarousel.getBoundingClientRect();
+        const carouselCenter = carouselRect.left + (carouselRect.width / 2);
+        const halfWidth = carouselRect.width / 2;
+
+        // Mirror shelf-row magnifier model.
+        const maxScale = 1.12;
+        const minScale = 0.78;
+
+        for (const slide of slides) {
+          // Do not magnify the slide that currently holds the real preview card.
+          // Otherwise the card will jump in size when the magnifier updates.
+          if (previewCardEl && slide.contains(previewCardEl)) {
+            slide.style.transform = '';
+            continue;
+          }
+
+          const rect = slide.getBoundingClientRect();
+          const center = rect.left + (rect.width / 2);
+          const distance = Math.abs(center - carouselCenter);
+          const t = Math.min(distance / halfWidth, 1);
+          const scale = maxScale - (maxScale - minScale) * t;
+          slide.style.transform = `scale(${scale.toFixed(3)})`;
+        }
+        schedulePreviewFitUpdate();
+      }
+
+      function schedulePreviewMagnifierUpdate() {
+        if (!previewCarousel) return;
+        if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
+        if (previewCarouselMagnifierRafId !== null) return;
+        previewCarouselMagnifierRafId = requestAnimationFrame(() => {
+          previewCarouselMagnifierRafId = null;
+          updatePreviewMagnifierScales();
+        });
+      }
+
+      function startPreviewCarouselMagnifier() {
+        if (!previewCarousel) return;
+        if (previewCarousel.__magnifierInstalled) return;
+        previewCarousel.__magnifierInstalled = true;
+
+        previewCarousel.addEventListener('scroll', schedulePreviewMagnifierUpdate, { passive: true });
+        window.addEventListener('resize', schedulePreviewMagnifierUpdate, { passive: true });
+
+        schedulePreviewMagnifierUpdate();
+      }
+
+      function stopPreviewCarouselMagnifier() {
+        if (!previewCarousel || !previewCarousel.__magnifierInstalled) return;
+        previewCarousel.__magnifierInstalled = false;
+
+        previewCarousel.removeEventListener('scroll', schedulePreviewMagnifierUpdate);
+        window.removeEventListener('resize', schedulePreviewMagnifierUpdate);
+
+        if (previewCarouselMagnifierRafId !== null) {
+          cancelAnimationFrame(previewCarouselMagnifierRafId);
+          previewCarouselMagnifierRafId = null;
+        }
+        if (previewFitRafId !== null) {
+          cancelAnimationFrame(previewFitRafId);
+          previewFitRafId = null;
+        }
+        const slides = previewCarousel.querySelectorAll('.preview-slide');
+        for (const slide of slides) {
+          slide.style.transform = '';
+        }
+      }
+
+
+      function movePreviewCardIntoSlideForCard(card, shouldCenter = true, centerInstant = false) {
+        if (!previewCarousel || !previewCardEl || !card) return;
+        buildPreviewCarouselSlides(card);
+
+        // Prefer the exact slide that corresponds to this specific poster instance (including clones).
+        let targetSlide = null;
+        try { targetSlide = previewPosterToSlide.get(card) || null; } catch (_) { targetSlide = null; }
+
+        // Fallback: map by morph-id (first occurrence) if needed.
+        if (!targetSlide) {
+          const morphId = card.getAttribute('data-morph-id');
+          if (!morphId) return;
+          targetSlide = previewCarousel.querySelector('.preview-slide[data-morph-id="' + morphId + '"]');
+          if (!targetSlide) {
+            targetSlide = previewSlideMap.get(morphId) || null;
+          }
+        }
+        if (!targetSlide) return;
+
+        startPreviewCarouselActiveTracking();
+
+        // If we're coming from the initial placeholder (no data-morph-id), place immediately.
+        const currentSlide = previewCardEl.closest('.preview-slide');
+        const currentMorphId = currentSlide ? currentSlide.getAttribute('data-morph-id') : null;
+        if (!currentMorphId) {
+          placePreviewCardIntoSlide(targetSlide);
+        }
+
+        if (shouldCenter) {
+          if (centerInstant) {
+            centerPreviewSlideInstant(targetSlide);
+          } else {
+            centerPreviewSlideWithAnimation(targetSlide);
+          }
+        }
+
+        // Do NOT set .is-active here. Let center-position logic control it during movement.
+        schedulePreviewActiveSlideUpdate();
+
+        return targetSlide;
+      }
 
       if (
         !morphCards.length ||
@@ -3172,6 +3772,30 @@ html { scrollbar-gutter: stable; }
 
       function isPreviewOpen() {
         return previewOpening || previewOverlay.classList.contains('is-visible');
+      }
+
+      // ZAQ TASK 2.6 — Desktop on-screen arrows (one card per click)
+      const previewNavPrevButton = previewOverlay.querySelector('.preview-nav-arrow--left');
+      const previewNavNextButton = previewOverlay.querySelector('.preview-nav-arrow--right');
+      if (previewNavPrevButton) {
+        previewNavPrevButton.addEventListener('click', (event) => {
+          if (!isPreviewOpen()) return;
+          event.preventDefault();
+          event.stopPropagation();
+          if (typeof window.goToPreviousCardByDomOrder === 'function') {
+            window.goToPreviousCardByDomOrder();
+          }
+        });
+      }
+      if (previewNavNextButton) {
+        previewNavNextButton.addEventListener('click', (event) => {
+          if (!isPreviewOpen()) return;
+          event.preventDefault();
+          event.stopPropagation();
+          if (typeof window.goToNextCardByDomOrder === 'function') {
+            window.goToNextCardByDomOrder();
+          }
+        });
       }
 
       let previewTeaserPlayer = null;
@@ -3544,27 +4168,37 @@ html { scrollbar-gutter: stable; }
         previewPosterImage.style.opacity = '1';
       }
 
-      function isA1PreviewCard(card) {
-        return !!(card && card.getAttribute('data-label') === A1_PREVIEW_LABEL);
+      function setPreviewPosterImageFromCard(card) {
+        if (!previewPosterImage || !card) return;
+        const posterSrc = card.getAttribute('data-poster-wide') || card.getAttribute('data-poster-vert') || '';
+        previewPosterImage.src = posterSrc;
+        previewPosterImage.alt = `${card.getAttribute('data-label') || 'Preview'} poster`;
+        previewPosterImage.style.opacity = posterSrc ? '1' : '0';
       }
 
-      const previewFallbackCopy = {
-        title: 'Preview Placeholder Title',
-        runtime: '1h 52m',
-        tags: 'Thriller • Sci‑Fi • Action',
-        description: 'This is a static placeholder description used for layout validation only. It is intentionally long so the text wraps across multiple lines and reveals spacing, rhythm, and hierarchy inside the Preview Modal. Replace this copy with real content in a later task once the layout has been visually approved.'
-      };
-
       function applyPreviewCopyFromCard(card) {
-        if (!previewTitleEl || !previewRuntimeEl || !previewTagsEl || !previewDescriptionEl) return;
-        const title = (card && card.getAttribute('data-title')) || previewFallbackCopy.title;
-        const runtime = (card && card.getAttribute('data-runtime')) || previewFallbackCopy.runtime;
-        const tags = (card && card.getAttribute('data-tags')) || previewFallbackCopy.tags;
-        const description = (card && card.getAttribute('data-description')) || previewFallbackCopy.description;
+        if (!card) return;
+        const label = (card.getAttribute('data-label') || '').trim();
+        const titleValue = (card.getAttribute('data-title') || '').trim();
+        const title = titleValue || (label ? `Preview Placeholder Title ${label}` : 'Preview Placeholder Title');
+
+        const runtimeValue = (card.getAttribute('data-runtime') || '').trim();
+        const tagsValue = (card.getAttribute('data-tags') || '').trim();
+        const descriptionValue = (card.getAttribute('data-description') || '').trim();
+
+        const runtime = runtimeValue || '1h 52m';
+        const tags = tagsValue || 'Thriller • Sci-Fi • Action';
+        const description = descriptionValue ||
+          'This is a static placeholder description used for layout validation only. It is intentionally long so the text wraps across multiple lines and reveals spacing, rhythm, and hierarchy inside the Preview Modal. Replace this copy with real content in a later task once the layout has been visually approved.';
+
         previewTitleEl.textContent = title;
         previewRuntimeEl.textContent = runtime;
         previewTagsEl.textContent = tags;
         previewDescriptionEl.textContent = description;
+      }
+
+      function isA1PreviewCard(card) {
+        return !!(card && card.getAttribute('data-label') === A1_PREVIEW_LABEL);
       }
 
       function hidePreviewPlaceholder() {
@@ -3774,8 +4408,6 @@ html { scrollbar-gutter: stable; }
       }
 
       let previewSwipeHandlers = null;
-      const SWIPE_NAV_THRESHOLD_PX = 80;
-      const SWIPE_INTENT_PX = 12;
 
       function isScrollableElement(element) {
         if (!element) return false;
@@ -3797,80 +4429,125 @@ html { scrollbar-gutter: stable; }
       }
 
       function attachPreviewSwipeListeners() {
+        return;
         if (previewSwipeHandlers) return;
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
 
+        const SWIPE_INTENT_PX = 10;
+        const SWIPE_NAV_THRESHOLD_PX = 60;
+        const SWIPE_DOWN_CLOSE_THRESHOLD_PX = 90;
+        const INTENT_RATIO = 1.2;
+
         let startX = 0;
         let startY = 0;
-        let maxDeltaX = 0;
+        let lastX = 0;
+        let lastY = 0;
         let maxDeltaY = 0;
         let scrollableStartEl = null;
-        let swipeEligible = false;
-        let swipeDirection = null;
+        let swipeDownEligible = false;
+        let gestureDisabled = false;
+        let gestureMode = null; // 'h' | 'v' | null
+
+        const resetGesture = () => {
+          startX = 0;
+          startY = 0;
+          lastX = 0;
+          lastY = 0;
+          maxDeltaY = 0;
+          scrollableStartEl = null;
+          swipeDownEligible = false;
+          gestureDisabled = false;
+          gestureMode = null;
+        };
 
         const onTouchStart = (event) => {
           if (!isPreviewOpen()) return;
           if (!event.touches || event.touches.length !== 1) return;
+
           if (event.target && event.target.closest('button, input, a, .preview-actions, .preview-volume, .preview-play-button, .preview-details-button, .preview-close-btn')) {
-            swipeEligible = false;
-            scrollableStartEl = null;
+            gestureDisabled = true;
             return;
           }
-          startX = event.touches[0].clientX;
-          startY = event.touches[0].clientY;
-          maxDeltaX = 0;
+
+          const t = event.touches[0];
+          startX = t.clientX;
+          startY = t.clientY;
+          lastX = startX;
+          lastY = startY;
           maxDeltaY = 0;
+
           scrollableStartEl = getScrollableStartTarget(event.target);
-          swipeEligible = !scrollableStartEl || isScrollableAtTop(scrollableStartEl);
-          swipeDirection = null;
+          swipeDownEligible = !scrollableStartEl || isScrollableAtTop(scrollableStartEl);
+          gestureMode = null;
+          gestureDisabled = false;
         };
 
         const onTouchMove = (event) => {
           if (!isPreviewOpen()) return;
           if (!event.touches || event.touches.length !== 1) return;
-          if (!swipeEligible) return;
-          const deltaX = event.touches[0].clientX - startX;
-          const deltaY = event.touches[0].clientY - startY;
-          const absX = Math.abs(deltaX);
-          const absY = Math.abs(deltaY);
+          if (gestureDisabled) return;
 
-          if (!swipeDirection) {
+          const t = event.touches[0];
+          lastX = t.clientX;
+          lastY = t.clientY;
+
+          const dx = lastX - startX;
+          const dy = lastY - startY;
+          const absX = Math.abs(dx);
+          const absY = Math.abs(dy);
+
+          if (!gestureMode) {
             if (absX < SWIPE_INTENT_PX && absY < SWIPE_INTENT_PX) return;
-            swipeDirection = absX > absY ? 'h' : 'v';
+            if (absX > absY * INTENT_RATIO) {
+              gestureMode = 'h';
+            } else if (absY > absX * INTENT_RATIO) {
+              gestureMode = 'v';
+            } else {
+              return;
+            }
           }
 
-          if (swipeDirection === 'h') {
+          if (gestureMode === 'h') {
             event.preventDefault();
-            if (absX > Math.abs(maxDeltaX)) {
-              maxDeltaX = deltaX;
-            }
-          } else if (swipeDirection === 'v' && deltaY > 0) {
-            event.preventDefault();
-            if (deltaY > maxDeltaY) {
-              maxDeltaY = deltaY;
+            return;
+          }
+
+          if (gestureMode === 'v') {
+            if (!swipeDownEligible) return;
+            if (dy > 0) {
+              event.preventDefault();
+              if (dy > maxDeltaY) {
+                maxDeltaY = dy;
+              }
             }
           }
         };
 
         const onTouchEnd = () => {
-          if (!isPreviewOpen()) return;
-          if (swipeDirection === 'h' && Math.abs(maxDeltaX) > SWIPE_NAV_THRESHOLD_PX) {
-            if (maxDeltaX < 0) {
-              goToNextPreviewCard();
-            } else {
-              goToPreviousPreviewCard();
-            }
-          } else if (maxDeltaY > 90) {
-            closePreview();
+          if (!isPreviewOpen()) {
+            resetGesture();
+            return;
           }
-          startX = 0;
-          startY = 0;
-          maxDeltaX = 0;
-          maxDeltaY = 0;
-          scrollableStartEl = null;
-          swipeEligible = false;
-          swipeDirection = null;
+
+          if (!gestureDisabled && gestureMode === 'h') {
+            const dx = lastX - startX;
+            if (Math.abs(dx) >= SWIPE_NAV_THRESHOLD_PX) {
+              if (dx < 0) {
+                if (typeof window.goToNextCardByDomOrder === 'function') window.goToNextCardByDomOrder();
+              } else {
+                if (typeof window.goToPreviousCardByDomOrder === 'function') window.goToPreviousCardByDomOrder();
+              }
+            }
+          }
+
+          if (!gestureDisabled && gestureMode === 'v') {
+            if (maxDeltaY > SWIPE_DOWN_CLOSE_THRESHOLD_PX) {
+              closePreview();
+            }
+          }
+
+          resetGesture();
         };
 
         previewSwipeHandlers = {
@@ -3886,7 +4563,7 @@ html { scrollbar-gutter: stable; }
         previewCard.addEventListener('touchcancel', onTouchEnd);
       }
 
-      function detachPreviewSwipeListeners() {
+function detachPreviewSwipeListeners() {
         if (!previewSwipeHandlers) return;
         const { previewCard, onTouchStart, onTouchMove, onTouchEnd } = previewSwipeHandlers;
         previewCard.removeEventListener('touchstart', onTouchStart);
@@ -3938,6 +4615,7 @@ html { scrollbar-gutter: stable; }
       const FILL_FADE_DURATION = 220;
       let lastOpenedCard = null;
       let currentPreviewCardEl = null;
+      let previewCloseDeferStart = null;
 
       function showPreviewPoster(card) {
         if (!previewPlaceholder || !card) return;
@@ -4698,7 +5376,43 @@ html { scrollbar-gutter: stable; }
         tile.style.height = `${targetRect.height}px`;
         tile.style.transform = `translate(${targetRect.left}px, ${targetRect.top}px)`;
       }
+      function fitPreviewToViewport() {
+        if (!previewOverlay) return;
+        const previewCard = previewOverlay.querySelector('.preview-card');
+        if (!previewCard) return;
 
+        // Use the overlay padding as the safety inset for glow.
+        const overlayStyle = getComputedStyle(previewOverlay);
+        const padTop = parseFloat(overlayStyle.paddingTop) || 0;
+        const padLeft = parseFloat(overlayStyle.paddingLeft) || 0;
+
+        const glowAllowance = 120; // accounts for outer shadow/glow
+        const availableHeight = Math.max(0, window.innerHeight - (padTop * 2) - glowAllowance);
+        const availableWidth = Math.max(0, window.innerWidth - (padLeft * 2) - glowAllowance);
+
+        let baseWidth = previewCard.offsetWidth;
+        let baseHeight = previewCard.offsetHeight;
+        if (baseWidth <= 0 || baseHeight <= 0) {
+          const rect = previewCard.getBoundingClientRect();
+          baseWidth = rect.width;
+          baseHeight = rect.height;
+        }
+
+        if (!Number.isFinite(baseWidth) || baseWidth <= 0) baseWidth = 1;
+        if (!Number.isFinite(baseHeight) || baseHeight <= 0) baseHeight = 1;
+
+        const scaleW = availableWidth / baseWidth;
+        const scaleH = availableHeight / baseHeight;
+        const scale = Math.min(1, scaleW, scaleH);
+
+        previewOverlay.style.setProperty('--preview-fit-scale', String(scale));
+      }
+
+
+      const handlePreviewResize = () => {
+        if (!isPreviewOpen()) return;
+        fitPreviewToViewport();
+      };
       function openPreviewFromCard(card, triggerElement = card) {
         // ZAQ TASK 1.8: Pause hero video when preview begins opening.
         previewOpening = true;
@@ -4723,22 +5437,16 @@ html { scrollbar-gutter: stable; }
           previewVolumeInitialTimeout = null;
         }, initialPreviewVolumeOpenDelay);
         triggerVolumeSweep(previewVolumeControl);
-        const title = 'Preview Placeholder Title';
-        const runtime = '1h 52m';
-        const tags = 'Thriller • Sci‑Fi • Action';
-        const description = 'This is a static placeholder description used for layout validation only. It is intentionally long so the text wraps across multiple lines and reveals spacing, rhythm, and hierarchy inside the Preview Modal. Replace this copy with real content in a later task once the layout has been visually approved.';
-previewTitleEl.textContent = title;
-        previewRuntimeEl.textContent = runtime;
-        previewTagsEl.textContent = tags;
-        previewDescriptionEl.textContent = description;
+        applyPreviewCopyFromCard(card);
 
         lastOpenedCard = triggerElement;
         currentPreviewCardEl = card;
-        if (isA1PreviewCard(card)) {
-          setPreviewPosterImage(card);
-        } else {
-          resetPreviewPosterImage();
+        if (typeof window.setActiveCardAuthority === 'function') {
+          window.setActiveCardAuthority(card);
         }
+        setPreviewPosterImageFromCard(card);
+        movePreviewCardIntoSlideForCard(card, true, true);
+        startPreviewCarouselMagnifier();
         lockScroll();
         previewOverlay.setAttribute('aria-hidden', 'false');
         const profile = getOpenMorphProfileForCard(card);
@@ -4756,6 +5464,15 @@ previewTitleEl.textContent = title;
         const isHeroPreview = !!(heroPreviewSource && (card === heroPreviewSource || card === heroSection || card === heroVisual || card.classList.contains('hero') || card.classList.contains('hero-video')));
         runOpenMorph(card, profile).then(() => {
           previewOpening = false;
+          // Apply any buffered swap requested while the morph tile owned the preview card.
+          if (pendingPreviewSwapCard && pendingPreviewSwapCard !== currentPreviewCardEl) {
+            const toSwap = pendingPreviewSwapCard;
+            pendingPreviewSwapCard = null;
+            swapPreviewContentToCard(toSwap);
+          } else {
+            pendingPreviewSwapCard = null;
+          }
+          window.addEventListener('resize', handlePreviewResize, { passive: true });
           if (isHeroPreview) {
             startHeroPreviewTeaser();
           } else {
@@ -4764,64 +5481,47 @@ previewTitleEl.textContent = title;
         });
       }
 
-      const heroDetailsButton = document.querySelector('.hero-details-button');
-      const previewPlayButton = document.querySelector('.preview-play-button');
-
-      function getPreviewNavCards(anchorCard) {
-        const sourceTrack = anchorCard && typeof anchorCard.closest === 'function'
-          ? anchorCard.closest('.shelf-track')
-          : null;
-        const selector = ':scope > .poster[data-morph-id]';
-        const cards = sourceTrack
-          ? Array.from(sourceTrack.querySelectorAll(selector))
-          : Array.from(document.querySelectorAll('.poster[data-morph-id]'));
-        return cards.filter((card) => !!card.querySelector('.poster-preview-button'));
-      }
-
-      function getPreviewNavTarget(direction) {
-        const cards = getPreviewNavCards(currentPreviewCardEl || lastOpenedCard);
-        if (!cards.length) return null;
-        const current = currentPreviewCardEl || lastOpenedCard;
-        const currentIndex = current ? cards.indexOf(current) : -1;
-        if (currentIndex === -1) {
-          return direction === 'next' ? cards[0] : cards[cards.length - 1];
-        }
-        const delta = direction === 'next' ? 1 : -1;
-        const nextIndex = (currentIndex + delta + cards.length) % cards.length;
-        return cards[nextIndex];
-      }
-
-      function swapPreviewContentToCard(card) {
-        if (!card) return;
+      function swapPreviewContentToCard(nextCard) {
+        if (!nextCard) return;
         stopPreviewTeaser();
-        resetPreviewPlaceholder();
-        applyPreviewCopyFromCard(card);
-        if (isA1PreviewCard(card)) {
-          setPreviewPosterImage(card);
-        } else {
-          resetPreviewPosterImage();
+        const targetSlide = movePreviewCardIntoSlideForCard(nextCard, true);
+        if (targetSlide && previewCardEl && previewCardEl.closest('.preview-slide') !== targetSlide) {
+          placePreviewCardIntoSlide(targetSlide);
         }
-        lastOpenedCard = card;
-        currentPreviewCardEl = card;
-        const isHeroPreview = !!(heroPreviewSource && (card === heroPreviewSource || card === heroSection || card === heroVisual || card.classList.contains('hero') || card.classList.contains('hero-video')));
+        currentPreviewCardEl = nextCard;
+        applyPreviewCopyFromCard(nextCard);
+        setPreviewPosterImageFromCard(nextCard);
+        schedulePreviewFitUpdate();
+        const isHeroPreview = !!(heroPreviewSource && (nextCard === heroPreviewSource || nextCard === heroSection || nextCard === heroVisual || nextCard.classList.contains('hero') || nextCard.classList.contains('hero-video')));
         if (isHeroPreview) {
           startHeroPreviewTeaser();
         } else {
-          startCardPreviewTeaser(card);
+          startCardPreviewTeaser(nextCard);
         }
       }
 
-      function goToNextPreviewCard() {
-        if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
-        const nextCard = getPreviewNavTarget('next');
-        if (nextCard) swapPreviewContentToCard(nextCard);
-      }
+      // During the open morph, the preview card is temporarily "owned" by the morph tile.
+      // If the carousel publishes an active-card-change during that window, moving/swapping
+      // the preview card will yank it out of the morph tile and cause the visible "jump".
+      // We buffer the latest requested card change and apply it after the morph finishes.
+      let pendingPreviewSwapCard = null;
 
-      function goToPreviousPreviewCard() {
-        if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
-        const prevCard = getPreviewNavTarget('prev');
-        if (prevCard) swapPreviewContentToCard(prevCard);
-      }
+      document.addEventListener('zaq-active-card-change', (event) => {
+        const nextCard = event && event.detail ? event.detail.card : null;
+        if (!nextCard) return;
+        if (!isPreviewOpen()) return;
+        if (nextCard === currentPreviewCardEl) return;
+
+        if (previewOpening || activeMorphTile) {
+          pendingPreviewSwapCard = nextCard;
+          return;
+        }
+
+        swapPreviewContentToCard(nextCard);
+      });
+
+      const heroDetailsButton = document.querySelector('.hero-details-button');
+      const previewPlayButton = document.querySelector('.preview-play-button');
 
       if (heroDetailsButton && heroPreviewSource) {
         heroDetailsButton.addEventListener('click', (event) => {
@@ -4857,11 +5557,13 @@ previewTitleEl.textContent = title;
             previewCard.style.transition = '';
             previewCard.classList.remove('is-hidden');
           }
+          // Compute fit scale BEFORE measuring the end rect so we don't resize after the morph.
+          fitPreviewToViewport();
           const endRect = measurePreviewRect();
 
           if (!previewCard || !endRect) {
             previewOverlay.classList.add('is-visible');
-            previewCard.classList.add('is-active');
+            if (previewCard) previewCard.classList.add('is-active');
             resolve();
             return;
           }
@@ -4870,7 +5572,6 @@ previewTitleEl.textContent = title;
           previewOverlay.style.pointerEvents = '';
           previewOverlay.classList.add('is-visible');
           previewOverlay.setAttribute('aria-hidden', 'false');
-          previewCard.classList.add('is-active');
           previewCard.style.opacity = '0';
           previewCard.style.transition = '';
           previewCard.style.transform = '';
@@ -4878,22 +5579,12 @@ previewTitleEl.textContent = title;
           const previewShadow = getComputedStyle(previewCard).boxShadow;
           const previewBorderColor = getComputedStyle(previewCard).borderColor;
 
+          // IMPORTANT: One-container strategy.
+          // The real .preview-card must never be reparented into the morph tile.
+          // The tile is purely a visual clone that animates from the poster to the
+          // preview destination. The real card stays in its normal DOM container
+          // (the centered slide) and only crossfades in.
           const { tile, fill } = createGlowTileFromCard(card, startRect);
-
-          const originalPreviewParent = previewCard.parentElement;
-          const originalPreviewNextSibling = previewCard.nextSibling;
-
-          tile.appendChild(previewCard);
-
-          previewCard.style.position = 'absolute';
-          previewCard.style.inset = '0';
-          previewCard.style.width = '100%';
-          previewCard.style.height = '100%';
-          previewCard.style.margin = '0';
-          previewCard.style.border = '0';
-          previewCard.style.boxShadow = 'none';
-          previewCard.style.borderRadius = 'inherit';
-          previewCard.style.overflow = 'hidden';
 
           activeMorphTile = tile;
           const cardRadius = getComputedStyle(card).borderRadius;
@@ -4908,30 +5599,13 @@ previewTitleEl.textContent = title;
           const finishCrossfade = () => {
             if (!hasCrossfaded) return;
 
-            if (originalPreviewParent) {
-              if (originalPreviewNextSibling && originalPreviewNextSibling.parentNode === originalPreviewParent) {
-                originalPreviewParent.insertBefore(previewCard, originalPreviewNextSibling);
-              } else {
-                originalPreviewParent.appendChild(previewCard);
-              }
-            }
-
-            previewCard.style.position = '';
-            previewCard.style.inset = '';
-            previewCard.style.width = '';
-            previewCard.style.height = '';
-            previewCard.style.margin = '';
-            previewCard.style.border = '';
-            previewCard.style.boxShadow = '';
-            previewCard.style.borderRadius = '';
-            previewCard.style.overflow = '';
-
             tile.remove();
             if (activeMorphTile === tile) {
               activeMorphTile = null;
             }
             previewCard.style.transition = '';
             previewCard.style.opacity = '';
+
             resolve();
           };
 
@@ -4947,6 +5621,7 @@ previewTitleEl.textContent = title;
             previewCard.addEventListener('transitionend', handleCardFadeInEnd);
             previewCard.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
             fill.style.transition = `opacity ${FILL_FADE_DURATION}ms ${currentMorphEasing}`;
+            previewCard.classList.add('is-active');
             previewCard.style.opacity = '1';
             fill.style.opacity = '0';
 
@@ -4989,12 +5664,44 @@ previewTitleEl.textContent = title;
         removePreviewAutounmuteListener();
         clearPreviewVolumeTimers();
 
+        stopPreviewCarouselMagnifier();
+
+        window.removeEventListener('resize', handlePreviewResize);
+        if (previewOverlay) {
+          previewOverlay.style.setProperty('--preview-fit-scale', '1');
+        }
+
+        // ZAQ TASK 2.4 — Close preview to active card (state-consistent exit)
+        // Use the authoritative active-card state for the exit target.
+        const authorityCard = (typeof window.getActiveCardAuthority === 'function')
+          ? window.getActiveCardAuthority()
+          : null;
+
+        // Prefer a real poster card for morph geometry. Fall back to the last opened trigger.
+        const exitCard = (authorityCard && authorityCard.classList && authorityCard.classList.contains('poster'))
+          ? authorityCard
+          : ((currentPreviewCardEl && currentPreviewCardEl.classList && currentPreviewCardEl.classList.contains('poster'))
+            ? currentPreviewCardEl
+            : lastOpenedCard);
+
+        // Ensure the underlying row is already aligned on the active card before starting the close morph.
+        const exitTrack = (exitCard && typeof exitCard.closest === 'function') ? exitCard.closest('.shelf-track') : null;
+        if (exitTrack && exitTrack.__scrollAnimating) {
+          const now = performance.now();
+          if (previewCloseDeferStart === null) previewCloseDeferStart = now;
+          if ((now - previewCloseDeferStart) < 2100) {
+            requestAnimationFrame(closePreview);
+            return;
+          }
+        }
+        previewCloseDeferStart = null;
+
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
         detachPreviewSwipeListeners();
 
         const previewCardRect = previewCard.getBoundingClientRect();
-        if (!lastOpenedCard) {
+        if (!exitCard) {
           previewOverlay.classList.remove('is-visible');
           previewOverlay.setAttribute('aria-hidden', 'true');
           previewCard.classList.remove('is-active');
@@ -5012,13 +5719,13 @@ previewTitleEl.textContent = title;
           }
           return;
         }
-        const cardRect = lastOpenedCard.getBoundingClientRect();
+        const cardRect = exitCard.getBoundingClientRect();
 
         let tile = activeMorphTile;
         let fill = null;
 
         if (!tile) {
-          const created = createGlowTileFromCard(lastOpenedCard, previewCardRect);
+          const created = createGlowTileFromCard(exitCard, previewCardRect);
           tile = created.tile;
           fill = created.fill;
           activeMorphTile = tile;
@@ -5033,7 +5740,7 @@ previewTitleEl.textContent = title;
           if (fill) {
             fill.classList.remove('is-fade-out');
             fill.style.opacity = '1';
-            const posterImg = lastOpenedCard.querySelector('img');
+            const posterImg = exitCard.querySelector('img');
             if (posterImg && posterImg.src) {
               fill.style.backgroundImage = `url(${posterImg.src})`;
             }
@@ -5046,7 +5753,7 @@ previewTitleEl.textContent = title;
         previewOverlay.classList.remove('is-visible');
         previewOverlay.setAttribute('aria-hidden', 'true');
 
-        const targetRadius = getComputedStyle(lastOpenedCard).borderRadius;
+        const targetRadius = getComputedStyle(exitCard).borderRadius;
 
         // Keep close timing compatible with the last open profile.
         tile.style.setProperty('--preview-morph-duration', `${currentMorphDuration}ms`);
@@ -5072,8 +5779,8 @@ previewTitleEl.textContent = title;
 
           unlockScroll();
 
-          if (lastOpenedCard && document.body.contains(lastOpenedCard)) {
-            lastOpenedCard.focus();
+          if (exitCard && document.body.contains(exitCard)) {
+            exitCard.focus();
           }
           lastOpenedCard = null;
           currentPreviewCardEl = null;
@@ -5090,26 +5797,9 @@ previewTitleEl.textContent = title;
       previewOverlay.addEventListener('click', (event) => {
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
-        if (event.target && event.target.closest('.preview-nav-arrow')) return;
         if (previewCard.contains(event.target)) return;
         closePreview();
       });
-
-      if (previewPrevButton) {
-        previewPrevButton.addEventListener('click', (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          goToPreviousPreviewCard();
-        });
-      }
-
-      if (previewNextButton) {
-        previewNextButton.addEventListener('click', (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          goToNextPreviewCard();
-        });
-      }
 
       document.addEventListener('click', (event) => {
         const previewButton = event.target.closest('.poster-preview-button');
@@ -5135,19 +5825,10 @@ previewTitleEl.textContent = title;
         }
       });
 
-      document.addEventListener('keydown', (event) => {
+document.addEventListener('keydown', (event) => {
         if ((event.key === 'Escape' || event.key === 'Esc') && previewOverlay.classList.contains('is-visible')) {
           event.preventDefault();
           closePreview();
-        }
-        if (!previewOverlay.classList.contains('is-visible')) return;
-        if (event.key === 'ArrowRight') {
-          event.preventDefault();
-          goToNextPreviewCard();
-        }
-        if (event.key === 'ArrowLeft') {
-          event.preventDefault();
-          goToPreviousPreviewCard();
         }
       });
     });
@@ -5157,39 +5838,43 @@ previewTitleEl.textContent = title;
   <div class="preview-overlay" aria-hidden="true">
     <button class="preview-nav-arrow preview-nav-arrow--left" type="button" aria-label="Previous">‹</button>
     <button class="preview-nav-arrow preview-nav-arrow--right" type="button" aria-label="Next">›</button>
-    <div class="preview-card" role="dialog" aria-modal="true" aria-labelledby="preview-title">
-      <button class="preview-close-btn" type="button" aria-label="Close preview">×</button>
-      <div class="preview-media">
-        <!-- Later: video or wide poster goes here -->
-        <div class="preview-media-placeholder"></div>
-        <img class="preview-media-poster" src="images/poster-wide-A1.png" alt="Wide poster for preview">
-      </div>
-      <div class="preview-info">
-        <header class="preview-header">
-          <h2 id="preview-title" class="preview-title">The Unreasonably Long and Impossible-to-Skip Title That Spills Across Multiple Lines to Stress Test the Preview Header Layout</h2>
-          <div class="preview-meta">
-            <span class="preview-runtime">2h 14m</span>
-            <span class="preview-tags">Prestige Drama • Mythic Noir • Alt‑History • Neo‑Western • Psychological Thriller • Courtroom Chaos • Cyber Romance • Cosmic Horror • Folk Mystery • Retro Futurism • Experimental Soundscape</span>
+    <div class="preview-carousel" aria-label="Preview carousel">
+      <div class="preview-slide is-active">
+        <div class="preview-card" role="dialog" aria-modal="true" aria-labelledby="preview-title">
+          <button class="preview-close-btn" type="button" aria-label="Close preview">×</button>
+          <div class="preview-media">
+            <!-- Later: video or wide poster goes here -->
+            <div class="preview-media-placeholder"></div>
+            <img class="preview-media-poster" src="images/poster-wide-A1.png" alt="Wide poster for preview">
           </div>
-        </header>
-        <div class="preview-body">
-          <p class="preview-description">
-            This is an intentionally overlong description designed to push the limits of the preview body container, wrapping across many lines and forcing the scroll behavior to reveal how the layout handles dense narrative blocks. It layers multiple sentences with varied cadence, mentions a sweeping saga of rival archivists, and references a cross‑continental chase that spans decades, climates, and shifting alliances. Even when the plot drifts into speculative territory and tangents about lost signals, the copy keeps flowing to ensure the text area is sufficiently stressed. Finally, the paragraph closes with a lingering note about unresolved mysteries, prompting the reader to keep scrolling just to see the end.
-          </p>
-        </div>
-        <div class="preview-actions">
-          <button class="preview-play-button" type="button">
-            Play
-          </button>
-          <button class="preview-details-button" type="button">
-            Details
-          </button>
-          <div class="preview-volume" aria-label="Preview volume control">
-            <button class="preview-volume__btn" type="button" aria-label="Preview volume">
-              <span aria-hidden="true">🔊</span>
-            </button>
-            <div class="preview-volume__sliderWrap">
-              <input class="preview-volume__slider" type="range" min="0" max="100" value="100" aria-label="Preview volume slider">
+          <div class="preview-info">
+            <header class="preview-header">
+              <h2 id="preview-title" class="preview-title">The Unreasonably Long and Impossible-to-Skip Title That Spills Across Multiple Lines to Stress Test the Preview Header Layout</h2>
+              <div class="preview-meta">
+                <span class="preview-runtime">2h 14m</span>
+                <span class="preview-tags">Prestige Drama • Mythic Noir • Alt‑History • Neo‑Western • Psychological Thriller • Courtroom Chaos • Cyber Romance • Cosmic Horror • Folk Mystery • Retro Futurism • Experimental Soundscape</span>
+              </div>
+            </header>
+            <div class="preview-body">
+              <p class="preview-description">
+                This is an intentionally overlong description designed to push the limits of the preview body container, wrapping across many lines and forcing the scroll behavior to reveal how the layout handles dense narrative blocks. It layers multiple sentences with varied cadence, mentions a sweeping saga of rival archivists, and references a cross‑continental chase that spans decades, climates, and shifting alliances. Even when the plot drifts into speculative territory and tangents about lost signals, the copy keeps flowing to ensure the text area is sufficiently stressed. Finally, the paragraph closes with a lingering note about unresolved mysteries, prompting the reader to keep scrolling just to see the end.
+              </p>
+            </div>
+            <div class="preview-actions">
+              <button class="preview-play-button" type="button">
+                Play
+              </button>
+              <button class="preview-details-button" type="button">
+                Details
+              </button>
+              <div class="preview-volume" aria-label="Preview volume control">
+                <button class="preview-volume__btn" type="button" aria-label="Preview volume">
+                  <span aria-hidden="true">🔊</span>
+                </button>
+                <div class="preview-volume__sliderWrap">
+                  <input class="preview-volume__slider" type="range" min="0" max="100" value="100" aria-label="Preview volume slider">
+                </div>
+              </div>
             </div>
           </div>
         </div>
