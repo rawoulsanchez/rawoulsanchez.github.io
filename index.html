@@ -3750,6 +3750,7 @@ html { scrollbar-gutter: stable; }
       const previewPosterImage = previewMedia ? previewMedia.querySelector('.preview-media-poster') : null;
       const A1_PREVIEW_LABEL = 'A1';
       const PREVIEW_TEASER_FADE_MS = 700;
+      const PREVIEW_CLOSE_FADE_MS = 2000;
       const PREVIEW_TEASER_AUDIO_STEP_MS = 50;
 
       let heroPausedTime = null;
@@ -4231,11 +4232,11 @@ html { scrollbar-gutter: stable; }
         }
       }
 
-      function fadeOutPreviewTeaserAudio(player) {
+      function fadeOutPreviewTeaserAudio(player, durationMs = PREVIEW_TEASER_FADE_MS) {
         if (!player || typeof player.setVolume !== 'function') return;
         const current = typeof player.getVolume === 'function' ? player.getVolume() : previewVolume;
         const startVolume = clampPreviewVolume(Number.isFinite(current) ? current : previewVolume);
-        const totalSteps = Math.max(1, Math.ceil(PREVIEW_TEASER_FADE_MS / PREVIEW_TEASER_AUDIO_STEP_MS));
+        const totalSteps = Math.max(1, Math.ceil(durationMs / PREVIEW_TEASER_AUDIO_STEP_MS));
         const volumeStep = startVolume / totalSteps;
         let step = 0;
         clearPreviewTeaserFadeInterval();
@@ -4272,6 +4273,21 @@ html { scrollbar-gutter: stable; }
           previewTeaserContainer.parentNode.removeChild(previewTeaserContainer);
         }
         previewTeaserContainer = null;
+      }
+
+      let previewCloseFadeTimeout = null;
+      function startPreviewCloseFade() {
+        if (previewCloseFadeTimeout) return;
+        if (!previewTeaserPlayer && !previewTeaserContainer) return;
+        fadeOutPreviewTeaserAudio(previewTeaserPlayer, PREVIEW_CLOSE_FADE_MS);
+        if (previewTeaserContainer) {
+          previewTeaserContainer.classList.add('teaser-fadeout');
+          previewTeaserContainer.style.transition = `opacity ${PREVIEW_CLOSE_FADE_MS}ms ease`;
+        }
+        previewCloseFadeTimeout = window.setTimeout(() => {
+          previewCloseFadeTimeout = null;
+          stopPreviewTeaser();
+        }, PREVIEW_CLOSE_FADE_MS);
       }
 
       function startHeroPreviewTeaser() {
@@ -5676,7 +5692,11 @@ function detachPreviewSwipeListeners() {
       function closePreview() {
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
         previewOpening = false;
-        stopPreviewTeaser();
+        if (previewTeaserPlayer || previewTeaserContainer) {
+          startPreviewCloseFade();
+        } else {
+          stopPreviewTeaser();
+        }
         resetPreviewPlaceholder();
         resetPreviewPosterImage();
         removePreviewAutounmuteListener();
