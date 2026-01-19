@@ -1274,6 +1274,8 @@ html { scrollbar-gutter: stable; }
     align-items: center;
     justify-content: center;
     background: radial-gradient(circle at top, rgba(0,0,0,0.80), rgba(0,0,0,0.95));
+    overflow: hidden;
+    isolation: isolate;
     z-index: 11000;
     padding: 48px;
     opacity: 0;
@@ -1293,6 +1295,14 @@ html { scrollbar-gutter: stable; }
     transition: opacity var(--preview-morph-duration) var(--preview-morph-ease);
   }
 
+  .preview-overlay-scrim {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top, rgba(0,0,0,0.80), rgba(0,0,0,0.95));
+    z-index: 1;
+    pointer-events: auto;
+  }
+
   .preview-card {
     width: 100%;
     max-width: 960px;
@@ -1305,6 +1315,7 @@ html { scrollbar-gutter: stable; }
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     position: relative;
+    z-index: 2;
     transform: scale(var(--preview-fit-scale, 1));
     transform-origin: center center;
     opacity: 0;
@@ -1346,6 +1357,50 @@ html { scrollbar-gutter: stable; }
     touch-action: manipulation;
   }
 
+  .preview-exit-sign {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 26px;
+    font-family: "Inter", system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    font-size: 1.15rem;
+    color: #ffecec;
+    background: linear-gradient(180deg, #5b0b0f 0%, #7f1118 100%);
+    border: 2px solid rgba(255, 120, 120, 0.7);
+    border-radius: 8px;
+    box-shadow:
+      0 0 12px rgba(227, 27, 35, 0.85),
+      0 0 28px rgba(227, 27, 35, 0.55),
+      inset 0 0 8px rgba(0, 0, 0, 0.6);
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.6),
+      0 0 8px rgba(255, 170, 170, 0.8);
+    pointer-events: none;
+  }
+
+  .preview-exit-sign::before,
+  .preview-exit-sign::after {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 180, 180, 0.35);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.55);
+    pointer-events: none;
+  }
+
+  .preview-exit-sign::after {
+    inset: 10px;
+    border-color: rgba(255, 120, 120, 0.25);
+  }
+
   /* Preview nav arrows */
   .preview-nav-arrow {
     position: fixed;
@@ -1364,7 +1419,7 @@ html { scrollbar-gutter: stable; }
     opacity: 0;
     pointer-events: none;
     transform: translateY(-50%);
-    z-index: 11001;
+    z-index: 3;
     touch-action: manipulation;
   }
   .preview-nav-arrow:hover {
@@ -3268,6 +3323,7 @@ html { scrollbar-gutter: stable; }
       // TASK 2.7 — Preview carousel scaffolding (center large, sides smaller)
       const previewCarousel = previewOverlay ? previewOverlay.querySelector('.preview-carousel') : null;
       const previewCardEl = previewOverlay ? previewOverlay.querySelector('.preview-card') : null;
+      const previewScrim = previewOverlay ? previewOverlay.querySelector('.preview-overlay-scrim') : null;
 
       const previewSlideMap = new Map();
       const previewPosterToSlide = new WeakMap();
@@ -5797,12 +5853,58 @@ function detachPreviewSwipeListeners() {
         closePreview();
       });
 
+      previewOverlay.addEventListener('pointerdown', (event) => {
+        const previewCard = previewOverlay.querySelector('.preview-card');
+        if (!previewCard) return;
+        if (event.target && event.target.closest('.preview-nav-arrow')) return;
+        if (previewCard.contains(event.target)) return;
+        closePreview();
+      }, true);
+      previewOverlay.addEventListener('click', (event) => {
+        const previewCard = previewOverlay.querySelector('.preview-card');
+        if (!previewCard) return;
+        if (event.target && event.target.closest('.preview-nav-arrow')) return;
+        if (previewCard.contains(event.target)) return;
+        closePreview();
+      }, true);
       previewOverlay.addEventListener('click', (event) => {
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
         if (previewCard.contains(event.target)) return;
         closePreview();
       });
+      if (previewCarousel) {
+        previewCarousel.addEventListener('click', (event) => {
+          const previewCard = previewOverlay.querySelector('.preview-card');
+          if (!previewCard) return;
+          if (event.target && event.target.closest('.preview-nav-arrow')) return;
+          if (previewCard.contains(event.target)) return;
+          closePreview();
+        });
+      }
+      if (previewScrim) {
+        previewScrim.addEventListener('click', () => {
+          closePreview();
+        });
+      }
+
+      document.addEventListener('pointerdown', (event) => {
+        if (!previewOverlay.classList.contains('is-visible')) return;
+        const previewCard = previewOverlay.querySelector('.preview-card');
+        if (!previewCard) return;
+        if (event.target && event.target.closest('.preview-nav-arrow')) return;
+        if (previewCard.contains(event.target)) return;
+        closePreview();
+      }, true);
+
+      document.addEventListener('touchstart', (event) => {
+        if (!previewOverlay.classList.contains('is-visible')) return;
+        const previewCard = previewOverlay.querySelector('.preview-card');
+        if (!previewCard) return;
+        if (event.target && event.target.closest('.preview-nav-arrow')) return;
+        if (previewCard.contains(event.target)) return;
+        closePreview();
+      }, true);
 
       document.addEventListener('click', (event) => {
         const previewButton = event.target.closest('.poster-preview-button');
@@ -5839,6 +5941,8 @@ document.addEventListener('keydown', (event) => {
 
   <!-- Preview Overlay (static skeleton) -->
   <div class="preview-overlay" aria-hidden="true">
+    <div class="preview-overlay-scrim" aria-hidden="true"></div>
+    <div class="preview-exit-sign" aria-hidden="true">Exit</div>
     <button class="preview-nav-arrow preview-nav-arrow--left" type="button" aria-label="Previous">‹</button>
     <button class="preview-nav-arrow preview-nav-arrow--right" type="button" aria-label="Next">›</button>
     <div class="preview-carousel" aria-label="Preview carousel">
