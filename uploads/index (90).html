@@ -5797,12 +5797,44 @@ function detachPreviewSwipeListeners() {
         closePreview();
       });
 
+      previewOverlay.addEventListener('pointerdown', (event) => {
+        const previewCard = previewOverlay.querySelector('.preview-card');
+        if (!previewCard) return;
+        if (event.target && event.target.closest('.preview-nav-arrow')) return;
+        if (previewCard.contains(event.target)) return;
+        closePreview();
+      }, true);
+      previewOverlay.addEventListener('click', (event) => {
+        const previewCard = previewOverlay.querySelector('.preview-card');
+        if (!previewCard) return;
+        if (event.target && event.target.closest('.preview-nav-arrow')) return;
+        if (previewCard.contains(event.target)) return;
+        closePreview();
+      }, true);
       previewOverlay.addEventListener('click', (event) => {
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
         if (previewCard.contains(event.target)) return;
         closePreview();
       });
+      if (previewCarousel) {
+        previewCarousel.addEventListener('click', (event) => {
+          const previewCard = previewOverlay.querySelector('.preview-card');
+          if (!previewCard) return;
+          if (event.target && event.target.closest('.preview-nav-arrow')) return;
+          if (previewCard.contains(event.target)) return;
+          closePreview();
+        });
+      }
+
+      document.addEventListener('pointerdown', (event) => {
+        if (!previewOverlay.classList.contains('is-visible')) return;
+        const previewCard = previewOverlay.querySelector('.preview-card');
+        if (!previewCard) return;
+        if (event.target && event.target.closest('.preview-nav-arrow')) return;
+        if (previewCard.contains(event.target)) return;
+        closePreview();
+      }, true);
 
       document.addEventListener('click', (event) => {
         const previewButton = event.target.closest('.poster-preview-button');
