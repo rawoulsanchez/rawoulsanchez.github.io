@@ -1275,12 +1275,13 @@ html { scrollbar-gutter: stable; }
     justify-content: center;
     background: radial-gradient(circle at top, rgba(0,0,0,0.80), rgba(0,0,0,0.95));
     z-index: 11000;
-    padding: 16px;
+    padding: 48px;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transition: opacity var(--preview-morph-duration) var(--preview-morph-ease), visibility 0s linear var(--preview-morph-duration);
     overscroll-behavior: contain;
+    --preview-fit-scale: 1;
   }
 
   /* Future: when we add JS, we’ll toggle this class */
@@ -1295,15 +1296,17 @@ html { scrollbar-gutter: stable; }
   .preview-card {
     width: 100%;
     max-width: 960px;
-    max-height: 90vh;
+    max-height: calc(100dvh - 96px);
     background: #05060a;
     border-radius: var(--preview-frame-radius);
     border: var(--preview-frame-border);
     box-shadow: var(--preview-frame-shadow);
     overflow: hidden;
     display: grid;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
     position: relative;
+    transform: scale(var(--preview-fit-scale, 1));
+    transform-origin: center center;
     opacity: 0;
     transition:
       transform var(--preview-morph-duration) var(--preview-morph-ease),
@@ -5748,6 +5751,17 @@ function detachPreviewSwipeListeners() {
 
       function closePreview() {
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
+        if (previewClosePending) return;
+        if (!previewClosePending && (previewTeaserPlayer || previewTeaserContainer)) {
+          previewClosePending = true;
+          startPreviewCloseFade();
+          window.setTimeout(() => {
+            previewClosePending = false;
+            closePreview();
+          }, PREVIEW_CLOSE_FADE_MS);
+          return;
+        }
+        previewClosePending = false;
         previewOpening = false;
         clearPreviewArrowGlow();
         stopPreviewTeaser();
@@ -5888,6 +5902,12 @@ function detachPreviewSwipeListeners() {
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
         if (event.target && event.target.closest('.preview-nav-arrow')) return;
+        if (previewCard.contains(event.target)) return;
+        closePreview();
+      }, true);
+      previewOverlay.addEventListener('click', (event) => {
+        const previewCard = previewOverlay.querySelector('.preview-card');
+        if (!previewCard) return;
         if (previewCard.contains(event.target)) return;
         closePreview();
       });
