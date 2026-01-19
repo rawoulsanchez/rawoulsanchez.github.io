@@ -5455,6 +5455,7 @@ function detachPreviewSwipeListeners() {
         const previousOverlayOpacity = previewOverlay.style.opacity;
         const previousOverlayVisibility = previewOverlay.style.visibility;
         const previousOverlayPointerEvents = previewOverlay.style.pointerEvents;
+        const previousAriaHidden = previewOverlay.getAttribute('aria-hidden');
         const previousTransform = previewCard.style.transform;
         const previousOpacity = previewCard.style.opacity;
 
@@ -5474,6 +5475,12 @@ function detachPreviewSwipeListeners() {
         const rect = previewCard.getBoundingClientRect();
 
         if (!wasVisible) {
+          previewOverlay.classList.remove('is-visible');
+          if (previousAriaHidden !== null) {
+            previewOverlay.setAttribute('aria-hidden', previousAriaHidden);
+          } else {
+            previewOverlay.setAttribute('aria-hidden', 'true');
+          }
         }
 
         if (!wasActive) {
