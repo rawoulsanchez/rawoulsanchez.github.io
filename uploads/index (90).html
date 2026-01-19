@@ -1274,6 +1274,8 @@ html { scrollbar-gutter: stable; }
     align-items: center;
     justify-content: center;
     background: radial-gradient(circle at top, rgba(0,0,0,0.80), rgba(0,0,0,0.95));
+    overflow: hidden;
+    isolation: isolate;
     z-index: 11000;
     padding: 48px;
     opacity: 0;
@@ -1293,6 +1295,14 @@ html { scrollbar-gutter: stable; }
     transition: opacity var(--preview-morph-duration) var(--preview-morph-ease);
   }
 
+  .preview-overlay-scrim {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top, rgba(0,0,0,0.80), rgba(0,0,0,0.95));
+    z-index: 1;
+    pointer-events: auto;
+  }
+
   .preview-card {
     width: 100%;
     max-width: 960px;
@@ -1305,6 +1315,7 @@ html { scrollbar-gutter: stable; }
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     position: relative;
+    z-index: 2;
     transform: scale(var(--preview-fit-scale, 1));
     transform-origin: center center;
     opacity: 0;
@@ -1350,7 +1361,7 @@ html { scrollbar-gutter: stable; }
     position: fixed;
     top: 24px;
     left: 24px;
-    z-index: 11002;
+    z-index: 3;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1408,7 +1419,7 @@ html { scrollbar-gutter: stable; }
     opacity: 0;
     pointer-events: none;
     transform: translateY(-50%);
-    z-index: 11001;
+    z-index: 3;
     touch-action: manipulation;
   }
   .preview-nav-arrow:hover {
@@ -3312,6 +3323,7 @@ html { scrollbar-gutter: stable; }
       // TASK 2.7 — Preview carousel scaffolding (center large, sides smaller)
       const previewCarousel = previewOverlay ? previewOverlay.querySelector('.preview-carousel') : null;
       const previewCardEl = previewOverlay ? previewOverlay.querySelector('.preview-card') : null;
+      const previewScrim = previewOverlay ? previewOverlay.querySelector('.preview-overlay-scrim') : null;
 
       const previewSlideMap = new Map();
       const previewPosterToSlide = new WeakMap();
@@ -5870,6 +5882,11 @@ function detachPreviewSwipeListeners() {
           closePreview();
         });
       }
+      if (previewScrim) {
+        previewScrim.addEventListener('click', () => {
+          closePreview();
+        });
+      }
 
       document.addEventListener('pointerdown', (event) => {
         if (!previewOverlay.classList.contains('is-visible')) return;
@@ -5924,6 +5941,7 @@ document.addEventListener('keydown', (event) => {
 
   <!-- Preview Overlay (static skeleton) -->
   <div class="preview-overlay" aria-hidden="true">
+    <div class="preview-overlay-scrim" aria-hidden="true"></div>
     <div class="preview-exit-sign" aria-hidden="true">Exit</div>
     <button class="preview-nav-arrow preview-nav-arrow--left" type="button" aria-label="Previous">‹</button>
     <button class="preview-nav-arrow preview-nav-arrow--right" type="button" aria-label="Next">›</button>
