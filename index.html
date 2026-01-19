@@ -5885,6 +5885,15 @@ function detachPreviewSwipeListeners() {
         if (previewCard.contains(event.target)) return;
         closePreview();
       });
+      if (previewCarousel) {
+        previewCarousel.addEventListener('click', (event) => {
+          const previewCard = previewOverlay.querySelector('.preview-card');
+          if (!previewCard) return;
+          if (event.target && event.target.closest('.preview-nav-arrow')) return;
+          if (previewCard.contains(event.target)) return;
+          closePreview();
+        });
+      }
 
       document.addEventListener('click', (event) => {
         const previewButton = event.target.closest('.poster-preview-button');
