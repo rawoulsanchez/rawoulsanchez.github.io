@@ -1378,6 +1378,17 @@ html { scrollbar-gutter: stable; }
       pointer-events: auto;
     }
   }
+  .preview-overlay.is-attention .preview-nav-arrow {
+    animation: previewArrowGlow 2.4s ease-in-out infinite;
+  }
+  @keyframes previewArrowGlow {
+    0%, 100% {
+      box-shadow: 0 0 0 1px rgba(227,27,35,0.15), 0 0 10px rgba(227,27,35,0.15);
+    }
+    50% {
+      box-shadow: 0 0 0 1px rgba(227,27,35,0.55), 0 0 18px rgba(227,27,35,0.55);
+    }
+  }
 
   .preview-media {
     position: relative;
@@ -3788,6 +3799,25 @@ html { scrollbar-gutter: stable; }
       // ZAQ TASK 2.6 — Desktop on-screen arrows (one card per click)
       const previewNavPrevButton = previewOverlay.querySelector('.preview-nav-arrow--left');
       const previewNavNextButton = previewOverlay.querySelector('.preview-nav-arrow--right');
+      let previewArrowGlowTimeout = null;
+      function schedulePreviewArrowGlow() {
+        if (!previewOverlay) return;
+        if (previewArrowGlowTimeout) window.clearTimeout(previewArrowGlowTimeout);
+        previewOverlay.classList.remove('is-attention');
+        previewArrowGlowTimeout = window.setTimeout(() => {
+          if (previewOverlay.classList.contains('is-visible')) {
+            previewOverlay.classList.add('is-attention');
+          }
+        }, 5000);
+      }
+      function clearPreviewArrowGlow() {
+        if (!previewOverlay) return;
+        if (previewArrowGlowTimeout) {
+          window.clearTimeout(previewArrowGlowTimeout);
+          previewArrowGlowTimeout = null;
+        }
+        previewOverlay.classList.remove('is-attention');
+      }
       if (previewNavPrevButton) {
         previewNavPrevButton.addEventListener('click', (event) => {
           if (!isPreviewOpen()) return;
@@ -5500,6 +5530,7 @@ function detachPreviewSwipeListeners() {
         startPreviewCarouselMagnifier();
         lockScroll();
         previewOverlay.setAttribute('aria-hidden', 'false');
+        schedulePreviewArrowGlow();
         const profile = getOpenMorphProfileForCard(card);
         currentMorphDuration = profile.duration;
         currentMorphEasing = profile.easing;
@@ -5720,11 +5751,8 @@ function detachPreviewSwipeListeners() {
         }
         previewClosePending = false;
         previewOpening = false;
-        if (previewTeaserPlayer || previewTeaserContainer) {
-          startPreviewCloseFade();
-        } else {
-          stopPreviewTeaser();
-        }
+        clearPreviewArrowGlow();
+        stopPreviewTeaser();
         resetPreviewPlaceholder();
         resetPreviewPosterImage();
         removePreviewAutounmuteListener();
