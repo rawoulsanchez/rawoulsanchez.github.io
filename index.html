@@ -3413,6 +3413,8 @@ html { scrollbar-gutter: stable; }
             };
             previewCarousel.addEventListener('mouseleave', stop);
             previewCarousel.addEventListener('mouseup', stop);
+            window.addEventListener('mouseup', stop);
+            window.addEventListener('blur', stop);
           }
         }
       }
