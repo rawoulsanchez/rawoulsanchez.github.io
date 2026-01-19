@@ -1383,7 +1383,8 @@ html { scrollbar-gutter: stable; }
     text-shadow:
       0 1px 2px rgba(0, 0, 0, 0.6),
       0 0 8px rgba(255, 170, 170, 0.8);
-    pointer-events: none;
+    cursor: pointer;
+    pointer-events: auto;
   }
 
   .preview-exit-sign::before,
@@ -5455,6 +5456,7 @@ function detachPreviewSwipeListeners() {
         const previousOverlayOpacity = previewOverlay.style.opacity;
         const previousOverlayVisibility = previewOverlay.style.visibility;
         const previousOverlayPointerEvents = previewOverlay.style.pointerEvents;
+        const previousAriaHidden = previewOverlay.getAttribute('aria-hidden');
         const previousTransform = previewCard.style.transform;
         const previousOpacity = previewCard.style.opacity;
 
@@ -5474,6 +5476,12 @@ function detachPreviewSwipeListeners() {
         const rect = previewCard.getBoundingClientRect();
 
         if (!wasVisible) {
+          previewOverlay.classList.remove('is-visible');
+          if (previousAriaHidden !== null) {
+            previewOverlay.setAttribute('aria-hidden', previousAriaHidden);
+          } else {
+            previewOverlay.setAttribute('aria-hidden', 'true');
+          }
         }
 
         if (!wasActive) {
@@ -5527,7 +5535,15 @@ function detachPreviewSwipeListeners() {
       function fitPreviewToViewport() {
         if (!previewOverlay) return;
         const previewCard = previewOverlay.querySelector('.preview-card');
-        if (!previewCard) return;
+        if (!previewCard) {
+          previewOverlay.classList.remove('is-visible');
+          previewOverlay.setAttribute('aria-hidden', 'true');
+          unlockScroll();
+          lastOpenedCard = null;
+          currentPreviewCardEl = null;
+          resetPreviewCarousel();
+          return;
+        }
 
         // Use the overlay padding as the safety inset for glow.
         const overlayStyle = getComputedStyle(previewOverlay);
@@ -5849,7 +5865,15 @@ function detachPreviewSwipeListeners() {
             : lastOpenedCard);
 
         const previewCard = previewOverlay.querySelector('.preview-card');
-        if (!previewCard) return;
+        if (!previewCard) {
+          previewOverlay.classList.remove('is-visible');
+          previewOverlay.setAttribute('aria-hidden', 'true');
+          unlockScroll();
+          lastOpenedCard = null;
+          currentPreviewCardEl = null;
+          resetPreviewCarousel();
+          return;
+        }
         detachPreviewSwipeListeners();
 
         const previewCardRect = previewCard.getBoundingClientRect();
@@ -5944,9 +5968,19 @@ function detachPreviewSwipeListeners() {
         }, currentMorphDuration);
       }
 
-      previewCloseButton.addEventListener('click', () => {
+      const previewExitSign = previewOverlay.querySelector('.preview-exit-sign');
+      const triggerClosePreview = (event) => {
+        if (event) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
         closePreview();
-      });
+      };
+
+      previewCloseButton.addEventListener('click', triggerClosePreview);
+      if (previewExitSign) {
+        previewExitSign.addEventListener('click', triggerClosePreview);
+      }
 
       previewOverlay.addEventListener('pointerdown', (event) => {
         const previewCard = previewOverlay.querySelector('.preview-card');
@@ -5982,6 +6016,15 @@ function detachPreviewSwipeListeners() {
           closePreview();
         });
       }
+
+      document.addEventListener('click', (event) => {
+        if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
+        const closeTarget = event.target.closest('.preview-close-btn, .preview-exit-sign');
+        if (!closeTarget) return;
+        event.preventDefault();
+        event.stopPropagation();
+        closePreview();
+      }, true);
 
       document.addEventListener('click', (event) => {
         const previewButton = event.target.closest('.poster-preview-button');
@@ -6028,7 +6071,7 @@ document.addEventListener('keydown', (event) => {
   <!-- Preview Overlay (static skeleton) -->
   <div class="preview-overlay" aria-hidden="true">
     <div class="preview-overlay-scrim" aria-hidden="true"></div>
-    <div class="preview-exit-sign" aria-hidden="true">Exit</div>
+    <button class="preview-exit-sign" type="button" aria-label="Exit preview">Exit</button>
     <button class="preview-nav-arrow preview-nav-arrow--left" type="button" aria-label="Previous">‹</button>
     <button class="preview-nav-arrow preview-nav-arrow--right" type="button" aria-label="Next">›</button>
     <div class="preview-carousel" aria-label="Preview carousel">
