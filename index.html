@@ -1,4 +1,5 @@
 
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -1274,8 +1275,6 @@ html { scrollbar-gutter: stable; }
     align-items: center;
     justify-content: center;
     background: radial-gradient(circle at top, rgba(0,0,0,0.80), rgba(0,0,0,0.95));
-    overflow: hidden;
-    isolation: isolate;
     z-index: 11000;
     padding: 48px;
     opacity: 0;
@@ -1295,14 +1294,6 @@ html { scrollbar-gutter: stable; }
     transition: opacity var(--preview-morph-duration) var(--preview-morph-ease);
   }
 
-  .preview-overlay-scrim {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at top, rgba(0,0,0,0.80), rgba(0,0,0,0.95));
-    z-index: 1;
-    pointer-events: auto;
-  }
-
   .preview-card {
     width: 100%;
     max-width: 960px;
@@ -1315,7 +1306,6 @@ html { scrollbar-gutter: stable; }
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     position: relative;
-    z-index: 2;
     transform: scale(var(--preview-fit-scale, 1));
     transform-origin: center center;
     opacity: 0;
@@ -1348,7 +1338,6 @@ html { scrollbar-gutter: stable; }
     font-size: 1.1rem;
     font-weight: 700;
     cursor: pointer;
-    z-index: 5;
   }
 
   .preview-close-btn:hover {
@@ -1356,51 +1345,6 @@ html { scrollbar-gutter: stable; }
   }
   .preview-close-btn {
     touch-action: manipulation;
-  }
-
-  .preview-exit-sign {
-    position: fixed;
-    top: 24px;
-    left: 24px;
-    z-index: 3;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 14px 26px;
-    font-family: "Inter", system-ui, sans-serif;
-    font-weight: 800;
-    letter-spacing: 0.38em;
-    text-transform: uppercase;
-    font-size: 1.15rem;
-    color: #ffecec;
-    background: linear-gradient(180deg, #5b0b0f 0%, #7f1118 100%);
-    border: 2px solid rgba(255, 120, 120, 0.7);
-    border-radius: 8px;
-    box-shadow:
-      0 0 12px rgba(227, 27, 35, 0.85),
-      0 0 28px rgba(227, 27, 35, 0.55),
-      inset 0 0 8px rgba(0, 0, 0, 0.6);
-    text-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.6),
-      0 0 8px rgba(255, 170, 170, 0.8);
-    cursor: pointer;
-    pointer-events: auto;
-  }
-
-  .preview-exit-sign::before,
-  .preview-exit-sign::after {
-    content: "";
-    position: absolute;
-    inset: 6px;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 180, 180, 0.35);
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.55);
-    pointer-events: none;
-  }
-
-  .preview-exit-sign::after {
-    inset: 10px;
-    border-color: rgba(255, 120, 120, 0.25);
   }
 
   /* Preview nav arrows */
@@ -1421,7 +1365,7 @@ html { scrollbar-gutter: stable; }
     opacity: 0;
     pointer-events: none;
     transform: translateY(-50%);
-    z-index: 3;
+    z-index: 11001;
     touch-action: manipulation;
   }
   .preview-nav-arrow:hover {
@@ -1433,17 +1377,6 @@ html { scrollbar-gutter: stable; }
     .preview-overlay.is-visible .preview-nav-arrow {
       opacity: 1;
       pointer-events: auto;
-    }
-  }
-  .preview-overlay.is-attention .preview-nav-arrow {
-    animation: previewArrowGlow 2.4s ease-in-out infinite;
-  }
-  @keyframes previewArrowGlow {
-    0%, 100% {
-      box-shadow: 0 0 0 1px rgba(227,27,35,0.15), 0 0 10px rgba(227,27,35,0.15);
-    }
-    50% {
-      box-shadow: 0 0 0 1px rgba(227,27,35,0.55), 0 0 18px rgba(227,27,35,0.55);
     }
   }
 
@@ -1795,7 +1728,7 @@ html { scrollbar-gutter: stable; }
     -webkit-overflow-scrolling: touch;
     padding: 0 calc(50vw - (var(--preview-card-width) / 2));
     scrollbar-width: none;
-    cursor: default;
+    cursor: grab;
   }
   .preview-carousel::-webkit-scrollbar{ display: none; }
   .preview-carousel.is-dragging{ cursor: grabbing; user-select: none; }
@@ -1805,9 +1738,6 @@ html { scrollbar-gutter: stable; }
     display: flex;
     align-items: stretch;
     justify-content: stretch;
-    align-self: center;
-    height: auto;
-    cursor: default;
     transform-origin: center center;
     opacity: 0.86;
     transition: opacity 220ms ease;
@@ -1823,10 +1753,6 @@ html { scrollbar-gutter: stable; }
     box-shadow: 0 18px 44px rgba(0,0,0,0.62), 0 0 0 1px rgba(255,255,255,0.02);
     overflow: hidden;
     display: block;
-    cursor: grab;
-  }
-  .preview-slide > .preview-card{
-    cursor: grab;
   }
   .preview-slide-ghost img{
     display: block;
@@ -3343,7 +3269,6 @@ html { scrollbar-gutter: stable; }
       // TASK 2.7 — Preview carousel scaffolding (center large, sides smaller)
       const previewCarousel = previewOverlay ? previewOverlay.querySelector('.preview-carousel') : null;
       const previewCardEl = previewOverlay ? previewOverlay.querySelector('.preview-card') : null;
-      const previewScrim = previewOverlay ? previewOverlay.querySelector('.preview-overlay-scrim') : null;
 
       const previewSlideMap = new Map();
       const previewPosterToSlide = new WeakMap();
@@ -3440,16 +3365,6 @@ html { scrollbar-gutter: stable; }
 
             previewCarousel.addEventListener('mousedown', (event) => {
               if (event.button !== 0) return;
-              if (event.target === previewCarousel) return;
-              if (!event.target || !event.target.closest('.preview-slide')) return;
-              if (!event.target.closest('.preview-card, .preview-slide-ghost')) return;
-              if (event.target && event.target.closest('button, input, a, .preview-actions, .preview-volume, .preview-close-btn')) {
-                return;
-              }
-              const scrollBlock = event.target ? event.target.closest('.preview-body') : null;
-              if (scrollBlock && isScrollableElement(scrollBlock)) {
-                return;
-              }
               isDragging = true;
               previewCarousel.classList.add('is-dragging');
               startX = event.pageX - previewCarousel.getBoundingClientRect().left;
@@ -3471,8 +3386,6 @@ html { scrollbar-gutter: stable; }
             };
             previewCarousel.addEventListener('mouseleave', stop);
             previewCarousel.addEventListener('mouseup', stop);
-            window.addEventListener('mouseup', stop);
-            window.addEventListener('blur', stop);
           }
         }
       }
@@ -3838,7 +3751,6 @@ html { scrollbar-gutter: stable; }
       const previewPosterImage = previewMedia ? previewMedia.querySelector('.preview-media-poster') : null;
       const A1_PREVIEW_LABEL = 'A1';
       const PREVIEW_TEASER_FADE_MS = 700;
-      const PREVIEW_CLOSE_FADE_MS = 2000;
       const PREVIEW_TEASER_AUDIO_STEP_MS = 50;
 
       let heroPausedTime = null;
@@ -3869,25 +3781,6 @@ html { scrollbar-gutter: stable; }
       // ZAQ TASK 2.6 — Desktop on-screen arrows (one card per click)
       const previewNavPrevButton = previewOverlay.querySelector('.preview-nav-arrow--left');
       const previewNavNextButton = previewOverlay.querySelector('.preview-nav-arrow--right');
-      let previewArrowGlowTimeout = null;
-      function schedulePreviewArrowGlow() {
-        if (!previewOverlay) return;
-        if (previewArrowGlowTimeout) window.clearTimeout(previewArrowGlowTimeout);
-        previewOverlay.classList.remove('is-attention');
-        previewArrowGlowTimeout = window.setTimeout(() => {
-          if (previewOverlay.classList.contains('is-visible')) {
-            previewOverlay.classList.add('is-attention');
-          }
-        }, 5000);
-      }
-      function clearPreviewArrowGlow() {
-        if (!previewOverlay) return;
-        if (previewArrowGlowTimeout) {
-          window.clearTimeout(previewArrowGlowTimeout);
-          previewArrowGlowTimeout = null;
-        }
-        previewOverlay.classList.remove('is-attention');
-      }
       if (previewNavPrevButton) {
         previewNavPrevButton.addEventListener('click', (event) => {
           if (!isPreviewOpen()) return;
@@ -4339,11 +4232,11 @@ html { scrollbar-gutter: stable; }
         }
       }
 
-      function fadeOutPreviewTeaserAudio(player, durationMs = PREVIEW_TEASER_FADE_MS) {
+      function fadeOutPreviewTeaserAudio(player) {
         if (!player || typeof player.setVolume !== 'function') return;
         const current = typeof player.getVolume === 'function' ? player.getVolume() : previewVolume;
         const startVolume = clampPreviewVolume(Number.isFinite(current) ? current : previewVolume);
-        const totalSteps = Math.max(1, Math.ceil(durationMs / PREVIEW_TEASER_AUDIO_STEP_MS));
+        const totalSteps = Math.max(1, Math.ceil(PREVIEW_TEASER_FADE_MS / PREVIEW_TEASER_AUDIO_STEP_MS));
         const volumeStep = startVolume / totalSteps;
         let step = 0;
         clearPreviewTeaserFadeInterval();
@@ -4380,43 +4273,6 @@ html { scrollbar-gutter: stable; }
           previewTeaserContainer.parentNode.removeChild(previewTeaserContainer);
         }
         previewTeaserContainer = null;
-      }
-
-      let previewCloseFadeTimeout = null;
-      function startPreviewCloseFade() {
-        if (previewCloseFadeTimeout) return;
-        if (!previewTeaserPlayer && !previewTeaserContainer) return;
-        fadeOutPreviewTeaserAudio(previewTeaserPlayer, PREVIEW_CLOSE_FADE_MS);
-        if (previewTeaserContainer) {
-          previewTeaserContainer.classList.add('teaser-fadeout');
-          previewTeaserContainer.style.transition = `opacity ${PREVIEW_CLOSE_FADE_MS}ms ease`;
-        }
-        previewCloseFadeTimeout = window.setTimeout(() => {
-          previewCloseFadeTimeout = null;
-          stopPreviewTeaser();
-        }, PREVIEW_CLOSE_FADE_MS);
-      }
-
-      function startPreviewTimedFade(card) {
-        if (previewTeaserContainer) {
-          previewTeaserContainer.classList.add('teaser-fadeout');
-          previewTeaserContainer.style.transition = `opacity ${PREVIEW_CLOSE_FADE_MS}ms ease`;
-        }
-        if (previewTeaserPlayer && typeof previewTeaserPlayer.getIframe === 'function') {
-          const iframe = previewTeaserPlayer.getIframe();
-          if (iframe) {
-            iframe.style.transition = `opacity ${PREVIEW_CLOSE_FADE_MS}ms ease`;
-            iframe.style.opacity = '0';
-          }
-        }
-        fadeOutPreviewTeaserAudio(previewTeaserPlayer, PREVIEW_CLOSE_FADE_MS);
-        clearPreviewTeaserFadeTimeout();
-        previewTeaserFadeTimeout = setTimeout(() => {
-          stopPreviewTeaser();
-          if (card) {
-            showPreviewPoster(card);
-          }
-        }, PREVIEW_CLOSE_FADE_MS);
       }
 
       function startHeroPreviewTeaser() {
@@ -4472,7 +4328,7 @@ html { scrollbar-gutter: stable; }
                 attemptPreviewAutounmuteIfPlaying(e.target);
               }, 600);
               previewTeaserTimer = setTimeout(() => {
-                startPreviewTimedFade();
+                stopPreviewTeaser();
               }, HERO_PREVIEW_DURATION_MS);
             }
           }
@@ -4536,7 +4392,19 @@ html { scrollbar-gutter: stable; }
                 attemptPreviewAutounmuteIfPlaying(e.target);
               }, 600);
               previewTeaserTimer = setTimeout(() => {
-                startPreviewTimedFade(card);
+                if (isA1PreviewCard(card)) {
+                  if (previewTeaserContainer) {
+                    previewTeaserContainer.classList.add('teaser-fadeout');
+                  }
+                  fadeOutPreviewTeaserAudio(previewTeaserPlayer);
+                  clearPreviewTeaserFadeTimeout();
+                  previewTeaserFadeTimeout = setTimeout(() => {
+                    stopPreviewTeaser();
+                  }, PREVIEW_TEASER_FADE_MS);
+                  return;
+                }
+                stopPreviewTeaser();
+                showPreviewPoster(card);
               }, HERO_PREVIEW_DURATION_MS);
             }
           }
@@ -5456,7 +5324,6 @@ function detachPreviewSwipeListeners() {
         const previousOverlayOpacity = previewOverlay.style.opacity;
         const previousOverlayVisibility = previewOverlay.style.visibility;
         const previousOverlayPointerEvents = previewOverlay.style.pointerEvents;
-        const previousAriaHidden = previewOverlay.getAttribute('aria-hidden');
         const previousTransform = previewCard.style.transform;
         const previousOpacity = previewCard.style.opacity;
 
@@ -5476,12 +5343,6 @@ function detachPreviewSwipeListeners() {
         const rect = previewCard.getBoundingClientRect();
 
         if (!wasVisible) {
-          previewOverlay.classList.remove('is-visible');
-          if (previousAriaHidden !== null) {
-            previewOverlay.setAttribute('aria-hidden', previousAriaHidden);
-          } else {
-            previewOverlay.setAttribute('aria-hidden', 'true');
-          }
         }
 
         if (!wasActive) {
@@ -5535,15 +5396,7 @@ function detachPreviewSwipeListeners() {
       function fitPreviewToViewport() {
         if (!previewOverlay) return;
         const previewCard = previewOverlay.querySelector('.preview-card');
-        if (!previewCard) {
-          previewOverlay.classList.remove('is-visible');
-          previewOverlay.setAttribute('aria-hidden', 'true');
-          unlockScroll();
-          lastOpenedCard = null;
-          currentPreviewCardEl = null;
-          resetPreviewCarousel();
-          return;
-        }
+        if (!previewCard) return;
 
         // Use the overlay padding as the safety inset for glow.
         const overlayStyle = getComputedStyle(previewOverlay);
@@ -5615,7 +5468,6 @@ function detachPreviewSwipeListeners() {
         startPreviewCarouselMagnifier();
         lockScroll();
         previewOverlay.setAttribute('aria-hidden', 'false');
-        schedulePreviewArrowGlow();
         const profile = getOpenMorphProfileForCard(card);
         currentMorphDuration = profile.duration;
         currentMorphEasing = profile.easing;
@@ -5824,19 +5676,7 @@ function detachPreviewSwipeListeners() {
 
       function closePreview() {
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
-        if (previewClosePending) return;
-        if (!previewClosePending && (previewTeaserPlayer || previewTeaserContainer)) {
-          previewClosePending = true;
-          startPreviewCloseFade();
-          window.setTimeout(() => {
-            previewClosePending = false;
-            closePreview();
-          }, PREVIEW_CLOSE_FADE_MS);
-          return;
-        }
-        previewClosePending = false;
         previewOpening = false;
-        clearPreviewArrowGlow();
         stopPreviewTeaser();
         resetPreviewPlaceholder();
         resetPreviewPosterImage();
@@ -5865,15 +5705,7 @@ function detachPreviewSwipeListeners() {
             : lastOpenedCard);
 
         const previewCard = previewOverlay.querySelector('.preview-card');
-        if (!previewCard) {
-          previewOverlay.classList.remove('is-visible');
-          previewOverlay.setAttribute('aria-hidden', 'true');
-          unlockScroll();
-          lastOpenedCard = null;
-          currentPreviewCardEl = null;
-          resetPreviewCarousel();
-          return;
-        }
+        if (!previewCard) return;
         detachPreviewSwipeListeners();
 
         const previewCardRect = previewCard.getBoundingClientRect();
@@ -5968,63 +5800,16 @@ function detachPreviewSwipeListeners() {
         }, currentMorphDuration);
       }
 
-      const previewExitSign = previewOverlay.querySelector('.preview-exit-sign');
-      const triggerClosePreview = (event) => {
-        if (event) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
+      previewCloseButton.addEventListener('click', () => {
         closePreview();
-      };
+      });
 
-      previewCloseButton.addEventListener('click', triggerClosePreview);
-      if (previewExitSign) {
-        previewExitSign.addEventListener('click', triggerClosePreview);
-      }
-
-      previewOverlay.addEventListener('pointerdown', (event) => {
-        const previewCard = previewOverlay.querySelector('.preview-card');
-        if (!previewCard) return;
-        if (event.target && event.target.closest('.preview-nav-arrow')) return;
-        if (previewCard.contains(event.target)) return;
-        closePreview();
-      }, true);
-      previewOverlay.addEventListener('click', (event) => {
-        const previewCard = previewOverlay.querySelector('.preview-card');
-        if (!previewCard) return;
-        if (event.target && event.target.closest('.preview-nav-arrow')) return;
-        if (previewCard.contains(event.target)) return;
-        closePreview();
-      }, true);
       previewOverlay.addEventListener('click', (event) => {
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
         if (previewCard.contains(event.target)) return;
         closePreview();
       });
-      if (previewCarousel) {
-        previewCarousel.addEventListener('click', (event) => {
-          const previewCard = previewOverlay.querySelector('.preview-card');
-          if (!previewCard) return;
-          if (event.target && event.target.closest('.preview-nav-arrow')) return;
-          if (previewCard.contains(event.target)) return;
-          closePreview();
-        });
-      }
-      if (previewScrim) {
-        previewScrim.addEventListener('click', () => {
-          closePreview();
-        });
-      }
-
-      document.addEventListener('click', (event) => {
-        if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
-        const closeTarget = event.target.closest('.preview-close-btn, .preview-exit-sign');
-        if (!closeTarget) return;
-        event.preventDefault();
-        event.stopPropagation();
-        closePreview();
-      }, true);
 
       document.addEventListener('click', (event) => {
         const previewButton = event.target.closest('.poster-preview-button');
@@ -6036,15 +5821,6 @@ function detachPreviewSwipeListeners() {
         event.preventDefault();
         event.stopPropagation();
         openPreviewFromCard(card, previewButton);
-      }, true);
-
-      document.addEventListener('pointerdown', (event) => {
-        if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
-        const previewCard = previewOverlay.querySelector('.preview-card');
-        if (!previewCard) return;
-        if (event.target && event.target.closest('.preview-nav-arrow')) return;
-        if (previewCard.contains(event.target)) return;
-        closePreview();
       }, true);
 
       document.addEventListener('keydown', (event) => {
@@ -6070,8 +5846,6 @@ document.addEventListener('keydown', (event) => {
 
   <!-- Preview Overlay (static skeleton) -->
   <div class="preview-overlay" aria-hidden="true">
-    <div class="preview-overlay-scrim" aria-hidden="true"></div>
-    <button class="preview-exit-sign" type="button" aria-label="Exit preview">Exit</button>
     <button class="preview-nav-arrow preview-nav-arrow--left" type="button" aria-label="Previous">‹</button>
     <button class="preview-nav-arrow preview-nav-arrow--right" type="button" aria-label="Next">›</button>
     <div class="preview-carousel" aria-label="Preview carousel">
