@@ -1409,12 +1409,9 @@ html { scrollbar-gutter: stable; }
     inset: 0;
     width: 100%;
     height: 100%;
-    z-index: 3;
+    z-index: 2;
     opacity: 1;
     transition: opacity 700ms ease;
-  }
-  .preview-teaser-player.is-loading {
-    opacity: 0;
   }
   .preview-teaser-player iframe {
     width: 100%;
@@ -4382,8 +4379,7 @@ html { scrollbar-gutter: stable; }
         if (!previewMedia || !window.YT || typeof window.YT.Player !== 'function') return;
         stopPreviewTeaser();
         previewTeaserContainer = document.createElement('div');
-        previewTeaserContainer.className = 'preview-teaser-player is-loading';
-        const teaserContainer = previewTeaserContainer;
+        previewTeaserContainer.className = 'preview-teaser-player';
         previewMedia.appendChild(previewTeaserContainer);
         previewTeaserPlayer = new YT.Player(previewTeaserContainer, {
           playerVars: {
@@ -4399,13 +4395,6 @@ html { scrollbar-gutter: stable; }
             onReady: e => {
               hidePreviewPlaceholder();
               hidePreviewPosterImage();
-              if (teaserContainer) {
-                requestAnimationFrame(() => {
-                  if (teaserContainer) {
-                    teaserContainer.classList.remove('is-loading');
-                  }
-                });
-              }
               applyPreviewVolumeToPlayer(e.target, desiredPreviewVolume, isMobile);
               if (isMobile && typeof e.target.mute === 'function') {
                 e.target.mute();
@@ -4443,14 +4432,6 @@ html { scrollbar-gutter: stable; }
                 stopPreviewTeaser();
               }, HERO_PREVIEW_DURATION_MS);
             }
-            ,
-            onStateChange: e => {
-              if (!teaserContainer) return;
-              const playingState = (window.YT && window.YT.PlayerState) ? window.YT.PlayerState.PLAYING : 1;
-              if (e.data === playingState) {
-                teaserContainer.classList.remove('is-loading');
-              }
-            }
           }
         });
       }
@@ -4458,14 +4439,13 @@ html { scrollbar-gutter: stable; }
       function startCardPreviewTeaser(card) {
         if (!isPreviewOpen()) return;
         if (!previewMedia || !window.YT || typeof window.YT.Player !== 'function') return;
-        const teaserUrl = card ? card.getAttribute('data-youtube-url') : '';
+        const teaserUrl = currentPreviewCardEl ? currentPreviewCardEl.getAttribute('data-youtube-url') : '';
         const teaserData = parseYouTubeUrl(teaserUrl);
         if (!teaserData || !teaserData.videoId) return;
         stopPreviewTeaser();
-        // Keep placeholder/poster visible until the teaser player is ready to avoid a black flash.
+        hidePreviewPlaceholder();
         previewTeaserContainer = document.createElement('div');
-        previewTeaserContainer.className = 'preview-teaser-player is-loading';
-        const teaserContainer = previewTeaserContainer;
+        previewTeaserContainer.className = 'preview-teaser-player';
         previewMedia.appendChild(previewTeaserContainer);
         previewTeaserPlayer = new YT.Player(previewTeaserContainer, {
           playerVars: {
@@ -4481,13 +4461,6 @@ html { scrollbar-gutter: stable; }
             onReady: e => {
               hidePreviewPlaceholder();
               hidePreviewPosterImage();
-              if (teaserContainer) {
-                requestAnimationFrame(() => {
-                  if (teaserContainer) {
-                    teaserContainer.classList.remove('is-loading');
-                  }
-                });
-              }
               applyPreviewVolumeToPlayer(e.target, desiredPreviewVolume, isMobile);
               if (isMobile && typeof e.target.mute === 'function') {
                 e.target.mute();
@@ -4536,14 +4509,6 @@ html { scrollbar-gutter: stable; }
                 stopPreviewTeaser();
                 showPreviewPoster(card);
               }, HERO_PREVIEW_DURATION_MS);
-            }
-            ,
-            onStateChange: e => {
-              if (!teaserContainer) return;
-              const playingState = (window.YT && window.YT.PlayerState) ? window.YT.PlayerState.PLAYING : 1;
-              if (e.data === playingState) {
-                teaserContainer.classList.remove('is-loading');
-              }
             }
           }
         });
