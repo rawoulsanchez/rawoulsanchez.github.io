@@ -4381,7 +4381,6 @@ html { scrollbar-gutter: stable; }
         if (!isPreviewOpen()) return;
         if (!previewMedia || !window.YT || typeof window.YT.Player !== 'function') return;
         stopPreviewTeaser();
-        hidePreviewPosterImage();
         previewTeaserContainer = document.createElement('div');
         previewTeaserContainer.className = 'preview-teaser-player is-loading';
         const teaserContainer = previewTeaserContainer;
@@ -4398,6 +4397,8 @@ html { scrollbar-gutter: stable; }
           },
           events: {
             onReady: e => {
+              hidePreviewPlaceholder();
+              hidePreviewPosterImage();
               if (teaserContainer) {
                 requestAnimationFrame(() => {
                   if (teaserContainer) {
@@ -4461,8 +4462,7 @@ html { scrollbar-gutter: stable; }
         const teaserData = parseYouTubeUrl(teaserUrl);
         if (!teaserData || !teaserData.videoId) return;
         stopPreviewTeaser();
-        hidePreviewPlaceholder();
-        hidePreviewPosterImage();
+        // Keep placeholder/poster visible until the teaser player is ready to avoid a black flash.
         previewTeaserContainer = document.createElement('div');
         previewTeaserContainer.className = 'preview-teaser-player is-loading';
         const teaserContainer = previewTeaserContainer;
@@ -4479,6 +4479,8 @@ html { scrollbar-gutter: stable; }
           },
           events: {
             onReady: e => {
+              hidePreviewPlaceholder();
+              hidePreviewPosterImage();
               if (teaserContainer) {
                 requestAnimationFrame(() => {
                   if (teaserContainer) {
