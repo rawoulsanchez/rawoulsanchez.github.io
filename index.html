@@ -1427,6 +1427,9 @@ html { scrollbar-gutter: stable; }
     display: grid;
     grid-template-rows: auto 1fr auto;
     gap: 12px;
+    opacity: var(--preview-reveal, 1);
+    transform: translateY(calc(22px * (1 - var(--preview-reveal, 1))));
+    transition: opacity 220ms ease, transform 260ms ease;
   }
 
   .preview-header {
@@ -1734,6 +1737,7 @@ html { scrollbar-gutter: stable; }
   .preview-carousel::-webkit-scrollbar{ display: none; }
   .preview-carousel.is-dragging{ cursor: grabbing; user-select: none; }
   .preview-slide{
+    --preview-reveal: 0;
     flex: 0 0 auto;
     width: var(--preview-card-width);
     display: flex;
@@ -1741,7 +1745,8 @@ html { scrollbar-gutter: stable; }
     justify-content: stretch;
     transform-origin: center center;
     opacity: 0.86;
-    transition: opacity 220ms ease;
+    transition: opacity 220ms ease, transform 220ms ease;
+    will-change: transform;
   }
   .preview-slide.is-active{
     opacity: 1;
@@ -3379,32 +3384,79 @@ html { scrollbar-gutter: stable; }
             previewCarousel.__dragInstalled = true;
 
             let isDragging = false;
+            let didDrag = false;
+            let dragStartX = 0;
+            let dragStartY = 0;
+            let dragSettleTimer = null;
+            let suppressOverlayCloseUntil = 0;
             let startX = 0;
             let startScrollLeft = 0;
+
+            const clearDragSettleTimer = () => {
+              if (dragSettleTimer) {
+                clearTimeout(dragSettleTimer);
+                dragSettleTimer = null;
+              }
+            };
 
             previewCarousel.addEventListener('mousedown', (event) => {
               if (event.button !== 0) return;
               isDragging = true;
+              didDrag = false;
               previewCarousel.classList.add('is-dragging');
               startX = event.pageX - previewCarousel.getBoundingClientRect().left;
+              dragStartX = event.pageX;
+              dragStartY = event.pageY;
               startScrollLeft = previewCarousel.scrollLeft;
-            });
-
-            previewCarousel.addEventListener('mousemove', (event) => {
-              if (!isDragging) return;
-              event.preventDefault();
-              const x = event.pageX - previewCarousel.getBoundingClientRect().left;
-              const walk = x - startX;
-              previewCarousel.scrollLeft = startScrollLeft - walk;
+              clearDragSettleTimer();
             });
 
             const stop = () => {
               if (!isDragging) return;
               isDragging = false;
               previewCarousel.classList.remove('is-dragging');
+              if (didDrag) {
+                suppressOverlayCloseUntil = performance.now() + 400;
+                clearDragSettleTimer();
+                dragSettleTimer = setTimeout(() => {
+                  const closest = getClosestPreviewSlideToCenter();
+                  if (closest) centerPreviewSlideWithAnimation(closest);
+                }, 500);
+              }
             };
+
+            previewCarousel.addEventListener('mousemove', (event) => {
+              if (!isDragging) return;
+              if (event.buttons !== 1) {
+                stop();
+                return;
+              }
+              if (!didDrag) {
+                const dx = Math.abs(event.pageX - dragStartX);
+                const dy = Math.abs(event.pageY - dragStartY);
+                if (dx > 4 || dy > 4) {
+                  didDrag = true;
+                }
+              }
+              event.preventDefault();
+              const x = event.pageX - previewCarousel.getBoundingClientRect().left;
+              const walk = x - startX;
+              previewCarousel.scrollLeft = startScrollLeft - walk;
+            });
+            previewCarousel.addEventListener('click', (event) => {
+              if (!didDrag) return;
+              event.stopPropagation();
+            });
             previewCarousel.addEventListener('mouseleave', stop);
             previewCarousel.addEventListener('mouseup', stop);
+            window.addEventListener('mouseup', stop);
+            window.addEventListener('mousemove', (event) => {
+              if (!isDragging) return;
+              if (event.buttons !== 1) stop();
+            });
+            window.addEventListener('blur', stop);
+
+            previewCarousel.__shouldSuppressOverlayClose = () => performance.now() < suppressOverlayCloseUntil;
           }
         }
       }
@@ -3644,19 +3696,14 @@ html { scrollbar-gutter: stable; }
         const minScale = 0.78;
 
         for (const slide of slides) {
-          // Do not magnify the slide that currently holds the real preview card.
-          // Otherwise the card will jump in size when the magnifier updates.
-          if (previewCardEl && slide.contains(previewCardEl)) {
-            slide.style.transform = '';
-            continue;
-          }
-
           const rect = slide.getBoundingClientRect();
           const center = rect.left + (rect.width / 2);
           const distance = Math.abs(center - carouselCenter);
           const t = Math.min(distance / halfWidth, 1);
           const scale = maxScale - (maxScale - minScale) * t;
+          const reveal = 1 - t;
           slide.style.transform = `scale(${scale.toFixed(3)})`;
+          slide.style.setProperty('--preview-reveal', reveal.toFixed(3));
         }
         schedulePreviewFitUpdate();
       }
@@ -3700,6 +3747,7 @@ html { scrollbar-gutter: stable; }
         const slides = previewCarousel.querySelectorAll('.preview-slide');
         for (const slide of slides) {
           slide.style.transform = '';
+          slide.style.removeProperty('--preview-reveal');
         }
       }
 
@@ -5827,6 +5875,9 @@ function detachPreviewSwipeListeners() {
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
         if (previewCard.contains(event.target)) return;
+        if (previewCarousel && typeof previewCarousel.__shouldSuppressOverlayClose === 'function') {
+          if (previewCarousel.__shouldSuppressOverlayClose()) return;
+        }
         closePreview();
       });
 
