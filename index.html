@@ -3395,22 +3395,30 @@ html { scrollbar-gutter: stable; }
               startScrollLeft = previewCarousel.scrollLeft;
             });
 
-            previewCarousel.addEventListener('mousemove', (event) => {
-              if (!isDragging) return;
-              event.preventDefault();
-              const x = event.pageX - previewCarousel.getBoundingClientRect().left;
-              const walk = x - startX;
-              previewCarousel.scrollLeft = startScrollLeft - walk;
-            });
-
             const stop = () => {
               if (!isDragging) return;
               isDragging = false;
               previewCarousel.classList.remove('is-dragging');
             };
+
+            previewCarousel.addEventListener('mousemove', (event) => {
+              if (!isDragging) return;
+              if (event.buttons !== 1) {
+                stop();
+                return;
+              }
+              event.preventDefault();
+              const x = event.pageX - previewCarousel.getBoundingClientRect().left;
+              const walk = x - startX;
+              previewCarousel.scrollLeft = startScrollLeft - walk;
+            });
             previewCarousel.addEventListener('mouseleave', stop);
             previewCarousel.addEventListener('mouseup', stop);
             window.addEventListener('mouseup', stop);
+            window.addEventListener('mousemove', (event) => {
+              if (!isDragging) return;
+              if (event.buttons !== 1) stop();
+            });
             window.addEventListener('blur', stop);
           }
         }
