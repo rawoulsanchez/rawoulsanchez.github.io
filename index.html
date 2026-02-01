@@ -1413,6 +1413,9 @@ html { scrollbar-gutter: stable; }
     opacity: 1;
     transition: opacity 700ms ease;
   }
+  .preview-teaser-player.is-loading {
+    opacity: 0;
+  }
   .preview-teaser-player iframe {
     width: 100%;
     height: 100%;
@@ -3620,6 +3623,7 @@ html { scrollbar-gutter: stable; }
             if (typeof window.setActiveCardAuthority === 'function') {
               window.setActiveCardAuthority(sourcePoster);
             }
+            schedulePreviewTeaserSwap(sourcePoster);
           }
         }
 
@@ -3874,6 +3878,7 @@ html { scrollbar-gutter: stable; }
       let previewTeaserFadeTimeout = null;
       let previewTeaserFadeInterval = null;
       let previewTeaserContainer = null;
+      let previewTeaserSwapTimer = null;
       let previewAutounmuteHandler = null;
       let previewAutounmuteRoot = null;
       let previewVolume = 100;
@@ -4299,6 +4304,30 @@ html { scrollbar-gutter: stable; }
         }
       }
 
+      function clearPreviewTeaserSwapTimer() {
+        if (previewTeaserSwapTimer !== null) {
+          clearTimeout(previewTeaserSwapTimer);
+          previewTeaserSwapTimer = null;
+        }
+      }
+
+      function schedulePreviewTeaserSwap(card) {
+        if (!card || !isPreviewOpen()) return;
+        clearPreviewTeaserSwapTimer();
+        previewTeaserSwapTimer = setTimeout(() => {
+          previewTeaserSwapTimer = null;
+          if (!isPreviewOpen()) return;
+          if (card !== currentPreviewCardEl) return;
+          const isHeroPreview = !!(heroPreviewSource && (card === heroPreviewSource || card === heroSection || card === heroVisual || card.classList.contains('hero') || card.classList.contains('hero-video')));
+          stopPreviewTeaser();
+          if (isHeroPreview) {
+            startHeroPreviewTeaser();
+          } else {
+            startCardPreviewTeaser(card);
+          }
+        }, 220);
+      }
+
       function fadeOutPreviewTeaserAudio(player) {
         if (!player || typeof player.setVolume !== 'function') return;
         const current = typeof player.getVolume === 'function' ? player.getVolume() : previewVolume;
@@ -4321,6 +4350,7 @@ html { scrollbar-gutter: stable; }
         clearPreviewTeaserTimer();
         clearPreviewTeaserFadeTimeout();
         clearPreviewTeaserFadeInterval();
+        clearPreviewTeaserSwapTimer();
         removePreviewAutounmuteListener();
         if (previewTeaserPlayer) {
           try {
@@ -4347,7 +4377,7 @@ html { scrollbar-gutter: stable; }
         if (!previewMedia || !window.YT || typeof window.YT.Player !== 'function') return;
         stopPreviewTeaser();
         previewTeaserContainer = document.createElement('div');
-        previewTeaserContainer.className = 'preview-teaser-player';
+        previewTeaserContainer.className = 'preview-teaser-player is-loading';
         previewMedia.appendChild(previewTeaserContainer);
         previewTeaserPlayer = new YT.Player(previewTeaserContainer, {
           playerVars: {
@@ -4361,6 +4391,13 @@ html { scrollbar-gutter: stable; }
           },
           events: {
             onReady: e => {
+              if (previewTeaserContainer) {
+                requestAnimationFrame(() => {
+                  if (previewTeaserContainer) {
+                    previewTeaserContainer.classList.remove('is-loading');
+                  }
+                });
+              }
               applyPreviewVolumeToPlayer(e.target, desiredPreviewVolume, isMobile);
               if (isMobile && typeof e.target.mute === 'function') {
                 e.target.mute();
@@ -4405,13 +4442,13 @@ html { scrollbar-gutter: stable; }
       function startCardPreviewTeaser(card) {
         if (!isPreviewOpen()) return;
         if (!previewMedia || !window.YT || typeof window.YT.Player !== 'function') return;
-        const teaserUrl = currentPreviewCardEl ? currentPreviewCardEl.getAttribute('data-youtube-url') : '';
+        const teaserUrl = card ? card.getAttribute('data-youtube-url') : '';
         const teaserData = parseYouTubeUrl(teaserUrl);
         if (!teaserData || !teaserData.videoId) return;
         stopPreviewTeaser();
         hidePreviewPlaceholder();
         previewTeaserContainer = document.createElement('div');
-        previewTeaserContainer.className = 'preview-teaser-player';
+        previewTeaserContainer.className = 'preview-teaser-player is-loading';
         previewMedia.appendChild(previewTeaserContainer);
         previewTeaserPlayer = new YT.Player(previewTeaserContainer, {
           playerVars: {
@@ -4425,6 +4462,13 @@ html { scrollbar-gutter: stable; }
           },
           events: {
             onReady: e => {
+              if (previewTeaserContainer) {
+                requestAnimationFrame(() => {
+                  if (previewTeaserContainer) {
+                    previewTeaserContainer.classList.remove('is-loading');
+                  }
+                });
+              }
               applyPreviewVolumeToPlayer(e.target, desiredPreviewVolume, isMobile);
               if (isMobile && typeof e.target.mute === 'function') {
                 e.target.mute();
