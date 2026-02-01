@@ -1724,16 +1724,19 @@ html { scrollbar-gutter: stable; }
     align-items: center;
     gap: 18px;
     overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
     overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
     padding: 0 calc(50vw - (var(--preview-card-width) / 2));
     scrollbar-width: none;
+    touch-action: pan-y pan-x;
     cursor: grab;
   }
   .preview-carousel::-webkit-scrollbar{ display: none; }
   .preview-carousel.is-dragging{ cursor: grabbing; user-select: none; }
   .preview-slide{
-    flex: 0 0 auto;
+    flex: 0 0 100%;
     width: var(--preview-card-width);
     display: flex;
     align-items: stretch;
@@ -1741,6 +1744,7 @@ html { scrollbar-gutter: stable; }
     transform-origin: center center;
     opacity: 0.86;
     transition: opacity 220ms ease;
+    scroll-snap-align: center;
   }
   .preview-slide.is-active{
     opacity: 1;
@@ -1764,7 +1768,7 @@ html { scrollbar-gutter: stable; }
   @media (max-width: 640px){
     .preview-carousel{
       padding: 0;
-      overflow-x: hidden;
+      overflow-x: auto;
       cursor: default;
     }
     .preview-carousel.is-dragging{ cursor: default; }
@@ -1772,9 +1776,6 @@ html { scrollbar-gutter: stable; }
       width: 100%;
       transform: none;
       opacity: 1;
-    }
-    .preview-slide:not(.is-active){
-      display: none;
     }
   }
 
@@ -4483,6 +4484,25 @@ html { scrollbar-gutter: stable; }
           gestureMode = null;
         };
 
+        const snapPreviewCarouselToNearestSlide = () => {
+          const previewCarousel = previewCard.querySelector('.preview-carousel');
+          if (!previewCarousel) return;
+          const slides = Array.from(previewCarousel.querySelectorAll('.preview-slide'));
+          if (!slides.length) return;
+          const carouselCenter = previewCarousel.scrollLeft + previewCarousel.clientWidth / 2;
+          let closestSlide = slides[0];
+          let closestDistance = Math.abs((closestSlide.offsetLeft + closestSlide.offsetWidth / 2) - carouselCenter);
+          slides.forEach((slide) => {
+            const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+            const distance = Math.abs(slideCenter - carouselCenter);
+            if (distance < closestDistance) {
+              closestDistance = distance;
+              closestSlide = slide;
+            }
+          });
+          previewCarousel.scrollTo({ left: closestSlide.offsetLeft, behavior: 'smooth' });
+        };
+
         const onTouchStart = (event) => {
           if (!isPreviewOpen()) return;
           if (!event.touches || event.touches.length !== 1) return;
@@ -4531,7 +4551,8 @@ html { scrollbar-gutter: stable; }
           }
 
           if (gestureMode === 'h') {
-            event.preventDefault();
+            // Let native horizontal scrolling of the preview carousel happen.
+            // Do not preventDefault for horizontal intent.
             return;
           }
 
@@ -4553,14 +4574,8 @@ html { scrollbar-gutter: stable; }
           }
 
           if (!gestureDisabled && gestureMode === 'h') {
-            const dx = lastX - startX;
-            if (Math.abs(dx) >= SWIPE_NAV_THRESHOLD_PX) {
-              if (dx < 0) {
-                if (typeof window.goToNextCardByDomOrder === 'function') window.goToNextCardByDomOrder();
-              } else {
-                if (typeof window.goToPreviousCardByDomOrder === 'function') window.goToPreviousCardByDomOrder();
-              }
-            }
+            // Let native scroll happen during the gesture, then snap to nearest slide on release.
+            snapPreviewCarouselToNearestSlide();
           }
 
           if (!gestureDisabled && gestureMode === 'v') {
