@@ -3401,6 +3401,9 @@ html { scrollbar-gutter: stable; }
 
             previewCarousel.addEventListener('mousedown', (event) => {
               if (event.button !== 0) return;
+              if (event.target && event.target.closest('.preview-volume, .preview-volume__sliderWrap, .preview-volume__slider')) {
+                return;
+              }
               isDragging = true;
               didDrag = false;
               previewCarousel.classList.add('is-dragging');
