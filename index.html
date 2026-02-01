@@ -1726,6 +1726,7 @@ html { scrollbar-gutter: stable; }
     overflow-x: auto;
     overflow-y: hidden;
     scroll-snap-type: x mandatory;
+    scroll-snap-stop: always;
     overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
     padding: 0 calc(50vw - (var(--preview-card-width) / 2));
@@ -1774,8 +1775,6 @@ html { scrollbar-gutter: stable; }
     .preview-carousel.is-dragging{ cursor: default; }
     .preview-slide{
       width: 100%;
-      transform: none;
-      opacity: 1;
     }
   }
 
@@ -3411,22 +3410,28 @@ html { scrollbar-gutter: stable; }
 
       // ZAQ TASK 2.4 — Preview navigation must move the carousel (row-style center shift)
       let previewCarouselScrollAnim = null;
+      let previewCarouselIsAnimating = false;
+      let previewCarouselScrollEndTimer = null;
+      const PREVIEW_SCROLL_END_DELAY = 120;
       function cancelPreviewCarouselScrollAnimation() {
         if (previewCarouselScrollAnim && typeof previewCarouselScrollAnim.frameId === 'number') {
           cancelAnimationFrame(previewCarouselScrollAnim.frameId);
         }
         previewCarouselScrollAnim = null;
+        previewCarouselIsAnimating = false;
       }
 
       function animatePreviewCarouselScrollLeftTo(target, durationMs) {
         if (!previewCarousel || typeof target !== 'number' || !isFinite(target)) return;
 
         cancelPreviewCarouselScrollAnimation();
+        previewCarouselIsAnimating = true;
 
         const start = previewCarousel.scrollLeft;
         const distance = target - start;
         if (distance === 0 || !durationMs || durationMs <= 0) {
           previewCarousel.scrollLeft = target;
+          previewCarouselIsAnimating = false;
           return;
         }
 
@@ -3450,6 +3455,7 @@ html { scrollbar-gutter: stable; }
           } else {
             previewCarousel.scrollLeft = target;
             cancelPreviewCarouselScrollAnimation();
+            previewCarouselIsAnimating = false;
           }
         }
 
@@ -3613,6 +3619,39 @@ html { scrollbar-gutter: stable; }
           previewCarouselActiveRafId = null;
         }
         previewCarouselActiveLastSlide = null;
+      }
+
+      function schedulePreviewCarouselScrollEndSnap() {
+        if (!previewCarousel || !isPreviewOpen()) return;
+        if (previewCarouselIsAnimating) return;
+        if (previewCarouselScrollEndTimer) {
+          clearTimeout(previewCarouselScrollEndTimer);
+        }
+        previewCarouselScrollEndTimer = window.setTimeout(() => {
+          previewCarouselScrollEndTimer = null;
+          if (!previewCarousel || !isPreviewOpen()) return;
+          if (previewCarouselIsAnimating) return;
+          const closest = getClosestPreviewSlideToCenter();
+          if (!closest) return;
+          centerPreviewSlideWithAnimation(closest);
+        }, PREVIEW_SCROLL_END_DELAY);
+      }
+
+      function startPreviewCarouselScrollEndSnap() {
+        if (!previewCarousel) return;
+        if (previewCarousel.__scrollEndSnapInstalled) return;
+        previewCarousel.__scrollEndSnapInstalled = true;
+        previewCarousel.addEventListener('scroll', schedulePreviewCarouselScrollEndSnap, { passive: true });
+      }
+
+      function stopPreviewCarouselScrollEndSnap() {
+        if (!previewCarousel || !previewCarousel.__scrollEndSnapInstalled) return;
+        previewCarousel.__scrollEndSnapInstalled = false;
+        previewCarousel.removeEventListener('scroll', schedulePreviewCarouselScrollEndSnap);
+        if (previewCarouselScrollEndTimer) {
+          clearTimeout(previewCarouselScrollEndTimer);
+          previewCarouselScrollEndTimer = null;
+        }
       }
 
       // ZAQ TASK 2.4 (REFINEMENT) — Preview carousel magnifier scaling (continuous, row-style)
@@ -4452,7 +4491,6 @@ html { scrollbar-gutter: stable; }
       }
 
       function attachPreviewSwipeListeners() {
-        return;
         if (previewSwipeHandlers) return;
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
@@ -4482,25 +4520,6 @@ html { scrollbar-gutter: stable; }
           swipeDownEligible = false;
           gestureDisabled = false;
           gestureMode = null;
-        };
-
-        const snapPreviewCarouselToNearestSlide = () => {
-          const previewCarousel = previewCard.querySelector('.preview-carousel');
-          if (!previewCarousel) return;
-          const slides = Array.from(previewCarousel.querySelectorAll('.preview-slide'));
-          if (!slides.length) return;
-          const carouselCenter = previewCarousel.scrollLeft + previewCarousel.clientWidth / 2;
-          let closestSlide = slides[0];
-          let closestDistance = Math.abs((closestSlide.offsetLeft + closestSlide.offsetWidth / 2) - carouselCenter);
-          slides.forEach((slide) => {
-            const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
-            const distance = Math.abs(slideCenter - carouselCenter);
-            if (distance < closestDistance) {
-              closestDistance = distance;
-              closestSlide = slide;
-            }
-          });
-          previewCarousel.scrollTo({ left: closestSlide.offsetLeft, behavior: 'smooth' });
         };
 
         const onTouchStart = (event) => {
@@ -4571,11 +4590,6 @@ html { scrollbar-gutter: stable; }
           if (!isPreviewOpen()) {
             resetGesture();
             return;
-          }
-
-          if (!gestureDisabled && gestureMode === 'h') {
-            // Let native scroll happen during the gesture, then snap to nearest slide on release.
-            snapPreviewCarouselToNearestSlide();
           }
 
           if (!gestureDisabled && gestureMode === 'v') {
@@ -5499,6 +5513,7 @@ function detachPreviewSwipeListeners() {
         resetPreviewCarousel();
         movePreviewCardIntoSlideForCard(card, true, true);
         startPreviewCarouselMagnifier();
+        startPreviewCarouselScrollEndSnap();
         lockScroll();
         previewOverlay.setAttribute('aria-hidden', 'false');
         const profile = getOpenMorphProfileForCard(card);
@@ -5718,6 +5733,7 @@ function detachPreviewSwipeListeners() {
 
         stopPreviewCarouselActiveTracking();
         stopPreviewCarouselMagnifier();
+        stopPreviewCarouselScrollEndSnap();
 
         window.removeEventListener('resize', handlePreviewResize);
         if (previewOverlay) {
