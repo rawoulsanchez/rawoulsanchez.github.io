@@ -1741,7 +1741,8 @@ html { scrollbar-gutter: stable; }
     justify-content: stretch;
     transform-origin: center center;
     opacity: 0.86;
-    transition: opacity 220ms ease;
+    transition: opacity 220ms ease, transform 220ms ease;
+    will-change: transform;
   }
   .preview-slide.is-active{
     opacity: 1;
@@ -3644,13 +3645,6 @@ html { scrollbar-gutter: stable; }
         const minScale = 0.78;
 
         for (const slide of slides) {
-          // Do not magnify the slide that currently holds the real preview card.
-          // Otherwise the card will jump in size when the magnifier updates.
-          if (previewCardEl && slide.contains(previewCardEl)) {
-            slide.style.transform = '';
-            continue;
-          }
-
           const rect = slide.getBoundingClientRect();
           const center = rect.left + (rect.width / 2);
           const distance = Math.abs(center - carouselCenter);
