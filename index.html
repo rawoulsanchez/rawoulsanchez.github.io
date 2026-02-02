@@ -1362,7 +1362,10 @@ html { scrollbar-gutter: stable; }
     cursor: pointer;
     opacity: 0;
     pointer-events: none;
-    transform: translateY(-50%);
+    --preview-arrow-offset-x: 0px;
+    --preview-arrow-offset-y: 0px;
+    transform: translate(var(--preview-arrow-offset-x), calc(-50% + var(--preview-arrow-offset-y)));
+    transition: transform 160ms ease, background-color 160ms ease;
     z-index: 11001;
     touch-action: manipulation;
   }
@@ -3869,6 +3872,137 @@ html { scrollbar-gutter: stable; }
           }
         });
       }
+
+      const previewNavArrowState = {
+        pointerX: 0,
+        pointerY: 0,
+        rafId: null
+      };
+      const prefersFinePointer = window.matchMedia('(pointer: fine)').matches;
+
+      function getPreviewCardRect() {
+        const previewCard = previewOverlay.querySelector('.preview-card');
+        if (!previewCard) return null;
+        return previewCard.getBoundingClientRect();
+      }
+
+      function getPreviewSlideRects() {
+        if (!previewCarousel) return null;
+        const slides = Array.from(previewCarousel.querySelectorAll('.preview-slide'));
+        if (!slides.length) return null;
+        const activeSlide = previewCarousel.querySelector('.preview-slide.is-active') || slides[0];
+        const activeIndex = slides.indexOf(activeSlide);
+        if (activeIndex < 0) return null;
+        const leftSlide = slides[(activeIndex - 1 + slides.length) % slides.length];
+        const rightSlide = slides[(activeIndex + 1) % slides.length];
+        return {
+          left: leftSlide.getBoundingClientRect(),
+          right: rightSlide.getBoundingClientRect()
+        };
+      }
+
+      function setPreviewArrowOffset(button, offsetX, offsetY) {
+        if (!button) return;
+        button.style.setProperty('--preview-arrow-offset-x', `${offsetX}px`);
+        button.style.setProperty('--preview-arrow-offset-y', `${offsetY}px`);
+      }
+
+      function resetPreviewArrowOffsets() {
+        setPreviewArrowOffset(previewNavPrevButton, 0, 0);
+        setPreviewArrowOffset(previewNavNextButton, 0, 0);
+      }
+
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function applyPreviewArrowMagnet() {
+        previewNavArrowState.rafId = null;
+        if (!prefersFinePointer || !isPreviewOpen()) {
+          resetPreviewArrowOffsets();
+          return;
+        }
+        const previewCardRect = getPreviewCardRect();
+        const slideRects = getPreviewSlideRects();
+        if (!previewCardRect || !slideRects) {
+          resetPreviewArrowOffsets();
+          return;
+        }
+
+        const withinVerticalRange =
+          previewNavArrowState.pointerY >= previewCardRect.top &&
+          previewNavArrowState.pointerY <= previewCardRect.bottom;
+
+        if (!withinVerticalRange) {
+          resetPreviewArrowOffsets();
+          return;
+        }
+
+        const leftAnchor = previewNavPrevButton ? previewNavPrevButton.getBoundingClientRect() : null;
+        const rightAnchor = previewNavNextButton ? previewNavNextButton.getBoundingClientRect() : null;
+
+        if (leftAnchor) {
+          const xInside = previewNavArrowState.pointerX >= slideRects.left.left &&
+            previewNavArrowState.pointerX <= slideRects.left.right;
+          if (xInside) {
+            const targetX = clamp(previewNavArrowState.pointerX, slideRects.left.left, slideRects.left.right);
+            const targetY = clamp(previewNavArrowState.pointerY, previewCardRect.top, previewCardRect.bottom);
+            const centerX = leftAnchor.left + leftAnchor.width / 2;
+            const centerY = leftAnchor.top + leftAnchor.height / 2;
+            const minOffsetX = slideRects.left.left - centerX;
+            const maxOffsetX = slideRects.left.right - centerX;
+            const minOffsetY = previewCardRect.top - centerY;
+            const maxOffsetY = previewCardRect.bottom - centerY;
+            const offsetX = clamp(targetX - centerX, minOffsetX, maxOffsetX);
+            const offsetY = clamp(targetY - centerY, minOffsetY, maxOffsetY);
+            setPreviewArrowOffset(previewNavPrevButton, offsetX, offsetY);
+          } else {
+            setPreviewArrowOffset(previewNavPrevButton, 0, 0);
+          }
+        }
+
+        if (rightAnchor) {
+          const xInside = previewNavArrowState.pointerX >= slideRects.right.left &&
+            previewNavArrowState.pointerX <= slideRects.right.right;
+          if (xInside) {
+            const targetX = clamp(previewNavArrowState.pointerX, slideRects.right.left, slideRects.right.right);
+            const targetY = clamp(previewNavArrowState.pointerY, previewCardRect.top, previewCardRect.bottom);
+            const centerX = rightAnchor.left + rightAnchor.width / 2;
+            const centerY = rightAnchor.top + rightAnchor.height / 2;
+            const minOffsetX = slideRects.right.left - centerX;
+            const maxOffsetX = slideRects.right.right - centerX;
+            const minOffsetY = previewCardRect.top - centerY;
+            const maxOffsetY = previewCardRect.bottom - centerY;
+            const offsetX = clamp(targetX - centerX, minOffsetX, maxOffsetX);
+            const offsetY = clamp(targetY - centerY, minOffsetY, maxOffsetY);
+            setPreviewArrowOffset(previewNavNextButton, offsetX, offsetY);
+          } else {
+            setPreviewArrowOffset(previewNavNextButton, 0, 0);
+          }
+        }
+      }
+
+      function schedulePreviewArrowMagnet() {
+        if (previewNavArrowState.rafId !== null) return;
+        previewNavArrowState.rafId = requestAnimationFrame(applyPreviewArrowMagnet);
+      }
+
+      if (previewOverlay) {
+        previewOverlay.addEventListener('pointermove', (event) => {
+          if (!prefersFinePointer) return;
+          previewNavArrowState.pointerX = event.clientX;
+          previewNavArrowState.pointerY = event.clientY;
+          schedulePreviewArrowMagnet();
+        });
+        previewOverlay.addEventListener('pointerleave', () => {
+          resetPreviewArrowOffsets();
+        });
+      }
+
+      window.addEventListener('resize', () => {
+        if (!isPreviewOpen()) return;
+        schedulePreviewArrowMagnet();
+      });
 
       let previewTeaserPlayer = null;
       let previewTeaserTimer = null;
