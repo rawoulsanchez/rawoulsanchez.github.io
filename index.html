@@ -2653,6 +2653,8 @@ html { scrollbar-gutter: stable; }
   document.addEventListener('DOMContentLoaded', () => {
     // Number of original sets to clone on each side for the infinite effect
     const CLONE_COUNT = 4;
+    // Keep the Hero preview ribbon centered with 4 duplicate sets on each side.
+    const HERO_CLONE_COUNT = 4;
     const RECENTER_DURATION = 1800; // ms, slow cinematic glide
     const activeScrollAnimations = new Map();
     // ZAQ TASK 1 — Mobile breakpoint helper (matches existing CSS @media max-width:640px)
@@ -3144,19 +3146,21 @@ html { scrollbar-gutter: stable; }
     document.querySelectorAll('.shelf-track').forEach(track => {
       const originalPosters = Array.from(track.children);
       if (originalPosters.length === 0) return;
+      const isHeroPreviewTrack = track.dataset.row === 'Hero' && track.closest('.hero-preview-source');
+      const cloneCount = isHeroPreviewTrack ? HERO_CLONE_COUNT : CLONE_COUNT;
 
       // --- 1. CLONE POSTERS for infinite effect ---
       const fragment = document.createDocumentFragment();
       originalPosters.forEach(poster => fragment.appendChild(poster.cloneNode(true)));
 
-      for (let i = 0; i < CLONE_COUNT; i++) {
+      for (let i = 0; i < cloneCount; i++) {
         track.prepend(fragment.cloneNode(true));
         track.append(fragment.cloneNode(true));
       }
 
       // --- 2. SET INITIAL SCROLL POSITION ---
       // We want to start at the first "real" card, not the clones.
-      const initialPosterIndex = originalPosters.length * CLONE_COUNT;
+      const initialPosterIndex = originalPosters.length * cloneCount;
       const initialPoster = track.children[initialPosterIndex];
       if (!initialPoster) return;
 
@@ -5852,7 +5856,7 @@ function detachPreviewSwipeListeners() {
 
       function getHeroMiddleSetCard() {
         if (!heroPreviewTrack) return heroPreviewSource;
-        const cloneCount = (typeof CLONE_COUNT === 'number' ? CLONE_COUNT : 0);
+        const cloneCount = (typeof HERO_CLONE_COUNT === 'number' ? HERO_CLONE_COUNT : 0);
         const setCount = (2 * cloneCount + 1);
         const totalCards = heroPreviewTrack.children.length;
         if (!totalCards || !setCount) return heroPreviewSource;
