@@ -1,6 +1,3 @@
-
-
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -1380,10 +1377,6 @@ html { scrollbar-gutter: stable; }
       pointer-events: auto;
     }
   }
-  .preview-overlay.is-hero-preview .preview-nav-arrow {
-    opacity: 0;
-    pointer-events: none;
-  }
 
   .preview-media {
     position: relative;
@@ -1738,10 +1731,6 @@ html { scrollbar-gutter: stable; }
     scrollbar-width: none;
     cursor: grab;
   }
-  .preview-overlay.is-hero-preview .preview-carousel{
-    overflow-x: hidden;
-    cursor: default;
-  }
   .preview-carousel::-webkit-scrollbar{ display: none; }
   .preview-carousel.is-dragging{ cursor: grabbing; user-select: none; }
   .preview-slide{
@@ -1767,8 +1756,6 @@ html { scrollbar-gutter: stable; }
     box-shadow: 0 18px 44px rgba(0,0,0,0.62), 0 0 0 1px rgba(255,255,255,0.02);
     overflow: hidden;
     display: block;
-    -webkit-user-drag: none;
-    user-select: none;
   }
   .preview-slide-ghost img{
     display: block;
@@ -1776,9 +1763,6 @@ html { scrollbar-gutter: stable; }
     height: 100%;
     object-fit: cover;
     aspect-ratio: 16 / 9;
-    -webkit-user-drag: none;
-    user-select: none;
-    pointer-events: none;
   }
   @media (max-width: 640px){
     .preview-carousel{
@@ -2182,9 +2166,6 @@ html { scrollbar-gutter: stable; }
       }
     });
     window.ytPlayer = ytPlayer;
-    if (typeof window.startPendingPreviewTeaser === 'function') {
-      window.startPendingPreviewTeaser();
-    }
   }
   function scheduleHeroPlayerInit() {
     if (ytPlayerInitialized) return;
@@ -2204,12 +2185,7 @@ html { scrollbar-gutter: stable; }
       }
     }, 250);
   }
-  window.onYouTubeIframeAPIReady = () => {
-    initHeroPlayer();
-    if (typeof window.startPendingPreviewTeaser === 'function') {
-      window.startPendingPreviewTeaser();
-    }
-  };
+  window.onYouTubeIframeAPIReady = initHeroPlayer;
   if (window.YT && typeof window.YT.Player === 'function') {
     initHeroPlayer();
   } else {
@@ -3471,9 +3447,6 @@ html { scrollbar-gutter: stable; }
               if (!didDrag) return;
               event.stopPropagation();
             });
-            previewCarousel.addEventListener('dragstart', (event) => {
-              event.preventDefault();
-            });
             previewCarousel.addEventListener('mouseleave', stop);
             previewCarousel.addEventListener('mouseup', stop);
             window.addEventListener('mouseup', stop);
@@ -3903,8 +3876,6 @@ html { scrollbar-gutter: stable; }
       let previewTeaserFadeInterval = null;
       let previewTeaserContainer = null;
       let previewTeaserSwapTimer = null;
-      let pendingPreviewTeaser = null;
-      let isHeroPreviewActive = false;
       let previewAutounmuteHandler = null;
       let previewAutounmuteRoot = null;
       let previewVolume = 100;
@@ -3913,22 +3884,6 @@ html { scrollbar-gutter: stable; }
       let desiredPreviewVolume = previewVolume;
       let previewLastNonZeroVolume = previewVolume || 100;
       const isMobile = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768;
-
-      function queuePreviewTeaser(card, isHero) {
-        pendingPreviewTeaser = { card, isHero: !!isHero };
-      }
-
-      window.startPendingPreviewTeaser = function startPendingPreviewTeaser() {
-        if (!pendingPreviewTeaser) return;
-        if (!isPreviewOpen()) return;
-        const { card, isHero } = pendingPreviewTeaser;
-        pendingPreviewTeaser = null;
-        if (isHero) {
-          startHeroPreviewTeaser();
-        } else {
-          startCardPreviewTeaser(card);
-        }
-      };
 
       const previewVolumeControl = previewOverlay.querySelector('.preview-volume');
       const previewVolumeButton = previewOverlay.querySelector('.preview-volume__btn');
@@ -4421,10 +4376,7 @@ html { scrollbar-gutter: stable; }
 
       function startHeroPreviewTeaser() {
         if (!isPreviewOpen()) return;
-        if (!previewMedia || !window.YT || typeof window.YT.Player !== 'function') {
-          queuePreviewTeaser(heroPreviewSource, true);
-          return;
-        }
+        if (!previewMedia || !window.YT || typeof window.YT.Player !== 'function') return;
         stopPreviewTeaser();
         previewTeaserContainer = document.createElement('div');
         previewTeaserContainer.className = 'preview-teaser-player';
@@ -4486,10 +4438,7 @@ html { scrollbar-gutter: stable; }
 
       function startCardPreviewTeaser(card) {
         if (!isPreviewOpen()) return;
-        if (!previewMedia || !window.YT || typeof window.YT.Player !== 'function') {
-          queuePreviewTeaser(card, false);
-          return;
-        }
+        if (!previewMedia || !window.YT || typeof window.YT.Player !== 'function') return;
         const teaserUrl = currentPreviewCardEl ? currentPreviewCardEl.getAttribute('data-youtube-url') : '';
         const teaserData = parseYouTubeUrl(teaserUrl);
         if (!teaserData || !teaserData.videoId) return;
@@ -5588,9 +5537,6 @@ function detachPreviewSwipeListeners() {
         if (!card) return;
         // ZAQ TASK 1.8: Pause hero video when preview begins opening.
         previewOpening = true;
-        const openingFromHero = !!(heroPreviewSource && (card === heroPreviewSource || card === heroSection || card === heroVisual || card.classList.contains('hero') || card.classList.contains('hero-video')));
-        isHeroPreviewActive = openingFromHero;
-        previewOverlay.classList.toggle('is-hero-preview', openingFromHero);
         const heroAudioState = getHeroAudioState();
         const syncedVolume = clampPreviewVolume(heroAudioState.volume);
         initialPreviewVolume = syncedVolume === 0 ? 50 : syncedVolume;
@@ -5637,7 +5583,7 @@ function detachPreviewSwipeListeners() {
           previewCard.style.setProperty('--preview-morph-ease', profile.easing);
         }
         attachPreviewSwipeListeners();
-        const isHeroPreview = openingFromHero;
+        const isHeroPreview = !!(heroPreviewSource && (card === heroPreviewSource || card === heroSection || card === heroVisual || card.classList.contains('hero') || card.classList.contains('hero-video')));
         runOpenMorph(card, profile).then(() => {
           previewOpening = false;
           // Apply any buffered swap requested while the morph tile owned the preview card.
@@ -5665,9 +5611,6 @@ function detachPreviewSwipeListeners() {
           placePreviewCardIntoSlide(targetSlide);
         }
         currentPreviewCardEl = nextCard;
-        const swappingToHero = !!(heroPreviewSource && (nextCard === heroPreviewSource || nextCard === heroSection || nextCard === heroVisual || nextCard.classList.contains('hero') || nextCard.classList.contains('hero-video')));
-        isHeroPreviewActive = swappingToHero;
-        previewOverlay.classList.toggle('is-hero-preview', swappingToHero);
         applyPreviewCopyFromCard(nextCard);
         setPreviewPosterImageFromCard(nextCard);
         schedulePreviewFitUpdate();
@@ -5838,7 +5781,6 @@ function detachPreviewSwipeListeners() {
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
         previewOpening = false;
         stopPreviewTeaser();
-        pendingPreviewTeaser = null;
         resetPreviewPlaceholder();
         resetPreviewPosterImage();
         removePreviewAutounmuteListener();
@@ -5859,14 +5801,11 @@ function detachPreviewSwipeListeners() {
           : null;
 
         // Prefer a real poster card for morph geometry. Fall back to the last opened trigger.
-        let exitCard = (authorityCard && authorityCard.classList && authorityCard.classList.contains('poster'))
+        const exitCard = (authorityCard && authorityCard.classList && authorityCard.classList.contains('poster'))
           ? authorityCard
           : ((currentPreviewCardEl && currentPreviewCardEl.classList && currentPreviewCardEl.classList.contains('poster'))
             ? currentPreviewCardEl
             : lastOpenedCard);
-        if (isHeroPreviewActive && heroPreviewSource) {
-          exitCard = heroPreviewSource;
-        }
 
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
@@ -5876,8 +5815,6 @@ function detachPreviewSwipeListeners() {
         if (!exitCard) {
           previewOverlay.classList.remove('is-visible');
           previewOverlay.setAttribute('aria-hidden', 'true');
-          previewOverlay.classList.remove('is-hero-preview');
-          isHeroPreviewActive = false;
           previewCard.classList.remove('is-active');
           previewCard.style.opacity = '';
           previewCard.style.pointerEvents = '';
@@ -5888,8 +5825,6 @@ function detachPreviewSwipeListeners() {
           unlockScroll();
           lastOpenedCard = null;
           currentPreviewCardEl = null;
-          previewOverlay.classList.remove('is-hero-preview');
-          isHeroPreviewActive = false;
           if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
             window.updateActiveTrackFromWindowScroll();
           }
@@ -5930,8 +5865,6 @@ function detachPreviewSwipeListeners() {
         previewOverlay.classList.remove('is-visible');
         previewOverlay.setAttribute('aria-hidden', 'true');
         resetPreviewCarousel();
-        previewOverlay.classList.remove('is-hero-preview');
-        isHeroPreviewActive = false;
 
         const targetRadius = getComputedStyle(exitCard).borderRadius;
 
@@ -5964,8 +5897,6 @@ function detachPreviewSwipeListeners() {
           }
           lastOpenedCard = null;
           currentPreviewCardEl = null;
-          previewOverlay.classList.remove('is-hero-preview');
-          isHeroPreviewActive = false;
           if (typeof window.updateActiveTrackFromWindowScroll === 'function') {
             window.updateActiveTrackFromWindowScroll();
           }
