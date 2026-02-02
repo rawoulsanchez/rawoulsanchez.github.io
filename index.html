@@ -5795,6 +5795,12 @@ function detachPreviewSwipeListeners() {
         runOpenMorph(card, profile, morphSourceElement).then(() => {
           previewOpening = false;
           schedulePreviewNavPulse();
+          // Ensure the preview carousel recenters once the overlay is visible.
+          requestAnimationFrame(() => {
+            if (currentPreviewCardEl) {
+              movePreviewCardIntoSlideForCard(currentPreviewCardEl, true, true);
+            }
+          });
           // Apply any buffered swap requested while the morph tile owned the preview card.
           if (pendingPreviewSwapCard && pendingPreviewSwapCard !== currentPreviewCardEl) {
             const toSwap = pendingPreviewSwapCard;
