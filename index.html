@@ -5852,12 +5852,13 @@ function detachPreviewSwipeListeners() {
 
       function getHeroMiddleSetCard() {
         if (!heroPreviewTrack) return heroPreviewSource;
-        const setCount = (typeof CLONE_COUNT === 'number' ? (2 * CLONE_COUNT + 1) : 1);
+        const cloneCount = (typeof CLONE_COUNT === 'number' ? CLONE_COUNT : 0);
+        const setCount = (2 * cloneCount + 1);
         const totalCards = heroPreviewTrack.children.length;
         if (!totalCards || !setCount) return heroPreviewSource;
         const originalCount = Math.floor(totalCards / setCount);
         if (!originalCount) return heroPreviewSource;
-        const middleStartIndex = originalCount * CLONE_COUNT;
+        const middleStartIndex = originalCount * cloneCount;
         return heroPreviewTrack.children[middleStartIndex] || heroPreviewSource;
       }
 
