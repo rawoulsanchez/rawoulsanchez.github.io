@@ -3923,9 +3923,11 @@ html { scrollbar-gutter: stable; }
         if (activeIndex < 0) return null;
         const leftSlide = slides[(activeIndex - 1 + slides.length) % slides.length];
         const rightSlide = slides[(activeIndex + 1) % slides.length];
+        const leftTarget = leftSlide.querySelector('.preview-slide-ghost') || leftSlide;
+        const rightTarget = rightSlide.querySelector('.preview-slide-ghost') || rightSlide;
         return {
-          left: leftSlide.getBoundingClientRect(),
-          right: rightSlide.getBoundingClientRect()
+          left: leftTarget.getBoundingClientRect(),
+          right: rightTarget.getBoundingClientRect()
         };
       }
 
@@ -3938,10 +3940,6 @@ html { scrollbar-gutter: stable; }
       function resetPreviewArrowOffsets() {
         setPreviewArrowOffset(previewNavPrevButton, 0, 0);
         setPreviewArrowOffset(previewNavNextButton, 0, 0);
-      }
-
-      function clamp(value, min, max) {
-        return Math.max(min, Math.min(max, value));
       }
 
       function applyPreviewArrowMagnet() {
@@ -3973,16 +3971,12 @@ html { scrollbar-gutter: stable; }
           const xInside = previewNavArrowState.pointerX >= slideRects.left.left &&
             previewNavArrowState.pointerX <= slideRects.left.right;
           if (xInside) {
-            const targetX = clamp(previewNavArrowState.pointerX, slideRects.left.left, slideRects.left.right);
-            const targetY = clamp(previewNavArrowState.pointerY, previewCardRect.top, previewCardRect.bottom);
+            const targetX = previewNavArrowState.pointerX;
+            const targetY = previewNavArrowState.pointerY;
             const centerX = leftAnchor.left + leftAnchor.width / 2;
             const centerY = leftAnchor.top + leftAnchor.height / 2;
-            const minOffsetX = slideRects.left.left - centerX;
-            const maxOffsetX = slideRects.left.right - centerX;
-            const minOffsetY = previewCardRect.top - centerY;
-            const maxOffsetY = previewCardRect.bottom - centerY;
-            const offsetX = clamp(targetX - centerX, minOffsetX, maxOffsetX);
-            const offsetY = clamp(targetY - centerY, minOffsetY, maxOffsetY);
+            const offsetX = targetX - centerX;
+            const offsetY = targetY - centerY;
             setPreviewArrowOffset(previewNavPrevButton, offsetX, offsetY);
           } else {
             setPreviewArrowOffset(previewNavPrevButton, 0, 0);
@@ -3993,16 +3987,12 @@ html { scrollbar-gutter: stable; }
           const xInside = previewNavArrowState.pointerX >= slideRects.right.left &&
             previewNavArrowState.pointerX <= slideRects.right.right;
           if (xInside) {
-            const targetX = clamp(previewNavArrowState.pointerX, slideRects.right.left, slideRects.right.right);
-            const targetY = clamp(previewNavArrowState.pointerY, previewCardRect.top, previewCardRect.bottom);
+            const targetX = previewNavArrowState.pointerX;
+            const targetY = previewNavArrowState.pointerY;
             const centerX = rightAnchor.left + rightAnchor.width / 2;
             const centerY = rightAnchor.top + rightAnchor.height / 2;
-            const minOffsetX = slideRects.right.left - centerX;
-            const maxOffsetX = slideRects.right.right - centerX;
-            const minOffsetY = previewCardRect.top - centerY;
-            const maxOffsetY = previewCardRect.bottom - centerY;
-            const offsetX = clamp(targetX - centerX, minOffsetX, maxOffsetX);
-            const offsetY = clamp(targetY - centerY, minOffsetY, maxOffsetY);
+            const offsetX = targetX - centerX;
+            const offsetY = targetY - centerY;
             setPreviewArrowOffset(previewNavNextButton, offsetX, offsetY);
           } else {
             setPreviewArrowOffset(previewNavNextButton, 0, 0);
