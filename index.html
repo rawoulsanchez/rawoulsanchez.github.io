@@ -1361,8 +1361,7 @@ html { scrollbar-gutter: stable; }
     border: 1px solid rgba(255,255,255,0.18);
     background: rgba(0,0,0,0.55);
     color: #fff;
-    font-size: 28px;
-    line-height: 1;
+    font-size: 0;
     cursor: pointer;
     opacity: 0;
     pointer-events: none;
@@ -1374,6 +1373,12 @@ html { scrollbar-gutter: stable; }
   .preview-nav-arrow.is-magnetic {
     transform: translate(-50%, -50%);
     transition: none;
+  }
+  .preview-nav-arrow__icon {
+    display: block;
+    font-size: 28px;
+    line-height: 1;
+    transform: translateY(-1px);
   }
   .preview-nav-arrow.is-hot {
     border-color: color-mix(in srgb, var(--brand) 65%, #fff 35%);
@@ -3928,6 +3933,7 @@ html { scrollbar-gutter: stable; }
         rafId: null
       };
       let previewNavPulseReady = false;
+      let previewNavPulseTimer = null;
       const prefersFinePointer = window.matchMedia('(pointer: fine)').matches;
 
       function getPreviewCardRect() {
@@ -3975,10 +3981,28 @@ html { scrollbar-gutter: stable; }
         resetPreviewArrowOffset(previewNavNextButton);
       }
 
+      function clearPreviewNavPulseTimer() {
+        if (previewNavPulseTimer !== null) {
+          clearTimeout(previewNavPulseTimer);
+          previewNavPulseTimer = null;
+        }
+      }
+
       function markPreviewNavPulseReady() {
         if (!previewOverlay || previewNavPulseReady) return;
         previewNavPulseReady = true;
         previewOverlay.classList.add('preview-nav-pulse');
+      }
+
+      function schedulePreviewNavPulse() {
+        if (!previewOverlay) return;
+        clearPreviewNavPulseTimer();
+        previewNavPulseReady = false;
+        previewOverlay.classList.remove('preview-nav-pulse');
+        previewNavPulseTimer = setTimeout(() => {
+          previewNavPulseTimer = null;
+          markPreviewNavPulseReady();
+        }, 5000);
       }
 
       function applyPreviewArrowMagnet() {
@@ -5715,6 +5739,7 @@ function detachPreviewSwipeListeners() {
         if (!card) return;
         // ZAQ TASK 1.8: Pause hero video when preview begins opening.
         previewOpening = true;
+        schedulePreviewNavPulse();
         const heroAudioState = getHeroAudioState();
         const syncedVolume = clampPreviewVolume(heroAudioState.volume);
         initialPreviewVolume = syncedVolume === 0 ? 50 : syncedVolume;
@@ -5764,6 +5789,7 @@ function detachPreviewSwipeListeners() {
         const isHeroPreview = isHeroPreviewCard(card);
         runOpenMorph(card, profile).then(() => {
           previewOpening = false;
+          schedulePreviewNavPulse();
           // Apply any buffered swap requested while the morph tile owned the preview card.
           if (pendingPreviewSwapCard && pendingPreviewSwapCard !== currentPreviewCardEl) {
             const toSwap = pendingPreviewSwapCard;
@@ -5959,6 +5985,7 @@ function detachPreviewSwipeListeners() {
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
         previewOpening = false;
         previewNavPulseReady = false;
+        clearPreviewNavPulseTimer();
         previewOverlay.classList.remove('preview-nav-pulse');
         stopPreviewTeaser();
         resetPreviewPlaceholder();
@@ -6132,8 +6159,12 @@ document.addEventListener('keydown', (event) => {
 
   <!-- Preview Overlay (static skeleton) -->
   <div class="preview-overlay" aria-hidden="true">
-    <button class="preview-nav-arrow preview-nav-arrow--left" type="button" aria-label="Previous">‹</button>
-    <button class="preview-nav-arrow preview-nav-arrow--right" type="button" aria-label="Next">›</button>
+    <button class="preview-nav-arrow preview-nav-arrow--left" type="button" aria-label="Previous">
+      <span class="preview-nav-arrow__icon">‹</span>
+    </button>
+    <button class="preview-nav-arrow preview-nav-arrow--right" type="button" aria-label="Next">
+      <span class="preview-nav-arrow__icon">›</span>
+    </button>
     <div class="preview-carousel" aria-label="Preview carousel">
       <div class="preview-slide is-active">
         <div class="preview-card" role="dialog" aria-modal="true" aria-labelledby="preview-title">
