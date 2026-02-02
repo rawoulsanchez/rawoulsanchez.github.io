@@ -2655,6 +2655,8 @@ html { scrollbar-gutter: stable; }
     const CLONE_COUNT = 4;
     // Keep the Hero preview ribbon centered with 4 duplicate sets on each side.
     const HERO_CLONE_COUNT = 4;
+    window.CLONE_COUNT = CLONE_COUNT;
+    window.HERO_CLONE_COUNT = HERO_CLONE_COUNT;
     const RECENTER_DURATION = 1800; // ms, slow cinematic glide
     const activeScrollAnimations = new Map();
     // ZAQ TASK 1 — Mobile breakpoint helper (matches existing CSS @media max-width:640px)
@@ -3396,7 +3398,7 @@ html { scrollbar-gutter: stable; }
         let hostIndex = activeIndex >= 0 ? activeIndex : 0;
         const isHeroPreviewTrack = sourceTrack && sourceTrack.dataset && sourceTrack.dataset.row === 'Hero' && sourceTrack.closest('.hero-preview-source');
         if (isHeroPreviewTrack) {
-          const cloneCount = (typeof HERO_CLONE_COUNT === 'number' ? HERO_CLONE_COUNT : 0);
+          const cloneCount = (typeof window.HERO_CLONE_COUNT === 'number' ? window.HERO_CLONE_COUNT : 0);
           const setCount = (2 * cloneCount + 1);
           const originalCount = setCount ? Math.floor(cards.length / setCount) : 0;
           if (originalCount > 0) {
@@ -5876,7 +5878,7 @@ function detachPreviewSwipeListeners() {
 
       function getHeroMiddleSetCard() {
         if (!heroPreviewTrack) return heroPreviewSource;
-        const cloneCount = (typeof HERO_CLONE_COUNT === 'number' ? HERO_CLONE_COUNT : 0);
+        const cloneCount = (typeof window.HERO_CLONE_COUNT === 'number' ? window.HERO_CLONE_COUNT : 0);
         const setCount = (2 * cloneCount + 1);
         const totalCards = heroPreviewTrack.children.length;
         if (!totalCards || !setCount) return heroPreviewSource;
