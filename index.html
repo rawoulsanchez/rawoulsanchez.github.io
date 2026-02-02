@@ -3895,7 +3895,6 @@ html { scrollbar-gutter: stable; }
         pointerY: 0,
         rafId: null
       };
-      const previewNavArrowStrength = 0.35;
       const prefersFinePointer = window.matchMedia('(pointer: fine)').matches;
 
       function getPreviewCardRect() {
@@ -3971,8 +3970,8 @@ html { scrollbar-gutter: stable; }
             const maxOffsetX = slideRects.left.right - centerX;
             const minOffsetY = previewCardRect.top - centerY;
             const maxOffsetY = previewCardRect.bottom - centerY;
-            const offsetX = clamp((targetX - centerX) * previewNavArrowStrength, minOffsetX, maxOffsetX);
-            const offsetY = clamp((targetY - centerY) * previewNavArrowStrength, minOffsetY, maxOffsetY);
+            const offsetX = clamp(targetX - centerX, minOffsetX, maxOffsetX);
+            const offsetY = clamp(targetY - centerY, minOffsetY, maxOffsetY);
             setPreviewArrowOffset(previewNavPrevButton, offsetX, offsetY);
           } else {
             setPreviewArrowOffset(previewNavPrevButton, 0, 0);
@@ -3991,8 +3990,8 @@ html { scrollbar-gutter: stable; }
             const maxOffsetX = slideRects.right.right - centerX;
             const minOffsetY = previewCardRect.top - centerY;
             const maxOffsetY = previewCardRect.bottom - centerY;
-            const offsetX = clamp((targetX - centerX) * previewNavArrowStrength, minOffsetX, maxOffsetX);
-            const offsetY = clamp((targetY - centerY) * previewNavArrowStrength, minOffsetY, maxOffsetY);
+            const offsetX = clamp(targetX - centerX, minOffsetX, maxOffsetX);
+            const offsetY = clamp(targetY - centerY, minOffsetY, maxOffsetY);
             setPreviewArrowOffset(previewNavNextButton, offsetX, offsetY);
           } else {
             setPreviewArrowOffset(previewNavNextButton, 0, 0);
