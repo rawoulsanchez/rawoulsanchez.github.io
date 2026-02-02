@@ -3947,18 +3947,8 @@ html { scrollbar-gutter: stable; }
           resetPreviewArrowOffsets();
           return;
         }
-        const previewCardRect = getPreviewCardRect();
         const slideRects = getPreviewSlideRects();
-        if (!previewCardRect || !slideRects) {
-          resetPreviewArrowOffsets();
-          return;
-        }
-
-        const withinVerticalRange =
-          previewNavArrowState.pointerY >= previewCardRect.top &&
-          previewNavArrowState.pointerY <= previewCardRect.bottom;
-
-        if (!withinVerticalRange) {
+        if (!slideRects) {
           resetPreviewArrowOffsets();
           return;
         }
@@ -3966,7 +3956,9 @@ html { scrollbar-gutter: stable; }
         if (previewNavPrevButton) {
           const xInside = previewNavArrowState.pointerX >= slideRects.left.left &&
             previewNavArrowState.pointerX <= slideRects.left.right;
-          if (xInside) {
+          const yInside = previewNavArrowState.pointerY >= slideRects.left.top &&
+            previewNavArrowState.pointerY <= slideRects.left.bottom;
+          if (xInside && yInside) {
             const targetX = previewNavArrowState.pointerX;
             const targetY = previewNavArrowState.pointerY;
             setPreviewArrowOffset(previewNavPrevButton, targetX, targetY);
@@ -3978,7 +3970,9 @@ html { scrollbar-gutter: stable; }
         if (previewNavNextButton) {
           const xInside = previewNavArrowState.pointerX >= slideRects.right.left &&
             previewNavArrowState.pointerX <= slideRects.right.right;
-          if (xInside) {
+          const yInside = previewNavArrowState.pointerY >= slideRects.right.top &&
+            previewNavArrowState.pointerY <= slideRects.right.bottom;
+          if (xInside && yInside) {
             const targetX = previewNavArrowState.pointerX;
             const targetY = previewNavArrowState.pointerY;
             setPreviewArrowOffset(previewNavNextButton, targetX, targetY);
