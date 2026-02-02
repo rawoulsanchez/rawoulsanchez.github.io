@@ -1375,6 +1375,16 @@ html { scrollbar-gutter: stable; }
     transform: translate(-50%, -50%);
     transition: none;
   }
+  .preview-nav-arrow.is-hot {
+    border-color: color-mix(in srgb, var(--brand) 65%, #fff 35%);
+    box-shadow: 0 0 12px rgba(227, 27, 35, 0.45), 0 0 26px rgba(227, 27, 35, 0.35);
+  }
+  .preview-overlay.preview-nav-pulse .preview-nav-arrow {
+    animation: preview-arrow-pulse 3.6s ease-in-out infinite;
+  }
+  .preview-overlay.preview-nav-pulse .preview-nav-arrow.is-hot {
+    animation: none;
+  }
   .preview-nav-arrow:hover {
     background: rgba(255,255,255,0.10);
   }
@@ -1384,6 +1394,21 @@ html { scrollbar-gutter: stable; }
     .preview-overlay.is-visible .preview-nav-arrow {
       opacity: 1;
       pointer-events: auto;
+    }
+  }
+
+  @keyframes preview-arrow-pulse {
+    0% {
+      border-color: rgba(255,255,255,0.18);
+      box-shadow: none;
+    }
+    50% {
+      border-color: color-mix(in srgb, var(--brand) 70%, #fff 30%);
+      box-shadow: 0 0 14px rgba(227, 27, 35, 0.45), 0 0 28px rgba(227, 27, 35, 0.35);
+    }
+    100% {
+      border-color: rgba(255,255,255,0.18);
+      box-shadow: none;
     }
   }
 
@@ -3895,6 +3920,7 @@ html { scrollbar-gutter: stable; }
         pointerY: 0,
         rafId: null
       };
+      let previewNavPulseReady = false;
       const prefersFinePointer = window.matchMedia('(pointer: fine)').matches;
 
       function getPreviewCardRect() {
@@ -3934,11 +3960,18 @@ html { scrollbar-gutter: stable; }
         button.style.top = '';
         button.style.right = '';
         button.classList.remove('is-magnetic');
+        button.classList.remove('is-hot');
       }
 
       function resetPreviewArrowOffsets() {
         resetPreviewArrowOffset(previewNavPrevButton);
         resetPreviewArrowOffset(previewNavNextButton);
+      }
+
+      function markPreviewNavPulseReady() {
+        if (!previewOverlay || previewNavPulseReady) return;
+        previewNavPulseReady = true;
+        previewOverlay.classList.add('preview-nav-pulse');
       }
 
       function applyPreviewArrowMagnet() {
@@ -3962,6 +3995,7 @@ html { scrollbar-gutter: stable; }
             const targetX = previewNavArrowState.pointerX;
             const targetY = previewNavArrowState.pointerY;
             setPreviewArrowOffset(previewNavPrevButton, targetX, targetY);
+            previewNavPrevButton.classList.add('is-hot');
           } else {
             resetPreviewArrowOffset(previewNavPrevButton);
           }
@@ -3976,6 +4010,7 @@ html { scrollbar-gutter: stable; }
             const targetX = previewNavArrowState.pointerX;
             const targetY = previewNavArrowState.pointerY;
             setPreviewArrowOffset(previewNavNextButton, targetX, targetY);
+            previewNavNextButton.classList.add('is-hot');
           } else {
             resetPreviewArrowOffset(previewNavNextButton);
           }
@@ -4563,6 +4598,7 @@ html { scrollbar-gutter: stable; }
                 attemptPreviewAutounmuteIfPlaying(e.target);
               }, 600);
               previewTeaserTimer = setTimeout(() => {
+                markPreviewNavPulseReady();
                 stopPreviewTeaser();
               }, HERO_PREVIEW_DURATION_MS);
             }
@@ -4629,6 +4665,7 @@ html { scrollbar-gutter: stable; }
                 attemptPreviewAutounmuteIfPlaying(e.target);
               }, 600);
               previewTeaserTimer = setTimeout(() => {
+                markPreviewNavPulseReady();
                 if (isA1PreviewCard(card)) {
                   if (previewTeaserContainer) {
                     previewTeaserContainer.classList.add('teaser-fadeout');
@@ -5914,6 +5951,8 @@ function detachPreviewSwipeListeners() {
       function closePreview() {
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
         previewOpening = false;
+        previewNavPulseReady = false;
+        previewOverlay.classList.remove('preview-nav-pulse');
         stopPreviewTeaser();
         resetPreviewPlaceholder();
         resetPreviewPosterImage();
