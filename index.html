@@ -3866,6 +3866,7 @@ html { scrollbar-gutter: stable; }
       const heroVisual = document.querySelector('.hero-video');
       const heroPreviewPoster = document.querySelector('.hero-preview-source .poster[data-morph-id]');
       const heroPreviewSource = heroPreviewPoster || heroVisual || heroSection;
+      const heroPreviewTrack = heroPreviewPoster ? heroPreviewPoster.closest('.shelf-track[data-row="Hero"]') : null;
       const isHeroPreviewCard = (card) => !!(card && (card === heroSection || card === heroVisual || card.classList.contains('hero') || card.classList.contains('hero-video')));
       const HERO_PAUSE_DELAY = 1000;
       const HERO_VISIBLE_RATIO = 0.6;
@@ -5849,12 +5850,24 @@ function detachPreviewSwipeListeners() {
       const heroDetailsButton = document.querySelector('.hero-details-button');
       const previewPlayButton = document.querySelector('.preview-play-button');
 
+      function getHeroMiddleSetCard() {
+        if (!heroPreviewTrack) return heroPreviewSource;
+        const setCount = (typeof CLONE_COUNT === 'number' ? (2 * CLONE_COUNT + 1) : 1);
+        const totalCards = heroPreviewTrack.children.length;
+        if (!totalCards || !setCount) return heroPreviewSource;
+        const originalCount = Math.floor(totalCards / setCount);
+        if (!originalCount) return heroPreviewSource;
+        const middleStartIndex = originalCount * CLONE_COUNT;
+        return heroPreviewTrack.children[middleStartIndex] || heroPreviewSource;
+      }
+
       if (heroDetailsButton && heroPreviewSource) {
         heroDetailsButton.addEventListener('click', (event) => {
           if (previewOverlay.classList.contains('is-visible')) return;
           event.preventDefault();
           event.stopPropagation();
-          openPreviewFromCard(heroPreviewSource, heroDetailsButton);
+          const heroMiddleCard = getHeroMiddleSetCard();
+          openPreviewFromCard(heroMiddleCard, heroDetailsButton);
         });
       }
 
