@@ -1363,8 +1363,13 @@ html { scrollbar-gutter: stable; }
     opacity: 0;
     pointer-events: none;
     transform: translateY(-50%);
+    transition: transform 160ms ease, background-color 160ms ease;
     z-index: 11001;
     touch-action: manipulation;
+  }
+  .preview-nav-arrow.is-magnetic {
+    transform: translate(-50%, -50%);
+    transition: none;
   }
   .preview-nav-arrow:hover {
     background: rgba(255,255,255,0.10);
@@ -3869,6 +3874,120 @@ html { scrollbar-gutter: stable; }
           }
         });
       }
+
+      const previewNavArrowState = {
+        pointerX: 0,
+        pointerY: 0,
+        rafId: null
+      };
+      const prefersFinePointer = window.matchMedia('(pointer: fine)').matches;
+
+      function getPreviewCardRect() {
+        const previewCard = previewOverlay.querySelector('.preview-card');
+        if (!previewCard) return null;
+        return previewCard.getBoundingClientRect();
+      }
+
+      function getPreviewSlideRects() {
+        if (!previewCarousel) return null;
+        const slides = Array.from(previewCarousel.querySelectorAll('.preview-slide'));
+        if (!slides.length) return null;
+        const activeSlide = previewCarousel.querySelector('.preview-slide.is-active') || slides[0];
+        const activeIndex = slides.indexOf(activeSlide);
+        if (activeIndex < 0) return null;
+        const leftSlide = slides[(activeIndex - 1 + slides.length) % slides.length];
+        const rightSlide = slides[(activeIndex + 1) % slides.length];
+        const leftTarget = leftSlide.querySelector('.preview-slide-ghost') || leftSlide;
+        const rightTarget = rightSlide.querySelector('.preview-slide-ghost') || rightSlide;
+        return {
+          left: leftTarget.getBoundingClientRect(),
+          right: rightTarget.getBoundingClientRect()
+        };
+      }
+
+      function setPreviewArrowOffset(button, offsetX, offsetY) {
+        if (!button) return;
+        button.style.left = `${offsetX}px`;
+        button.style.top = `${offsetY}px`;
+        button.style.right = 'auto';
+        button.classList.add('is-magnetic');
+      }
+
+      function resetPreviewArrowOffset(button) {
+        if (!button) return;
+        button.style.left = '';
+        button.style.top = '';
+        button.style.right = '';
+        button.classList.remove('is-magnetic');
+      }
+
+      function resetPreviewArrowOffsets() {
+        resetPreviewArrowOffset(previewNavPrevButton);
+        resetPreviewArrowOffset(previewNavNextButton);
+      }
+
+      function applyPreviewArrowMagnet() {
+        previewNavArrowState.rafId = null;
+        if (!prefersFinePointer || !isPreviewOpen()) {
+          resetPreviewArrowOffsets();
+          return;
+        }
+        const slideRects = getPreviewSlideRects();
+        if (!slideRects) {
+          resetPreviewArrowOffsets();
+          return;
+        }
+
+        if (previewNavPrevButton) {
+          const xInside = previewNavArrowState.pointerX >= slideRects.left.left &&
+            previewNavArrowState.pointerX <= slideRects.left.right;
+          const yInside = previewNavArrowState.pointerY >= slideRects.left.top &&
+            previewNavArrowState.pointerY <= slideRects.left.bottom;
+          if (xInside && yInside) {
+            const targetX = previewNavArrowState.pointerX;
+            const targetY = previewNavArrowState.pointerY;
+            setPreviewArrowOffset(previewNavPrevButton, targetX, targetY);
+          } else {
+            resetPreviewArrowOffset(previewNavPrevButton);
+          }
+        }
+
+        if (previewNavNextButton) {
+          const xInside = previewNavArrowState.pointerX >= slideRects.right.left &&
+            previewNavArrowState.pointerX <= slideRects.right.right;
+          const yInside = previewNavArrowState.pointerY >= slideRects.right.top &&
+            previewNavArrowState.pointerY <= slideRects.right.bottom;
+          if (xInside && yInside) {
+            const targetX = previewNavArrowState.pointerX;
+            const targetY = previewNavArrowState.pointerY;
+            setPreviewArrowOffset(previewNavNextButton, targetX, targetY);
+          } else {
+            resetPreviewArrowOffset(previewNavNextButton);
+          }
+        }
+      }
+
+      function schedulePreviewArrowMagnet() {
+        if (previewNavArrowState.rafId !== null) return;
+        previewNavArrowState.rafId = requestAnimationFrame(applyPreviewArrowMagnet);
+      }
+
+      if (previewOverlay) {
+        previewOverlay.addEventListener('pointermove', (event) => {
+          if (!prefersFinePointer) return;
+          previewNavArrowState.pointerX = event.clientX;
+          previewNavArrowState.pointerY = event.clientY;
+          schedulePreviewArrowMagnet();
+        });
+        previewOverlay.addEventListener('pointerleave', () => {
+          resetPreviewArrowOffsets();
+        });
+      }
+
+      window.addEventListener('resize', () => {
+        if (!isPreviewOpen()) return;
+        schedulePreviewArrowMagnet();
+      });
 
       let previewTeaserPlayer = null;
       let previewTeaserTimer = null;
