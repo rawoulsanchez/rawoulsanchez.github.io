@@ -1951,8 +1951,25 @@ html { scrollbar-gutter: stable; }
 <section class="after-hero" aria-label="Actions">
   <!-- Use a new inner wrapper to apply max-width and centering for content -->
 
+  <!-- Hero preview row -->
+  <section class="shelf shelf--tight" aria-labelledby="hero-preview-title">
+    <div class="content-pad">
+      <h2 id="hero-preview-title" class="shelf-title">Hero Preview</h2>
+      <div class="shelf-divider" aria-hidden="true"></div>
+    </div>
+    <div class="shelf-outer">
+      <div class="shelf-track" data-row="Hero" role="list" aria-label="Hero preview posters">
+        <a class="poster" role="listitem" aria-label="Hero 1" data-label="Hero 1" data-title="Hero 1" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t1x7Q0IA3Os?t=154" data-youtube-play-url="" data-poster-vert="images/poster-wide-hero-1.png" data-poster-wide="images/poster-wide-hero-1.png" data-morph-id="morph-hero-01"><img src="images/poster-wide-hero-1.png" alt="Hero 1 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="Hero 2" data-label="Hero 2" data-title="Hero 2" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t1x7Q0IA3Os?t=184" data-youtube-play-url="" data-poster-vert="images/poster-wide-hero-2.png" data-poster-wide="images/poster-wide-hero-2.png" data-morph-id="morph-hero-02"><img src="images/poster-wide-hero-2.png" alt="Hero 2 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="Hero 3" data-label="Hero 3" data-title="Hero 3" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t1x7Q0IA3Os?t=214" data-youtube-play-url="" data-poster-vert="images/poster-wide-hero-3.png" data-poster-wide="images/poster-wide-hero-3.png" data-morph-id="morph-hero-03"><img src="images/poster-wide-hero-3.png" alt="Hero 3 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="Hero 4" data-label="Hero 4" data-title="Hero 4" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t1x7Q0IA3Os?t=244" data-youtube-play-url="" data-poster-vert="images/poster-wide-hero-4.png" data-poster-wide="images/poster-wide-hero-4.png" data-morph-id="morph-hero-04"><img src="images/poster-wide-hero-4.png" alt="Hero 4 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="Hero 5" data-label="Hero 5" data-title="Hero 5" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t1x7Q0IA3Os?t=274" data-youtube-play-url="" data-poster-vert="images/poster-wide-hero-5.png" data-poster-wide="images/poster-wide-hero-5.png" data-morph-id="morph-hero-05"><img src="images/poster-wide-hero-5.png" alt="Hero 5 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      </div>
+    </div>
+  </section>
+
   <!-- Row A moved inside after-hero -->
-  <section class="shelf shelf--tight" aria-labelledby="row-a-title">
+  <section class="shelf" aria-labelledby="row-a-title">
     <div class="content-pad">
       <h2 id="row-a-title" class="shelf-title">Row A</h2>
       <div class="shelf-divider" aria-hidden="true"></div>
@@ -3809,7 +3826,9 @@ html { scrollbar-gutter: stable; }
 
       const heroSection = document.querySelector('.hero');
       const heroVisual = document.querySelector('.hero-video');
-      const heroPreviewSource = heroVisual || heroSection;
+      const heroPreviewPoster = document.querySelector('.shelf-track[data-row="Hero"] .poster[data-morph-id]');
+      const heroPreviewSource = heroPreviewPoster || heroVisual || heroSection;
+      const isHeroPreviewCard = (card) => !!(card && (card === heroSection || card === heroVisual || card.classList.contains('hero') || card.classList.contains('hero-video')));
       const HERO_PAUSE_DELAY = 1000;
       const HERO_VISIBLE_RATIO = 0.6;
       const HERO_PREVIEW_START_SECONDS = 154;
@@ -4320,7 +4339,7 @@ html { scrollbar-gutter: stable; }
           previewTeaserSwapTimer = null;
           if (!isPreviewOpen()) return;
           if (card !== currentPreviewCardEl) return;
-          const isHeroPreview = !!(heroPreviewSource && (card === heroPreviewSource || card === heroSection || card === heroVisual || card.classList.contains('hero') || card.classList.contains('hero-video')));
+          const isHeroPreview = isHeroPreviewCard(card);
           stopPreviewTeaser();
           if (isHeroPreview) {
             startHeroPreviewTeaser();
@@ -5583,7 +5602,7 @@ function detachPreviewSwipeListeners() {
           previewCard.style.setProperty('--preview-morph-ease', profile.easing);
         }
         attachPreviewSwipeListeners();
-        const isHeroPreview = !!(heroPreviewSource && (card === heroPreviewSource || card === heroSection || card === heroVisual || card.classList.contains('hero') || card.classList.contains('hero-video')));
+        const isHeroPreview = isHeroPreviewCard(card);
         runOpenMorph(card, profile).then(() => {
           previewOpening = false;
           // Apply any buffered swap requested while the morph tile owned the preview card.
@@ -5614,7 +5633,7 @@ function detachPreviewSwipeListeners() {
         applyPreviewCopyFromCard(nextCard);
         setPreviewPosterImageFromCard(nextCard);
         schedulePreviewFitUpdate();
-        const isHeroPreview = !!(heroPreviewSource && (nextCard === heroPreviewSource || nextCard === heroSection || nextCard === heroVisual || nextCard.classList.contains('hero') || nextCard.classList.contains('hero-video')));
+        const isHeroPreview = isHeroPreviewCard(nextCard);
         if (isHeroPreview) {
           startHeroPreviewTeaser();
         } else {
