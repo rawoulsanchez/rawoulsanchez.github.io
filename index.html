@@ -1969,13 +1969,13 @@ html { scrollbar-gutter: stable; }
         <span>Play Now</span>
       </button>
 
-      <!-- Details -->
+      <!-- Previews -->
       <button type="button" class="btn btn--ghost hero-details-button">
         <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M13 16h-1v-4h-1m1-4h.01"/>
           <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
-        <span>Details</span>
+        <span>Previews</span>
       </button>
       <div class="hero-volume" aria-label="Hero volume control">
         <button class="hero-volume__btn" type="button" aria-label="Hero volume">🔊</button>
@@ -5736,7 +5736,7 @@ function detachPreviewSwipeListeners() {
         if (!isPreviewOpen()) return;
         fitPreviewToViewport();
       };
-      function openPreviewFromCard(card, triggerElement = card) {
+      function openPreviewFromCard(card, triggerElement = card, morphSourceElement = card) {
         if (!card) return;
         // ZAQ TASK 1.8: Pause hero video when preview begins opening.
         previewOpening = true;
@@ -5788,7 +5788,7 @@ function detachPreviewSwipeListeners() {
         }
         attachPreviewSwipeListeners();
         const isHeroPreview = isHeroPreviewCard(card);
-        runOpenMorph(card, profile).then(() => {
+        runOpenMorph(card, profile, morphSourceElement).then(() => {
           previewOpening = false;
           schedulePreviewNavPulse();
           // Apply any buffered swap requested while the morph tile owned the preview card.
@@ -5868,7 +5868,7 @@ function detachPreviewSwipeListeners() {
           event.preventDefault();
           event.stopPropagation();
           const heroMiddleCard = getHeroMiddleSetCard();
-          openPreviewFromCard(heroMiddleCard, heroDetailsButton);
+          openPreviewFromCard(heroMiddleCard, heroDetailsButton, heroDetailsButton);
         });
       }
 
@@ -5888,9 +5888,9 @@ function detachPreviewSwipeListeners() {
         });
       }
 
-      function runOpenMorph(card, profile) {
+      function runOpenMorph(card, profile, morphSourceElement = card) {
         return new Promise((resolve) => {
-          const startRect = card.getBoundingClientRect();
+          const startRect = morphSourceElement.getBoundingClientRect();
           const previewCard = previewOverlay.querySelector('.preview-card');
           if (previewCard) {
             previewCard.style.opacity = '0';
@@ -5927,7 +5927,7 @@ function detachPreviewSwipeListeners() {
           const { tile, fill } = createGlowTileFromCard(card, startRect);
 
           activeMorphTile = tile;
-          const cardRadius = getComputedStyle(card).borderRadius;
+          const cardRadius = getComputedStyle(morphSourceElement).borderRadius;
           tile.style.borderRadius = cardRadius;
           const targetRadius = getComputedStyle(previewCard).borderRadius;
 
@@ -6022,11 +6022,14 @@ function detachPreviewSwipeListeners() {
           : null;
 
         // Prefer a real poster card for morph geometry. Fall back to the last opened trigger.
-        const exitCard = (authorityCard && authorityCard.classList && authorityCard.classList.contains('poster'))
-          ? authorityCard
-          : ((currentPreviewCardEl && currentPreviewCardEl.classList && currentPreviewCardEl.classList.contains('poster'))
-            ? currentPreviewCardEl
-            : lastOpenedCard);
+        const prefersHeroButton = lastOpenedCard && lastOpenedCard.classList && lastOpenedCard.classList.contains('hero-details-button');
+        const exitCard = prefersHeroButton
+          ? lastOpenedCard
+          : (authorityCard && authorityCard.classList && authorityCard.classList.contains('poster'))
+            ? authorityCard
+            : ((currentPreviewCardEl && currentPreviewCardEl.classList && currentPreviewCardEl.classList.contains('poster'))
+              ? currentPreviewCardEl
+              : lastOpenedCard);
 
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
@@ -6058,7 +6061,10 @@ function detachPreviewSwipeListeners() {
         let fill = null;
 
         if (!tile) {
-          const created = createGlowTileFromCard(exitCard, previewCardRect);
+          const imageCard = (exitCard && exitCard.querySelector && exitCard.querySelector('img'))
+            ? exitCard
+            : currentPreviewCardEl;
+          const created = createGlowTileFromCard(imageCard, previewCardRect);
           tile = created.tile;
           fill = created.fill;
           activeMorphTile = tile;
@@ -6073,7 +6079,8 @@ function detachPreviewSwipeListeners() {
           if (fill) {
             fill.classList.remove('is-fade-out');
             fill.style.opacity = '1';
-            const posterImg = exitCard.querySelector('img');
+            const posterImg = (exitCard && exitCard.querySelector && exitCard.querySelector('img'))
+              || (currentPreviewCardEl && currentPreviewCardEl.querySelector && currentPreviewCardEl.querySelector('img'));
             if (posterImg && posterImg.src) {
               fill.style.backgroundImage = `url(${posterImg.src})`;
             }
@@ -6206,7 +6213,7 @@ document.addEventListener('keydown', (event) => {
                 Play
               </button>
               <button class="preview-details-button" type="button">
-                Details
+                Previews
               </button>
               <div class="preview-volume" aria-label="Preview volume control">
                 <button class="preview-volume__btn" type="button" aria-label="Preview volume">
