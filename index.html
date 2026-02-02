@@ -2675,11 +2675,18 @@ html { scrollbar-gutter: stable; }
     };
 
     // ZAQ TASK 2.1 — Next / Previous Navigation Core (DOM order + WRAP)
-    function getNavCardsInDomOrder(){
+    function getNavCardsInDomOrder(currentCard){
+      if (currentCard && typeof currentCard.closest === 'function') {
+        const heroTrack = currentCard.closest('.shelf-track[data-row="Hero"]');
+        if (heroTrack && heroTrack.closest('.hero-preview-source')) {
+          const heroCards = Array.from(heroTrack.querySelectorAll(':scope > .poster[data-morph-id]'));
+          if (heroCards.length) return heroCards;
+        }
+      }
       return Array.from(document.querySelectorAll('.poster'));
     }
     function computeNextCardByDomOrder(currentCard){
-      const cards = getNavCardsInDomOrder();
+      const cards = getNavCardsInDomOrder(currentCard);
       if (!cards.length) return null;
 
       const idx = cards.indexOf(currentCard);
@@ -2689,7 +2696,7 @@ html { scrollbar-gutter: stable; }
       return cards[nextIdx];
     }
     function computePreviousCardByDomOrder(currentCard){
-      const cards = getNavCardsInDomOrder();
+      const cards = getNavCardsInDomOrder(currentCard);
       if (!cards.length) return null;
 
       const idx = cards.indexOf(currentCard);
