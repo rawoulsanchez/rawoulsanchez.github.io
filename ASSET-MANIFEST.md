@@ -61,11 +61,11 @@ poster-wide-A9.png
 poster-wide-A10.png
 
 Hero Preview
-poster-wide-hero-1.png
-poster-wide-hero-2.png
-poster-wide-hero-3.png
-poster-wide-hero-4.png
-poster-wide-hero-5.png
+Hero 1.png
+Hero 2.png
+Hero 3.png
+Hero 4.png
+Hero 5.png
 
 B1–B10
 poster-wide-B1.png
