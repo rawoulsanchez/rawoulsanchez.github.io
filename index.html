@@ -1366,12 +1366,14 @@ html { scrollbar-gutter: stable; }
     cursor: pointer;
     opacity: 0;
     pointer-events: none;
-    --preview-arrow-offset-x: 0px;
-    --preview-arrow-offset-y: 0px;
-    transform: translate(var(--preview-arrow-offset-x), calc(-50% + var(--preview-arrow-offset-y)));
+    transform: translateY(-50%);
     transition: transform 160ms ease, background-color 160ms ease;
     z-index: 11001;
     touch-action: manipulation;
+  }
+  .preview-nav-arrow.is-magnetic {
+    transform: translate(-50%, -50%);
+    transition: none;
   }
   .preview-nav-arrow:hover {
     background: rgba(255,255,255,0.10);
@@ -3937,13 +3939,23 @@ html { scrollbar-gutter: stable; }
 
       function setPreviewArrowOffset(button, offsetX, offsetY) {
         if (!button) return;
-        button.style.setProperty('--preview-arrow-offset-x', `${offsetX}px`);
-        button.style.setProperty('--preview-arrow-offset-y', `${offsetY}px`);
+        button.style.left = `${offsetX}px`;
+        button.style.top = `${offsetY}px`;
+        button.style.right = 'auto';
+        button.classList.add('is-magnetic');
+      }
+
+      function resetPreviewArrowOffset(button) {
+        if (!button) return;
+        button.style.left = '';
+        button.style.top = '';
+        button.style.right = '';
+        button.classList.remove('is-magnetic');
       }
 
       function resetPreviewArrowOffsets() {
-        setPreviewArrowOffset(previewNavPrevButton, 0, 0);
-        setPreviewArrowOffset(previewNavNextButton, 0, 0);
+        resetPreviewArrowOffset(previewNavPrevButton);
+        resetPreviewArrowOffset(previewNavNextButton);
       }
 
       function applyPreviewArrowMagnet() {
@@ -3968,38 +3980,27 @@ html { scrollbar-gutter: stable; }
           return;
         }
 
-        const leftAnchor = previewNavPrevButton ? previewNavPrevButton.getBoundingClientRect() : null;
-        const rightAnchor = previewNavNextButton ? previewNavNextButton.getBoundingClientRect() : null;
-
-        if (leftAnchor) {
+        if (previewNavPrevButton) {
           const xInside = previewNavArrowState.pointerX >= slideRects.left.left &&
             previewNavArrowState.pointerX <= slideRects.left.right;
           if (xInside) {
             const targetX = previewNavArrowState.pointerX;
             const targetY = previewNavArrowState.pointerY;
-            const centerX = leftAnchor.left + leftAnchor.width / 2;
-            const centerY = leftAnchor.top + leftAnchor.height / 2;
-            const offsetX = targetX - centerX;
-            const offsetY = targetY - centerY;
-            setPreviewArrowOffset(previewNavPrevButton, offsetX, offsetY);
+            setPreviewArrowOffset(previewNavPrevButton, targetX, targetY);
           } else {
-            setPreviewArrowOffset(previewNavPrevButton, 0, 0);
+            resetPreviewArrowOffset(previewNavPrevButton);
           }
         }
 
-        if (rightAnchor) {
+        if (previewNavNextButton) {
           const xInside = previewNavArrowState.pointerX >= slideRects.right.left &&
             previewNavArrowState.pointerX <= slideRects.right.right;
           if (xInside) {
             const targetX = previewNavArrowState.pointerX;
             const targetY = previewNavArrowState.pointerY;
-            const centerX = rightAnchor.left + rightAnchor.width / 2;
-            const centerY = rightAnchor.top + rightAnchor.height / 2;
-            const offsetX = targetX - centerX;
-            const offsetY = targetY - centerY;
-            setPreviewArrowOffset(previewNavNextButton, offsetX, offsetY);
+            setPreviewArrowOffset(previewNavNextButton, targetX, targetY);
           } else {
-            setPreviewArrowOffset(previewNavNextButton, 0, 0);
+            resetPreviewArrowOffset(previewNavNextButton);
           }
         }
       }
