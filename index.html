@@ -3393,7 +3393,21 @@ html { scrollbar-gutter: stable; }
         // Note: WeakMap has no clear(); we simply create fresh mappings below.
 
         const activeIndex = sourceCard ? cards.indexOf(sourceCard) : -1;
-        const hostIndex = activeIndex >= 0 ? activeIndex : 0;
+        let hostIndex = activeIndex >= 0 ? activeIndex : 0;
+        const isHeroPreviewTrack = sourceTrack && sourceTrack.dataset && sourceTrack.dataset.row === 'Hero' && sourceTrack.closest('.hero-preview-source');
+        if (isHeroPreviewTrack) {
+          const cloneCount = (typeof HERO_CLONE_COUNT === 'number' ? HERO_CLONE_COUNT : 0);
+          const setCount = (2 * cloneCount + 1);
+          const originalCount = setCount ? Math.floor(cards.length / setCount) : 0;
+          if (originalCount > 0) {
+            const middleStartIndex = originalCount * cloneCount;
+            if (activeIndex >= 0) {
+              hostIndex = middleStartIndex + (activeIndex % originalCount);
+            } else {
+              hostIndex = middleStartIndex;
+            }
+          }
+        }
 
         for (let i = 0; i < cards.length; i++) {
           const c = cards[i];
