@@ -4651,7 +4651,15 @@ html { scrollbar-gutter: stable; }
               }, 600);
               previewTeaserTimer = setTimeout(() => {
                 markPreviewNavPulseReady();
-                stopPreviewTeaser();
+                if (previewTeaserContainer) {
+                  previewTeaserContainer.classList.add('teaser-fadeout');
+                }
+                fadeOutPreviewTeaserAudio(previewTeaserPlayer);
+                clearPreviewTeaserFadeTimeout();
+                previewTeaserFadeTimeout = setTimeout(() => {
+                  stopPreviewTeaser();
+                  showPreviewPoster(currentPreviewCardEl);
+                }, PREVIEW_TEASER_FADE_MS);
               }, HERO_PREVIEW_DURATION_MS);
             }
           }
