@@ -6919,6 +6919,7 @@ function detachPreviewSwipeListeners() {
         const previewCard = previewOverlay.querySelector('.preview-card');
         if (!previewCard) return;
         if (previewCard.contains(event.target)) return;
+        if (event.target && event.target.closest('.preview-nav-arrow')) return;
         if (previewCarousel && typeof previewCarousel.__shouldSuppressOverlayClose === 'function') {
           if (previewCarousel.__shouldSuppressOverlayClose()) return;
         }
