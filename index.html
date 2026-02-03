@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -1438,7 +1439,7 @@ html { scrollbar-gutter: stable; }
     height: 100%;
     object-fit: cover;
     opacity: 1;
-    z-index: 1;
+    z-index: 3;
   }
   .preview-teaser-player {
     position: absolute;
@@ -1447,7 +1448,7 @@ html { scrollbar-gutter: stable; }
     height: 100%;
     z-index: 2;
     opacity: 1;
-    transition: opacity 700ms ease;
+    transition: opacity 2000ms ease;
   }
   .preview-teaser-player iframe {
     width: 100%;
@@ -3896,7 +3897,9 @@ html { scrollbar-gutter: stable; }
       const previewPlaceholder = previewMedia ? previewMedia.querySelector('.preview-media-placeholder') : null;
       const previewPosterImage = previewMedia ? previewMedia.querySelector('.preview-media-poster') : null;
       const A1_PREVIEW_LABEL = 'A1';
-      const PREVIEW_TEASER_FADE_MS = 700;
+      const PREVIEW_TEASER_FADE_MS = 2000;
+      const PREVIEW_TEASER_DEBUG = false;
+      const PREVIEW_TEASER_FADE_START_MS = 13000;
       const PREVIEW_TEASER_AUDIO_STEP_MS = 50;
 
       let heroPausedTime = null;
@@ -4096,6 +4099,7 @@ html { scrollbar-gutter: stable; }
       let previewTeaserFadeTimeout = null;
       let previewTeaserFadeInterval = null;
       let previewTeaserContainer = null;
+      let previewTeaserIsFading = false;
       let previewTeaserSwapTimer = null;
       let previewAutounmuteHandler = null;
       let previewAutounmuteRoot = null;
@@ -4542,7 +4546,7 @@ html { scrollbar-gutter: stable; }
           if (!isPreviewOpen()) return;
           if (card !== currentPreviewCardEl) return;
           const isHeroPreview = isHeroPreviewCard(card);
-          stopPreviewTeaser();
+          stopPreviewTeaser(true);
           if (isHeroPreview) {
             startHeroPreviewTeaser();
           } else {
@@ -4569,7 +4573,46 @@ html { scrollbar-gutter: stable; }
         }, PREVIEW_TEASER_AUDIO_STEP_MS);
       }
 
-      function stopPreviewTeaser() {
+      function hidePreviewPosterForTeaser() {
+        if (!previewPosterImage) return;
+        previewPosterImage.style.transition = '';
+        previewPosterImage.style.opacity = '0';
+      }
+
+      function fadeInPreviewPosterForTeaser() {
+        if (!previewPosterImage) return;
+        previewPosterImage.style.transition = `opacity ${PREVIEW_TEASER_FADE_MS}ms ease`;
+        previewPosterImage.style.opacity = '1';
+      }
+
+      function beginPreviewTeaserFadeOut() {
+        if (!previewTeaserContainer || previewTeaserIsFading) return;
+        previewTeaserIsFading = true;
+        clearPreviewTeaserTimer();
+        markPreviewNavPulseReady();
+        previewTeaserContainer.classList.add('teaser-fadeout');
+        fadeInPreviewPosterForTeaser();
+        fadeOutPreviewTeaserAudio(previewTeaserPlayer);
+        clearPreviewTeaserFadeTimeout();
+        previewTeaserFadeTimeout = setTimeout(() => {
+          stopPreviewTeaser(true);
+        }, PREVIEW_TEASER_FADE_MS);
+      }
+
+      function schedulePreviewTeaserFadeForPlayer() {
+        clearPreviewTeaserTimer();
+        previewTeaserTimer = setTimeout(() => {
+          beginPreviewTeaserFadeOut();
+        }, PREVIEW_TEASER_FADE_START_MS);
+      }
+
+      function stopPreviewTeaser(force = false) {
+        if (!force) {
+          if (previewTeaserContainer && !previewTeaserIsFading) {
+            beginPreviewTeaserFadeOut();
+          }
+          return;
+        }
         clearPreviewTeaserTimer();
         clearPreviewTeaserFadeTimeout();
         clearPreviewTeaserFadeInterval();
@@ -4593,15 +4636,26 @@ html { scrollbar-gutter: stable; }
           previewTeaserContainer.parentNode.removeChild(previewTeaserContainer);
         }
         previewTeaserContainer = null;
+        previewTeaserIsFading = false;
+        if (previewPosterImage) {
+          previewPosterImage.style.transition = '';
+          previewPosterImage.style.opacity = '1';
+        }
       }
 
       function startHeroPreviewTeaser() {
         if (!isPreviewOpen()) return;
         if (!previewMedia || !window.YT || typeof window.YT.Player !== 'function') return;
-        stopPreviewTeaser();
+        stopPreviewTeaser(true);
+        if (heroPreviewPoster) {
+          setPreviewPosterImageFromCard(heroPreviewPoster);
+          showPreviewPoster(heroPreviewPoster);
+        }
+        hidePreviewPosterForTeaser();
         previewTeaserContainer = document.createElement('div');
         previewTeaserContainer.className = 'preview-teaser-player';
         previewMedia.appendChild(previewTeaserContainer);
+        previewTeaserIsFading = false;
         previewTeaserPlayer = new YT.Player(previewTeaserContainer, {
           playerVars: {
             autoplay: 1,
@@ -4614,8 +4668,11 @@ html { scrollbar-gutter: stable; }
           },
           events: {
             onReady: e => {
-              hidePreviewPlaceholder();
-              hidePreviewPosterImage();
+              if (heroPreviewPoster) {
+                setPreviewPosterImageFromCard(heroPreviewPoster);
+                showPreviewPoster(heroPreviewPoster);
+              }
+              hidePreviewPosterForTeaser();
               applyPreviewVolumeToPlayer(e.target, desiredPreviewVolume, isMobile);
               if (isMobile && typeof e.target.mute === 'function') {
                 e.target.mute();
@@ -4649,18 +4706,14 @@ html { scrollbar-gutter: stable; }
                 }
                 attemptPreviewAutounmuteIfPlaying(e.target);
               }, 600);
-              previewTeaserTimer = setTimeout(() => {
-                markPreviewNavPulseReady();
-                if (previewTeaserContainer) {
-                  previewTeaserContainer.classList.add('teaser-fadeout');
-                }
-                fadeOutPreviewTeaserAudio(previewTeaserPlayer);
-                clearPreviewTeaserFadeTimeout();
-                previewTeaserFadeTimeout = setTimeout(() => {
-                  stopPreviewTeaser();
-                  showPreviewPoster(currentPreviewCardEl);
-                }, PREVIEW_TEASER_FADE_MS);
-              }, HERO_PREVIEW_DURATION_MS);
+              schedulePreviewTeaserFadeForPlayer();
+            }
+            ,
+            onStateChange: e => {
+              const endedState = (window.YT && window.YT.PlayerState) ? window.YT.PlayerState.ENDED : 0;
+              if (e.data === endedState) {
+                beginPreviewTeaserFadeOut();
+              }
             }
           }
         });
@@ -4672,11 +4725,14 @@ html { scrollbar-gutter: stable; }
         const teaserUrl = currentPreviewCardEl ? currentPreviewCardEl.getAttribute('data-youtube-url') : '';
         const teaserData = parseYouTubeUrl(teaserUrl);
         if (!teaserData || !teaserData.videoId) return;
-        stopPreviewTeaser();
-        hidePreviewPlaceholder();
+        stopPreviewTeaser(true);
+        setPreviewPosterImageFromCard(card);
+        showPreviewPoster(card);
+        hidePreviewPosterForTeaser();
         previewTeaserContainer = document.createElement('div');
         previewTeaserContainer.className = 'preview-teaser-player';
         previewMedia.appendChild(previewTeaserContainer);
+        previewTeaserIsFading = false;
         previewTeaserPlayer = new YT.Player(previewTeaserContainer, {
           playerVars: {
             autoplay: 1,
@@ -4689,8 +4745,9 @@ html { scrollbar-gutter: stable; }
           },
           events: {
             onReady: e => {
-              hidePreviewPlaceholder();
-              hidePreviewPosterImage();
+              setPreviewPosterImageFromCard(card);
+              showPreviewPoster(card);
+              hidePreviewPosterForTeaser();
               applyPreviewVolumeToPlayer(e.target, desiredPreviewVolume, isMobile);
               if (isMobile && typeof e.target.mute === 'function') {
                 e.target.mute();
@@ -4724,22 +4781,14 @@ html { scrollbar-gutter: stable; }
                 }
                 attemptPreviewAutounmuteIfPlaying(e.target);
               }, 600);
-              previewTeaserTimer = setTimeout(() => {
-                markPreviewNavPulseReady();
-                if (isA1PreviewCard(card)) {
-                  if (previewTeaserContainer) {
-                    previewTeaserContainer.classList.add('teaser-fadeout');
-                  }
-                  fadeOutPreviewTeaserAudio(previewTeaserPlayer);
-                  clearPreviewTeaserFadeTimeout();
-                  previewTeaserFadeTimeout = setTimeout(() => {
-                    stopPreviewTeaser();
-                  }, PREVIEW_TEASER_FADE_MS);
-                  return;
-                }
-                stopPreviewTeaser();
-                showPreviewPoster(card);
-              }, HERO_PREVIEW_DURATION_MS);
+              schedulePreviewTeaserFadeForPlayer();
+            }
+            ,
+            onStateChange: e => {
+              const endedState = (window.YT && window.YT.PlayerState) ? window.YT.PlayerState.ENDED : 0;
+              if (e.data === endedState) {
+                beginPreviewTeaserFadeOut();
+              }
             }
           }
         });
@@ -5844,7 +5893,7 @@ function detachPreviewSwipeListeners() {
 
       function swapPreviewContentToCard(nextCard) {
         if (!nextCard) return;
-        stopPreviewTeaser();
+        stopPreviewTeaser(true);
         const targetSlide = movePreviewCardIntoSlideForCard(nextCard, true);
         if (targetSlide && previewCardEl && previewCardEl.closest('.preview-slide') !== targetSlide) {
           placePreviewCardIntoSlide(targetSlide);
@@ -5910,7 +5959,7 @@ function detachPreviewSwipeListeners() {
         previewPlayButton.addEventListener('click', (event) => {
           event.preventDefault();
           event.stopPropagation();
-          stopPreviewTeaser();
+          stopPreviewTeaser(true);
           if (typeof openFullscreenPlayback === 'function') {
             const playUrl = currentPreviewCardEl
               ? (currentPreviewCardEl.getAttribute('data-youtube-play-url') || currentPreviewCardEl.getAttribute('data-youtube-url'))
@@ -6035,7 +6084,7 @@ function detachPreviewSwipeListeners() {
         previewNavPulseReady = false;
         clearPreviewNavPulseTimer();
         previewOverlay.classList.remove('preview-nav-pulse');
-        stopPreviewTeaser();
+        stopPreviewTeaser(true);
         resetPreviewPlaceholder();
         resetPreviewPosterImage();
         removePreviewAutounmuteListener();
