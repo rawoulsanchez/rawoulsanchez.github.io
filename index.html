@@ -1,4 +1,4 @@
-
+﻿
 <!doctype html>
 <html lang="en">
 <head>
@@ -344,7 +344,7 @@ border-bottom:0;
   .title-chip-text{ letter-spacing:.09em; }
 }
 @media (min-width:768px){
-  .title-chip-text{ font-size:1.35rem; } /* matches clamp’s max */
+  .title-chip-text{ font-size:1.35rem; } /* matches clampâ€™s max */
 }
 
 /* Layout helpers used by the page */
@@ -410,7 +410,7 @@ main{
     color:var(--fg);
   }
   .footer-nav-link::before{
-    content:"•";
+    content:"â€¢";
     opacity:.6;
     margin:0 6px 0 2px;
   }
@@ -554,7 +554,7 @@ main{
 }
 
 
-/* Hero gradient: bottom → top, covers full hero */
+/* Hero gradient: bottom â†’ top, covers full hero */
 .hero-gradient{
   position:absolute;
   inset:0;                    /* cover full hero box */
@@ -755,7 +755,7 @@ main{
   }
   /* commit: no-horizontal-scroll */
 html { overflow-x: hidden; }
-/* ZAQ TASK — PREVIEW SCROLL LOCK: reserve scrollbar space to prevent layout shift */
+/* ZAQ TASK â€” PREVIEW SCROLL LOCK: reserve scrollbar space to prevent layout shift */
 html { scrollbar-gutter: stable; }
 
 /* CTA row under the hero video */
@@ -867,6 +867,80 @@ html { scrollbar-gutter: stable; }
     rgba(0,0,0,0.32) 75%,
     rgba(0,0,0,0.00) 100%
   );
+}
+/* Row nav buttons (desktop only, hover to reveal) */
+.row-nav-btn{
+  position:absolute;
+  top:50%;
+  width:44px;
+  height:44px;
+  display:inline-grid;
+  place-items:center;
+  border-radius:999px;
+  border:1px solid rgba(227, 27, 35, 0.75);
+  background:rgba(12,12,12,0.78);
+  color:#fff;
+  font-size:0;
+  cursor:pointer;
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(-50%);
+  transition:opacity 160ms ease, transform 160ms ease, background-color 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  z-index:3;
+  box-shadow:
+    0 0 10px rgba(227, 27, 35, 0.55),
+    0 0 22px rgba(227, 27, 35, 0.40);
+}
+.row-nav-zone{
+  position:absolute;
+  border:1px solid rgba(50,255,120,0.95);
+  box-shadow:0 0 0 1px rgba(0,0,0,0.4) inset;
+  pointer-events:none;
+  display:none;
+  z-index:2;
+}
+body.debug-row-zones .row-nav-zone{
+  display:block;
+}
+.row-nav-btn.is-magnetic{
+  transform:translate(-50%, -50%);
+  transition:none;
+}
+.row-nav-btn.is-hot{
+  border-color: color-mix(in srgb, var(--brand) 85%, #fff 15%);
+  box-shadow:
+    0 0 14px rgba(227, 27, 35, 0.75),
+    0 0 34px rgba(227, 27, 35, 0.55),
+    0 0 52px rgba(227, 27, 35, 0.35);
+}
+.row-nav-btn__icon{
+  display:block;
+  width:18px;
+  height:18px;
+  line-height:0;
+  transform:none;
+}
+.row-nav-btn__icon svg{
+  display:block;
+  width:18px;
+  height:18px;
+  stroke: currentColor;
+  stroke-width:3;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  fill:none;
+}
+.row-nav-btn:hover{
+  background:rgba(20,20,20,0.9);
+}
+.row-nav-btn--left{ left:68px; }
+.row-nav-btn--right{ right:68px; }
+@media (pointer: fine){
+  .shelf-outer:hover .row-nav-btn,
+  .row-nav-btn:focus-visible{
+    opacity:1;
+    pointer-events:auto;
+  }
 }
 /* Horizontal list of posters */
 /* --- SHELF TRACK --- */
@@ -1063,7 +1137,7 @@ html { scrollbar-gutter: stable; }
      of the hero video box. This moves Row A as a block without
      affecting Rows B and C. */
   .after-hero .shelf.shelf--tight {
-    margin-top: 0.40rem;        /* Pills → Row A label rhythm on desktop */
+    margin-top: 0.40rem;        /* Pills â†’ Row A label rhythm on desktop */
   }
 
   .hero-cta {
@@ -1240,32 +1314,32 @@ html { scrollbar-gutter: stable; }
 
 :root {
   /* Hero + Row A spacing tokens, aligned to a 4px-based grid (comments only) */
-  --space-chip-meta: 0.5rem;      /* ≈ 8px  = 2 × 4px  (Chip → Meta) */
-  --space-synopsis-pills: 2.20rem;/* ≈ 35px ≈ 9 × 4px (Synopsis → Pills) */
-  --space-pills-rowa: 0.40rem;    /* ≈ 6px  ≈ 1.5 × 4px (Pills → Row A label) */
-  --space-rowa-divider: 0.20rem;  /* ≈ 3px  ≈ 0.75 × 4px (Row A label → divider) */
+  --space-chip-meta: 0.5rem;      /* â‰ˆ 8px  = 2 Ã— 4px  (Chip â†’ Meta) */
+  --space-synopsis-pills: 2.20rem;/* â‰ˆ 35px â‰ˆ 9 Ã— 4px (Synopsis â†’ Pills) */
+  --space-pills-rowa: 0.40rem;    /* â‰ˆ 6px  â‰ˆ 1.5 Ã— 4px (Pills â†’ Row A label) */
+  --space-rowa-divider: 0.20rem;  /* â‰ˆ 3px  â‰ˆ 0.75 Ã— 4px (Row A label â†’ divider) */
 
-  /* ZAQ – shelf label vertical offsets */
+  /* ZAQ â€“ shelf label vertical offsets */
   --shelf-title-shift-mobile: 2rem;    /* shift labels into gap below divider on mobile/tablet */
   --shelf-title-shift-desktop: 2.25rem;/* slightly larger shift for desktop gap */
 }
 
-/* ZAQ – desktop-only vertical rhythm for hero + Row A */
+/* ZAQ â€“ desktop-only vertical rhythm for hero + Row A */
 @media (min-width: 1024px) {
   .title-chip {
-    margin-bottom: var(--space-chip-meta);       /* Chip → Meta */
+    margin-bottom: var(--space-chip-meta);       /* Chip â†’ Meta */
   }
 
   .hero-cta {
-    margin-top: var(--space-synopsis-pills);     /* Synopsis → Pills */
+    margin-top: var(--space-synopsis-pills);     /* Synopsis â†’ Pills */
   }
 
   .shelf.shelf--tight {
-    margin-top: var(--space-pills-rowa);         /* Pills → Row A Label */
+    margin-top: var(--space-pills-rowa);         /* Pills â†’ Row A Label */
   }
 
   .shelf-title {
-    margin-bottom: var(--space-rowa-divider);    /* Row A Label → Divider */
+    margin-bottom: var(--space-rowa-divider);    /* Row A Label â†’ Divider */
     transform: translateY(var(--shelf-title-shift-desktop));
   }
 }
@@ -1320,7 +1394,7 @@ html { scrollbar-gutter: stable; }
     );
   }
 
-  /* Future: when we add JS, we’ll toggle this class */
+  /* Future: when we add JS, weâ€™ll toggle this class */
   .preview-overlay.is-visible {
     z-index: 11000;
     opacity: 1;
@@ -1392,17 +1466,20 @@ html { scrollbar-gutter: stable; }
     display: inline-grid;
     place-items: center;
     border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.18);
-    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(227, 27, 35, 0.75);
+    background: rgba(12,12,12,0.78);
     color: #fff;
     font-size: 0;
     cursor: pointer;
     opacity: 0;
     pointer-events: none;
     transform: translateY(-50%);
-    transition: transform 160ms ease, background-color 160ms ease;
+    transition: transform 160ms ease, background-color 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
     z-index: 11001;
     touch-action: manipulation;
+    box-shadow:
+      0 0 10px rgba(227, 27, 35, 0.55),
+      0 0 22px rgba(227, 27, 35, 0.40);
   }
   .preview-nav-arrow.is-magnetic {
     transform: translate(-50%, -50%);
@@ -1410,13 +1487,27 @@ html { scrollbar-gutter: stable; }
   }
   .preview-nav-arrow__icon {
     display: block;
-    font-size: 28px;
-    line-height: 1;
-    transform: translateY(-1px);
+    width:18px;
+    height:18px;
+    line-height:0;
+    transform: none;
+  }
+  .preview-nav-arrow__icon svg{
+    display:block;
+    width:18px;
+    height:18px;
+    stroke: currentColor;
+    stroke-width:3;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    fill:none;
   }
   .preview-nav-arrow.is-hot {
-    border-color: color-mix(in srgb, var(--brand) 65%, #fff 35%);
-    box-shadow: 0 0 12px rgba(227, 27, 35, 0.45), 0 0 26px rgba(227, 27, 35, 0.35);
+    border-color: color-mix(in srgb, var(--brand) 85%, #fff 15%);
+    box-shadow:
+      0 0 14px rgba(227, 27, 35, 0.75),
+      0 0 34px rgba(227, 27, 35, 0.55),
+      0 0 52px rgba(227, 27, 35, 0.35);
   }
   .preview-overlay.preview-nav-pulse .preview-nav-arrow {
     animation: preview-arrow-pulse 3.6s ease-in-out infinite;
@@ -1425,10 +1516,10 @@ html { scrollbar-gutter: stable; }
     animation: none;
   }
   .preview-nav-arrow:hover {
-    background: rgba(255,255,255,0.10);
+    background: rgba(20,20,20,0.9);
   }
-  .preview-nav-arrow--left { left: 16px; }
-  .preview-nav-arrow--right { right: 16px; }
+  .preview-nav-arrow--left { left: 68px; }
+  .preview-nav-arrow--right { right: 68px; }
   @media (min-width: 769px) {
     .preview-overlay.is-visible .preview-nav-arrow {
       opacity: 1;
@@ -1883,14 +1974,69 @@ html { scrollbar-gutter: stable; }
     color: #fff;
     backdrop-filter: blur(6px);
     cursor: pointer;
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    transition: opacity 0.25s ease, transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
     opacity: 1;            /* always visible for now */
     pointer-events: auto;  /* clickable */
+    overflow: hidden;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+  }
+
+  .poster.is-active.is-preview-pulse .poster-preview-button,
+  .poster.is-active.is-preview-locked .poster-preview-button{
+    color: var(--brand);
   }
 
   .poster-preview-button:hover {
     background: rgba(255,255,255,0.20);
     transform: translateX(-50%) scale(1.05);
+  }
+
+  .poster.is-active.is-preview-pulse .poster-preview-button,
+  .poster.is-active.is-preview-locked .poster-preview-button{
+    background-color: rgba(255,255,255,0.12);
+    background-image: linear-gradient(to right, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.92) 20%, rgba(0,0,0,0.92) 80%, rgba(0,0,0,0.0) 100%);
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    background-size: 0% 100%;
+    border-color: color-mix(in srgb, var(--brand) 80%, #fff 20%);
+    box-shadow:
+      0 0 12px rgba(227, 27, 35, 0.85),
+      0 0 28px rgba(227, 27, 35, 0.70),
+      0 0 48px rgba(227, 27, 35, 0.45);
+    animation:
+      preview-pill-bloom 1000ms ease-out forwards,
+      preview-pill-fill 1000ms ease-out forwards;
+  }
+  .poster.is-active.is-preview-locked .poster-preview-button{
+    animation: none;
+    background-size: 100% 100%;
+  }
+  .poster-preview-button.is-fading{
+    transition: background-size 1000ms ease, color 1000ms ease, box-shadow 1000ms ease, border-color 1000ms ease, background-color 1000ms ease;
+    background-size: 0% 100%;
+    background-color: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.25);
+    box-shadow: none;
+    color: #fff;
+  }
+  @keyframes preview-pill-bloom{
+    0%{
+      box-shadow:
+        0 0 4px rgba(227, 27, 35, 0.20),
+        0 0 10px rgba(227, 27, 35, 0.18),
+        0 0 18px rgba(227, 27, 35, 0.12);
+    }
+    100%{
+      box-shadow:
+        0 0 16px rgba(227, 27, 35, 0.95),
+        0 0 36px rgba(227, 27, 35, 0.80),
+        0 0 60px rgba(227, 27, 35, 0.55);
+    }
+  }
+  @keyframes preview-pill-fill{
+    0%{ background-size: 0% 100%; background-position: 50% 50%; }
+    100%{ background-size: 100% 100%; background-position: 50% 50%; }
   }
 
 </style>
@@ -1939,7 +2085,7 @@ html { scrollbar-gutter: stable; }
     </nav>
   </div>
   <div class="nav-overlay" aria-hidden="true">
-    <button class="nav-overlay-close" type="button" aria-label="Close menu">×</button>
+    <button class="nav-overlay-close" type="button" aria-label="Close menu">Ã—</button>
     <nav class="nav-overlay-menu" aria-label="Mobile navigation">
       <a href="#hero">Film</a>
       <a href="#photography">Photography</a>
@@ -1964,7 +2110,7 @@ html { scrollbar-gutter: stable; }
     <div class="hero-debug" aria-hidden="true"></div>
   </div>
 
-  <!-- Hero gradient: bottom → top -->
+  <!-- Hero gradient: bottom â†’ top -->
   <div class="hero-gradient" aria-hidden="true"></div>
 
   <!-- Overlay area locked to viewport edges -->
@@ -2021,7 +2167,7 @@ html { scrollbar-gutter: stable; }
         <span>Previews</span>
       </button>
       <div class="hero-volume" aria-label="Hero volume control">
-        <button class="hero-volume__btn" type="button" aria-label="Hero volume">🔊</button>
+        <button class="hero-volume__btn" type="button" aria-label="Hero volume">&#128266;</button>
         <div class="hero-volume__sliderWrap">
           <input class="hero-volume__slider" type="range" min="0" max="100" value="50" aria-label="Hero volume">
         </div>
@@ -2117,7 +2263,7 @@ html { scrollbar-gutter: stable; }
   <div class="section-anchor" id="contact"></div>
 
   <div id="fullscreen-player-wrapper" class="fullscreen-player-wrapper" hidden>
-    <button type="button" class="fullscreen-player-close" aria-label="Close fullscreen playback">×</button>
+    <button type="button" class="fullscreen-player-close" aria-label="Close fullscreen playback">Ã—</button>
     <div class="fullscreen-player-inner">
       <div id="fullscreen-player"></div>
     </div>
@@ -2128,7 +2274,7 @@ html { scrollbar-gutter: stable; }
   <div id="footer-lock-sentinel" aria-hidden="true"></div>
   <div id="footer-placeholder" aria-hidden="true"></div>
   <footer>
-    © <span id="y"></span> Rawoul
+    Â© <span id="y"></span> Rawoul
     <nav class="footer-nav" aria-label="Footer navigation">
       <a class="footer-nav-link footer-nav-link--active" href="#hero" aria-label="Go to Film section">Film</a>
       <a class="footer-nav-link" href="#photography" aria-label="Go to Photography section">Photography</a>
@@ -2288,7 +2434,7 @@ html { scrollbar-gutter: stable; }
     const heroVolume = document.querySelector('.hero-volume');
     const heroVolumeButton = document.querySelector('.hero-volume__btn');
     if (muteButton) {
-      muteButton.textContent = isMuted ? '🔇' : '🔊';
+      muteButton.textContent = isMuted ? '\uD83D\uDD07' : '\uD83D\uDD0A';
       muteButton.setAttribute('aria-pressed', isMuted ? 'true' : 'false');
     }
     if (heroVolume) {
@@ -2296,7 +2442,7 @@ html { scrollbar-gutter: stable; }
       heroVolume.classList.toggle('is-unmuted', !isMuted);
     }
     if (heroVolumeButton) {
-      heroVolumeButton.textContent = isMuted ? '🔇' : '🔊';
+      heroVolumeButton.textContent = isMuted ? '\uD83D\uDD07' : '\uD83D\uDD0A';
       heroVolumeButton.setAttribute('aria-pressed', isMuted ? 'true' : 'false');
     }
   }
@@ -2662,7 +2808,7 @@ html { scrollbar-gutter: stable; }
       const anchor = document.querySelector('.hero-cta-anchor');
       if(!cta || !anchor || !anchor.parentElement) return;
 
-      // Use the parent’s current width as the stable base
+      // Use the parentâ€™s current width as the stable base
       const base = anchor.parentElement.getBoundingClientRect().width;
 
       // Target = 67% of that base (i.e., 1/3 shorter)
@@ -2701,13 +2847,14 @@ html { scrollbar-gutter: stable; }
     window.CLONE_COUNT = CLONE_COUNT;
     window.HERO_CLONE_COUNT = HERO_CLONE_COUNT;
     const RECENTER_DURATION = 1800; // ms, slow cinematic glide
+    const ROW_NAV_DURATION = 700;   // ms, faster single-card nudge
     const activeScrollAnimations = new Map();
-    // ZAQ TASK 1 — Mobile breakpoint helper (matches existing CSS @media max-width:640px)
+    // ZAQ TASK 1 â€” Mobile breakpoint helper (matches existing CSS @media max-width:640px)
     const MOBILE_MQ = window.matchMedia('(max-width: 768px)');
     function isMobileView(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
     window.isMobileView = isMobileView;
 
-    // ZAQ TASK 2.0 — Active Card Authority (foundational)
+    // ZAQ TASK 2.0 â€” Active Card Authority (foundational)
     // Single, explicit source of truth for the currently focused card.
     if (!window.__activeCardAuthority) {
       window.__activeCardAuthority = { current: null };
@@ -2726,7 +2873,7 @@ html { scrollbar-gutter: stable; }
       return window.__activeCardAuthority.current || null;
     };
 
-    // ZAQ TASK 2.1 — Next / Previous Navigation Core (DOM order + WRAP)
+    // ZAQ TASK 2.1 â€” Next / Previous Navigation Core (DOM order + WRAP)
     function getNavCardsInDomOrder(currentCard){
       if (currentCard && typeof currentCard.closest === 'function') {
         const heroTrack = currentCard.closest('.shelf-track[data-row="Hero"]');
@@ -2835,6 +2982,9 @@ html { scrollbar-gutter: stable; }
           track.scrollLeft = target;
           activeScrollAnimations.delete(track);
           track.__scrollAnimating = false;
+          try {
+            track.dispatchEvent(new CustomEvent('row-settle-request'));
+          } catch (_) {}
         }
       }
 
@@ -2842,25 +2992,31 @@ html { scrollbar-gutter: stable; }
       activeScrollAnimations.set(track, { frameId, step });
     }
 
-    function recenterTrackActivePoster(track) {
-      if (!track) return;
-      const activePoster = track.querySelector('.poster.is-active');
-      if (!activePoster) return;
+    function recenterTrackToCard(track, targetCard, durationOverride) {
+      if (!track || !targetCard) return;
 
       const trackWidth = track.clientWidth;
-      const activePosterWidth = activePoster.offsetWidth; // Use layout width, not visual width
-      const posterLeft = activePoster.offsetLeft;
+      const targetWidth = targetCard.offsetWidth; // Use layout width, not visual width
+      const posterLeft = targetCard.offsetLeft;
 
-      const posterCenter = posterLeft + (activePosterWidth / 2);
+      const posterCenter = posterLeft + (targetWidth / 2);
       const trackCenter = trackWidth / 2;
       const target = posterCenter - trackCenter;
 
-      animateScrollLeftSlow(track, target, RECENTER_DURATION);
+      const duration = (typeof durationOverride === 'number' ? durationOverride : RECENTER_DURATION);
+      animateScrollLeftSlow(track, target, duration);
+    }
+
+    function recenterTrackActivePoster(track, durationOverride) {
+      if (!track) return;
+      const activePoster = track.querySelector('.poster.is-active');
+      if (!activePoster) return;
+      recenterTrackToCard(track, activePoster, durationOverride);
     }
 
     const shelfTracks = Array.from(document.querySelectorAll('.shelf-track'));
 
-    // ZAQ TASK 2.3 — Row scroll sync to active card (center match)
+    // ZAQ TASK 2.3 â€” Row scroll sync to active card (center match)
     // When the authoritative active-card changes (e.g., from preview navigation),
     // scroll ONLY the containing row so the matching card becomes centered.
     document.addEventListener('zaq-active-card-change', (e) => {
@@ -2872,14 +3028,21 @@ html { scrollbar-gutter: stable; }
       if (!track) return;
 
       if (track.classList.contains('is-dragging')) return;
+      const isRowNavJump = !!track.__rowNavJumping;
 
-      // Ensure the track's existing centering logic targets the active card.
-      const prevActive = track.querySelector('.poster.is-active');
-      if (prevActive && prevActive !== nextCard) prevActive.classList.remove('is-active');
-      nextCard.classList.add('is-active');
+      if (!isRowNavJump) {
+        // Ensure the track's existing centering logic targets the active card.
+        const prevActive = track.querySelector('.poster.is-active');
+        if (prevActive && prevActive !== nextCard) prevActive.classList.remove('is-active');
+        nextCard.classList.add('is-active');
+      }
 
       cancelScrollAnimation(track);
-      recenterTrackActivePoster(track);
+      if (isRowNavJump) {
+        recenterTrackToCard(track, nextCard, ROW_NAV_DURATION);
+        return;
+      }
+      recenterTrackToCard(track, nextCard);
     });
 
     function recenterAllOtherTracks(currentTrack) {
@@ -2894,7 +3057,7 @@ html { scrollbar-gutter: stable; }
 
     let windowScrollRaf = null;
 
-    // ZAQ TASK — SOFT-PULL VERTICAL ROW CENTERING (REDUCE JUMP)
+    // ZAQ TASK â€” SOFT-PULL VERTICAL ROW CENTERING (REDUCE JUMP)
     const VERTICAL_CENTER_CONFIG = {
       desktop: { settleDelay: 180, duration: 1200, deadzone: 32 }, // ms / ms / px
       mobile: { settleDelay: 240, duration: 1500, deadzone: 24 } // gentler, longer glide
@@ -3152,7 +3315,18 @@ html { scrollbar-gutter: stable; }
           if (closestTrack.classList.contains('shelf-track')) {
             recenterTrackActivePoster(closestTrack);
             recenterAllOtherTracks(closestTrack);
+            if (typeof closestTrack.__schedulePreviewPulse === 'function') {
+              if (typeof closestTrack.__updateScalesAndActive === 'function') {
+                closestTrack.__updateScalesAndActive();
+              }
+              closestTrack.__schedulePreviewPulse();
+            }
           }
+        }
+      }
+      if (previousActiveTrack && previousActiveTrack !== closestTrack) {
+        if (typeof previousActiveTrack.__fadePreviewPulse === 'function') {
+          previousActiveTrack.__fadePreviewPulse();
         }
       }
 
@@ -3215,6 +3389,88 @@ html { scrollbar-gutter: stable; }
       track.scrollLeft = initialPoster.offsetLeft - (trackRect.width / 2) + (initialPosterRect.width / 2);
 
       // --- 3. Continuous magnifier scaling + active card ---
+      let lastPulsePoster = null;
+      let previewPulseTimeout = null;
+      track.__pulseLocked = false;
+
+      function clearPreviewPulse() {
+        if (previewPulseTimeout) {
+          clearTimeout(previewPulseTimeout);
+          previewPulseTimeout = null;
+        }
+        const pulsing = track.querySelectorAll('.poster.is-preview-pulse, .poster.is-preview-locked');
+        if (pulsing && pulsing.length) {
+          pulsing.forEach(p => {
+            p.classList.remove('is-preview-pulse');
+            p.classList.remove('is-preview-locked');
+          });
+        }
+        const fading = track.querySelectorAll('.poster-preview-button.is-fading');
+        if (fading && fading.length) {
+          fading.forEach(btn => btn.classList.remove('is-fading'));
+        }
+        track.__pulseLocked = false;
+      }
+
+      function applyPreviewPulseToActive(locked) {
+        const activePoster = track.querySelector('.poster.is-active');
+        if (!activePoster) return;
+        const pulsing = track.querySelectorAll('.poster.is-preview-pulse, .poster.is-preview-locked');
+        if (pulsing && pulsing.length) {
+          pulsing.forEach(p => {
+            p.classList.remove('is-preview-pulse');
+            p.classList.remove('is-preview-locked');
+          });
+        }
+        activePoster.classList.add('is-preview-pulse');
+        if (locked) {
+          activePoster.classList.add('is-preview-locked');
+        }
+      }
+
+      function fadePreviewPulse() {
+        if (previewPulseTimeout) {
+          clearTimeout(previewPulseTimeout);
+          previewPulseTimeout = null;
+        }
+        const activePoster = track.querySelector('.poster.is-active');
+        const activeBtn = activePoster ? activePoster.querySelector('.poster-preview-button') : null;
+        if (activePoster) activePoster.classList.remove('is-preview-locked');
+        if (activeBtn) {
+          activeBtn.classList.add('is-fading');
+        }
+        setTimeout(() => {
+          const pulsing = track.querySelectorAll('.poster.is-preview-pulse, .poster.is-preview-locked');
+          if (pulsing && pulsing.length) {
+            pulsing.forEach(p => {
+              p.classList.remove('is-preview-pulse');
+              p.classList.remove('is-preview-locked');
+            });
+          }
+          if (activeBtn) activeBtn.classList.remove('is-fading');
+        }, 1000);
+        track.__pulseLocked = false;
+      }
+
+      function schedulePreviewPulse() {
+        clearPreviewPulse();
+        const attempt = () => {
+          if (track.__scrollAnimating || track.classList.contains('is-dragging')) {
+            previewPulseTimeout = setTimeout(attempt, 120);
+            return;
+          }
+          applyPreviewPulseToActive(false);
+          track.__pulseLocked = true;
+        };
+        previewPulseTimeout = setTimeout(attempt, 600);
+      }
+
+      track.__schedulePreviewPulse = schedulePreviewPulse;
+      track.__fadePreviewPulse = fadePreviewPulse;
+      track.__updateScalesAndActive = updateScalesAndActive;
+      track.__applyPreviewPulseToActive = applyPreviewPulseToActive;
+      track.__clearPreviewPulse = clearPreviewPulse;
+
       function updateScalesAndActive() {
         const trackRect = track.getBoundingClientRect();
         const trackCenterX = trackRect.left + trackRect.width / 2;
@@ -3257,6 +3513,20 @@ html { scrollbar-gutter: stable; }
               poster.style.zIndex = String(maxZ);
             } else {
               poster.classList.remove('is-active');
+              if (!track.__pulseLocked) {
+                poster.classList.remove('is-preview-pulse');
+                poster.classList.remove('is-preview-locked');
+              }
+            }
+          }
+          if (closestPoster !== lastPulsePoster) {
+            lastPulsePoster = closestPoster;
+            if (track.__pulseLocked) {
+              applyPreviewPulseToActive(true);
+            } else if (track.classList.contains('shelf-track--active')) {
+              schedulePreviewPulse();
+            } else {
+              clearPreviewPulse();
             }
           }
         }
@@ -3283,6 +3553,12 @@ html { scrollbar-gutter: stable; }
 
           if (previousActiveTrack !== track) {
             recenterAllOtherTracks(track);
+            if (typeof track.__schedulePreviewPulse === 'function') {
+              if (typeof track.__updateScalesAndActive === 'function') {
+                track.__updateScalesAndActive();
+              }
+              track.__schedulePreviewPulse();
+            }
           }
 
           // Same-row behavior: when the user scrolls away and then stops,
@@ -3351,11 +3627,280 @@ html { scrollbar-gutter: stable; }
       track.addEventListener('touchstart', () => {
         cancelScrollAnimation(track);
       }, { passive: true });
+
+      track.addEventListener('row-settle-request', () => {
+        if (!track.classList.contains('shelf-track--active')) {
+          clearPreviewPulse();
+          return;
+        }
+        if (track.__pulseLocked) {
+          applyPreviewPulseToActive(true);
+          return;
+        }
+        schedulePreviewPulse();
+      });
     });
+
+    const isFinePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+
+    function getTrackPosters(track) {
+      if (!track) return [];
+      return Array.from(track.querySelectorAll(':scope > .poster[data-morph-id]'));
+    }
+
+    function getActivePosterInTrack(track) {
+      if (!track) return null;
+      const active = track.querySelector(':scope > .poster.is-active');
+      if (active) return active;
+      const posters = getTrackPosters(track);
+      return posters.length ? posters[0] : null;
+    }
+
+    function goToSiblingPoster(track, direction) {
+      if (!track || !window.setActiveCardAuthority) return;
+      const posters = getTrackPosters(track);
+      if (!posters.length) return;
+      const active = getActivePosterInTrack(track) || posters[0];
+      let idx = posters.indexOf(active);
+      if (idx < 0) idx = 0;
+      const nextIdx = (idx + direction + posters.length) % posters.length;
+      const next = posters[nextIdx];
+      if (!next) return;
+      const shouldLock = !!(active && (active.classList.contains('is-preview-pulse') || active.classList.contains('is-preview-locked')));
+      track.__pulseLocked = shouldLock;
+      track.__rowNavJumping = true;
+      const clearRowNavJump = () => {
+        track.__rowNavJumping = false;
+      };
+      track.addEventListener('row-settle-request', clearRowNavJump, { once: true });
+      window.setActiveCardAuthority(next);
+      recenterTrackToCard(track, next, ROW_NAV_DURATION);
+    }
+
+    function installRowNavButtons() {
+      if (!isFinePointer) return;
+      const rowTracks = shelfTracks.filter((track) => {
+        if (!track || !track.dataset) return false;
+        if (track.dataset.row === 'Hero') return false;
+        return true;
+      });
+
+      for (const track of rowTracks) {
+        const outer = track.closest('.shelf-outer');
+        if (!outer || outer.__rowNavInstalled) continue;
+        outer.__rowNavInstalled = true;
+
+        const rowLabel = track.getAttribute('data-row') || 'Row';
+
+        const leftBtn = document.createElement('button');
+        leftBtn.type = 'button';
+        leftBtn.className = 'row-nav-btn row-nav-btn--left';
+        leftBtn.setAttribute('aria-label', `Previous card in ${rowLabel}`);
+        leftBtn.innerHTML = '<span class="row-nav-btn__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></span>';
+
+        const rightBtn = document.createElement('button');
+        rightBtn.type = 'button';
+        rightBtn.className = 'row-nav-btn row-nav-btn--right';
+        rightBtn.setAttribute('aria-label', `Next card in ${rowLabel}`);
+        rightBtn.innerHTML = '<span class="row-nav-btn__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>';
+
+        const leftZone = document.createElement('div');
+        leftZone.className = 'row-nav-zone row-nav-zone--left';
+        const rightZone = document.createElement('div');
+        rightZone.className = 'row-nav-zone row-nav-zone--right';
+
+        function attachNavButtonDrag(btn, direction) {
+          let isPointerDown = false;
+          let isDragging = false;
+          let startX = 0;
+          let startScrollLeft = 0;
+          const dragThreshold = 4;
+
+          btn.addEventListener('pointerdown', (event) => {
+            if (event.button !== 0) return;
+            event.preventDefault();
+            event.stopPropagation();
+            isPointerDown = true;
+            isDragging = false;
+            startX = event.clientX;
+            startScrollLeft = track.scrollLeft;
+            btn.setPointerCapture(event.pointerId);
+          });
+
+          btn.addEventListener('pointermove', (event) => {
+            if (!isPointerDown) return;
+            const dx = event.clientX - startX;
+            if (!isDragging && Math.abs(dx) > dragThreshold) {
+              isDragging = true;
+              track.classList.add('is-dragging');
+              cancelScrollAnimation(track);
+            }
+            if (isDragging) {
+              event.preventDefault();
+              track.scrollLeft = startScrollLeft - dx;
+            }
+          });
+
+          btn.addEventListener('pointerup', (event) => {
+            if (!isPointerDown) return;
+            event.preventDefault();
+            event.stopPropagation();
+            if (isDragging) {
+              track.classList.remove('is-dragging');
+            } else {
+              goToSiblingPoster(track, direction);
+            }
+            isPointerDown = false;
+            isDragging = false;
+            try {
+              btn.releasePointerCapture(event.pointerId);
+            } catch (_) {}
+          });
+
+          btn.addEventListener('pointercancel', () => {
+            if (isDragging) track.classList.remove('is-dragging');
+            isPointerDown = false;
+            isDragging = false;
+          });
+        }
+
+        attachNavButtonDrag(leftBtn, -1);
+        attachNavButtonDrag(rightBtn, 1);
+
+        outer.appendChild(leftBtn);
+        outer.appendChild(rightBtn);
+        outer.appendChild(leftZone);
+        outer.appendChild(rightZone);
+
+        const rowNavState = {
+          rafId: null,
+          pointerX: 0,
+          pointerY: 0
+        };
+
+        function resetRowButton(btn) {
+          btn.classList.remove('is-hot');
+          btn.classList.remove('is-magnetic');
+          btn.style.left = '';
+          btn.style.top = '';
+        }
+
+        function setRowButtonOffset(btn, x, y) {
+          btn.classList.add('is-magnetic');
+          btn.style.left = `${x}px`;
+          btn.style.top = `${y}px`;
+        }
+
+        function applyRowNavMagnet() {
+          rowNavState.rafId = null;
+
+          const outerRect = outer.getBoundingClientRect();
+          const rect = track.getBoundingClientRect();
+          const trackLeft = rect.left - outerRect.left;
+          const trackRight = rect.right - outerRect.left;
+          const trackTop = rect.top - outerRect.top;
+          const trackBottom = rect.bottom - outerRect.top;
+          const x = rowNavState.pointerX;
+          const y = rowNavState.pointerY;
+          const insideY = (y >= trackTop && y <= trackBottom);
+          if (!insideY) {
+            resetRowButton(leftBtn);
+            resetRowButton(rightBtn);
+            return;
+          }
+
+          const posters = Array.from(track.querySelectorAll(':scope > .poster'));
+          const visible = posters
+            .map(p => {
+              const r = p.getBoundingClientRect();
+              return {
+                el: p,
+                rect: {
+                  left: r.left - outerRect.left,
+                  right: r.right - outerRect.left,
+                  width: r.width
+                }
+              };
+            })
+            .filter(p => p.rect.right > trackLeft && p.rect.left < trackRight);
+
+          const leftEdgeCards = visible
+            .slice()
+            .sort((a, b) => a.rect.left - b.rect.left)
+            .slice(0, 2);
+          const rightEdgeCards = visible
+            .slice()
+            .sort((a, b) => b.rect.right - a.rect.right)
+            .slice(0, 2);
+
+          const fallbackLeftEdge = trackLeft + rect.width * 0.33;
+          const fallbackRightEdge = trackRight - rect.width * 0.33;
+
+          let inLeftZone = x <= fallbackLeftEdge;
+          let inRightZone = x >= fallbackRightEdge;
+
+          let leftMin = trackLeft;
+          let leftMax = fallbackLeftEdge;
+          let rightMin = fallbackRightEdge;
+          let rightMax = trackRight;
+
+          if (leftEdgeCards.length) {
+            leftMin = Math.min(...leftEdgeCards.map(p => p.rect.left));
+            leftMax = Math.max(...leftEdgeCards.map(p => p.rect.right));
+            inLeftZone = (x >= leftMin && x <= leftMax);
+          }
+          if (rightEdgeCards.length) {
+            rightMin = Math.min(...rightEdgeCards.map(p => p.rect.left));
+            rightMax = Math.max(...rightEdgeCards.map(p => p.rect.right));
+            inRightZone = (x >= rightMin && x <= rightMax);
+          }
+
+          if (inLeftZone) {
+            setRowButtonOffset(leftBtn, x, y);
+            leftBtn.classList.add('is-hot');
+          } else {
+            resetRowButton(leftBtn);
+          }
+          if (inRightZone) {
+            setRowButtonOffset(rightBtn, x, y);
+            rightBtn.classList.add('is-hot');
+          } else {
+            resetRowButton(rightBtn);
+          }
+
+          leftZone.style.left = `${leftMin}px`;
+          leftZone.style.top = `${trackTop}px`;
+          leftZone.style.width = `${Math.max(0, leftMax - leftMin)}px`;
+          leftZone.style.height = `${Math.max(0, trackBottom - trackTop)}px`;
+
+          rightZone.style.left = `${rightMin}px`;
+          rightZone.style.top = `${trackTop}px`;
+          rightZone.style.width = `${Math.max(0, rightMax - rightMin)}px`;
+          rightZone.style.height = `${Math.max(0, trackBottom - trackTop)}px`;
+        }
+
+        function scheduleRowNavMagnet() {
+          if (rowNavState.rafId !== null) return;
+          rowNavState.rafId = requestAnimationFrame(applyRowNavMagnet);
+        }
+
+        outer.addEventListener('pointermove', (event) => {
+          const outerRect = outer.getBoundingClientRect();
+          rowNavState.pointerX = event.clientX - outerRect.left;
+          rowNavState.pointerY = event.clientY - outerRect.top;
+          scheduleRowNavMagnet();
+        });
+        outer.addEventListener('pointerleave', () => {
+          resetRowButton(leftBtn);
+          resetRowButton(rightBtn);
+        });
+      }
+    }
 
     requestAnimationFrame(() => {
       updateActiveTrackFromWindowScroll();
     });
+    installRowNavButtons();
   });
 </script>
 <script>
@@ -3385,13 +3930,13 @@ html { scrollbar-gutter: stable; }
       // and per-card data-morph-id so both originals and clones open correctly.
       const previewOverlay = document.querySelector('.preview-overlay');
       const previewCloseButton = previewOverlay ? previewOverlay.querySelector('.preview-close-btn') : null;
-      // ZAQ TASK 2.3/2.4 — Preview template authority: bind fields from the preview overlay template.
+      // ZAQ TASK 2.3/2.4 â€” Preview template authority: bind fields from the preview overlay template.
       const previewTitleEl = previewOverlay ? previewOverlay.querySelector('h2#preview-title.preview-title') : null;
       const previewRuntimeEl = previewOverlay ? previewOverlay.querySelector('.preview-runtime') : null;
       const previewTagsEl = previewOverlay ? previewOverlay.querySelector('.preview-tags') : null;
       const previewDescriptionEl = previewOverlay ? previewOverlay.querySelector('.preview-description') : null;
 
-      // TASK 2.7 — Preview carousel scaffolding (center large, sides smaller)
+      // TASK 2.7 â€” Preview carousel scaffolding (center large, sides smaller)
       const previewCarousel = previewOverlay ? previewOverlay.querySelector('.preview-carousel') : null;
       const previewCardEl = previewOverlay ? previewOverlay.querySelector('.preview-card') : null;
 
@@ -3579,7 +4124,7 @@ html { scrollbar-gutter: stable; }
         }
       }
 
-      // ZAQ TASK 2.4 — Preview navigation must move the carousel (row-style center shift)
+      // ZAQ TASK 2.4 â€” Preview navigation must move the carousel (row-style center shift)
       let previewCarouselScrollAnim = null;
       function cancelPreviewCarouselScrollAnimation() {
         if (previewCarouselScrollAnim && typeof previewCarouselScrollAnim.frameId === 'number') {
@@ -3654,7 +4199,7 @@ html { scrollbar-gutter: stable; }
         schedulePreviewMagnifierUpdate();
       }
 
-      // ZAQ TASK 2.4 FIX — Active preview slide must follow carousel center during scrolling
+      // ZAQ TASK 2.4 FIX â€” Active preview slide must follow carousel center during scrolling
       let previewCarouselActiveRafId = null;
       let previewCarouselActiveLastSlide = null;
 
@@ -3786,7 +4331,7 @@ html { scrollbar-gutter: stable; }
         previewCarouselActiveLastSlide = null;
       }
 
-      // ZAQ TASK 2.4 (REFINEMENT) — Preview carousel magnifier scaling (continuous, row-style)
+      // ZAQ TASK 2.4 (REFINEMENT) â€” Preview carousel magnifier scaling (continuous, row-style)
       let previewCarouselMagnifierRafId = null;
       let previewFitRafId = null;
       let previewFadeRafId = null;
@@ -3995,12 +4540,16 @@ html { scrollbar-gutter: stable; }
         return previewOpening || previewOverlay.classList.contains('is-visible');
       }
 
-      // ZAQ TASK 2.6 — Desktop on-screen arrows (one card per click)
+      // ZAQ TASK 2.6 â€” Desktop on-screen arrows (one card per click)
       const previewNavPrevButton = previewOverlay.querySelector('.preview-nav-arrow--left');
       const previewNavNextButton = previewOverlay.querySelector('.preview-nav-arrow--right');
       if (previewNavPrevButton) {
         previewNavPrevButton.addEventListener('click', (event) => {
           if (!isPreviewOpen()) return;
+          if (previewNavPrevButton.__suppressClick) {
+            previewNavPrevButton.__suppressClick = false;
+            return;
+          }
           event.preventDefault();
           event.stopPropagation();
           if (typeof window.goToPreviousCardByDomOrder === 'function') {
@@ -4011,6 +4560,10 @@ html { scrollbar-gutter: stable; }
       if (previewNavNextButton) {
         previewNavNextButton.addEventListener('click', (event) => {
           if (!isPreviewOpen()) return;
+          if (previewNavNextButton.__suppressClick) {
+            previewNavNextButton.__suppressClick = false;
+            return;
+          }
           event.preventDefault();
           event.stopPropagation();
           if (typeof window.goToNextCardByDomOrder === 'function') {
@@ -4018,6 +4571,79 @@ html { scrollbar-gutter: stable; }
           }
         });
       }
+
+      function attachPreviewArrowScrub(btn, direction) {
+        if (!btn) return;
+        let isPointerDown = false;
+        let isDragging = false;
+        let startX = 0;
+        let startScrollLeft = 0;
+        const dragThreshold = 4;
+
+        btn.addEventListener('pointerdown', (event) => {
+          if (!isPreviewOpen()) return;
+          if (event.button !== 0) return;
+          event.preventDefault();
+          event.stopPropagation();
+          if (!previewCarousel) return;
+          isPointerDown = true;
+          isDragging = false;
+          startX = event.clientX;
+          startScrollLeft = previewCarousel.scrollLeft;
+          btn.setPointerCapture(event.pointerId);
+        });
+
+        btn.addEventListener('pointermove', (event) => {
+          if (!isPointerDown || !previewCarousel) return;
+          const dx = event.clientX - startX;
+          if (!isDragging && Math.abs(dx) > dragThreshold) {
+            isDragging = true;
+            previewCarousel.classList.add('is-dragging');
+            cancelPreviewCarouselScrollAnimation();
+          }
+          if (isDragging) {
+            event.preventDefault();
+            previewCarousel.scrollLeft = startScrollLeft - dx;
+            schedulePreviewMagnifierUpdate();
+          }
+        });
+
+        btn.addEventListener('pointerup', (event) => {
+          if (!isPointerDown) return;
+          event.preventDefault();
+          event.stopPropagation();
+          if (isDragging) {
+            previewCarousel.classList.remove('is-dragging');
+            const closest = getClosestPreviewSlideToCenter();
+            if (closest) centerPreviewSlideWithAnimation(closest);
+          } else {
+            btn.__suppressClick = true;
+            if (direction < 0) {
+              if (typeof window.goToPreviousCardByDomOrder === 'function') {
+                window.goToPreviousCardByDomOrder();
+              }
+            } else {
+              if (typeof window.goToNextCardByDomOrder === 'function') {
+                window.goToNextCardByDomOrder();
+              }
+            }
+          }
+          isPointerDown = false;
+          isDragging = false;
+          try {
+            btn.releasePointerCapture(event.pointerId);
+          } catch (_) {}
+        });
+
+        btn.addEventListener('pointercancel', () => {
+          if (previewCarousel) previewCarousel.classList.remove('is-dragging');
+          isPointerDown = false;
+          isDragging = false;
+        });
+      }
+
+      attachPreviewArrowScrub(previewNavPrevButton, -1);
+      attachPreviewArrowScrub(previewNavNextButton, 1);
 
       const previewNavArrowState = {
         pointerX: 0,
@@ -4328,7 +4954,7 @@ html { scrollbar-gutter: stable; }
         }
         if (previewVolumeButton) {
           const iconTarget = previewVolumeButton.querySelector('span') || previewVolumeButton;
-          iconTarget.textContent = isMuted ? '🔇' : '🔊';
+          iconTarget.textContent = isMuted ? '\uD83D\uDD07' : '\uD83D\uDD0A';
           previewVolumeButton.setAttribute('aria-pressed', isMuted ? 'true' : 'false');
         }
       }
@@ -4558,7 +5184,7 @@ html { scrollbar-gutter: stable; }
         const descriptionValue = (card.getAttribute('data-description') || '').trim();
 
         const runtime = runtimeValue || '1h 52m';
-        const tags = tagsValue || 'Thriller • Sci-Fi • Action';
+        const tags = tagsValue || 'Thriller â€¢ Sci-Fi â€¢ Action';
         const description = descriptionValue ||
           'This is a static placeholder description used for layout validation only. It is intentionally long so the text wraps across multiple lines and reveals spacing, rhythm, and hierarchy inside the Preview Modal. Replace this copy with real content in a later task once the layout has been visually approved.';
 
@@ -6169,7 +6795,7 @@ function detachPreviewSwipeListeners() {
           previewOverlay.style.setProperty('--preview-fit-scale', '1');
         }
 
-        // ZAQ TASK 2.4 — Close preview to active card (state-consistent exit)
+        // ZAQ TASK 2.4 â€” Close preview to active card (state-consistent exit)
         // Use the authoritative active-card state for the exit target.
         const authorityCard = (typeof window.getActiveCardAuthority === 'function')
           ? window.getActiveCardAuthority()
@@ -6335,15 +6961,15 @@ document.addEventListener('keydown', (event) => {
   <!-- Preview Overlay (static skeleton) -->
   <div class="preview-overlay" aria-hidden="true">
     <button class="preview-nav-arrow preview-nav-arrow--left" type="button" aria-label="Previous">
-      <span class="preview-nav-arrow__icon">‹</span>
+      <span class="preview-nav-arrow__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></span>
     </button>
     <button class="preview-nav-arrow preview-nav-arrow--right" type="button" aria-label="Next">
-      <span class="preview-nav-arrow__icon">›</span>
+      <span class="preview-nav-arrow__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
     </button>
     <div class="preview-carousel" aria-label="Preview carousel">
       <div class="preview-slide is-active">
         <div class="preview-card" role="dialog" aria-modal="true" aria-labelledby="preview-title">
-          <button class="preview-close-btn" type="button" aria-label="Close preview">×</button>
+          <button class="preview-close-btn" type="button" aria-label="Close preview">Ã—</button>
           <div class="preview-media">
             <!-- Later: video or wide poster goes here -->
             <div class="preview-media-placeholder"></div>
@@ -6354,12 +6980,12 @@ document.addEventListener('keydown', (event) => {
               <h2 id="preview-title" class="preview-title">The Unreasonably Long and Impossible-to-Skip Title That Spills Across Multiple Lines to Stress Test the Preview Header Layout</h2>
               <div class="preview-meta">
                 <span class="preview-runtime">2h 14m</span>
-                <span class="preview-tags">Prestige Drama • Mythic Noir • Alt‑History • Neo‑Western • Psychological Thriller • Courtroom Chaos • Cyber Romance • Cosmic Horror • Folk Mystery • Retro Futurism • Experimental Soundscape</span>
+                <span class="preview-tags">Prestige Drama â€¢ Mythic Noir â€¢ Altâ€‘History â€¢ Neoâ€‘Western â€¢ Psychological Thriller â€¢ Courtroom Chaos â€¢ Cyber Romance â€¢ Cosmic Horror â€¢ Folk Mystery â€¢ Retro Futurism â€¢ Experimental Soundscape</span>
               </div>
             </header>
             <div class="preview-body">
               <p class="preview-description">
-                This is an intentionally overlong description designed to push the limits of the preview body container, wrapping across many lines and forcing the scroll behavior to reveal how the layout handles dense narrative blocks. It layers multiple sentences with varied cadence, mentions a sweeping saga of rival archivists, and references a cross‑continental chase that spans decades, climates, and shifting alliances. Even when the plot drifts into speculative territory and tangents about lost signals, the copy keeps flowing to ensure the text area is sufficiently stressed. Finally, the paragraph closes with a lingering note about unresolved mysteries, prompting the reader to keep scrolling just to see the end.
+                This is an intentionally overlong description designed to push the limits of the preview body container, wrapping across many lines and forcing the scroll behavior to reveal how the layout handles dense narrative blocks. It layers multiple sentences with varied cadence, mentions a sweeping saga of rival archivists, and references a crossâ€‘continental chase that spans decades, climates, and shifting alliances. Even when the plot drifts into speculative territory and tangents about lost signals, the copy keeps flowing to ensure the text area is sufficiently stressed. Finally, the paragraph closes with a lingering note about unresolved mysteries, prompting the reader to keep scrolling just to see the end.
               </p>
             </div>
             <div class="preview-actions">
@@ -6371,7 +6997,7 @@ document.addEventListener('keydown', (event) => {
               </button>
               <div class="preview-volume" aria-label="Preview volume control">
                 <button class="preview-volume__btn" type="button" aria-label="Preview volume">
-                  <span aria-hidden="true">🔊</span>
+                  <span aria-hidden="true">&#128266;</span>
                 </button>
                 <div class="preview-volume__sliderWrap">
                   <input class="preview-volume__slider" type="range" min="0" max="100" value="100" aria-label="Preview volume slider">
@@ -6387,7 +7013,7 @@ document.addEventListener('keydown', (event) => {
 
 
 <script>
-  // ZAQ TASK 1 — "Zero Tolerance" Magnetic Pull
+  // ZAQ TASK 1 â€” "Zero Tolerance" Magnetic Pull
   (function(){
     const SETTLE_DELAY_MS = 420;   // Wait for scroll to settle
     const HERO_SETTLE_DELAY_MS = 620;
@@ -6891,7 +7517,7 @@ document.addEventListener('keydown', (event) => {
 
 
 <script>
-/* ZAQ TASK: Hero glow truth → YouTube playback (preview override wins) */
+/* ZAQ TASK: Hero glow truth â†’ YouTube playback (preview override wins) */
 (function(){
   var heroEl = document.querySelector('.hero');
   var previewEl = document.querySelector('.preview-overlay');
@@ -7069,3 +7695,4 @@ document.addEventListener('keydown', (event) => {
 
 </body>
 </html>
+
