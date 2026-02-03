@@ -836,12 +836,12 @@ html { scrollbar-gutter: stable; }
 /* =============================
    Shelves (Rows A/B/C)
    ============================= */
-:root{ --shelf-gap:4px; --shelf-radius:14px; }
+:root{ --shelf-gap:4px; --shelf-radius:14px; --shelf-inline-pad:16px; }
 .shelf{ margin:0; }
 .shelf-title{ font:700 1rem/1.3 var(--font-ui); color:var(--fg); margin:0 0 6px; position:relative; transform:translateY(var(--shelf-title-shift-mobile)); }
 .shelf-divider{ height:2px; background:#3a3f46; opacity:.9; border-radius:2px; }
 /* Full-bleed wrapper so the track can extend to viewport edges */
-.shelf-outer{ position:relative; width:100vw; left:50%; transform:translateX(-50%); }
+.shelf-outer{ position:relative; width:100vw; left:50%; transform:translateX(-50%); overflow:hidden; }
 /* Edge fades (narrow 48px) */
 .shelf-outer::before, .shelf-outer::after{
   content:""; position:absolute; top:0; bottom:0; width:120px; pointer-events:none; z-index:2;
@@ -878,7 +878,9 @@ html { scrollbar-gutter: stable; }
   overflow-x: auto;
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
-  padding: 10px calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left));
+  padding: 10px calc(var(--shelf-inline-pad) + env(safe-area-inset-right)) 16px calc(var(--shelf-inline-pad) + env(safe-area-inset-left));
+  margin-left: calc(-1 * (var(--shelf-inline-pad) + env(safe-area-inset-left)));
+  margin-right: calc(-1 * (var(--shelf-inline-pad) + env(safe-area-inset-right)));
   scroll-snap-type: x mandatory; /* Snap horizontally */
   scrollbar-width: none; /* Hide scrollbar for Firefox */
   cursor: grab;
@@ -915,7 +917,7 @@ html { scrollbar-gutter: stable; }
   border-radius: var(--shelf-radius);
   overflow: hidden;
   aspect-ratio: 2 / 3;
-  width: calc((100vw - (16px * 2) - (var(--shelf-gap) * 2)) / 3); /* ~3.0 visible on mobile */
+  width: calc((100vw - (var(--shelf-inline-pad) * 2) - (var(--shelf-gap) * 2)) / 3); /* ~3.0 visible on mobile */
   scroll-snap-align: center; /* Snap posters to the center */
   transform-origin: center center;
   filter: brightness(0.9);
@@ -1279,7 +1281,7 @@ html { scrollbar-gutter: stable; }
     justify-content: center;
     background: radial-gradient(circle at top, rgba(0,0,0,0.80), rgba(0,0,0,0.95));
     z-index: 11000;
-    padding: 48px;
+    padding: clamp(20px, 4vw, 48px) 0;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -1760,7 +1762,9 @@ html { scrollbar-gutter: stable; }
      ============================= */
   .preview-carousel{
     --preview-card-width: min(960px, 78vw);
-    width: 100%;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
     display: flex;
     align-items: center;
     gap: 18px;
