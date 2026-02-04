@@ -1629,6 +1629,10 @@ body.debug-row-zones .row-nav-zone{
       pointer-events: auto;
     }
   }
+  .preview-overlay.preview-scrub-active .preview-nav-arrow,
+  .preview-overlay.preview-scrub-active .preview-matrix__nav {
+    pointer-events: none;
+  }
   @media (max-width: 768px) {
     .preview-overlay.is-visible .preview-nav-arrow {
       opacity: 0;
@@ -4564,6 +4568,7 @@ body.debug-row-zones .row-nav-zone{
               }
               isDragging = true;
               didDrag = false;
+              setPreviewScrubbing(true);
               previewCarousel.classList.add('is-dragging');
               startX = event.pageX - previewCarousel.getBoundingClientRect().left;
               dragStartX = event.pageX;
@@ -4576,6 +4581,7 @@ body.debug-row-zones .row-nav-zone{
               if (!isDragging) return;
               isDragging = false;
               previewCarousel.classList.remove('is-dragging');
+              setPreviewScrubbing(false);
               if (didDrag) {
                 suppressOverlayCloseUntil = performance.now() + 400;
                 clearDragSettleTimer();
@@ -4821,6 +4827,7 @@ body.debug-row-zones .row-nav-zone{
           }
           previewCarouselSettleTimer = null;
           if (!previewCarousel || previewCarousel.classList.contains('is-dragging')) return;
+          if (previewOverlay && previewOverlay.classList.contains('preview-scrub-active')) return;
           if (previewCarousel.__scrollAnimating) return;
           const closest = getClosestPreviewSlideToCenter();
           if (closest) centerPreviewSlideWithAnimation(closest);
@@ -5137,6 +5144,23 @@ body.debug-row-zones .row-nav-zone{
       const previewMatrixCursorIn = previewOverlay.querySelector('.preview-matrix__cursor--in');
       let previewMatrixAnimating = false;
       let previewMatrixAnimTimer = null;
+      let previewScrubTimer = null;
+      function setPreviewScrubbing(isOn) {
+        if (!previewOverlay) return;
+        if (isOn) {
+          if (previewScrubTimer) {
+            clearTimeout(previewScrubTimer);
+            previewScrubTimer = null;
+          }
+          previewOverlay.classList.add('preview-scrub-active');
+          return;
+        }
+        if (previewScrubTimer) clearTimeout(previewScrubTimer);
+        previewScrubTimer = setTimeout(() => {
+          previewOverlay.classList.remove('preview-scrub-active');
+          previewScrubTimer = null;
+        }, 180);
+      }
       const previewMatrixCursor = previewOverlay.querySelector('.preview-matrix__cursor');
       function goToPreviewSiblingSlide(direction) {
         if (!previewCarousel || !isPreviewOpen()) return;
@@ -6138,6 +6162,7 @@ body.debug-row-zones .row-nav-zone{
         let lastX = 0;
         let lastY = 0;
         let maxDeltaY = 0;
+        let startScrollLeft = 0;
         let scrollableStartEl = null;
         let swipeDownEligible = false;
         let gestureDisabled = false;
@@ -6154,6 +6179,7 @@ body.debug-row-zones .row-nav-zone{
           swipeDownEligible = false;
           gestureDisabled = false;
           gestureMode = null;
+          dragStarted = false;
         };
 
         const onTouchStart = (event) => {
@@ -6168,12 +6194,14 @@ body.debug-row-zones .row-nav-zone{
           lastX = startX;
           lastY = startY;
           maxDeltaY = 0;
+          startScrollLeft = previewCarousel ? previewCarousel.scrollLeft : 0;
 
           scrollableStartEl = getScrollableStartTarget(event.target);
           swipeDownEligible = !scrollableStartEl || isScrollableAtTop(scrollableStartEl);
           gestureMode = null;
           gestureDisabled = false;
           dragStarted = false;
+          setPreviewScrubbing(true);
         };
 
         const onTouchMove = (event) => {
@@ -6211,6 +6239,14 @@ body.debug-row-zones .row-nav-zone{
                 previewOverlay.__suppressTapUntil = performance.now() + 500;
               }
             }
+            if (previewCarousel) {
+              previewCarousel.classList.add('is-dragging');
+              cancelPreviewCarouselScrollAnimation();
+              const scrubFactor = 0.9;
+              previewCarousel.scrollLeft = startScrollLeft - (dx * scrubFactor);
+              schedulePreviewMagnifierUpdate();
+              schedulePreviewActiveSlideUpdate();
+            }
             return;
           }
 
@@ -6232,13 +6268,10 @@ body.debug-row-zones .row-nav-zone{
           }
 
           if (!gestureDisabled && gestureMode === 'h') {
-            const dx = lastX - startX;
-            if (Math.abs(dx) >= SWIPE_NAV_THRESHOLD_PX) {
-              if (dx < 0) {
-                goToPreviewSiblingSlide(1);
-              } else {
-                goToPreviewSiblingSlide(-1);
-              }
+            if (previewCarousel) {
+              previewCarousel.classList.remove('is-dragging');
+              const closest = getClosestPreviewSlideToCenter();
+              if (closest) centerPreviewSlideWithAnimation(closest);
             }
           }
 
@@ -6249,6 +6282,7 @@ body.debug-row-zones .row-nav-zone{
           }
 
           resetGesture();
+          setPreviewScrubbing(false);
         };
 
         previewSwipeHandlers = {
@@ -7308,6 +7342,7 @@ function detachPreviewSwipeListeners() {
           if (!isPreviewOpen()) return;
           event.preventDefault();
           event.stopPropagation();
+          setPreviewScrubbing(true);
           if (previewOverlay) {
             previewOverlay.__suppressCloseUntil = performance.now() + 500;
           }
@@ -7337,6 +7372,7 @@ function detachPreviewSwipeListeners() {
             const closest = getClosestPreviewSlideToCenter();
             if (closest) centerPreviewSlideWithAnimation(closest);
           }
+          setPreviewScrubbing(false);
           if (previewOverlay) {
             previewOverlay.__suppressCloseUntil = performance.now() + 400;
           }
