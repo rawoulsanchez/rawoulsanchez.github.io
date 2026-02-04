@@ -1,4 +1,4 @@
-
+﻿
 <!doctype html>
 <html lang="en">
 <head>
@@ -344,7 +344,7 @@ border-bottom:0;
   .title-chip-text{ letter-spacing:.09em; }
 }
 @media (min-width:768px){
-  .title-chip-text{ font-size:1.35rem; } /* matches clamp’s max */
+  .title-chip-text{ font-size:1.35rem; } /* matches clampâ€™s max */
 }
 
 /* Layout helpers used by the page */
@@ -410,7 +410,7 @@ main{
     color:var(--fg);
   }
   .footer-nav-link::before{
-    content:"•";
+    content:"â€¢";
     opacity:.6;
     margin:0 6px 0 2px;
   }
@@ -554,7 +554,7 @@ main{
 }
 
 
-/* Hero gradient: bottom → top, covers full hero */
+/* Hero gradient: bottom â†’ top, covers full hero */
 .hero-gradient{
   position:absolute;
   inset:0;                    /* cover full hero box */
@@ -755,7 +755,7 @@ main{
   }
   /* commit: no-horizontal-scroll */
 html { overflow-x: hidden; }
-/* ZAQ TASK — PREVIEW SCROLL LOCK: reserve scrollbar space to prevent layout shift */
+/* ZAQ TASK â€” PREVIEW SCROLL LOCK: reserve scrollbar space to prevent layout shift */
 html { scrollbar-gutter: stable; }
 
 /* CTA row under the hero video */
@@ -1137,7 +1137,7 @@ body.debug-row-zones .row-nav-zone{
      of the hero video box. This moves Row A as a block without
      affecting Rows B and C. */
   .after-hero .shelf.shelf--tight {
-    margin-top: 0.40rem;        /* Pills → Row A label rhythm on desktop */
+    margin-top: 0.40rem;        /* Pills â†’ Row A label rhythm on desktop */
   }
 
   .hero-cta {
@@ -1315,32 +1315,32 @@ body.debug-row-zones .row-nav-zone{
 
 :root {
   /* Hero + Row A spacing tokens, aligned to a 4px-based grid (comments only) */
-  --space-chip-meta: 0.5rem;      /* ≈ 8px  = 2 × 4px  (Chip → Meta) */
-  --space-synopsis-pills: 2.20rem;/* ≈ 35px ≈ 9 × 4px (Synopsis → Pills) */
-  --space-pills-rowa: 0.40rem;    /* ≈ 6px  ≈ 1.5 × 4px (Pills → Row A label) */
-  --space-rowa-divider: 0.20rem;  /* ≈ 3px  ≈ 0.75 × 4px (Row A label → divider) */
+  --space-chip-meta: 0.5rem;      /* â‰ˆ 8px  = 2 Ã— 4px  (Chip â†’ Meta) */
+  --space-synopsis-pills: 2.20rem;/* â‰ˆ 35px â‰ˆ 9 Ã— 4px (Synopsis â†’ Pills) */
+  --space-pills-rowa: 0.40rem;    /* â‰ˆ 6px  â‰ˆ 1.5 Ã— 4px (Pills â†’ Row A label) */
+  --space-rowa-divider: 0.20rem;  /* â‰ˆ 3px  â‰ˆ 0.75 Ã— 4px (Row A label â†’ divider) */
 
-  /* ZAQ – shelf label vertical offsets */
+  /* ZAQ â€“ shelf label vertical offsets */
   --shelf-title-shift-mobile: 2rem;    /* shift labels into gap below divider on mobile/tablet */
   --shelf-title-shift-desktop: 2.25rem;/* slightly larger shift for desktop gap */
 }
 
-/* ZAQ – desktop-only vertical rhythm for hero + Row A */
+/* ZAQ â€“ desktop-only vertical rhythm for hero + Row A */
 @media (min-width: 1024px) {
   .title-chip {
-    margin-bottom: var(--space-chip-meta);       /* Chip → Meta */
+    margin-bottom: var(--space-chip-meta);       /* Chip â†’ Meta */
   }
 
   .hero-cta {
-    margin-top: var(--space-synopsis-pills);     /* Synopsis → Pills */
+    margin-top: var(--space-synopsis-pills);     /* Synopsis â†’ Pills */
   }
 
   .shelf.shelf--tight {
-    margin-top: var(--space-pills-rowa);         /* Pills → Row A Label */
+    margin-top: var(--space-pills-rowa);         /* Pills â†’ Row A Label */
   }
 
   .shelf-title {
-    margin-bottom: var(--space-rowa-divider);    /* Row A Label → Divider */
+    margin-bottom: var(--space-rowa-divider);    /* Row A Label â†’ Divider */
     transform: translateY(var(--shelf-title-shift-desktop));
   }
 }
@@ -1362,6 +1362,7 @@ body.debug-row-zones .row-nav-zone{
     pointer-events: none;
     transition: opacity var(--preview-morph-duration) var(--preview-morph-ease), visibility 0s linear var(--preview-morph-duration);
     overscroll-behavior: contain;
+    overflow: visible;
     --preview-fit-scale: 1;
     --preview-fade-top: 0px;
     --preview-fade-height: 100%;
@@ -1395,7 +1396,7 @@ body.debug-row-zones .row-nav-zone{
     );
   }
 
-  /* Future: when we add JS, we’ll toggle this class */
+  /* Future: when we add JS, weâ€™ll toggle this class */
   .preview-overlay.is-visible {
     z-index: 11000;
     opacity: 1;
@@ -1492,6 +1493,108 @@ body.debug-row-zones .row-nav-zone{
     line-height:0;
     transform: none;
   }
+  .preview-nav-arrow__label {
+    display: none;
+  }
+  .preview-matrix {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    display: grid;
+    grid-template-columns: 36px auto 36px;
+    align-items: center;
+    gap: 8px;
+    z-index: 11005;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms ease;
+    width: var(--preview-matrix-width, 280px);
+  }
+  .preview-overlay.is-visible .preview-matrix {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .preview-matrix__rail {
+    position: relative;
+    height: 22px;
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    gap: 7px;
+    align-items: center;
+    padding: 0 12px;
+    border-radius: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: hidden;
+  }
+  .preview-matrix__rail::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 50%;
+    height: 2px;
+    transform: translateY(-50%);
+    background: linear-gradient(90deg, rgba(227,27,35,0), rgba(227,27,35,0.45), rgba(227,27,35,0));
+    opacity: 0.7;
+    filter: blur(0.2px);
+  }
+  .preview-matrix__dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(227,27,35,0.3);
+    box-shadow: 0 0 8px rgba(227,27,35,0.35);
+    transform: scale(1);
+    transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+    opacity: 0.65;
+  }
+  .preview-matrix__cursor {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    transform: translate(0, -50%);
+    background: rgba(255,65,65,1);
+    box-shadow:
+      0 0 10px rgba(255,70,70,1),
+      0 0 22px rgba(227,27,35,0.85);
+    transition: transform 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    pointer-events: none;
+  }
+  .preview-matrix__cursor--out {
+    opacity: 0.85;
+  }
+  .preview-matrix__cursor--in {
+    opacity: 1;
+  }
+  .preview-matrix__nav {
+    width: 32px;
+    height: 22px;
+    border: 0;
+    background: transparent;
+    color: rgba(255,60,60,0.95);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    position: relative;
+  }
+  .preview-matrix__nav svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    filter:
+      drop-shadow(0 0 6px rgba(227,27,35,0.9))
+      drop-shadow(0 0 14px rgba(227,27,35,0.6));
+  }
   .preview-nav-arrow__icon svg{
     display:block;
     width:18px;
@@ -1524,6 +1627,63 @@ body.debug-row-zones .row-nav-zone{
     .preview-overlay.is-visible .preview-nav-arrow {
       opacity: 1;
       pointer-events: auto;
+    }
+  }
+  @media (max-width: 768px) {
+    .preview-overlay.is-visible .preview-nav-arrow {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .preview-nav-arrow {
+      top: 50%;
+      width: 46px;
+      height: 140px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      transform: translateY(-50%);
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background:
+        linear-gradient(90deg, rgba(227,27,35,0.15), rgba(0,0,0,0)),
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.12), transparent 60%);
+      backdrop-filter: blur(6px);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.06),
+        0 10px 30px rgba(0,0,0,0.55),
+        0 0 24px rgba(227, 27, 35, 0.28);
+    }
+    .preview-nav-arrow--left { left: 6px; }
+    .preview-nav-arrow--right { right: 6px; }
+    .preview-nav-arrow__label {
+      display: none;
+    }
+    .preview-nav-arrow__icon {
+      width: 20px;
+      height: 20px;
+    }
+    .preview-nav-arrow::before {
+      content: "";
+      position: absolute;
+      inset: -18px -6px;
+      border-radius: 999px;
+      background:
+        linear-gradient(180deg, rgba(227,27,35,0.0), rgba(227,27,35,0.18), rgba(227,27,35,0.0));
+      opacity: 0.65;
+      pointer-events: none;
+    }
+    .preview-nav-arrow::after {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.55);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+      pointer-events: none;
+    }
+    .preview-nav-arrow__icon {
+      position: relative;
+      z-index: 1;
     }
   }
 
@@ -1724,7 +1884,7 @@ body.debug-row-zones .row-nav-zone{
 
   .preview-actions {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 12px;
     justify-content: flex-start;
     padding: 0 6px env(safe-area-inset-bottom, 0px);
@@ -1733,6 +1893,7 @@ body.debug-row-zones .row-nav-zone{
     z-index: 9;
     cursor: default;
     pointer-events: auto;
+    overflow: visible;
   }
 
   .preview-volume {
@@ -1747,6 +1908,7 @@ body.debug-row-zones .row-nav-zone{
     display: inline-flex;
     gap: 8px;
     align-items: center;
+    margin-top: 0;
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
@@ -2027,11 +2189,11 @@ body.debug-row-zones .row-nav-zone{
       }
 
       .preview-details-tabs {
-        flex-wrap: wrap;
-        max-width: 100%;
-        width: 100%;
-        gap: 4px;
-        row-gap: 8px;
+        flex-wrap: nowrap;
+        max-width: none;
+        width: auto;
+        gap: 6px;
+        row-gap: 0;
       }
 
       .preview-details-tab {
@@ -2060,7 +2222,7 @@ body.debug-row-zones .row-nav-zone{
 
       .preview-details-tabs {
         order: 2;
-        flex-basis: 100%;
+        flex-basis: auto;
       }
 
       .preview-volume {
@@ -2131,18 +2293,19 @@ body.debug-row-zones .row-nav-zone{
   }
   @media (max-width: 640px){
     .preview-carousel{
-      padding: 0;
-      overflow-x: hidden;
+      --preview-card-width: min(84vw, 520px);
+      padding: 0 calc(50vw - (var(--preview-card-width) / 2));
+      overflow-x: auto;
       cursor: default;
+      gap: 14px;
     }
     .preview-carousel.is-dragging{ cursor: default; }
     .preview-slide{
-      width: 100%;
-      transform: none;
-      opacity: 1;
+      width: var(--preview-card-width);
+      opacity: 0.7;
     }
     .preview-slide:not(.is-active){
-      display: none;
+      display: flex;
     }
   }
 
@@ -2277,7 +2440,7 @@ body.debug-row-zones .row-nav-zone{
     </nav>
   </div>
   <div class="nav-overlay" aria-hidden="true">
-    <button class="nav-overlay-close" type="button" aria-label="Close menu">×</button>
+    <button class="nav-overlay-close" type="button" aria-label="Close menu">Ã—</button>
     <nav class="nav-overlay-menu" aria-label="Mobile navigation">
       <a href="#hero">Film</a>
       <a href="#photography">Photography</a>
@@ -2302,7 +2465,7 @@ body.debug-row-zones .row-nav-zone{
     <div class="hero-debug" aria-hidden="true"></div>
   </div>
 
-  <!-- Hero gradient: bottom → top -->
+  <!-- Hero gradient: bottom â†’ top -->
   <div class="hero-gradient" aria-hidden="true"></div>
 
   <!-- Overlay area locked to viewport edges -->
@@ -2595,7 +2758,7 @@ body.debug-row-zones .row-nav-zone{
   <div class="section-anchor" id="contact"></div>
 
   <div id="fullscreen-player-wrapper" class="fullscreen-player-wrapper" hidden>
-    <button type="button" class="fullscreen-player-close" aria-label="Close fullscreen playback">×</button>
+    <button type="button" class="fullscreen-player-close" aria-label="Close fullscreen playback">Ã—</button>
     <div class="fullscreen-player-inner">
       <div id="fullscreen-player"></div>
     </div>
@@ -2606,7 +2769,7 @@ body.debug-row-zones .row-nav-zone{
   <div id="footer-lock-sentinel" aria-hidden="true"></div>
   <div id="footer-placeholder" aria-hidden="true"></div>
   <footer>
-    © <span id="y"></span> Rawoul
+    Â© <span id="y"></span> Rawoul
     <nav class="footer-nav" aria-label="Footer navigation">
       <a class="footer-nav-link footer-nav-link--active" href="#hero" aria-label="Go to Film section">Film</a>
       <a class="footer-nav-link" href="#photography" aria-label="Go to Photography section">Photography</a>
@@ -3140,7 +3303,7 @@ body.debug-row-zones .row-nav-zone{
       const anchor = document.querySelector('.hero-cta-anchor');
       if(!cta || !anchor || !anchor.parentElement) return;
 
-      // Use the parent’s current width as the stable base
+      // Use the parentâ€™s current width as the stable base
       const base = anchor.parentElement.getBoundingClientRect().width;
 
       // Target = 67% of that base (i.e., 1/3 shorter)
@@ -3181,12 +3344,12 @@ body.debug-row-zones .row-nav-zone{
     const RECENTER_DURATION = 1800; // ms, slow cinematic glide
     const ROW_NAV_DURATION = 700;   // ms, faster single-card nudge
     const activeScrollAnimations = new Map();
-    // ZAQ TASK 1 — Mobile breakpoint helper (matches existing CSS @media max-width:640px)
+    // ZAQ TASK 1 â€” Mobile breakpoint helper (matches existing CSS @media max-width:640px)
     const MOBILE_MQ = window.matchMedia('(max-width: 768px)');
     function isMobileView(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
     window.isMobileView = isMobileView;
 
-    // ZAQ TASK 2.0 — Active Card Authority (foundational)
+    // ZAQ TASK 2.0 â€” Active Card Authority (foundational)
     // Single, explicit source of truth for the currently focused card.
     if (!window.__activeCardAuthority) {
       window.__activeCardAuthority = { current: null };
@@ -3205,7 +3368,7 @@ body.debug-row-zones .row-nav-zone{
       return window.__activeCardAuthority.current || null;
     };
 
-    // ZAQ TASK 2.1 — Next / Previous Navigation Core (DOM order + WRAP)
+    // ZAQ TASK 2.1 â€” Next / Previous Navigation Core (DOM order + WRAP)
     function getNavCardsInDomOrder(currentCard){
       if (currentCard && typeof currentCard.closest === 'function') {
         const heroTrack = currentCard.closest('.shelf-track[data-row="Hero"]');
@@ -3348,7 +3511,7 @@ body.debug-row-zones .row-nav-zone{
 
     const shelfTracks = Array.from(document.querySelectorAll('.shelf-track'));
 
-    // ZAQ TASK 2.3 — Row scroll sync to active card (center match)
+    // ZAQ TASK 2.3 â€” Row scroll sync to active card (center match)
     // When the authoritative active-card changes (e.g., from preview navigation),
     // scroll ONLY the containing row so the matching card becomes centered.
     document.addEventListener('zaq-active-card-change', (e) => {
@@ -3389,7 +3552,7 @@ body.debug-row-zones .row-nav-zone{
 
     let windowScrollRaf = null;
 
-    // ZAQ TASK — SOFT-PULL VERTICAL ROW CENTERING (REDUCE JUMP)
+    // ZAQ TASK â€” SOFT-PULL VERTICAL ROW CENTERING (REDUCE JUMP)
     const VERTICAL_CENTER_CONFIG = {
       desktop: { settleDelay: 180, duration: 1200, deadzone: 32 }, // ms / ms / px
       mobile: { settleDelay: 240, duration: 1500, deadzone: 24 } // gentler, longer glide
@@ -4262,13 +4425,13 @@ body.debug-row-zones .row-nav-zone{
       // and per-card data-morph-id so both originals and clones open correctly.
       const previewOverlay = document.querySelector('.preview-overlay');
       const previewCloseButton = previewOverlay ? previewOverlay.querySelector('.preview-close-btn') : null;
-      // ZAQ TASK 2.3/2.4 — Preview template authority: bind fields from the preview overlay template.
+      // ZAQ TASK 2.3/2.4 â€” Preview template authority: bind fields from the preview overlay template.
       const previewTitleEl = previewOverlay ? previewOverlay.querySelector('h2#preview-title.preview-title') : null;
       const previewRuntimeEl = previewOverlay ? previewOverlay.querySelector('.preview-runtime') : null;
       const previewTagsEl = previewOverlay ? previewOverlay.querySelector('.preview-tags') : null;
       const previewDescriptionEl = previewOverlay ? previewOverlay.querySelector('.preview-description') : null;
 
-      // TASK 2.7 — Preview carousel scaffolding (center large, sides smaller)
+      // TASK 2.7 â€” Preview carousel scaffolding (center large, sides smaller)
       const previewCarousel = previewOverlay ? previewOverlay.querySelector('.preview-carousel') : null;
       const previewCardEl = previewOverlay ? previewOverlay.querySelector('.preview-card') : null;
 
@@ -4459,7 +4622,7 @@ body.debug-row-zones .row-nav-zone{
         }
       }
 
-      // ZAQ TASK 2.4 — Preview navigation must move the carousel (row-style center shift)
+      // ZAQ TASK 2.4 â€” Preview navigation must move the carousel (row-style center shift)
       let previewCarouselScrollAnim = null;
       function cancelPreviewCarouselScrollAnimation() {
         if (previewCarouselScrollAnim && typeof previewCarouselScrollAnim.frameId === 'number') {
@@ -4534,9 +4697,10 @@ body.debug-row-zones .row-nav-zone{
         schedulePreviewMagnifierUpdate();
       }
 
-      // ZAQ TASK 2.4 FIX — Active preview slide must follow carousel center during scrolling
+      // ZAQ TASK 2.4 FIX â€” Active preview slide must follow carousel center during scrolling
       let previewCarouselActiveRafId = null;
       let previewCarouselActiveLastSlide = null;
+      let previewCarouselSettleTimer = null;
 
       function getClosestPreviewSlideToCenter() {
         if (!previewCarousel) return null;
@@ -4638,7 +4802,29 @@ body.debug-row-zones .row-nav-zone{
         previewCarouselActiveRafId = requestAnimationFrame(() => {
           previewCarouselActiveRafId = null;
           updatePreviewActiveSlideFromCenter();
+          updatePreviewMatrixDots();
         });
+      }
+      let previewCarouselLastScrollAt = 0;
+      function schedulePreviewCarouselSettle() {
+        if (!previewCarousel) return;
+        previewCarouselLastScrollAt = performance.now();
+        if (previewCarouselSettleTimer) {
+          clearTimeout(previewCarouselSettleTimer);
+          previewCarouselSettleTimer = null;
+        }
+        previewCarouselSettleTimer = setTimeout(() => {
+          const since = performance.now() - previewCarouselLastScrollAt;
+          if (since < 220) {
+            schedulePreviewCarouselSettle();
+            return;
+          }
+          previewCarouselSettleTimer = null;
+          if (!previewCarousel || previewCarousel.classList.contains('is-dragging')) return;
+          if (previewCarousel.__scrollAnimating) return;
+          const closest = getClosestPreviewSlideToCenter();
+          if (closest) centerPreviewSlideWithAnimation(closest);
+        }, 220);
       }
 
       function startPreviewCarouselActiveTracking() {
@@ -4646,10 +4832,75 @@ body.debug-row-zones .row-nav-zone{
         if (previewCarousel.__activeTrackingInstalled) return;
         previewCarousel.__activeTrackingInstalled = true;
 
-        previewCarousel.addEventListener('scroll', schedulePreviewActiveSlideUpdate, { passive: true });
+        previewCarousel.addEventListener('scroll', () => {
+          schedulePreviewActiveSlideUpdate();
+          schedulePreviewCarouselSettle();
+        }, { passive: true });
         window.addEventListener('resize', schedulePreviewActiveSlideUpdate, { passive: true });
 
         schedulePreviewActiveSlideUpdate();
+        updatePreviewMatrixDots();
+      }
+
+      let previewMatrixCenterX = null;
+      function updatePreviewMatrixDots() {
+        if (!previewMatrixRail || !previewMatrixCursorOut || !previewMatrixCursorIn) return;
+        if (!previewCarousel) return;
+        const railRect = previewMatrixRail.getBoundingClientRect();
+        const dots = Array.from(previewMatrixRail.querySelectorAll('.preview-matrix__dot'));
+        const slides = Array.from(previewCarousel.querySelectorAll('.preview-slide'));
+        if (!dots.length || !slides.length) return;
+
+        // Continuous sync: map carousel center to rail X.
+        const carouselRect = previewCarousel.getBoundingClientRect();
+        const carouselCenter = carouselRect.left + (carouselRect.width / 2);
+
+        let closest = null;
+        let closestDist = Infinity;
+        let closestCenter = null;
+        for (const slide of slides) {
+          const rect = slide.getBoundingClientRect();
+          const center = rect.left + (rect.width / 2);
+          const dist = Math.abs(center - carouselCenter);
+          if (dist < closestDist) {
+            closestDist = dist;
+            closest = slide;
+            closestCenter = center;
+          }
+        }
+        if (!closest || closestCenter === null) return;
+
+        const localX = Math.max(0, Math.min(
+          railRect.width,
+          ((closestCenter - carouselRect.left) / carouselRect.width) * railRect.width
+        ));
+
+        previewMatrixCursorOut.style.transition = 'none';
+        previewMatrixCursorIn.style.transition = 'none';
+        previewMatrixCursorOut.style.transform = `translate(${Math.round(localX)}px, -50%)`;
+        previewMatrixCursorIn.style.transform = `translate(${Math.round(localX)}px, -50%)`;
+      }
+
+      function animatePreviewMatrixCursor(direction) {
+        // No-op: continuous sync handles motion.
+        updatePreviewMatrixDots();
+      }
+
+      function positionPreviewMatrix() {
+        if (!previewMatrix || !previewCardEl) return;
+        const rect = previewCardEl.getBoundingClientRect();
+        const offset = isMobile ? 44 : 24;
+        const maxWidth = Math.min(280, Math.max(200, rect.width * 0.7));
+        previewMatrix.style.setProperty('--preview-matrix-width', `${Math.round(maxWidth)}px`);
+        const matrixHeight = previewMatrix.offsetHeight || 24;
+        let top = rect.bottom + offset;
+        const maxTop = window.innerHeight - matrixHeight - 6;
+        if (top > maxTop) top = maxTop;
+        if (top < 6) top = 6;
+        previewMatrix.style.top = `${top}px`;
+        previewMatrix.style.bottom = 'auto';
+        previewMatrix.style.left = '50%';
+        previewMatrix.style.transform = 'translateX(-50%)';
       }
 
       function stopPreviewCarouselActiveTracking() {
@@ -4666,7 +4917,7 @@ body.debug-row-zones .row-nav-zone{
         previewCarouselActiveLastSlide = null;
       }
 
-      // ZAQ TASK 2.4 (REFINEMENT) — Preview carousel magnifier scaling (continuous, row-style)
+      // ZAQ TASK 2.4 (REFINEMENT) â€” Preview carousel magnifier scaling (continuous, row-style)
       let previewCarouselMagnifierRafId = null;
       let previewFitRafId = null;
       let previewFadeRafId = null;
@@ -4875,9 +5126,32 @@ body.debug-row-zones .row-nav-zone{
         return previewOpening || previewOverlay.classList.contains('is-visible');
       }
 
-      // ZAQ TASK 2.6 — Desktop on-screen arrows (one card per click)
+      // ZAQ TASK 2.6 â€” Desktop on-screen arrows (one card per click)
       const previewNavPrevButton = previewOverlay.querySelector('.preview-nav-arrow--left');
       const previewNavNextButton = previewOverlay.querySelector('.preview-nav-arrow--right');
+      const previewMatrixPrevButton = previewOverlay.querySelector('.preview-matrix__nav--prev');
+      const previewMatrixNextButton = previewOverlay.querySelector('.preview-matrix__nav--next');
+      const previewMatrixRail = previewOverlay.querySelector('.preview-matrix__rail');
+      const previewMatrix = previewOverlay.querySelector('.preview-matrix');
+      const previewMatrixCursorOut = previewOverlay.querySelector('.preview-matrix__cursor--out');
+      const previewMatrixCursorIn = previewOverlay.querySelector('.preview-matrix__cursor--in');
+      let previewMatrixAnimating = false;
+      let previewMatrixAnimTimer = null;
+      const previewMatrixCursor = previewOverlay.querySelector('.preview-matrix__cursor');
+      function goToPreviewSiblingSlide(direction) {
+        if (!previewCarousel || !isPreviewOpen()) return;
+        const slides = Array.from(previewCarousel.querySelectorAll('.preview-slide'));
+        if (!slides.length) return;
+        const active = previewCarousel.querySelector('.preview-slide.is-active') || getClosestPreviewSlideToCenter();
+        if (!active) return;
+        const idx = slides.indexOf(active);
+        const nextIdx = (idx + direction + slides.length) % slides.length;
+        const target = slides[nextIdx];
+        if (!target) return;
+        animatePreviewMatrixCursor(direction);
+        centerPreviewSlideWithAnimation(target);
+        schedulePreviewActiveSlideUpdate();
+      }
       if (previewNavPrevButton) {
         previewNavPrevButton.addEventListener('click', (event) => {
           if (!isPreviewOpen()) return;
@@ -4887,9 +5161,7 @@ body.debug-row-zones .row-nav-zone{
           }
           event.preventDefault();
           event.stopPropagation();
-          if (typeof window.goToPreviousCardByDomOrder === 'function') {
-            window.goToPreviousCardByDomOrder();
-          }
+          goToPreviewSiblingSlide(-1);
         });
       }
       if (previewNavNextButton) {
@@ -4901,9 +5173,7 @@ body.debug-row-zones .row-nav-zone{
           }
           event.preventDefault();
           event.stopPropagation();
-          if (typeof window.goToNextCardByDomOrder === 'function') {
-            window.goToNextCardByDomOrder();
-          }
+          goToPreviewSiblingSlide(1);
         });
       }
 
@@ -5523,7 +5793,7 @@ body.debug-row-zones .row-nav-zone{
           : (window.innerWidth <= 768);
 
         const runtime = runtimeValue || '1h 52m';
-        const tags = tagsValue || 'Thriller • Sci-Fi • Action';
+        const tags = tagsValue || 'Thriller â€¢ Sci-Fi â€¢ Action';
         const descriptionCandidate = isMobileSynopsis
           ? (descriptionMobileValue || descriptionDesktopValue)
           : (descriptionDesktopValue || descriptionMobileValue);
@@ -5852,9 +6122,10 @@ body.debug-row-zones .row-nav-zone{
       }
 
       function attachPreviewSwipeListeners() {
-        return;
         if (previewSwipeHandlers) return;
         const previewCard = previewOverlay.querySelector('.preview-card');
+        const previewMatrix = previewOverlay.querySelector('.preview-matrix');
+        const swipeZone = previewMatrix || previewCard;
         if (!previewCard) return;
 
         const SWIPE_INTENT_PX = 10;
@@ -5870,6 +6141,7 @@ body.debug-row-zones .row-nav-zone{
         let scrollableStartEl = null;
         let swipeDownEligible = false;
         let gestureDisabled = false;
+        let dragStarted = false;
         let gestureMode = null; // 'h' | 'v' | null
 
         const resetGesture = () => {
@@ -5888,10 +6160,7 @@ body.debug-row-zones .row-nav-zone{
           if (!isPreviewOpen()) return;
           if (!event.touches || event.touches.length !== 1) return;
 
-          if (event.target && event.target.closest('button, input, a, .preview-actions, .preview-volume, .preview-play-button, .preview-synopsis-button, .preview-details-tabs, .preview-details-tab, .preview-close-btn')) {
-            gestureDisabled = true;
-            return;
-          }
+        // Allow scrubbing anywhere; we'll distinguish tap vs drag by movement threshold.
 
           const t = event.touches[0];
           startX = t.clientX;
@@ -5904,13 +6173,12 @@ body.debug-row-zones .row-nav-zone{
           swipeDownEligible = !scrollableStartEl || isScrollableAtTop(scrollableStartEl);
           gestureMode = null;
           gestureDisabled = false;
+          dragStarted = false;
         };
 
         const onTouchMove = (event) => {
           if (!isPreviewOpen()) return;
           if (!event.touches || event.touches.length !== 1) return;
-          if (gestureDisabled) return;
-
           const t = event.touches[0];
           lastX = t.clientX;
           lastY = t.clientY;
@@ -5933,6 +6201,16 @@ body.debug-row-zones .row-nav-zone{
 
           if (gestureMode === 'h') {
             event.preventDefault();
+            if (!dragStarted && Math.abs(dx) > SWIPE_INTENT_PX) {
+              dragStarted = true;
+              // Prevent accidental taps when dragging over buttons/inputs.
+              if (event.target && typeof event.target.blur === 'function') {
+                event.target.blur();
+              }
+              if (previewOverlay) {
+                previewOverlay.__suppressTapUntil = performance.now() + 500;
+              }
+            }
             return;
           }
 
@@ -5957,9 +6235,9 @@ body.debug-row-zones .row-nav-zone{
             const dx = lastX - startX;
             if (Math.abs(dx) >= SWIPE_NAV_THRESHOLD_PX) {
               if (dx < 0) {
-                if (typeof window.goToNextCardByDomOrder === 'function') window.goToNextCardByDomOrder();
+                goToPreviewSiblingSlide(1);
               } else {
-                if (typeof window.goToPreviousCardByDomOrder === 'function') window.goToPreviousCardByDomOrder();
+                goToPreviewSiblingSlide(-1);
               }
             }
           }
@@ -5975,24 +6253,27 @@ body.debug-row-zones .row-nav-zone{
 
         previewSwipeHandlers = {
           previewCard,
+          swipeZone,
           onTouchStart,
           onTouchMove,
           onTouchEnd
         };
 
-        previewCard.addEventListener('touchstart', onTouchStart, { passive: true });
-        previewCard.addEventListener('touchmove', onTouchMove, { passive: false });
-        previewCard.addEventListener('touchend', onTouchEnd);
-        previewCard.addEventListener('touchcancel', onTouchEnd);
+        swipeZone.addEventListener('touchstart', onTouchStart, { passive: true });
+        swipeZone.addEventListener('touchmove', onTouchMove, { passive: false });
+        swipeZone.addEventListener('touchend', onTouchEnd);
+        swipeZone.addEventListener('touchcancel', onTouchEnd);
       }
 
 function detachPreviewSwipeListeners() {
         if (!previewSwipeHandlers) return;
-        const { previewCard, onTouchStart, onTouchMove, onTouchEnd } = previewSwipeHandlers;
-        previewCard.removeEventListener('touchstart', onTouchStart);
-        previewCard.removeEventListener('touchmove', onTouchMove);
-        previewCard.removeEventListener('touchend', onTouchEnd);
-        previewCard.removeEventListener('touchcancel', onTouchEnd);
+        const { swipeZone, onTouchStart, onTouchMove, onTouchEnd } = previewSwipeHandlers;
+        if (swipeZone) {
+          swipeZone.removeEventListener('touchstart', onTouchStart);
+          swipeZone.removeEventListener('touchmove', onTouchMove);
+          swipeZone.removeEventListener('touchend', onTouchEnd);
+          swipeZone.removeEventListener('touchcancel', onTouchEnd);
+        }
         previewSwipeHandlers = null;
       }
 
@@ -6852,6 +7133,7 @@ function detachPreviewSwipeListeners() {
         if (currentPreviewCardEl) {
           applyPreviewCopyFromCard(currentPreviewCardEl);
         }
+        positionPreviewMatrix();
       };
       function openPreviewFromCard(card, triggerElement = card, morphSourceElement = card) {
         if (!card) return;
@@ -6919,6 +7201,7 @@ function detachPreviewSwipeListeners() {
             if (currentPreviewCardEl) {
               movePreviewCardIntoSlideForCard(currentPreviewCardEl, true, true);
             }
+            positionPreviewMatrix();
           });
           // Apply any buffered swap requested while the morph tile owned the preview card.
           if (pendingPreviewSwapCard && pendingPreviewSwapCard !== currentPreviewCardEl) {
@@ -6998,6 +7281,71 @@ function detachPreviewSwipeListeners() {
         if (detailsPanel) {
           detailsPanel.setAttribute('aria-hidden', isOn ? 'false' : 'true');
         }
+      }
+      if (previewMatrixPrevButton) {
+        previewMatrixPrevButton.addEventListener('click', (event) => {
+          if (!isPreviewOpen()) return;
+          event.preventDefault();
+          event.stopPropagation();
+          goToPreviewSiblingSlide(-1);
+        });
+      }
+      if (previewMatrixNextButton) {
+        previewMatrixNextButton.addEventListener('click', (event) => {
+          if (!isPreviewOpen()) return;
+          event.preventDefault();
+          event.stopPropagation();
+          goToPreviewSiblingSlide(1);
+        });
+      }
+
+      if (previewMatrixRail) {
+        let isDragging = false;
+        let startX = 0;
+        let startScrollLeft = 0;
+        const dragThreshold = 4;
+        previewMatrixRail.addEventListener('pointerdown', (event) => {
+          if (!isPreviewOpen()) return;
+          event.preventDefault();
+          event.stopPropagation();
+          if (previewOverlay) {
+            previewOverlay.__suppressCloseUntil = performance.now() + 500;
+          }
+          isDragging = true;
+          startX = event.clientX;
+          startScrollLeft = previewCarousel ? previewCarousel.scrollLeft : 0;
+          if (previewCarousel) {
+            previewCarousel.classList.add('is-dragging');
+            cancelPreviewCarouselScrollAnimation();
+          }
+          previewMatrixRail.setPointerCapture(event.pointerId);
+        });
+        previewMatrixRail.addEventListener('pointermove', (event) => {
+          if (!isDragging || !previewCarousel) return;
+          const dx = event.clientX - startX;
+          if (Math.abs(dx) > dragThreshold) {
+            previewCarousel.scrollLeft = startScrollLeft - dx;
+            schedulePreviewMagnifierUpdate();
+            schedulePreviewActiveSlideUpdate();
+          }
+        });
+        const stopMatrixDrag = (event) => {
+          if (!isDragging) return;
+          isDragging = false;
+          if (previewCarousel) {
+            previewCarousel.classList.remove('is-dragging');
+            const closest = getClosestPreviewSlideToCenter();
+            if (closest) centerPreviewSlideWithAnimation(closest);
+          }
+          if (previewOverlay) {
+            previewOverlay.__suppressCloseUntil = performance.now() + 400;
+          }
+          if (event && event.pointerId && previewMatrixRail.hasPointerCapture(event.pointerId)) {
+            previewMatrixRail.releasePointerCapture(event.pointerId);
+          }
+        };
+        previewMatrixRail.addEventListener('pointerup', stopMatrixDrag);
+        previewMatrixRail.addEventListener('pointercancel', stopMatrixDrag);
       }
 
       function setActiveDetailsTab(name) {
@@ -7209,7 +7557,7 @@ function detachPreviewSwipeListeners() {
           previewOverlay.style.setProperty('--preview-fit-scale', '1');
         }
 
-        // ZAQ TASK 2.4 — Close preview to active card (state-consistent exit)
+        // ZAQ TASK 2.4 â€” Close preview to active card (state-consistent exit)
         // Use the authoritative active-card state for the exit target.
         const authorityCard = (typeof window.getActiveCardAuthority === 'function')
           ? window.getActiveCardAuthority()
@@ -7334,11 +7682,20 @@ function detachPreviewSwipeListeners() {
         if (!previewCard) return;
         if (previewCard.contains(event.target)) return;
         if (event.target && event.target.closest('.preview-nav-arrow')) return;
+        if (previewOverlay.__suppressCloseUntil && performance.now() < previewOverlay.__suppressCloseUntil) return;
         if (previewCarousel && typeof previewCarousel.__shouldSuppressOverlayClose === 'function') {
           if (previewCarousel.__shouldSuppressOverlayClose()) return;
         }
         closePreview();
       });
+      previewOverlay.addEventListener('click', (event) => {
+        if (!previewOverlay.__suppressTapUntil) return;
+        if (performance.now() >= previewOverlay.__suppressTapUntil) return;
+        if (previewOverlay.contains(event.target)) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }, true);
 
       document.addEventListener('click', (event) => {
         const previewButton = event.target.closest('.poster-preview-button');
@@ -7377,35 +7734,37 @@ document.addEventListener('keydown', (event) => {
   <div class="preview-overlay" aria-hidden="true">
     <button class="preview-nav-arrow preview-nav-arrow--left" type="button" aria-label="Previous">
       <span class="preview-nav-arrow__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></span>
+      <span class="preview-nav-arrow__label">Prev</span>
     </button>
     <button class="preview-nav-arrow preview-nav-arrow--right" type="button" aria-label="Next">
       <span class="preview-nav-arrow__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+      <span class="preview-nav-arrow__label">Next</span>
     </button>
     <div class="preview-carousel" aria-label="Preview carousel">
       <div class="preview-slide is-active">
         <div class="preview-card" role="dialog" aria-modal="true" aria-labelledby="preview-title">
-          <button class="preview-close-btn" type="button" aria-label="Close preview">×</button>
+          <button class="preview-close-btn" type="button" aria-label="Close preview">Ã—</button>
           <div class="preview-media">
             <!-- Later: video or wide poster goes here -->
             <div class="preview-media-placeholder"></div>
             <img class="preview-media-poster" src="images/poster-wide-A1.png" alt="Wide poster for preview">
           </div>
           <div class="preview-info">
-              <header class="preview-header">
-                <h2 id="preview-title" class="preview-title">The Unreasonably Long and Impossible-to-Skip Title That Spills Across Multiple Lines to Stress Test the Preview Header Layout</h2>
-              </header>
-              <div class="preview-content-stack">
-                <div class="preview-meta">
-                  <span class="preview-runtime">2h 14m</span>
-                  <span class="preview-tags">Prestige Drama • Mythic Noir • Alt‑History • Neo‑Western • Psychological Thriller • Courtroom Chaos • Cyber Romance • Cosmic Horror • Folk Mystery • Retro Futurism • Experimental Soundscape</span>
+            <header class="preview-header">
+              <h2 id="preview-title" class="preview-title">The Unreasonably Long and Impossible-to-Skip Title That Spills Across Multiple Lines to Stress Test the Preview Header Layout</h2>
+            </header>
+            <div class="preview-content-stack">
+              <div class="preview-meta">
+                <span class="preview-runtime">2h 14m</span>
+                <span class="preview-tags">Prestige Drama â€¢ Mythic Noir â€¢ Altâ€‘History â€¢ Neoâ€‘Western â€¢ Psychological Thriller â€¢ Courtroom Chaos â€¢ Cyber Romance â€¢ Cosmic Horror â€¢ Folk Mystery â€¢ Retro Futurism â€¢ Experimental Soundscape</span>
+              </div>
+              <div class="preview-body-stack">
+                <div class="preview-body">
+                  <p class="preview-description">
+                    This is an intentionally overlong description designed to push the limits of the preview body container, wrapping across many lines and forcing the scroll behavior to reveal how the layout handles dense narrative blocks. It layers multiple sentences with varied cadence, mentions a sweeping saga of rival archivists, and references a crossâ€‘continental chase that spans decades, climates, and shifting alliances. Even when the plot drifts into speculative territory and tangents about lost signals, the copy keeps flowing to ensure the text area is sufficiently stressed. Finally, the paragraph closes with a lingering note about unresolved mysteries, prompting the reader to keep scrolling just to see the end.
+                  </p>
                 </div>
-                <div class="preview-body-stack">
-                  <div class="preview-body">
-                    <p class="preview-description">
-                      This is an intentionally overlong description designed to push the limits of the preview body container, wrapping across many lines and forcing the scroll behavior to reveal how the layout handles dense narrative blocks. It layers multiple sentences with varied cadence, mentions a sweeping saga of rival archivists, and references a cross‑continental chase that spans decades, climates, and shifting alliances. Even when the plot drifts into speculative territory and tangents about lost signals, the copy keeps flowing to ensure the text area is sufficiently stressed. Finally, the paragraph closes with a lingering note about unresolved mysteries, prompting the reader to keep scrolling just to see the end.
-                    </p>
-                  </div>
-                  <div class="preview-details-panel" aria-hidden="true">
+                <div class="preview-details-panel" aria-hidden="true">
                   <div class="preview-details-section is-active" data-details-panel="sponsors">
                     <div class="preview-details-grid">
                       <div class="preview-details-row">
@@ -7433,27 +7792,24 @@ document.addEventListener('keydown', (event) => {
                       <div class="preview-details-row"><span class="label">Country</span><span class="value">South Africa</span></div>
                     </div>
                   </div>
-                    <div class="preview-details-section" data-details-panel="year">
+                  <div class="preview-details-section" data-details-panel="year">
                     <div class="preview-details-grid">
                       <div class="preview-details-row"><span class="label">Production</span><span class="value">2026</span></div>
                       <div class="preview-details-row"><span class="label">Release</span><span class="value">TBD</span></div>
                     </div>
                   </div>
-                    <div class="preview-details-section" data-details-panel="awards">
+                  <div class="preview-details-section" data-details-panel="awards">
                     <div class="preview-details-grid">
                       <div class="preview-details-row"><span class="label">Awards</span><span class="value">TBD</span></div>
                       <div class="preview-details-row"><span class="label">Selections</span><span class="value">TBD</span></div>
+                    </div>
                   </div>
                 </div>
               </div>
-              </div>
+            </div>
             <div class="preview-actions">
-              <button class="preview-play-button" type="button">
-                Play
-              </button>
-              <button class="preview-synopsis-button is-active" type="button">
-                Synopsis
-              </button>
+              <button class="preview-play-button" type="button">Play</button>
+              <button class="preview-synopsis-button is-active" type="button">Synopsis</button>
               <div class="preview-details-tabs" role="tablist" aria-label="Details tabs">
                 <button class="preview-details-tab is-active" type="button" data-details-tab="sponsors" role="tab" aria-selected="true">Sponsors</button>
                 <button class="preview-details-tab" type="button" data-details-tab="crew" role="tab" aria-selected="false">Crew</button>
@@ -7474,12 +7830,27 @@ document.addEventListener('keydown', (event) => {
         </div>
       </div>
     </div>
+    <div class="preview-matrix" aria-hidden="true">
+      <button class="preview-matrix__nav preview-matrix__nav--prev" type="button" aria-label="Previous">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <div class="preview-matrix__rail">
+        <span class="preview-matrix__dot"></span><span class="preview-matrix__dot"></span><span class="preview-matrix__dot"></span><span class="preview-matrix__dot"></span><span class="preview-matrix__dot"></span>
+        <span class="preview-matrix__dot"></span><span class="preview-matrix__dot"></span><span class="preview-matrix__dot"></span><span class="preview-matrix__dot"></span><span class="preview-matrix__dot"></span>
+        <span class="preview-matrix__dot"></span><span class="preview-matrix__dot"></span><span class="preview-matrix__dot"></span><span class="preview-matrix__dot"></span><span class="preview-matrix__dot"></span>
+        <span class="preview-matrix__cursor preview-matrix__cursor--out" aria-hidden="true"></span>
+        <span class="preview-matrix__cursor preview-matrix__cursor--in" aria-hidden="true"></span>
+      </div>
+      <button class="preview-matrix__nav preview-matrix__nav--next" type="button" aria-label="Next">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>
   </div>
 
 
 
 <script>
-  // ZAQ TASK 1 — "Zero Tolerance" Magnetic Pull
+  // ZAQ TASK 1 â€” "Zero Tolerance" Magnetic Pull
   (function(){
     const SETTLE_DELAY_MS = 420;   // Wait for scroll to settle
     const HERO_SETTLE_DELAY_MS = 620;
@@ -7983,7 +8354,7 @@ document.addEventListener('keydown', (event) => {
 
 
 <script>
-/* ZAQ TASK: Hero glow truth → YouTube playback (preview override wins) */
+/* ZAQ TASK: Hero glow truth â†’ YouTube playback (preview override wins) */
 (function(){
   var heroEl = document.querySelector('.hero');
   var previewEl = document.querySelector('.preview-overlay');
@@ -8161,4 +8532,8 @@ document.addEventListener('keydown', (event) => {
 
 </body>
 </html>
+
+\n<!-- WRITE TEST -->
+
+
 
