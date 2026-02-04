@@ -1588,7 +1588,7 @@ body.debug-row-zones .row-nav-zone{
     padding: 16px 18px 18px 18px;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
-    gap: 12px;
+    gap: 10px;
     opacity: var(--preview-reveal, 1);
     transform: translateY(calc(22px * (1 - var(--preview-reveal, 1))));
     transition: opacity 220ms ease, transform 260ms ease;
@@ -1618,6 +1618,7 @@ body.debug-row-zones .row-nav-zone{
     gap: 8px;
     font-size: 0.78rem;
     color: var(--muted);
+    align-items: center;
   }
 
   .preview-runtime {
@@ -1630,15 +1631,19 @@ body.debug-row-zones .row-nav-zone{
 
   .preview-tags {
     opacity: 0.9;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1.2;
   }
 
   .preview-body {
     font-size: 0.88rem;
     color: var(--muted);
     overflow: auto;
-    min-height: clamp(72px, 12vh, 120px);
-    max-height: clamp(96px, 18vh, 160px);
+    min-height: clamp(60px, 10vh, 110px);
+    max-height: clamp(84px, 16vh, 140px);
     overscroll-behavior: contain;
+    margin-top: 6px;
   }
 
   .preview-content-stack {
