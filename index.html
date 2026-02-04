@@ -9,12 +9,12 @@
   /* Design tokens */
 :root { --bg:#000; --fg:#eaeaf0; --muted:#9aa0a6; --accent:#7aa2ff; --nav-height:64px; --brand:#e31b23; --brand-glow-shadow:0 0 8px var(--brand), 0 0 24px color-mix(in srgb, var(--brand) 60%, transparent 40%); --preview-frame-radius:18px; --preview-frame-border:1px solid #262b33; --preview-frame-shadow:0 22px 60px rgba(0,0,0,0.80), 0 0 0 1px rgba(255,255,255,0.03), var(--brand-glow-shadow); --preview-morph-duration:340ms; --preview-morph-ease:cubic-bezier(0.22, 0.61, 0.36, 1); }
   :root{
-  --font-ui: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-  --font-display: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-}
+    --font-ui: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+    --font-display: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+  }
   * { box-sizing:border-box; }
   body { margin:0; font-family:var(--font-ui); background:var(--bg); color:var(--fg); line-height:1.5; overflow-x:hidden; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-  body.no-scroll { overflow:hidden; }
+    body.no-scroll { overflow:hidden; }
   html.nav-open,
   body.nav-open { overflow:hidden; overscroll-behavior:none; touch-action:none; }
   .nav-scrim {
@@ -1407,7 +1407,6 @@ body.debug-row-zones .row-nav-zone{
   .preview-card {
     width: 100%;
     max-width: 960px;
-    max-height: calc(100dvh - 96px);
     background: #05060a;
     border-radius: var(--preview-frame-radius);
     border: var(--preview-frame-border);
@@ -1644,7 +1643,7 @@ body.debug-row-zones .row-nav-zone{
 
   .preview-content-stack {
     position: relative;
-    min-height: clamp(150px, 24vh, 220px);
+    min-height: 0;
   }
 
   .preview-summary {
@@ -1992,23 +1991,22 @@ body.debug-row-zones .row-nav-zone{
     }
   }
 
-  @media (max-width: 640px) {
-    .preview-card {
-      max-width: 100%;
-      border-radius: var(--preview-frame-radius);
-      max-height: 100vh;
-    }
+    @media (max-width: 640px) {
+      .preview-card {
+        max-width: 100%;
+        border-radius: var(--preview-frame-radius);
+      }
 
     .preview-info {
       padding: 14px 14px 16px 14px;
     }
   }
 
-  @media (min-width: 641px) {
-    .preview-card {
-      max-height: calc(100vh - 32px);
+    @media (min-width: 641px) {
+      .preview-card {
+        max-height: none;
+      }
     }
-  }
 
   /* =============================
      Preview Carousel Layout (TASK 2.7)
