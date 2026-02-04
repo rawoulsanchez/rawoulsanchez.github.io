@@ -2011,12 +2011,32 @@ body.debug-row-zones .row-nav-zone{
 
     @media (max-width: 640px) {
       .preview-card {
-        max-width: 100%;
+        max-width: 92vw;
+        width: 92vw;
         border-radius: var(--preview-frame-radius);
+        margin: 0 auto;
       }
 
       .preview-info {
         padding: 14px 14px 16px 14px;
+      }
+
+      .preview-actions {
+        gap: 8px;
+        row-gap: 6px;
+      }
+
+      .preview-details-tabs {
+        flex-wrap: wrap;
+        max-width: 100%;
+        width: 100%;
+        gap: 4px;
+        row-gap: 8px;
+      }
+
+      .preview-details-tab {
+        font-size: 0.62rem;
+        padding: 0.28rem 0.48rem;
       }
 
       .preview-body-stack {
