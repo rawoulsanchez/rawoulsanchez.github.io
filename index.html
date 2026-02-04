@@ -1,4 +1,4 @@
-﻿
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -344,7 +344,7 @@ border-bottom:0;
   .title-chip-text{ letter-spacing:.09em; }
 }
 @media (min-width:768px){
-  .title-chip-text{ font-size:1.35rem; } /* matches clampâ€™s max */
+  .title-chip-text{ font-size:1.35rem; } /* matches clamp’s max */
 }
 
 /* Layout helpers used by the page */
@@ -410,7 +410,7 @@ main{
     color:var(--fg);
   }
   .footer-nav-link::before{
-    content:"â€¢";
+    content:"•";
     opacity:.6;
     margin:0 6px 0 2px;
   }
@@ -554,7 +554,7 @@ main{
 }
 
 
-/* Hero gradient: bottom â†’ top, covers full hero */
+/* Hero gradient: bottom → top, covers full hero */
 .hero-gradient{
   position:absolute;
   inset:0;                    /* cover full hero box */
@@ -755,7 +755,7 @@ main{
   }
   /* commit: no-horizontal-scroll */
 html { overflow-x: hidden; }
-/* ZAQ TASK â€” PREVIEW SCROLL LOCK: reserve scrollbar space to prevent layout shift */
+/* ZAQ TASK — PREVIEW SCROLL LOCK: reserve scrollbar space to prevent layout shift */
 html { scrollbar-gutter: stable; }
 
 /* CTA row under the hero video */
@@ -1137,7 +1137,7 @@ body.debug-row-zones .row-nav-zone{
      of the hero video box. This moves Row A as a block without
      affecting Rows B and C. */
   .after-hero .shelf.shelf--tight {
-    margin-top: 0.40rem;        /* Pills â†’ Row A label rhythm on desktop */
+    margin-top: 0.40rem;        /* Pills → Row A label rhythm on desktop */
   }
 
   .hero-cta {
@@ -1315,32 +1315,32 @@ body.debug-row-zones .row-nav-zone{
 
 :root {
   /* Hero + Row A spacing tokens, aligned to a 4px-based grid (comments only) */
-  --space-chip-meta: 0.5rem;      /* â‰ˆ 8px  = 2 Ã— 4px  (Chip â†’ Meta) */
-  --space-synopsis-pills: 2.20rem;/* â‰ˆ 35px â‰ˆ 9 Ã— 4px (Synopsis â†’ Pills) */
-  --space-pills-rowa: 0.40rem;    /* â‰ˆ 6px  â‰ˆ 1.5 Ã— 4px (Pills â†’ Row A label) */
-  --space-rowa-divider: 0.20rem;  /* â‰ˆ 3px  â‰ˆ 0.75 Ã— 4px (Row A label â†’ divider) */
+  --space-chip-meta: 0.5rem;      /* ≈ 8px  = 2 × 4px  (Chip → Meta) */
+  --space-synopsis-pills: 2.20rem;/* ≈ 35px ≈ 9 × 4px (Synopsis → Pills) */
+  --space-pills-rowa: 0.40rem;    /* ≈ 6px  ≈ 1.5 × 4px (Pills → Row A label) */
+  --space-rowa-divider: 0.20rem;  /* ≈ 3px  ≈ 0.75 × 4px (Row A label → divider) */
 
-  /* ZAQ â€“ shelf label vertical offsets */
+  /* ZAQ – shelf label vertical offsets */
   --shelf-title-shift-mobile: 2rem;    /* shift labels into gap below divider on mobile/tablet */
   --shelf-title-shift-desktop: 2.25rem;/* slightly larger shift for desktop gap */
 }
 
-/* ZAQ â€“ desktop-only vertical rhythm for hero + Row A */
+/* ZAQ – desktop-only vertical rhythm for hero + Row A */
 @media (min-width: 1024px) {
   .title-chip {
-    margin-bottom: var(--space-chip-meta);       /* Chip â†’ Meta */
+    margin-bottom: var(--space-chip-meta);       /* Chip → Meta */
   }
 
   .hero-cta {
-    margin-top: var(--space-synopsis-pills);     /* Synopsis â†’ Pills */
+    margin-top: var(--space-synopsis-pills);     /* Synopsis → Pills */
   }
 
   .shelf.shelf--tight {
-    margin-top: var(--space-pills-rowa);         /* Pills â†’ Row A Label */
+    margin-top: var(--space-pills-rowa);         /* Pills → Row A Label */
   }
 
   .shelf-title {
-    margin-bottom: var(--space-rowa-divider);    /* Row A Label â†’ Divider */
+    margin-bottom: var(--space-rowa-divider);    /* Row A Label → Divider */
     transform: translateY(var(--shelf-title-shift-desktop));
   }
 }
@@ -1395,7 +1395,7 @@ body.debug-row-zones .row-nav-zone{
     );
   }
 
-  /* Future: when we add JS, weâ€™ll toggle this class */
+  /* Future: when we add JS, we’ll toggle this class */
   .preview-overlay.is-visible {
     z-index: 11000;
     opacity: 1;
@@ -1640,10 +1640,8 @@ body.debug-row-zones .row-nav-zone{
     font-size: 0.88rem;
     color: var(--muted);
     overflow: auto;
-    min-height: clamp(60px, 10vh, 110px);
-    max-height: clamp(84px, 16vh, 140px);
-    overscroll-behavior: contain;
     margin-top: 6px;
+    margin-bottom: 10px;
   }
 
   .preview-content-stack {
@@ -1651,11 +1649,21 @@ body.debug-row-zones .row-nav-zone{
     min-height: 0;
   }
 
-  .preview-summary {
+  .preview-body-stack {
+    position: relative;
+  }
+
+  .preview-body {
+    height: 100%;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  .preview-body {
     transition: opacity 220ms ease, transform 260ms ease;
   }
 
-  .preview-card.is-details .preview-summary {
+  .preview-card.is-details .preview-body {
     opacity: 0;
     transform: translateY(-6px);
     pointer-events: none;
@@ -1668,6 +1676,7 @@ body.debug-row-zones .row-nav-zone{
     transform: translateY(8px);
     transition: opacity 220ms ease, transform 260ms ease;
     pointer-events: none;
+    overflow: hidden;
   }
 
   .preview-card.is-details .preview-details-panel {
@@ -1692,7 +1701,7 @@ body.debug-row-zones .row-nav-zone{
   .preview-details-row {
     display: grid;
     grid-template-columns: 120px 1fr;
-    gap: 12px;
+    gap: 16px;
     font-size: 0.92rem;
     color: #cbd1d8;
   }
@@ -1716,7 +1725,7 @@ body.debug-row-zones .row-nav-zone{
   .preview-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
     justify-content: flex-start;
     padding: 0 6px env(safe-area-inset-bottom, 0px);
     align-items: center;
@@ -1724,6 +1733,10 @@ body.debug-row-zones .row-nav-zone{
     z-index: 9;
     cursor: default;
     pointer-events: auto;
+  }
+
+  .preview-volume {
+    margin-left: 0;
   }
 
   .preview-actions button {
@@ -2002,10 +2015,38 @@ body.debug-row-zones .row-nav-zone{
         border-radius: var(--preview-frame-radius);
       }
 
-    .preview-info {
-      padding: 14px 14px 16px 14px;
+      .preview-info {
+        padding: 14px 14px 16px 14px;
+      }
+
+      .preview-body-stack {
+        min-height: calc(1.4em * 4);
+        max-height: calc(1.4em * 4);
+      }
+
+      .preview-body {
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 4;
+        overflow: hidden;
+      }
+
+      .preview-play-button,
+      .preview-synopsis-button,
+      .preview-volume {
+        order: 1;
+      }
+
+      .preview-details-tabs {
+        order: 2;
+        flex-basis: 100%;
+      }
+
+      .preview-volume {
+        margin-left: 0;
+      }
     }
-  }
 
     @media (min-width: 641px) {
       .preview-card {
@@ -2216,7 +2257,7 @@ body.debug-row-zones .row-nav-zone{
     </nav>
   </div>
   <div class="nav-overlay" aria-hidden="true">
-    <button class="nav-overlay-close" type="button" aria-label="Close menu">Ã—</button>
+    <button class="nav-overlay-close" type="button" aria-label="Close menu">×</button>
     <nav class="nav-overlay-menu" aria-label="Mobile navigation">
       <a href="#hero">Film</a>
       <a href="#photography">Photography</a>
@@ -2241,7 +2282,7 @@ body.debug-row-zones .row-nav-zone{
     <div class="hero-debug" aria-hidden="true"></div>
   </div>
 
-  <!-- Hero gradient: bottom â†’ top -->
+  <!-- Hero gradient: bottom → top -->
   <div class="hero-gradient" aria-hidden="true"></div>
 
   <!-- Overlay area locked to viewport edges -->
@@ -2307,11 +2348,31 @@ body.debug-row-zones .row-nav-zone{
   </div>
   <div class="hero-preview-source" hidden>
     <div class="shelf-track" data-row="Hero" role="list" aria-label="Hero preview posters">
-      <a class="poster" role="listitem" aria-label="Hero 1" data-label="Hero 1" data-title="Hero 1" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t1x7Q0IA3Os?t=15" data-youtube-play-url="" data-poster-vert="images/Hero 1.png" data-poster-wide="images/Hero 1.png" data-morph-id="morph-hero-01"><img src="images/Hero 1.png" alt="Hero 1 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-      <a class="poster" role="listitem" aria-label="Hero 2" data-label="Hero 2" data-title="Hero 2" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t1x7Q0IA3Os?t=45" data-youtube-play-url="" data-poster-vert="images/Hero 2.png" data-poster-wide="images/Hero 2.png" data-morph-id="morph-hero-02"><img src="images/Hero 2.png" alt="Hero 2 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-      <a class="poster" role="listitem" aria-label="Hero 3" data-label="Hero 3" data-title="Hero 3" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t1x7Q0IA3Os?t=75" data-youtube-play-url="" data-poster-vert="images/Hero 3.png" data-poster-wide="images/Hero 3.png" data-morph-id="morph-hero-03"><img src="images/Hero 3.png" alt="Hero 3 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-      <a class="poster" role="listitem" aria-label="Hero 4" data-label="Hero 4" data-title="Hero 4" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t1x7Q0IA3Os?t=105" data-youtube-play-url="" data-poster-vert="images/Hero 4.png" data-poster-wide="images/Hero 4.png" data-morph-id="morph-hero-04"><img src="images/Hero 4.png" alt="Hero 4 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-      <a class="poster" role="listitem" aria-label="Hero 5" data-label="Hero 5" data-title="Hero 5" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t1x7Q0IA3Os?t=135" data-youtube-play-url="" data-poster-vert="images/Hero 5.png" data-poster-wide="images/Hero 5.png" data-morph-id="morph-hero-05"><img src="images/Hero 5.png" alt="Hero 5 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="Hero 1" data-label="Hero 1" data-title="Hero 1" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t1x7Q0IA3Os?t=15" data-youtube-play-url="" data-poster-vert="images/Hero 1.png" data-poster-wide="images/Hero 1.png" data-morph-id="morph-hero-01"><img src="images/Hero 1.png" alt="Hero 1 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="Hero 2" data-label="Hero 2" data-title="Hero 2" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t1x7Q0IA3Os?t=45" data-youtube-play-url="" data-poster-vert="images/Hero 2.png" data-poster-wide="images/Hero 2.png" data-morph-id="morph-hero-02"><img src="images/Hero 2.png" alt="Hero 2 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="Hero 3" data-label="Hero 3" data-title="Hero 3" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t1x7Q0IA3Os?t=75" data-youtube-play-url="" data-poster-vert="images/Hero 3.png" data-poster-wide="images/Hero 3.png" data-morph-id="morph-hero-03"><img src="images/Hero 3.png" alt="Hero 3 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="Hero 4" data-label="Hero 4" data-title="Hero 4" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t1x7Q0IA3Os?t=105" data-youtube-play-url="" data-poster-vert="images/Hero 4.png" data-poster-wide="images/Hero 4.png" data-morph-id="morph-hero-04"><img src="images/Hero 4.png" alt="Hero 4 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="Hero 5" data-label="Hero 5" data-title="Hero 5" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t1x7Q0IA3Os?t=135" data-youtube-play-url="" data-poster-vert="images/Hero 5.png" data-poster-wide="images/Hero 5.png" data-morph-id="morph-hero-05"><img src="images/Hero 5.png" alt="Hero 5 poster"><button class="poster-preview-button" type="button">Preview</button></a>
     </div>
   </div>
 <!-- This wrapper div was limiting the width and causing the pink background to leak. -->
@@ -2327,16 +2388,56 @@ body.debug-row-zones .row-nav-zone{
     </div>
     <div class="shelf-outer">
       <div class="shelf-track" data-row="A" role="list" aria-label="Row A posters">
-        <a class="poster" role="listitem" aria-label="A1" data-label="A1" data-title="A1" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/OePuntIsxk4?si=Jz16wdbWQ0rZksW_&t=276" data-youtube-play-url="" data-poster-vert="images/poster-vert-A1.png" data-poster-wide="images/poster-wide-A1.png" data-morph-id="morph-01"><img src="images/poster-vert-A1.png" alt="Sanchez Ninjah A1 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-        <a class="poster" role="listitem" aria-label="A2" data-label="A2" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/VDxo-pW3EPc?si=6_ZHof-z_NIBqFtg" data-poster-vert="images/poster-vert-A2.png" data-poster-wide="images/poster-wide-A2.png" data-morph-id="morph-02"><img src="images/poster-vert-A2.png" alt="A2 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-        <a class="poster" role="listitem" aria-label="A3" data-label="A3" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t4z2DbgCOr0?si=cL3qRQBr_SpIjVoA&t=82" data-poster-vert="images/poster-vert-A3.png" data-poster-wide="images/poster-wide-A3.png" data-morph-id="morph-03"><img src="images/poster-vert-A3.png" alt="A3 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-        <a class="poster" role="listitem" aria-label="A4" data-label="A4" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/AC9ZOFEZD20?si=4tM7nUr18Zt7jI6t&t=11" data-poster-vert="images/poster-vert-A4.png" data-poster-wide="images/poster-wide-A4.png" data-morph-id="morph-04"><img src="images/poster-vert-A4.png" alt="A4 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-        <a class="poster" role="listitem" aria-label="A5" data-label="A5" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/kjjKoP_Pm-Q?si=ZYNH9PAHOexUDivQ" data-poster-vert="images/poster-vert-A5.png" data-poster-wide="images/poster-wide-A5.png" data-morph-id="morph-05"><img src="images/poster-vert-A5.png" alt="A5 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-        <a class="poster" role="listitem" aria-label="A6" data-label="A6" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/WodvZGCNg14?si=MRjMnKfPQ7F02lr1" data-poster-vert="images/poster-vert-A6.png" data-poster-wide="images/poster-wide-A6.png" data-morph-id="morph-06"><img src="images/poster-vert-A6.png" alt="A6 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-        <a class="poster" role="listitem" aria-label="A7" data-label="A7" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/VBdaOkpLe_o?si=xjttKahNt6XkK3TM&t=20" data-poster-vert="images/poster-vert-A7.png" data-poster-wide="images/poster-wide-A7.png" data-morph-id="morph-07"><img src="images/poster-vert-A7.png" alt="A7 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-        <a class="poster" role="listitem" aria-label="A8" data-label="A8" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/3aHOoTboHxU?si=4bt2CLzGSC4M3mgP&t=153" data-poster-vert="images/poster-vert-A8.png" data-poster-wide="images/poster-wide-A8.png" data-morph-id="morph-08"><img src="images/poster-vert-A8.png" alt="A8 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-        <a class="poster" role="listitem" aria-label="A9" data-label="A9" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/QXnVXN7ZOdc?si=VoM_8IccUnuEQ465&t=25" data-poster-vert="images/poster-vert-A9.png" data-poster-wide="images/poster-wide-A9.png" data-morph-id="morph-09"><img src="images/poster-vert-A9.png" alt="A9 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-        <a class="poster" role="listitem" aria-label="A10" data-label="A10" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/yTza2aIiy9w?si=rtv-cD6MORy5uJ4D" data-poster-vert="images/poster-vert-A10.png" data-poster-wide="images/poster-wide-A10.png" data-morph-id="morph-10"><img src="images/poster-vert-A10.png" alt="A10 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A1" data-label="A1" data-title="A1" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/OePuntIsxk4?si=Jz16wdbWQ0rZksW_&t=276" data-youtube-play-url="" data-poster-vert="images/poster-vert-A1.png" data-poster-wide="images/poster-wide-A1.png" data-morph-id="morph-01"><img src="images/poster-vert-A1.png" alt="Sanchez Ninjah A1 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A2" data-label="A2" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/VDxo-pW3EPc?si=6_ZHof-z_NIBqFtg" data-poster-vert="images/poster-vert-A2.png" data-poster-wide="images/poster-wide-A2.png" data-morph-id="morph-02"><img src="images/poster-vert-A2.png" alt="A2 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A3" data-label="A3" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/t4z2DbgCOr0?si=cL3qRQBr_SpIjVoA&t=82" data-poster-vert="images/poster-vert-A3.png" data-poster-wide="images/poster-wide-A3.png" data-morph-id="morph-03"><img src="images/poster-vert-A3.png" alt="A3 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A4" data-label="A4" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/AC9ZOFEZD20?si=4tM7nUr18Zt7jI6t&t=11" data-poster-vert="images/poster-vert-A4.png" data-poster-wide="images/poster-wide-A4.png" data-morph-id="morph-04"><img src="images/poster-vert-A4.png" alt="A4 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A5" data-label="A5" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/kjjKoP_Pm-Q?si=ZYNH9PAHOexUDivQ" data-poster-vert="images/poster-vert-A5.png" data-poster-wide="images/poster-wide-A5.png" data-morph-id="morph-05"><img src="images/poster-vert-A5.png" alt="A5 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A6" data-label="A6" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/WodvZGCNg14?si=MRjMnKfPQ7F02lr1" data-poster-vert="images/poster-vert-A6.png" data-poster-wide="images/poster-wide-A6.png" data-morph-id="morph-06"><img src="images/poster-vert-A6.png" alt="A6 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A7" data-label="A7" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/VBdaOkpLe_o?si=xjttKahNt6XkK3TM&t=20" data-poster-vert="images/poster-vert-A7.png" data-poster-wide="images/poster-wide-A7.png" data-morph-id="morph-07"><img src="images/poster-vert-A7.png" alt="A7 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A8" data-label="A8" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/3aHOoTboHxU?si=4bt2CLzGSC4M3mgP&t=153" data-poster-vert="images/poster-vert-A8.png" data-poster-wide="images/poster-wide-A8.png" data-morph-id="morph-08"><img src="images/poster-vert-A8.png" alt="A8 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A9" data-label="A9" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/QXnVXN7ZOdc?si=VoM_8IccUnuEQ465&t=25" data-poster-vert="images/poster-vert-A9.png" data-poster-wide="images/poster-wide-A9.png" data-morph-id="morph-09"><img src="images/poster-vert-A9.png" alt="A9 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+        <a class="poster" role="listitem" aria-label="A10" data-label="A10" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="https://youtu.be/yTza2aIiy9w?si=rtv-cD6MORy5uJ4D" data-poster-vert="images/poster-vert-A10.png" data-poster-wide="images/poster-wide-A10.png" data-morph-id="morph-10"><img src="images/poster-vert-A10.png" alt="A10 poster"><button class="poster-preview-button" type="button">Preview</button></a>
       </div>
     </div>
   </section>
@@ -2350,16 +2451,56 @@ body.debug-row-zones .row-nav-zone{
   </div>
   <div class="shelf-outer">
     <div class="shelf-track" data-row="B" role="list" aria-label="Row B posters">
-      <a class="poster" role="listitem" aria-label="B1" data-label="B1" data-title="TBD Title B1" data-description="TBD Description B1" data-runtime="TBD Runtime B1" data-tags="TBD Tags B1" data-youtube-url="TBD YouTube URL B1" data-poster-vert="images/poster-vert-A1.png" data-poster-wide="images/poster-wide-A1.png" data-morph-id="morph-11"><img src="images/poster-vert-A1.png" alt="B1 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-      <a class="poster" role="listitem" aria-label="B2" data-label="B2" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A2.png" data-poster-wide="images/poster-wide-A2.png" data-morph-id="morph-12"><img src="images/poster-vert-A2.png" alt="B2 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-      <a class="poster" role="listitem" aria-label="B3" data-label="B3" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A3.png" data-poster-wide="images/poster-wide-A3.png" data-morph-id="morph-13"><img src="images/poster-vert-A3.png" alt="B3 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-      <a class="poster" role="listitem" aria-label="B4" data-label="B4" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A4.png" data-poster-wide="images/poster-wide-A4.png" data-morph-id="morph-14"><img src="images/poster-vert-A4.png" alt="B4 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-      <a class="poster" role="listitem" aria-label="B5" data-label="B5" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A5.png" data-poster-wide="images/poster-wide-A5.png" data-morph-id="morph-15"><img src="images/poster-vert-A5.png" alt="B5 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-      <a class="poster" role="listitem" aria-label="B6" data-label="B6" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A6.png" data-poster-wide="images/poster-wide-A6.png" data-morph-id="morph-16"><img src="images/poster-vert-A6.png" alt="B6 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-      <a class="poster" role="listitem" aria-label="B7" data-label="B7" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A7.png" data-poster-wide="images/poster-wide-A7.png" data-morph-id="morph-17"><img src="images/poster-vert-A7.png" alt="B7 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-      <a class="poster" role="listitem" aria-label="B8" data-label="B8" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A8.png" data-poster-wide="images/poster-wide-A8.png" data-morph-id="morph-18"><img src="images/poster-vert-A8.png" alt="B8 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-      <a class="poster" role="listitem" aria-label="B9" data-label="B9" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A9.png" data-poster-wide="images/poster-wide-A9.png" data-morph-id="morph-19"><img src="images/poster-vert-A9.png" alt="B9 poster"><button class="poster-preview-button" type="button">Preview</button></a>
-      <a class="poster" role="listitem" aria-label="B10" data-label="B10" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A10.png" data-poster-wide="images/poster-wide-A10.png" data-morph-id="morph-20"><img src="images/poster-vert-A10.png" alt="B10 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B1" data-label="B1" data-title="TBD Title B1" data-description-desktop="TBD Description B1" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="TBD Runtime B1" data-tags="TBD Tags B1" data-youtube-url="TBD YouTube URL B1" data-poster-vert="images/poster-vert-A1.png" data-poster-wide="images/poster-wide-A1.png" data-morph-id="morph-11"><img src="images/poster-vert-A1.png" alt="B1 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B2" data-label="B2" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A2.png" data-poster-wide="images/poster-wide-A2.png" data-morph-id="morph-12"><img src="images/poster-vert-A2.png" alt="B2 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B3" data-label="B3" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A3.png" data-poster-wide="images/poster-wide-A3.png" data-morph-id="morph-13"><img src="images/poster-vert-A3.png" alt="B3 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B4" data-label="B4" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A4.png" data-poster-wide="images/poster-wide-A4.png" data-morph-id="morph-14"><img src="images/poster-vert-A4.png" alt="B4 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B5" data-label="B5" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A5.png" data-poster-wide="images/poster-wide-A5.png" data-morph-id="morph-15"><img src="images/poster-vert-A5.png" alt="B5 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B6" data-label="B6" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A6.png" data-poster-wide="images/poster-wide-A6.png" data-morph-id="morph-16"><img src="images/poster-vert-A6.png" alt="B6 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B7" data-label="B7" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A7.png" data-poster-wide="images/poster-wide-A7.png" data-morph-id="morph-17"><img src="images/poster-vert-A7.png" alt="B7 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B8" data-label="B8" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A8.png" data-poster-wide="images/poster-wide-A8.png" data-morph-id="morph-18"><img src="images/poster-vert-A8.png" alt="B8 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B9" data-label="B9" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A9.png" data-poster-wide="images/poster-wide-A9.png" data-morph-id="morph-19"><img src="images/poster-vert-A9.png" alt="B9 poster"><button class="poster-preview-button" type="button">Preview</button></a>
+      <a class="poster" role="listitem" aria-label="B10" data-label="B10" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-A10.png" data-poster-wide="images/poster-wide-A10.png" data-morph-id="morph-20"><img src="images/poster-vert-A10.png" alt="B10 poster"><button class="poster-preview-button" type="button">Preview</button></a>
     </div>
   </div>
 </section>
@@ -2371,16 +2512,56 @@ body.debug-row-zones .row-nav-zone{
   </div>
   <div class="shelf-outer">
     <div class="shelf-track" data-row="C" role="list" aria-label="Row C posters">
-      <a class="poster" role="listitem" aria-label="C1" data-label="C1" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C1.png" data-poster-wide="images/poster-wide-C1.png"></a>
-      <a class="poster" role="listitem" aria-label="C2" data-label="C2" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C2.png" data-poster-wide="images/poster-wide-C2.png"></a>
-      <a class="poster" role="listitem" aria-label="C3" data-label="C3" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C3.png" data-poster-wide="images/poster-wide-C3.png"></a>
-      <a class="poster" role="listitem" aria-label="C4" data-label="C4" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C4.png" data-poster-wide="images/poster-wide-C4.png"></a>
-      <a class="poster" role="listitem" aria-label="C5" data-label="C5" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C5.png" data-poster-wide="images/poster-wide-C5.png"></a>
-      <a class="poster" role="listitem" aria-label="C6" data-label="C6" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C6.png" data-poster-wide="images/poster-wide-C6.png"></a>
-      <a class="poster" role="listitem" aria-label="C7" data-label="C7" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C7.png" data-poster-wide="images/poster-wide-C7.png"></a>
-      <a class="poster" role="listitem" aria-label="C8" data-label="C8" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C8.png" data-poster-wide="images/poster-wide-C8.png"></a>
-      <a class="poster" role="listitem" aria-label="C9" data-label="C9" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C9.png" data-poster-wide="images/poster-wide-C9.png"></a>
-      <a class="poster" role="listitem" aria-label="C10" data-label="C10" data-title="" data-description="" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C10.png" data-poster-wide="images/poster-wide-C10.png"></a>
+      <a class="poster" role="listitem" aria-label="C1" data-label="C1" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C1.png" data-poster-wide="images/poster-wide-C1.png"></a>
+      <a class="poster" role="listitem" aria-label="C2" data-label="C2" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C2.png" data-poster-wide="images/poster-wide-C2.png"></a>
+      <a class="poster" role="listitem" aria-label="C3" data-label="C3" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C3.png" data-poster-wide="images/poster-wide-C3.png"></a>
+      <a class="poster" role="listitem" aria-label="C4" data-label="C4" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C4.png" data-poster-wide="images/poster-wide-C4.png"></a>
+      <a class="poster" role="listitem" aria-label="C5" data-label="C5" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C5.png" data-poster-wide="images/poster-wide-C5.png"></a>
+      <a class="poster" role="listitem" aria-label="C6" data-label="C6" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C6.png" data-poster-wide="images/poster-wide-C6.png"></a>
+      <a class="poster" role="listitem" aria-label="C7" data-label="C7" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C7.png" data-poster-wide="images/poster-wide-C7.png"></a>
+      <a class="poster" role="listitem" aria-label="C8" data-label="C8" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C8.png" data-poster-wide="images/poster-wide-C8.png"></a>
+      <a class="poster" role="listitem" aria-label="C9" data-label="C9" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C9.png" data-poster-wide="images/poster-wide-C9.png"></a>
+      <a class="poster" role="listitem" aria-label="C10" data-label="C10" data-title="" data-description-desktop="" data-description-mobile="0001 02 3 000004 00000000005 00000000006 0007 008 000009 00000000010
+00011 012 013 00000000000014 00015 016 0017 00018 000019 0000020
+000000021 000022 0023 00000024 00000025 0000026 0027 0000000028 0000029 0030
+00000031 000032 00000033 00034 00035 00036 00037 00000038 039 40
+000041 00042 00043 0044 0000045 0046 00047 000000048 000000049" data-runtime="" data-tags="" data-youtube-url="" data-poster-vert="images/poster-vert-C10.png" data-poster-wide="images/poster-wide-C10.png"></a>
     </div>
   </div>
 </section>
@@ -2394,7 +2575,7 @@ body.debug-row-zones .row-nav-zone{
   <div class="section-anchor" id="contact"></div>
 
   <div id="fullscreen-player-wrapper" class="fullscreen-player-wrapper" hidden>
-    <button type="button" class="fullscreen-player-close" aria-label="Close fullscreen playback">Ã—</button>
+    <button type="button" class="fullscreen-player-close" aria-label="Close fullscreen playback">×</button>
     <div class="fullscreen-player-inner">
       <div id="fullscreen-player"></div>
     </div>
@@ -2405,7 +2586,7 @@ body.debug-row-zones .row-nav-zone{
   <div id="footer-lock-sentinel" aria-hidden="true"></div>
   <div id="footer-placeholder" aria-hidden="true"></div>
   <footer>
-    Â© <span id="y"></span> Rawoul
+    © <span id="y"></span> Rawoul
     <nav class="footer-nav" aria-label="Footer navigation">
       <a class="footer-nav-link footer-nav-link--active" href="#hero" aria-label="Go to Film section">Film</a>
       <a class="footer-nav-link" href="#photography" aria-label="Go to Photography section">Photography</a>
@@ -2939,7 +3120,7 @@ body.debug-row-zones .row-nav-zone{
       const anchor = document.querySelector('.hero-cta-anchor');
       if(!cta || !anchor || !anchor.parentElement) return;
 
-      // Use the parentâ€™s current width as the stable base
+      // Use the parent’s current width as the stable base
       const base = anchor.parentElement.getBoundingClientRect().width;
 
       // Target = 67% of that base (i.e., 1/3 shorter)
@@ -2980,12 +3161,12 @@ body.debug-row-zones .row-nav-zone{
     const RECENTER_DURATION = 1800; // ms, slow cinematic glide
     const ROW_NAV_DURATION = 700;   // ms, faster single-card nudge
     const activeScrollAnimations = new Map();
-    // ZAQ TASK 1 â€” Mobile breakpoint helper (matches existing CSS @media max-width:640px)
+    // ZAQ TASK 1 — Mobile breakpoint helper (matches existing CSS @media max-width:640px)
     const MOBILE_MQ = window.matchMedia('(max-width: 768px)');
     function isMobileView(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
     window.isMobileView = isMobileView;
 
-    // ZAQ TASK 2.0 â€” Active Card Authority (foundational)
+    // ZAQ TASK 2.0 — Active Card Authority (foundational)
     // Single, explicit source of truth for the currently focused card.
     if (!window.__activeCardAuthority) {
       window.__activeCardAuthority = { current: null };
@@ -3004,7 +3185,7 @@ body.debug-row-zones .row-nav-zone{
       return window.__activeCardAuthority.current || null;
     };
 
-    // ZAQ TASK 2.1 â€” Next / Previous Navigation Core (DOM order + WRAP)
+    // ZAQ TASK 2.1 — Next / Previous Navigation Core (DOM order + WRAP)
     function getNavCardsInDomOrder(currentCard){
       if (currentCard && typeof currentCard.closest === 'function') {
         const heroTrack = currentCard.closest('.shelf-track[data-row="Hero"]');
@@ -3147,7 +3328,7 @@ body.debug-row-zones .row-nav-zone{
 
     const shelfTracks = Array.from(document.querySelectorAll('.shelf-track'));
 
-    // ZAQ TASK 2.3 â€” Row scroll sync to active card (center match)
+    // ZAQ TASK 2.3 — Row scroll sync to active card (center match)
     // When the authoritative active-card changes (e.g., from preview navigation),
     // scroll ONLY the containing row so the matching card becomes centered.
     document.addEventListener('zaq-active-card-change', (e) => {
@@ -3188,7 +3369,7 @@ body.debug-row-zones .row-nav-zone{
 
     let windowScrollRaf = null;
 
-    // ZAQ TASK â€” SOFT-PULL VERTICAL ROW CENTERING (REDUCE JUMP)
+    // ZAQ TASK — SOFT-PULL VERTICAL ROW CENTERING (REDUCE JUMP)
     const VERTICAL_CENTER_CONFIG = {
       desktop: { settleDelay: 180, duration: 1200, deadzone: 32 }, // ms / ms / px
       mobile: { settleDelay: 240, duration: 1500, deadzone: 24 } // gentler, longer glide
@@ -4061,13 +4242,13 @@ body.debug-row-zones .row-nav-zone{
       // and per-card data-morph-id so both originals and clones open correctly.
       const previewOverlay = document.querySelector('.preview-overlay');
       const previewCloseButton = previewOverlay ? previewOverlay.querySelector('.preview-close-btn') : null;
-      // ZAQ TASK 2.3/2.4 â€” Preview template authority: bind fields from the preview overlay template.
+      // ZAQ TASK 2.3/2.4 — Preview template authority: bind fields from the preview overlay template.
       const previewTitleEl = previewOverlay ? previewOverlay.querySelector('h2#preview-title.preview-title') : null;
       const previewRuntimeEl = previewOverlay ? previewOverlay.querySelector('.preview-runtime') : null;
       const previewTagsEl = previewOverlay ? previewOverlay.querySelector('.preview-tags') : null;
       const previewDescriptionEl = previewOverlay ? previewOverlay.querySelector('.preview-description') : null;
 
-      // TASK 2.7 â€” Preview carousel scaffolding (center large, sides smaller)
+      // TASK 2.7 — Preview carousel scaffolding (center large, sides smaller)
       const previewCarousel = previewOverlay ? previewOverlay.querySelector('.preview-carousel') : null;
       const previewCardEl = previewOverlay ? previewOverlay.querySelector('.preview-card') : null;
 
@@ -4258,7 +4439,7 @@ body.debug-row-zones .row-nav-zone{
         }
       }
 
-      // ZAQ TASK 2.4 â€” Preview navigation must move the carousel (row-style center shift)
+      // ZAQ TASK 2.4 — Preview navigation must move the carousel (row-style center shift)
       let previewCarouselScrollAnim = null;
       function cancelPreviewCarouselScrollAnimation() {
         if (previewCarouselScrollAnim && typeof previewCarouselScrollAnim.frameId === 'number') {
@@ -4333,7 +4514,7 @@ body.debug-row-zones .row-nav-zone{
         schedulePreviewMagnifierUpdate();
       }
 
-      // ZAQ TASK 2.4 FIX â€” Active preview slide must follow carousel center during scrolling
+      // ZAQ TASK 2.4 FIX — Active preview slide must follow carousel center during scrolling
       let previewCarouselActiveRafId = null;
       let previewCarouselActiveLastSlide = null;
 
@@ -4465,7 +4646,7 @@ body.debug-row-zones .row-nav-zone{
         previewCarouselActiveLastSlide = null;
       }
 
-      // ZAQ TASK 2.4 (REFINEMENT) â€” Preview carousel magnifier scaling (continuous, row-style)
+      // ZAQ TASK 2.4 (REFINEMENT) — Preview carousel magnifier scaling (continuous, row-style)
       let previewCarouselMagnifierRafId = null;
       let previewFitRafId = null;
       let previewFadeRafId = null;
@@ -4674,7 +4855,7 @@ body.debug-row-zones .row-nav-zone{
         return previewOpening || previewOverlay.classList.contains('is-visible');
       }
 
-      // ZAQ TASK 2.6 â€” Desktop on-screen arrows (one card per click)
+      // ZAQ TASK 2.6 — Desktop on-screen arrows (one card per click)
       const previewNavPrevButton = previewOverlay.querySelector('.preview-nav-arrow--left');
       const previewNavNextButton = previewOverlay.querySelector('.preview-nav-arrow--right');
       if (previewNavPrevButton) {
@@ -5315,11 +5496,18 @@ body.debug-row-zones .row-nav-zone{
 
         const runtimeValue = (card.getAttribute('data-runtime') || '').trim();
         const tagsValue = (card.getAttribute('data-tags') || '').trim();
-        const descriptionValue = (card.getAttribute('data-description') || '').trim();
+        const descriptionDesktopValue = (card.getAttribute('data-description-desktop') || card.getAttribute('data-description') || '').trim();
+        const descriptionMobileValue = (card.getAttribute('data-description-mobile') || '').trim();
+        const isMobileSynopsis = (typeof window.matchMedia === 'function')
+          ? window.matchMedia('(max-width: 768px)').matches
+          : (window.innerWidth <= 768);
 
         const runtime = runtimeValue || '1h 52m';
-        const tags = tagsValue || 'Thriller â€¢ Sci-Fi â€¢ Action';
-        const description = descriptionValue ||
+        const tags = tagsValue || 'Thriller • Sci-Fi • Action';
+        const descriptionCandidate = isMobileSynopsis
+          ? (descriptionMobileValue || descriptionDesktopValue)
+          : (descriptionDesktopValue || descriptionMobileValue);
+        const description = descriptionCandidate ||
           'This is a static placeholder description used for layout validation only. It is intentionally long so the text wraps across multiple lines and reveals spacing, rhythm, and hierarchy inside the Preview Modal. Replace this copy with real content in a later task once the layout has been visually approved.';
 
         previewTitleEl.textContent = title;
@@ -6641,6 +6829,9 @@ function detachPreviewSwipeListeners() {
       const handlePreviewResize = () => {
         if (!isPreviewOpen()) return;
         fitPreviewToViewport();
+        if (currentPreviewCardEl) {
+          applyPreviewCopyFromCard(currentPreviewCardEl);
+        }
       };
       function openPreviewFromCard(card, triggerElement = card, morphSourceElement = card) {
         if (!card) return;
@@ -6998,7 +7189,7 @@ function detachPreviewSwipeListeners() {
           previewOverlay.style.setProperty('--preview-fit-scale', '1');
         }
 
-        // ZAQ TASK 2.4 â€” Close preview to active card (state-consistent exit)
+        // ZAQ TASK 2.4 — Close preview to active card (state-consistent exit)
         // Use the authoritative active-card state for the exit target.
         const authorityCard = (typeof window.getActiveCardAuthority === 'function')
           ? window.getActiveCardAuthority()
@@ -7173,7 +7364,7 @@ document.addEventListener('keydown', (event) => {
     <div class="preview-carousel" aria-label="Preview carousel">
       <div class="preview-slide is-active">
         <div class="preview-card" role="dialog" aria-modal="true" aria-labelledby="preview-title">
-          <button class="preview-close-btn" type="button" aria-label="Close preview">Ã—</button>
+          <button class="preview-close-btn" type="button" aria-label="Close preview">×</button>
           <div class="preview-media">
             <!-- Later: video or wide poster goes here -->
             <div class="preview-media-placeholder"></div>
@@ -7184,18 +7375,17 @@ document.addEventListener('keydown', (event) => {
                 <h2 id="preview-title" class="preview-title">The Unreasonably Long and Impossible-to-Skip Title That Spills Across Multiple Lines to Stress Test the Preview Header Layout</h2>
               </header>
               <div class="preview-content-stack">
-                <div class="preview-summary">
-                  <div class="preview-meta">
-                    <span class="preview-runtime">2h 14m</span>
-                    <span class="preview-tags">Prestige Drama â€¢ Mythic Noir â€¢ Altâ€‘History â€¢ Neoâ€‘Western â€¢ Psychological Thriller â€¢ Courtroom Chaos â€¢ Cyber Romance â€¢ Cosmic Horror â€¢ Folk Mystery â€¢ Retro Futurism â€¢ Experimental Soundscape</span>
-                  </div>
+                <div class="preview-meta">
+                  <span class="preview-runtime">2h 14m</span>
+                  <span class="preview-tags">Prestige Drama • Mythic Noir • Alt‑History • Neo‑Western • Psychological Thriller • Courtroom Chaos • Cyber Romance • Cosmic Horror • Folk Mystery • Retro Futurism • Experimental Soundscape</span>
+                </div>
+                <div class="preview-body-stack">
                   <div class="preview-body">
                     <p class="preview-description">
-                      This is an intentionally overlong description designed to push the limits of the preview body container, wrapping across many lines and forcing the scroll behavior to reveal how the layout handles dense narrative blocks. It layers multiple sentences with varied cadence, mentions a sweeping saga of rival archivists, and references a crossâ€‘continental chase that spans decades, climates, and shifting alliances. Even when the plot drifts into speculative territory and tangents about lost signals, the copy keeps flowing to ensure the text area is sufficiently stressed. Finally, the paragraph closes with a lingering note about unresolved mysteries, prompting the reader to keep scrolling just to see the end.
+                      This is an intentionally overlong description designed to push the limits of the preview body container, wrapping across many lines and forcing the scroll behavior to reveal how the layout handles dense narrative blocks. It layers multiple sentences with varied cadence, mentions a sweeping saga of rival archivists, and references a cross‑continental chase that spans decades, climates, and shifting alliances. Even when the plot drifts into speculative territory and tangents about lost signals, the copy keeps flowing to ensure the text area is sufficiently stressed. Finally, the paragraph closes with a lingering note about unresolved mysteries, prompting the reader to keep scrolling just to see the end.
                     </p>
                   </div>
-                </div>
-                <div class="preview-details-panel" aria-hidden="true">
+                  <div class="preview-details-panel" aria-hidden="true">
                   <div class="preview-details-section is-active" data-details-panel="sponsors">
                     <div class="preview-details-grid">
                       <div class="preview-details-row">
@@ -7223,19 +7413,19 @@ document.addEventListener('keydown', (event) => {
                       <div class="preview-details-row"><span class="label">Country</span><span class="value">South Africa</span></div>
                     </div>
                   </div>
-                  <div class="preview-details-section" data-details-panel="year">
+                    <div class="preview-details-section" data-details-panel="year">
                     <div class="preview-details-grid">
                       <div class="preview-details-row"><span class="label">Production</span><span class="value">2026</span></div>
                       <div class="preview-details-row"><span class="label">Release</span><span class="value">TBD</span></div>
                     </div>
                   </div>
-                  <div class="preview-details-section" data-details-panel="awards">
+                    <div class="preview-details-section" data-details-panel="awards">
                     <div class="preview-details-grid">
                       <div class="preview-details-row"><span class="label">Awards</span><span class="value">TBD</span></div>
                       <div class="preview-details-row"><span class="label">Selections</span><span class="value">TBD</span></div>
-                    </div>
                   </div>
                 </div>
+              </div>
               </div>
             <div class="preview-actions">
               <button class="preview-play-button" type="button">
@@ -7269,7 +7459,7 @@ document.addEventListener('keydown', (event) => {
 
 
 <script>
-  // ZAQ TASK 1 â€” "Zero Tolerance" Magnetic Pull
+  // ZAQ TASK 1 — "Zero Tolerance" Magnetic Pull
   (function(){
     const SETTLE_DELAY_MS = 420;   // Wait for scroll to settle
     const HERO_SETTLE_DELAY_MS = 620;
@@ -7773,7 +7963,7 @@ document.addEventListener('keydown', (event) => {
 
 
 <script>
-/* ZAQ TASK: Hero glow truth â†’ YouTube playback (preview override wins) */
+/* ZAQ TASK: Hero glow truth → YouTube playback (preview override wins) */
 (function(){
   var heroEl = document.querySelector('.hero');
   var previewEl = document.querySelector('.preview-overlay');
