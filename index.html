@@ -1152,7 +1152,8 @@ body.debug-row-zones .row-nav-zone{
   }
 
   .preview-play-button,
-  .preview-details-button {
+  .preview-details-button,
+  .preview-synopsis-button {
     font-size: 0.95rem;
     padding: 0.50rem 0.80rem;
   }
@@ -1587,13 +1588,14 @@ body.debug-row-zones .row-nav-zone{
   .preview-info {
     padding: 16px 18px 18px 18px;
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
     gap: 12px;
     opacity: var(--preview-reveal, 1);
     transform: translateY(calc(22px * (1 - var(--preview-reveal, 1))));
     transition: opacity 220ms ease, transform 260ms ease;
     position: relative;
     z-index: 6;
+    min-height: 0;
   }
 
   .preview-header {
@@ -1635,6 +1637,72 @@ body.debug-row-zones .row-nav-zone{
     font-size: 0.88rem;
     color: var(--muted);
     overflow: auto;
+    min-height: clamp(72px, 12vh, 120px);
+    max-height: clamp(96px, 18vh, 160px);
+    overscroll-behavior: contain;
+  }
+
+  .preview-content-stack {
+    position: relative;
+    min-height: clamp(150px, 24vh, 220px);
+  }
+
+  .preview-summary {
+    transition: opacity 220ms ease, transform 260ms ease;
+  }
+
+  .preview-card.is-details .preview-summary {
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+  }
+
+  .preview-details-panel {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 220ms ease, transform 260ms ease;
+    pointer-events: none;
+  }
+
+  .preview-card.is-details .preview-details-panel {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .preview-details-section {
+    display: none;
+  }
+
+  .preview-details-section.is-active {
+    display: block;
+  }
+
+  .preview-details-grid {
+    display: grid;
+    gap: 10px;
+  }
+
+  .preview-details-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 12px;
+    font-size: 0.92rem;
+    color: #cbd1d8;
+  }
+
+  .preview-details-row .label {
+    color: #9aa0a6;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.68rem;
+  }
+
+  .preview-details-row .value {
+    color: #e6e9ee;
   }
 
   .preview-description {
@@ -1646,11 +1714,63 @@ body.debug-row-zones .row-nav-zone{
     flex-wrap: wrap;
     gap: 10px;
     justify-content: flex-start;
-    padding: 0 6px;
+    padding: 0 6px env(safe-area-inset-bottom, 0px);
+    align-items: center;
+    position: relative;
+    z-index: 9;
+    cursor: default;
+    pointer-events: auto;
   }
 
+  .preview-actions button {
+    cursor: pointer;
+  }
+
+  .preview-details-tabs {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    transition: opacity 220ms ease, transform 280ms ease;
+    white-space: nowrap;
+  }
+
+  .preview-card.is-details .preview-details-tabs {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .preview-details-tab {
+    appearance: none;
+    border-radius: 999px;
+    padding: 0.38rem 0.62rem;
+    font: 700 0.72rem/1 var(--font-ui);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 0;
+    background: rgba(255,255,255,0.08);
+    color: #c8cdd5;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.20);
+    transition: color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  }
+
+  .preview-details-tab.is-active {
+    color: #ffffff;
+    background: rgba(255,255,255,0.16);
+    box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.45);
+  }
+
+  .preview-details-tab:hover {
+    color: #ffffff;
+    box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.45);
+  }
   .preview-play-button,
-  .preview-details-button {
+  .preview-details-button,
+  .preview-synopsis-button {
     appearance: none;
     border-radius: 999px;
     padding: 0.42rem 0.56rem;
@@ -1671,14 +1791,22 @@ body.debug-row-zones .row-nav-zone{
     background: #e6e6e6;
   }
 
-  .preview-details-button {
+  .preview-details-button,
+  .preview-synopsis-button {
     background: rgba(255,255,255,0.10);
     color: #eaeaf0;
     box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.28);
   }
 
-  .preview-details-button:hover {
+  .preview-details-button:hover,
+  .preview-synopsis-button:hover {
     box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.5);
+  }
+
+  .preview-synopsis-button.is-active {
+    background: rgba(255,255,255,0.18);
+    color: #ffffff;
+    box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.6);
   }
 
   .preview-volume {
@@ -4061,6 +4189,9 @@ body.debug-row-zones .row-nav-zone{
 
             previewCarousel.addEventListener('mousedown', (event) => {
               if (event.button !== 0) return;
+              if (event.target && event.target.closest('.preview-actions, .preview-play-button, .preview-synopsis-button, .preview-details-tabs, .preview-details-tab')) {
+                return;
+              }
               if (event.target && event.target.closest('.preview-volume, .preview-volume__sliderWrap, .preview-volume__slider')) {
                 return;
               }
@@ -5546,7 +5677,7 @@ body.debug-row-zones .row-nav-zone{
           if (!isPreviewOpen()) return;
           if (!event.touches || event.touches.length !== 1) return;
 
-          if (event.target && event.target.closest('button, input, a, .preview-actions, .preview-volume, .preview-play-button, .preview-details-button, .preview-close-btn')) {
+          if (event.target && event.target.closest('button, input, a, .preview-actions, .preview-volume, .preview-play-button, .preview-synopsis-button, .preview-details-tabs, .preview-details-tab, .preview-close-btn')) {
             gestureDisabled = true;
             return;
           }
@@ -6510,6 +6641,11 @@ function detachPreviewSwipeListeners() {
       };
       function openPreviewFromCard(card, triggerElement = card, morphSourceElement = card) {
         if (!card) return;
+        setDetailsMode(false);
+        if (previewDetailsTabButtons && previewDetailsTabButtons.length) {
+          const defaultTab = previewDetailsTabButtons[0].getAttribute('data-details-tab');
+          setActiveDetailsTab(defaultTab);
+        }
         // ZAQ TASK 1.8: Pause hero video when preview begins opening.
         previewOpening = true;
         schedulePreviewNavPulse();
@@ -6629,6 +6765,39 @@ function detachPreviewSwipeListeners() {
 
       const heroDetailsButton = document.querySelector('.hero-details-button');
       const previewPlayButton = document.querySelector('.preview-play-button');
+      const previewSynopsisButton = document.querySelector('.preview-synopsis-button');
+      const previewDetailsTabs = document.querySelector('.preview-details-tabs');
+      const previewDetailsTabButtons = previewDetailsTabs
+        ? Array.from(previewDetailsTabs.querySelectorAll('[data-details-tab]'))
+        : [];
+      const previewDetailsSections = Array.from(document.querySelectorAll('.preview-details-section[data-details-panel]'));
+      const previewActions = document.querySelector('.preview-actions');
+      const previewCardRoot = document.querySelector('.preview-card');
+
+      function setDetailsMode(isOn) {
+        if (!previewCardRoot) return;
+        previewCardRoot.classList.toggle('is-details', isOn);
+        if (previewSynopsisButton) {
+          previewSynopsisButton.classList.toggle('is-active', !isOn);
+        }
+        const detailsPanel = document.querySelector('.preview-details-panel');
+        if (detailsPanel) {
+          detailsPanel.setAttribute('aria-hidden', isOn ? 'false' : 'true');
+        }
+      }
+
+      function setActiveDetailsTab(name) {
+        if (!name) return;
+        previewDetailsTabButtons.forEach((btn) => {
+          const isActive = btn.getAttribute('data-details-tab') === name;
+          btn.classList.toggle('is-active', isActive);
+          btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+        previewDetailsSections.forEach((section) => {
+          const isActive = section.getAttribute('data-details-panel') === name;
+          section.classList.toggle('is-active', isActive);
+        });
+      }
 
       function getHeroMiddleSetCard() {
         if (!heroPreviewTrack) return heroPreviewSource;
@@ -6665,6 +6834,36 @@ function detachPreviewSwipeListeners() {
             const resolvedPlayUrl = playVideoId ? `https://youtu.be/${playVideoId}` : playUrl;
             openFullscreenPlayback(resolvedPlayUrl);
           }
+        });
+      }
+
+      if (previewSynopsisButton) {
+        previewSynopsisButton.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          setDetailsMode(false);
+        });
+      }
+
+      if (previewActions) {
+        previewActions.addEventListener('click', (event) => {
+          const synopsisBtn = event.target && event.target.closest('.preview-synopsis-button');
+          if (!synopsisBtn) return;
+          event.preventDefault();
+          event.stopPropagation();
+          setDetailsMode(false);
+        });
+      }
+
+      if (previewDetailsTabs) {
+        previewDetailsTabs.addEventListener('click', (event) => {
+          const button = event.target && event.target.closest('[data-details-tab]');
+          if (!button) return;
+          event.preventDefault();
+          event.stopPropagation();
+          const tabName = button.getAttribute('data-details-tab');
+          setDetailsMode(true);
+          setActiveDetailsTab(tabName);
         });
       }
 
@@ -6777,6 +6976,7 @@ function detachPreviewSwipeListeners() {
 
       function closePreview() {
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
+        setDetailsMode(false);
         previewOpening = false;
         previewNavPulseReady = false;
         clearPreviewNavPulseTimer();
@@ -6977,25 +7177,77 @@ document.addEventListener('keydown', (event) => {
             <img class="preview-media-poster" src="images/poster-wide-A1.png" alt="Wide poster for preview">
           </div>
           <div class="preview-info">
-            <header class="preview-header">
-              <h2 id="preview-title" class="preview-title">The Unreasonably Long and Impossible-to-Skip Title That Spills Across Multiple Lines to Stress Test the Preview Header Layout</h2>
-              <div class="preview-meta">
-                <span class="preview-runtime">2h 14m</span>
-                <span class="preview-tags">Prestige Drama â€¢ Mythic Noir â€¢ Altâ€‘History â€¢ Neoâ€‘Western â€¢ Psychological Thriller â€¢ Courtroom Chaos â€¢ Cyber Romance â€¢ Cosmic Horror â€¢ Folk Mystery â€¢ Retro Futurism â€¢ Experimental Soundscape</span>
+              <header class="preview-header">
+                <h2 id="preview-title" class="preview-title">The Unreasonably Long and Impossible-to-Skip Title That Spills Across Multiple Lines to Stress Test the Preview Header Layout</h2>
+              </header>
+              <div class="preview-content-stack">
+                <div class="preview-summary">
+                  <div class="preview-meta">
+                    <span class="preview-runtime">2h 14m</span>
+                    <span class="preview-tags">Prestige Drama â€¢ Mythic Noir â€¢ Altâ€‘History â€¢ Neoâ€‘Western â€¢ Psychological Thriller â€¢ Courtroom Chaos â€¢ Cyber Romance â€¢ Cosmic Horror â€¢ Folk Mystery â€¢ Retro Futurism â€¢ Experimental Soundscape</span>
+                  </div>
+                  <div class="preview-body">
+                    <p class="preview-description">
+                      This is an intentionally overlong description designed to push the limits of the preview body container, wrapping across many lines and forcing the scroll behavior to reveal how the layout handles dense narrative blocks. It layers multiple sentences with varied cadence, mentions a sweeping saga of rival archivists, and references a crossâ€‘continental chase that spans decades, climates, and shifting alliances. Even when the plot drifts into speculative territory and tangents about lost signals, the copy keeps flowing to ensure the text area is sufficiently stressed. Finally, the paragraph closes with a lingering note about unresolved mysteries, prompting the reader to keep scrolling just to see the end.
+                    </p>
+                  </div>
+                </div>
+                <div class="preview-details-panel" aria-hidden="true">
+                  <div class="preview-details-section is-active" data-details-panel="sponsors">
+                    <div class="preview-details-grid">
+                      <div class="preview-details-row">
+                        <span class="label">Sponsors</span>
+                        <span class="value">Sanchez Studio, Neon Arc, Pulse Thread</span>
+                      </div>
+                      <div class="preview-details-row">
+                        <span class="label">Partners</span>
+                        <span class="value">Kinetic House, Ember Labs</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="preview-details-section" data-details-panel="crew">
+                    <div class="preview-details-grid">
+                      <div class="preview-details-row"><span class="label">Director</span><span class="value">TBD</span></div>
+                      <div class="preview-details-row"><span class="label">Choreographer</span><span class="value">TBD</span></div>
+                      <div class="preview-details-row"><span class="label">Editor</span><span class="value">TBD</span></div>
+                      <div class="preview-details-row"><span class="label">DP</span><span class="value">TBD</span></div>
+                    </div>
+                  </div>
+                  <div class="preview-details-section" data-details-panel="location">
+                    <div class="preview-details-grid">
+                      <div class="preview-details-row"><span class="label">City</span><span class="value">Cape Town</span></div>
+                      <div class="preview-details-row"><span class="label">Venue</span><span class="value">TBD</span></div>
+                      <div class="preview-details-row"><span class="label">Country</span><span class="value">South Africa</span></div>
+                    </div>
+                  </div>
+                  <div class="preview-details-section" data-details-panel="year">
+                    <div class="preview-details-grid">
+                      <div class="preview-details-row"><span class="label">Production</span><span class="value">2026</span></div>
+                      <div class="preview-details-row"><span class="label">Release</span><span class="value">TBD</span></div>
+                    </div>
+                  </div>
+                  <div class="preview-details-section" data-details-panel="awards">
+                    <div class="preview-details-grid">
+                      <div class="preview-details-row"><span class="label">Awards</span><span class="value">TBD</span></div>
+                      <div class="preview-details-row"><span class="label">Selections</span><span class="value">TBD</span></div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </header>
-            <div class="preview-body">
-              <p class="preview-description">
-                This is an intentionally overlong description designed to push the limits of the preview body container, wrapping across many lines and forcing the scroll behavior to reveal how the layout handles dense narrative blocks. It layers multiple sentences with varied cadence, mentions a sweeping saga of rival archivists, and references a crossâ€‘continental chase that spans decades, climates, and shifting alliances. Even when the plot drifts into speculative territory and tangents about lost signals, the copy keeps flowing to ensure the text area is sufficiently stressed. Finally, the paragraph closes with a lingering note about unresolved mysteries, prompting the reader to keep scrolling just to see the end.
-              </p>
-            </div>
             <div class="preview-actions">
               <button class="preview-play-button" type="button">
                 Play
               </button>
-              <button class="preview-details-button" type="button">
-                Details
+              <button class="preview-synopsis-button is-active" type="button">
+                Synopsis
               </button>
+              <div class="preview-details-tabs" role="tablist" aria-label="Details tabs">
+                <button class="preview-details-tab is-active" type="button" data-details-tab="sponsors" role="tab" aria-selected="true">Sponsors</button>
+                <button class="preview-details-tab" type="button" data-details-tab="crew" role="tab" aria-selected="false">Crew</button>
+                <button class="preview-details-tab" type="button" data-details-tab="location" role="tab" aria-selected="false">Location</button>
+                <button class="preview-details-tab" type="button" data-details-tab="year" role="tab" aria-selected="false">Year</button>
+                <button class="preview-details-tab" type="button" data-details-tab="awards" role="tab" aria-selected="false">Awards</button>
+              </div>
               <div class="preview-volume" aria-label="Preview volume control">
                 <button class="preview-volume__btn" type="button" aria-label="Preview volume">
                   <span aria-hidden="true">&#128266;</span>
