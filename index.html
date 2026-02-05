@@ -1,4 +1,4 @@
-﻿
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -344,7 +344,7 @@ border-bottom:0;
   .title-chip-text{ letter-spacing:.09em; }
 }
 @media (min-width:768px){
-  .title-chip-text{ font-size:1.35rem; } /* matches clampâ€™s max */
+  .title-chip-text{ font-size:1.35rem; } /* matches clamp’s max */
 }
 
 /* Layout helpers used by the page */
@@ -410,7 +410,7 @@ main{
     color:var(--fg);
   }
   .footer-nav-link::before{
-    content:"â€¢";
+    content:"•";
     opacity:.6;
     margin:0 6px 0 2px;
   }
@@ -554,7 +554,7 @@ main{
 }
 
 
-/* Hero gradient: bottom â†’ top, covers full hero */
+/* Hero gradient: bottom → top, covers full hero */
 .hero-gradient{
   position:absolute;
   inset:0;                    /* cover full hero box */
@@ -755,7 +755,7 @@ main{
   }
   /* commit: no-horizontal-scroll */
 html { overflow-x: hidden; }
-/* ZAQ TASK â€” PREVIEW SCROLL LOCK: reserve scrollbar space to prevent layout shift */
+/* ZAQ TASK — PREVIEW SCROLL LOCK: reserve scrollbar space to prevent layout shift */
 html { scrollbar-gutter: stable; }
 
 /* CTA row under the hero video */
@@ -1137,7 +1137,7 @@ body.debug-row-zones .row-nav-zone{
      of the hero video box. This moves Row A as a block without
      affecting Rows B and C. */
   .after-hero .shelf.shelf--tight {
-    margin-top: 0.40rem;        /* Pills â†’ Row A label rhythm on desktop */
+    margin-top: 0.40rem;        /* Pills → Row A label rhythm on desktop */
   }
 
   .hero-cta {
@@ -1315,32 +1315,32 @@ body.debug-row-zones .row-nav-zone{
 
 :root {
   /* Hero + Row A spacing tokens, aligned to a 4px-based grid (comments only) */
-  --space-chip-meta: 0.5rem;      /* â‰ˆ 8px  = 2 Ã— 4px  (Chip â†’ Meta) */
-  --space-synopsis-pills: 2.20rem;/* â‰ˆ 35px â‰ˆ 9 Ã— 4px (Synopsis â†’ Pills) */
-  --space-pills-rowa: 0.40rem;    /* â‰ˆ 6px  â‰ˆ 1.5 Ã— 4px (Pills â†’ Row A label) */
-  --space-rowa-divider: 0.20rem;  /* â‰ˆ 3px  â‰ˆ 0.75 Ã— 4px (Row A label â†’ divider) */
+  --space-chip-meta: 0.5rem;      /* ≈ 8px  = 2 × 4px  (Chip → Meta) */
+  --space-synopsis-pills: 2.20rem;/* ≈ 35px ≈ 9 × 4px (Synopsis → Pills) */
+  --space-pills-rowa: 0.40rem;    /* ≈ 6px  ≈ 1.5 × 4px (Pills → Row A label) */
+  --space-rowa-divider: 0.20rem;  /* ≈ 3px  ≈ 0.75 × 4px (Row A label → divider) */
 
-  /* ZAQ â€“ shelf label vertical offsets */
+  /* ZAQ – shelf label vertical offsets */
   --shelf-title-shift-mobile: 2rem;    /* shift labels into gap below divider on mobile/tablet */
   --shelf-title-shift-desktop: 2.25rem;/* slightly larger shift for desktop gap */
 }
 
-/* ZAQ â€“ desktop-only vertical rhythm for hero + Row A */
+/* ZAQ – desktop-only vertical rhythm for hero + Row A */
 @media (min-width: 1024px) {
   .title-chip {
-    margin-bottom: var(--space-chip-meta);       /* Chip â†’ Meta */
+    margin-bottom: var(--space-chip-meta);       /* Chip → Meta */
   }
 
   .hero-cta {
-    margin-top: var(--space-synopsis-pills);     /* Synopsis â†’ Pills */
+    margin-top: var(--space-synopsis-pills);     /* Synopsis → Pills */
   }
 
   .shelf.shelf--tight {
-    margin-top: var(--space-pills-rowa);         /* Pills â†’ Row A Label */
+    margin-top: var(--space-pills-rowa);         /* Pills → Row A Label */
   }
 
   .shelf-title {
-    margin-bottom: var(--space-rowa-divider);    /* Row A Label â†’ Divider */
+    margin-bottom: var(--space-rowa-divider);    /* Row A Label → Divider */
     transform: translateY(var(--shelf-title-shift-desktop));
   }
 }
@@ -1396,7 +1396,7 @@ body.debug-row-zones .row-nav-zone{
     );
   }
 
-  /* Future: when we add JS, weâ€™ll toggle this class */
+  /* Future: when we add JS, we’ll toggle this class */
   .preview-overlay.is-visible {
     z-index: 11000;
     opacity: 1;
@@ -1426,6 +1426,21 @@ body.debug-row-zones .row-nav-zone{
 
   .preview-card.is-active {
     opacity: 1;
+  }
+
+  .preview-card.is-side {
+    opacity: 1;
+    pointer-events: none;
+  }
+  .preview-card.is-side .preview-close-btn {
+    display: none;
+  }
+  .preview-card.is-side .preview-actions button,
+  .preview-card.is-side .preview-volume {
+    opacity: 0.55;
+  }
+  .preview-card.is-side .preview-teaser-player {
+    display: none;
   }
 
   .preview-card.is-hidden {
@@ -2279,21 +2294,72 @@ body.debug-row-zones .row-nav-zone{
   .preview-slide.is-active{
     opacity: 1;
   }
-  .preview-slide-ghost{
-    width: 100%;
-    border-radius: var(--preview-frame-radius);
-    border: 1px solid #262b33;
-    background: #05060a;
-    box-shadow: 0 18px 44px rgba(0,0,0,0.62), 0 0 0 1px rgba(255,255,255,0.02);
-    overflow: hidden;
-    display: block;
+
+  /* Debug: preview card geometry box */
+  .preview-debug-box {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    border: 2px solid rgba(255, 64, 0, 0.9);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.6);
+    pointer-events: none;
+    z-index: 12000;
+    opacity: 0;
   }
-  .preview-slide-ghost img{
-    display: block;
-    width: 100%;
+  body.debug-layout .preview-debug-box {
+    opacity: 1;
+  }
+  .preview-debug-box::before,
+  .preview-debug-box::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 1px;
     height: 100%;
-    object-fit: cover;
-    aspect-ratio: 16 / 9;
+    background: rgba(255, 64, 0, 0.65);
+    transform: translateX(-50%);
+  }
+  .preview-debug-box::after {
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    transform: translateY(-50%);
+  }
+
+  /* Debug: draggable guide lines */
+  .preview-debug-guides {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 12001;
+  }
+  .preview-debug-guide {
+    position: fixed;
+    background: rgba(255, 230, 0, 0.9);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.4);
+    pointer-events: none;
+    opacity: 0.85;
+  }
+  .preview-debug-guide.is-vertical {
+    top: 0;
+    width: 2px;
+    height: 100vh;
+  }
+  .preview-debug-guide.is-horizontal {
+    left: 0;
+    height: 2px;
+    width: 100vw;
+  }
+  body.debug-move .preview-debug-guide {
+    pointer-events: auto;
+    cursor: grab;
+  }
+  body.debug-move .preview-debug-guide.is-dragging {
+    cursor: grabbing;
   }
   @media (max-width: 640px){
     .preview-carousel{
@@ -2444,7 +2510,7 @@ body.debug-row-zones .row-nav-zone{
     </nav>
   </div>
   <div class="nav-overlay" aria-hidden="true">
-    <button class="nav-overlay-close" type="button" aria-label="Close menu">Ã—</button>
+    <button class="nav-overlay-close" type="button" aria-label="Close menu">×</button>
     <nav class="nav-overlay-menu" aria-label="Mobile navigation">
       <a href="#hero">Film</a>
       <a href="#photography">Photography</a>
@@ -2469,7 +2535,7 @@ body.debug-row-zones .row-nav-zone{
     <div class="hero-debug" aria-hidden="true"></div>
   </div>
 
-  <!-- Hero gradient: bottom â†’ top -->
+  <!-- Hero gradient: bottom → top -->
   <div class="hero-gradient" aria-hidden="true"></div>
 
   <!-- Overlay area locked to viewport edges -->
@@ -2762,7 +2828,7 @@ body.debug-row-zones .row-nav-zone{
   <div class="section-anchor" id="contact"></div>
 
   <div id="fullscreen-player-wrapper" class="fullscreen-player-wrapper" hidden>
-    <button type="button" class="fullscreen-player-close" aria-label="Close fullscreen playback">Ã—</button>
+    <button type="button" class="fullscreen-player-close" aria-label="Close fullscreen playback">×</button>
     <div class="fullscreen-player-inner">
       <div id="fullscreen-player"></div>
     </div>
@@ -2773,7 +2839,7 @@ body.debug-row-zones .row-nav-zone{
   <div id="footer-lock-sentinel" aria-hidden="true"></div>
   <div id="footer-placeholder" aria-hidden="true"></div>
   <footer>
-    Â© <span id="y"></span> Rawoul
+    © <span id="y"></span> Rawoul
     <nav class="footer-nav" aria-label="Footer navigation">
       <a class="footer-nav-link footer-nav-link--active" href="#hero" aria-label="Go to Film section">Film</a>
       <a class="footer-nav-link" href="#photography" aria-label="Go to Photography section">Photography</a>
@@ -3307,7 +3373,7 @@ body.debug-row-zones .row-nav-zone{
       const anchor = document.querySelector('.hero-cta-anchor');
       if(!cta || !anchor || !anchor.parentElement) return;
 
-      // Use the parentâ€™s current width as the stable base
+      // Use the parent’s current width as the stable base
       const base = anchor.parentElement.getBoundingClientRect().width;
 
       // Target = 67% of that base (i.e., 1/3 shorter)
@@ -3348,12 +3414,12 @@ body.debug-row-zones .row-nav-zone{
     const RECENTER_DURATION = 1800; // ms, slow cinematic glide
     const ROW_NAV_DURATION = 700;   // ms, faster single-card nudge
     const activeScrollAnimations = new Map();
-    // ZAQ TASK 1 â€” Mobile breakpoint helper (matches existing CSS @media max-width:640px)
+    // ZAQ TASK 1 — Mobile breakpoint helper (matches existing CSS @media max-width:640px)
     const MOBILE_MQ = window.matchMedia('(max-width: 768px)');
     function isMobileView(){ return !!(MOBILE_MQ && MOBILE_MQ.matches); }
     window.isMobileView = isMobileView;
 
-    // ZAQ TASK 2.0 â€” Active Card Authority (foundational)
+    // ZAQ TASK 2.0 — Active Card Authority (foundational)
     // Single, explicit source of truth for the currently focused card.
     if (!window.__activeCardAuthority) {
       window.__activeCardAuthority = { current: null };
@@ -3372,7 +3438,7 @@ body.debug-row-zones .row-nav-zone{
       return window.__activeCardAuthority.current || null;
     };
 
-    // ZAQ TASK 2.1 â€” Next / Previous Navigation Core (DOM order + WRAP)
+    // ZAQ TASK 2.1 — Next / Previous Navigation Core (DOM order + WRAP)
     function getNavCardsInDomOrder(currentCard){
       if (currentCard && typeof currentCard.closest === 'function') {
         const heroTrack = currentCard.closest('.shelf-track[data-row="Hero"]');
@@ -3515,7 +3581,7 @@ body.debug-row-zones .row-nav-zone{
 
     const shelfTracks = Array.from(document.querySelectorAll('.shelf-track'));
 
-    // ZAQ TASK 2.3 â€” Row scroll sync to active card (center match)
+    // ZAQ TASK 2.3 — Row scroll sync to active card (center match)
     // When the authoritative active-card changes (e.g., from preview navigation),
     // scroll ONLY the containing row so the matching card becomes centered.
     document.addEventListener('zaq-active-card-change', (e) => {
@@ -3556,7 +3622,7 @@ body.debug-row-zones .row-nav-zone{
 
     let windowScrollRaf = null;
 
-    // ZAQ TASK â€” SOFT-PULL VERTICAL ROW CENTERING (REDUCE JUMP)
+    // ZAQ TASK — SOFT-PULL VERTICAL ROW CENTERING (REDUCE JUMP)
     const VERTICAL_CENTER_CONFIG = {
       desktop: { settleDelay: 180, duration: 1200, deadzone: 32 }, // ms / ms / px
       mobile: { settleDelay: 240, duration: 1500, deadzone: 24 } // gentler, longer glide
@@ -4429,20 +4495,138 @@ body.debug-row-zones .row-nav-zone{
       // and per-card data-morph-id so both originals and clones open correctly.
       const previewOverlay = document.querySelector('.preview-overlay');
       const previewCloseButton = previewOverlay ? previewOverlay.querySelector('.preview-close-btn') : null;
-      // ZAQ TASK 2.3/2.4 â€” Preview template authority: bind fields from the preview overlay template.
+      // ZAQ TASK 2.3/2.4 — Preview template authority: bind fields from the preview overlay template.
       const previewTitleEl = previewOverlay ? previewOverlay.querySelector('h2#preview-title.preview-title') : null;
       const previewRuntimeEl = previewOverlay ? previewOverlay.querySelector('.preview-runtime') : null;
       const previewTagsEl = previewOverlay ? previewOverlay.querySelector('.preview-tags') : null;
       const previewDescriptionEl = previewOverlay ? previewOverlay.querySelector('.preview-description') : null;
 
-      // TASK 2.7 â€” Preview carousel scaffolding (center large, sides smaller)
+      // TASK 2.7 — Preview carousel scaffolding (center large, sides smaller)
       const previewCarousel = previewOverlay ? previewOverlay.querySelector('.preview-carousel') : null;
-      const previewCardEl = previewOverlay ? previewOverlay.querySelector('.preview-card') : null;
+      const previewCardEl = previewOverlay ? previewOverlay.querySelector('.preview-card:not(.is-side)') : null;
+      let previewSideCardLeftEl = null;
+      let previewSideCardRightEl = null;
 
       const previewSlideMap = new Map();
       const previewPosterToSlide = new WeakMap();
       let previewCarouselSourceTrack = null;
       let previewCarouselSourceCards = null;
+
+      function stripIdsFromTree(root) {
+        if (!root) return;
+        if (root.removeAttribute) {
+          root.removeAttribute('id');
+          root.removeAttribute('aria-labelledby');
+          root.removeAttribute('aria-describedby');
+        }
+        const withIds = root.querySelectorAll ? root.querySelectorAll('[id], [aria-labelledby], [aria-describedby]') : [];
+        for (const el of withIds) {
+          if (el.removeAttribute) {
+            el.removeAttribute('id');
+            el.removeAttribute('aria-labelledby');
+            el.removeAttribute('aria-describedby');
+          }
+        }
+      }
+
+      function createSidePreviewCard() {
+        if (!previewCardEl) return null;
+        const clone = previewCardEl.cloneNode(true);
+        stripIdsFromTree(clone);
+        clone.classList.remove('is-active');
+        clone.classList.remove('is-hidden');
+        clone.classList.add('is-side');
+        clone.setAttribute('aria-hidden', 'true');
+        clone.setAttribute('role', 'presentation');
+        clone.style.opacity = '1';
+        clone.style.transition = '';
+        clone.style.transform = '';
+        const teaser = clone.querySelector('.preview-teaser-player');
+        if (teaser && teaser.parentNode) {
+          teaser.parentNode.removeChild(teaser);
+        }
+        return clone;
+      }
+
+      function ensureSidePreviewCards() {
+        if (!previewSideCardLeftEl) previewSideCardLeftEl = createSidePreviewCard();
+        if (!previewSideCardRightEl) previewSideCardRightEl = createSidePreviewCard();
+      }
+
+      function applyPreviewCopyFromCardTo(card, root) {
+        if (!card || !root) return;
+        const label = (card.getAttribute('data-label') || '').trim();
+        const titleValue = (card.getAttribute('data-title') || '').trim();
+        const title = titleValue || (label ? `Preview Placeholder Title ${label}` : 'Preview Placeholder Title');
+
+        const runtimeValue = (card.getAttribute('data-runtime') || '').trim();
+        const tagsValue = (card.getAttribute('data-tags') || '').trim();
+        const descriptionDesktopValue = (card.getAttribute('data-description-desktop') || card.getAttribute('data-description') || '').trim();
+        const descriptionMobileValue = (card.getAttribute('data-description-mobile') || '').trim();
+        const isMobileSynopsis = (typeof window.matchMedia === 'function')
+          ? window.matchMedia('(max-width: 768px)').matches
+          : (window.innerWidth <= 768);
+
+        const runtime = runtimeValue || '1h 52m';
+        const tags = tagsValue || 'Thriller • Sci-Fi • Action';
+        const descriptionCandidate = isMobileSynopsis
+          ? (descriptionMobileValue || descriptionDesktopValue)
+          : (descriptionDesktopValue || descriptionMobileValue);
+        const description = descriptionCandidate ||
+          'This is a static placeholder description used for layout validation only. It is intentionally long so the text wraps across multiple lines and reveals spacing, rhythm, and hierarchy inside the Preview Modal. Replace this copy with real content in a later task once the layout has been visually approved.';
+
+        const titleEl = root.querySelector('.preview-title');
+        const runtimeEl = root.querySelector('.preview-runtime');
+        const tagsEl = root.querySelector('.preview-tags');
+        const descEl = root.querySelector('.preview-description');
+        if (titleEl) titleEl.textContent = title;
+        if (runtimeEl) runtimeEl.textContent = runtime;
+        if (tagsEl) tagsEl.textContent = tags;
+        if (descEl) descEl.textContent = description;
+      }
+
+      function setPreviewPosterImageForRoot(card, root) {
+        if (!card || !root) return;
+        const posterImg = root.querySelector('.preview-media-poster');
+        if (!posterImg) return;
+        const posterSrc = card.getAttribute('data-poster-wide') || card.getAttribute('data-poster-vert') || '';
+        posterImg.src = posterSrc;
+        posterImg.alt = `${card.getAttribute('data-label') || 'Preview'} poster`;
+        posterImg.style.opacity = posterSrc ? '1' : '0';
+      }
+
+      function placeSideCardIntoSlide(cardEl, targetSlide) {
+        if (!cardEl || !targetSlide) return;
+        if (previewCardEl && targetSlide.contains(previewCardEl)) return;
+        const currentSlide = cardEl.closest('.preview-slide');
+        if (currentSlide === targetSlide) return;
+        targetSlide.appendChild(cardEl);
+      }
+
+      function updateSidePreviewCards(centerSlide) {
+        if (!previewCarousel || !centerSlide) return;
+        ensureSidePreviewCards();
+        if (!previewSideCardLeftEl || !previewSideCardRightEl) return;
+        const slides = Array.from(previewCarousel.querySelectorAll('.preview-slide'));
+        if (!slides.length) return;
+        const centerIndex = slides.indexOf(centerSlide);
+        if (centerIndex < 0) return;
+        const leftSlide = slides[(centerIndex - 1 + slides.length) % slides.length];
+        const rightSlide = slides[(centerIndex + 1) % slides.length];
+
+        const leftSource = leftSlide.__sourcePoster || null;
+        const rightSource = rightSlide.__sourcePoster || null;
+        if (leftSource) {
+          applyPreviewCopyFromCardTo(leftSource, previewSideCardLeftEl);
+          setPreviewPosterImageForRoot(leftSource, previewSideCardLeftEl);
+        }
+        if (rightSource) {
+          applyPreviewCopyFromCardTo(rightSource, previewSideCardRightEl);
+          setPreviewPosterImageForRoot(rightSource, previewSideCardRightEl);
+        }
+        placeSideCardIntoSlide(previewSideCardLeftEl, leftSlide);
+        placeSideCardIntoSlide(previewSideCardRightEl, rightSlide);
+      }
 
       function buildPreviewCarouselSlides(activeCard) {
         if (!previewCarousel || !previewCardEl) return;
@@ -4511,16 +4695,6 @@ body.debug-row-zones .row-nav-zone{
             slide.classList.add('is-active');
             slide.__holdsPreviewCard = true;
             slide.appendChild(previewCardEl);
-          } else {
-            const ghost = document.createElement('div');
-            ghost.className = 'preview-slide-ghost';
-
-            const img = document.createElement('img');
-            const src = c.getAttribute('data-poster-wide') || c.getAttribute('data-poster-vert') || '';
-            img.src = src;
-            img.alt = (c.getAttribute('data-title') || c.getAttribute('data-label') || 'Preview').trim();
-            ghost.appendChild(img);
-            slide.appendChild(ghost);
           }
 
           previewCarousel.appendChild(slide);
@@ -4628,13 +4802,16 @@ body.debug-row-zones .row-nav-zone{
         }
       }
 
-      // ZAQ TASK 2.4 â€” Preview navigation must move the carousel (row-style center shift)
+      // ZAQ TASK 2.4 — Preview navigation must move the carousel (row-style center shift)
       let previewCarouselScrollAnim = null;
       function cancelPreviewCarouselScrollAnimation() {
         if (previewCarouselScrollAnim && typeof previewCarouselScrollAnim.frameId === 'number') {
           cancelAnimationFrame(previewCarouselScrollAnim.frameId);
         }
         previewCarouselScrollAnim = null;
+        if (previewCarousel) {
+          previewCarousel.__scrollAnimating = false;
+        }
       }
 
       function animatePreviewCarouselScrollLeftTo(target, durationMs) {
@@ -4646,9 +4823,12 @@ body.debug-row-zones .row-nav-zone{
         const distance = target - start;
         if (distance === 0 || !durationMs || durationMs <= 0) {
           previewCarousel.scrollLeft = target;
+          previewCarousel.__scrollAnimating = false;
+          applyPendingPreviewCenterSwap();
           return;
         }
 
+        previewCarousel.__scrollAnimating = true;
         const startTime = performance.now();
         function easeInOutCubic(t) {
           if (t <= 0) return 0;
@@ -4668,7 +4848,9 @@ body.debug-row-zones .row-nav-zone{
             previewCarouselScrollAnim.frameId = requestAnimationFrame(step);
           } else {
             previewCarousel.scrollLeft = target;
+            previewCarousel.__scrollAnimating = false;
             cancelPreviewCarouselScrollAnimation();
+            applyPendingPreviewCenterSwap();
           }
         }
 
@@ -4703,10 +4885,98 @@ body.debug-row-zones .row-nav-zone{
         schedulePreviewMagnifierUpdate();
       }
 
-      // ZAQ TASK 2.4 FIX â€” Active preview slide must follow carousel center during scrolling
+      // ZAQ TASK 2.4 FIX — Active preview slide must follow carousel center during scrolling
       let previewCarouselActiveRafId = null;
       let previewCarouselActiveLastSlide = null;
       let previewCarouselSettleTimer = null;
+      const PREVIEW_CARD_SWAP_FADE_MS = 0;
+      let previewPendingCenterSlide = null;
+
+      function isPreviewReparentLocked() {
+        if (!previewCarousel) return true;
+        if (previewOpening || activeMorphTile) return true;
+        return false;
+      }
+
+      function queuePreviewCenterSwap(closest) {
+        if (!closest) return;
+        previewPendingCenterSlide = closest;
+      }
+
+      function crossfadePreviewCardToSlide(targetSlide) {
+        if (!previewCarousel || !previewCardEl || !targetSlide) return;
+        const currentSlide = previewCardEl.closest('.preview-slide');
+        if (currentSlide === targetSlide) return;
+        if (!PREVIEW_CARD_SWAP_FADE_MS) {
+          placePreviewCardIntoSlide(targetSlide);
+          return;
+        }
+
+        const previousTransition = previewCardEl.style.transition;
+        const previousOpacity = previewCardEl.style.opacity;
+        const previousPointerEvents = previewCardEl.style.pointerEvents;
+        let moved = false;
+
+        const finishMove = () => {
+          if (moved) return;
+          moved = true;
+          previewCardEl.removeEventListener('transitionend', handleFadeOut);
+          placePreviewCardIntoSlide(targetSlide);
+          previewCardEl.style.transition = `opacity ${PREVIEW_CARD_SWAP_FADE_MS}ms ease`;
+          previewCardEl.style.opacity = '1';
+          previewCardEl.style.pointerEvents = previousPointerEvents || '';
+          setTimeout(() => {
+            previewCardEl.style.transition = previousTransition;
+            previewCardEl.style.opacity = previousOpacity;
+            previewCardEl.style.pointerEvents = previousPointerEvents || '';
+          }, PREVIEW_CARD_SWAP_FADE_MS + 40);
+        };
+
+        const handleFadeOut = (event) => {
+          if (event.propertyName !== 'opacity') return;
+          finishMove();
+        };
+
+        previewCardEl.addEventListener('transitionend', handleFadeOut);
+        previewCardEl.style.transition = `opacity ${PREVIEW_CARD_SWAP_FADE_MS}ms ease`;
+        previewCardEl.style.opacity = '0';
+        previewCardEl.style.pointerEvents = 'none';
+        setTimeout(finishMove, PREVIEW_CARD_SWAP_FADE_MS + 60);
+      }
+
+      function applyPreviewCenteredSlide(closest) {
+        if (!closest) return;
+
+        const sourcePoster = closest.__sourcePoster || null;
+        if (sourcePoster && sourcePoster !== currentPreviewCardEl) {
+          currentPreviewCardEl = sourcePoster;
+          applyPreviewCopyFromCard(sourcePoster);
+          setPreviewPosterImageFromCard(sourcePoster);
+          if (typeof window.setActiveCardAuthority === 'function') {
+            window.setActiveCardAuthority(sourcePoster);
+          }
+          schedulePreviewTeaserSwap(sourcePoster);
+          schedulePreviewFitUpdate();
+        }
+
+        if (previewCardEl) {
+          const currentSlide = previewCardEl.closest('.preview-slide');
+          if (currentSlide !== closest) {
+            crossfadePreviewCardToSlide(closest);
+            schedulePreviewFitUpdate();
+          }
+        }
+
+        updateSidePreviewCards(closest);
+      }
+
+      function applyPendingPreviewCenterSwap() {
+        if (!previewPendingCenterSlide) return;
+        if (isPreviewReparentLocked()) return;
+        const pendingSlide = previewPendingCenterSlide;
+        previewPendingCenterSlide = null;
+        applyPreviewCenteredSlide(pendingSlide);
+      }
 
       function getClosestPreviewSlideToCenter() {
         if (!previewCarousel) return null;
@@ -4736,30 +5006,13 @@ body.debug-row-zones .row-nav-zone{
         const currentSlide = previewCardEl.closest('.preview-slide');
         if (currentSlide === targetSlide) return;
 
-        // Remove any ghost in the target and place the real preview card.
-        const existingGhost = targetSlide.querySelector('.preview-slide-ghost');
-        if (existingGhost) {
-          existingGhost.remove();
+        // Remove any side cards in the target and place the real preview card.
+        const sideCards = targetSlide.querySelectorAll('.preview-card.is-side');
+        for (const side of sideCards) {
+          side.remove();
         }
         targetSlide.appendChild(previewCardEl);
 
-        // Restore ghost into the slide we moved from (if needed).
-        if (currentSlide && currentSlide !== targetSlide) {
-          const oldMorphId = currentSlide.getAttribute('data-morph-id');
-          const alreadyHasGhost = !!currentSlide.querySelector('.preview-slide-ghost');
-          const sourceCard = currentSlide.__sourcePoster
-            || (oldMorphId ? document.querySelector('.poster[data-morph-id="' + oldMorphId + '"]') : null);
-          if (sourceCard && !alreadyHasGhost) {
-            const ghost = document.createElement('div');
-            ghost.className = 'preview-slide-ghost';
-            const img = document.createElement('img');
-            const src = sourceCard.getAttribute('data-poster-wide') || sourceCard.getAttribute('data-poster-vert') || '';
-            img.src = src;
-            img.alt = (sourceCard.getAttribute('data-title') || sourceCard.getAttribute('data-label') || 'Preview').trim();
-            ghost.appendChild(img);
-            currentSlide.appendChild(ghost);
-          }
-        }
       }
 
       function updatePreviewActiveSlideFromCenter() {
@@ -4776,30 +5029,17 @@ body.debug-row-zones .row-nav-zone{
           }
           closest.classList.add('is-active');
           previewCarouselActiveLastSlide = closest;
-
-          // When the centered slide changes, update the active preview card authority
-          // to the exact poster instance that this slide represents. This ensures the
-          // close morph targets the currently centered card (not the originally opened one).
-          const sourcePoster = closest.__sourcePoster || null;
-          if (sourcePoster && sourcePoster !== currentPreviewCardEl) {
-            currentPreviewCardEl = sourcePoster;
-            applyPreviewCopyFromCard(sourcePoster);
-            setPreviewPosterImageFromCard(sourcePoster);
-            if (typeof window.setActiveCardAuthority === 'function') {
-              window.setActiveCardAuthority(sourcePoster);
-            }
-            schedulePreviewTeaserSwap(sourcePoster);
-          }
         }
 
-        // Keep the single real preview card housed in the currently centered slide.
-        if (previewCardEl) {
-          const currentSlide = previewCardEl.closest('.preview-slide');
-          if (currentSlide !== closest) {
-            placePreviewCardIntoSlide(closest);
-            schedulePreviewFitUpdate();
-          }
+        // Keep side cards updated live during scroll, even if the center card is locked.
+        updateSidePreviewCards(closest);
+
+        if (isPreviewReparentLocked()) {
+          queuePreviewCenterSwap(closest);
+          return;
         }
+
+        applyPreviewCenteredSlide(closest);
       }
 
       function schedulePreviewActiveSlideUpdate() {
@@ -4830,7 +5070,11 @@ body.debug-row-zones .row-nav-zone{
           if (previewOverlay && previewOverlay.classList.contains('preview-scrub-active')) return;
           if (previewCarousel.__scrollAnimating) return;
           const closest = getClosestPreviewSlideToCenter();
-          if (closest) centerPreviewSlideWithAnimation(closest);
+          if (closest) {
+            centerPreviewSlideWithAnimation(closest);
+          } else {
+            applyPendingPreviewCenterSwap();
+          }
         }, 220);
       }
 
@@ -4924,10 +5168,146 @@ body.debug-row-zones .row-nav-zone{
         previewCarouselActiveLastSlide = null;
       }
 
-      // ZAQ TASK 2.4 (REFINEMENT) â€” Preview carousel magnifier scaling (continuous, row-style)
+      // ZAQ TASK 2.4 (REFINEMENT) — Preview carousel magnifier scaling (continuous, row-style)
       let previewCarouselMagnifierRafId = null;
       let previewFitRafId = null;
       let previewFadeRafId = null;
+      let previewDebugBoxEl = null;
+      let previewDebugGuides = null;
+
+      function ensurePreviewDebugBox() {
+        if (previewDebugBoxEl) return previewDebugBoxEl;
+        const box = document.createElement('div');
+        box.className = 'preview-debug-box';
+        document.body.appendChild(box);
+        previewDebugBoxEl = box;
+        return box;
+      }
+
+      function ensurePreviewDebugGuides() {
+        if (previewDebugGuides) return previewDebugGuides;
+        const wrap = document.createElement('div');
+        wrap.className = 'preview-debug-guides';
+
+        const v1 = document.createElement('div');
+        v1.className = 'preview-debug-guide is-vertical';
+        v1.dataset.axis = 'x';
+        v1.style.left = '30%';
+
+        const v2 = document.createElement('div');
+        v2.className = 'preview-debug-guide is-vertical';
+        v2.dataset.axis = 'x';
+        v2.style.left = '70%';
+
+        const h1 = document.createElement('div');
+        h1.className = 'preview-debug-guide is-horizontal';
+        h1.dataset.axis = 'y';
+        h1.style.top = '30%';
+
+        const h2 = document.createElement('div');
+        h2.className = 'preview-debug-guide is-horizontal';
+        h2.dataset.axis = 'y';
+        h2.style.top = '70%';
+
+        wrap.appendChild(v1);
+        wrap.appendChild(v2);
+        wrap.appendChild(h1);
+        wrap.appendChild(h2);
+        document.body.appendChild(wrap);
+        previewDebugGuides = wrap;
+
+        const guides = [v1, v2, h1, h2];
+        let activeGuide = null;
+        let startX = 0;
+        let startY = 0;
+        let startLeft = 0;
+        let startTop = 0;
+
+        const onPointerMove = (event) => {
+          if (!activeGuide) return;
+          const axis = activeGuide.dataset.axis;
+          if (axis === 'x') {
+            const dx = event.clientX - startX;
+            const next = Math.max(0, Math.min(window.innerWidth, startLeft + dx));
+            activeGuide.style.left = `${Math.round(next)}px`;
+          } else {
+            const dy = event.clientY - startY;
+            const next = Math.max(0, Math.min(window.innerHeight, startTop + dy));
+            activeGuide.style.top = `${Math.round(next)}px`;
+          }
+        };
+
+        const onPointerUp = () => {
+          if (!activeGuide) return;
+          activeGuide.classList.remove('is-dragging');
+          activeGuide = null;
+          document.removeEventListener('pointermove', onPointerMove);
+          document.removeEventListener('pointerup', onPointerUp);
+          document.removeEventListener('pointercancel', onPointerUp);
+        };
+
+        guides.forEach((guide) => {
+          guide.addEventListener('pointerdown', (event) => {
+            if (!document.body.classList.contains('debug-layout')) return;
+            event.preventDefault();
+            event.stopPropagation();
+            activeGuide = guide;
+            activeGuide.classList.add('is-dragging');
+            startX = event.clientX;
+            startY = event.clientY;
+            const rect = guide.getBoundingClientRect();
+            startLeft = rect.left;
+            startTop = rect.top;
+            document.addEventListener('pointermove', onPointerMove);
+            document.addEventListener('pointerup', onPointerUp);
+            document.addEventListener('pointercancel', onPointerUp);
+          });
+        });
+
+        return wrap;
+      }
+
+      function updatePreviewDebugBox() {
+        if (!document.body || !document.body.classList.contains('debug-layout')) return;
+        if (!previewCardEl) return;
+        const rect = previewCardEl.getBoundingClientRect();
+        if (!rect || !Number.isFinite(rect.width) || !Number.isFinite(rect.height)) return;
+        const box = ensurePreviewDebugBox();
+        box.style.transform = `translate(${Math.round(rect.left)}px, ${Math.round(rect.top)}px)`;
+        box.style.width = `${Math.round(rect.width)}px`;
+        box.style.height = `${Math.round(rect.height)}px`;
+      }
+
+      function updatePreviewGhostSizing() {
+        if (!previewCarousel || !previewCardEl) return;
+        const rect = previewCardEl.getBoundingClientRect();
+        if (!rect || !Number.isFinite(rect.height) || rect.height <= 0) return;
+        ensurePreviewDebugGuides();
+        previewCarousel.style.setProperty('--preview-card-height', `${rect.height}px`);
+        const media = previewCardEl.querySelector('.preview-media');
+        const info = previewCardEl.querySelector('.preview-info');
+        if (media) {
+          const mediaRect = media.getBoundingClientRect();
+          if (Number.isFinite(mediaRect.height) && mediaRect.height > 0) {
+            previewCarousel.style.setProperty('--preview-ghost-media-height', `${mediaRect.height}px`);
+          }
+        }
+        if (info) {
+          const infoRect = info.getBoundingClientRect();
+          if (Number.isFinite(infoRect.height) && infoRect.height > 0) {
+            previewCarousel.style.setProperty('--preview-ghost-info-height', `${infoRect.height}px`);
+          }
+        }
+        updatePreviewDebugBox();
+      }
+
+      window.addEventListener('keydown', (event) => {
+        if (!event || !event.key) return;
+        if (event.key.toLowerCase() !== 'z') return;
+        if (!document.body) return;
+        event.preventDefault();
+        document.body.classList.toggle('debug-move');
+      });
 
       function schedulePreviewFitUpdate() {
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
@@ -4937,12 +5317,13 @@ body.debug-row-zones .row-nav-zone{
         previewFitRafId = requestAnimationFrame(() => {
           previewFitRafId = null;
           fitPreviewToViewport();
+          updatePreviewGhostSizing();
         });
       }
 
       function updatePreviewEdgeFades() {
         if (!previewOverlay) return;
-        const previewCard = previewOverlay.querySelector('.preview-card');
+        const previewCard = previewOverlay.querySelector('.preview-card:not(.is-side)');
         if (!previewCard) return;
         const overlayRect = previewOverlay.getBoundingClientRect();
         const cardRect = previewCard.getBoundingClientRect();
@@ -4970,9 +5351,9 @@ body.debug-row-zones .row-nav-zone{
         const carouselCenter = carouselRect.left + (carouselRect.width / 2);
         const halfWidth = carouselRect.width / 2;
 
-        // Mirror shelf-row magnifier model.
-        const maxScale = 1.12;
-        const minScale = 0.78;
+        // Keep all preview slides the same size (no magnifier scaling).
+        const maxScale = 1;
+        const minScale = 1;
 
         for (const slide of slides) {
           const rect = slide.getBoundingClientRect();
@@ -4980,7 +5361,7 @@ body.debug-row-zones .row-nav-zone{
           const distance = Math.abs(center - carouselCenter);
           const t = Math.min(distance / halfWidth, 1);
           const scale = maxScale - (maxScale - minScale) * t;
-          const reveal = 1 - t;
+          const reveal = 1;
           slide.style.transform = `scale(${scale.toFixed(3)})`;
           slide.style.setProperty('--preview-reveal', reveal.toFixed(3));
         }
@@ -5133,7 +5514,7 @@ body.debug-row-zones .row-nav-zone{
         return previewOpening || previewOverlay.classList.contains('is-visible');
       }
 
-      // ZAQ TASK 2.6 â€” Desktop on-screen arrows (one card per click)
+      // ZAQ TASK 2.6 — Desktop on-screen arrows (one card per click)
       const previewNavPrevButton = previewOverlay.querySelector('.preview-nav-arrow--left');
       const previewNavNextButton = previewOverlay.querySelector('.preview-nav-arrow--right');
       const previewMatrixPrevButton = previewOverlay.querySelector('.preview-matrix__nav--prev');
@@ -5284,7 +5665,7 @@ body.debug-row-zones .row-nav-zone{
       const prefersFinePointer = window.matchMedia('(pointer: fine)').matches;
 
       function getPreviewCardRect() {
-        const previewCard = previewOverlay.querySelector('.preview-card');
+        const previewCard = previewOverlay.querySelector('.preview-card:not(.is-side)');
         if (!previewCard) return null;
         return previewCard.getBoundingClientRect();
       }
@@ -5298,11 +5679,9 @@ body.debug-row-zones .row-nav-zone{
         if (activeIndex < 0) return null;
         const leftSlide = slides[(activeIndex - 1 + slides.length) % slides.length];
         const rightSlide = slides[(activeIndex + 1) % slides.length];
-        const leftTarget = leftSlide.querySelector('.preview-slide-ghost') || leftSlide;
-        const rightTarget = rightSlide.querySelector('.preview-slide-ghost') || rightSlide;
         return {
-          left: leftTarget.getBoundingClientRect(),
-          right: rightTarget.getBoundingClientRect()
+          left: leftSlide.getBoundingClientRect(),
+          right: rightSlide.getBoundingClientRect()
         };
       }
 
@@ -5817,7 +6196,7 @@ body.debug-row-zones .row-nav-zone{
           : (window.innerWidth <= 768);
 
         const runtime = runtimeValue || '1h 52m';
-        const tags = tagsValue || 'Thriller â€¢ Sci-Fi â€¢ Action';
+        const tags = tagsValue || 'Thriller • Sci-Fi • Action';
         const descriptionCandidate = isMobileSynopsis
           ? (descriptionMobileValue || descriptionDesktopValue)
           : (descriptionDesktopValue || descriptionMobileValue);
@@ -6147,7 +6526,7 @@ body.debug-row-zones .row-nav-zone{
 
       function attachPreviewSwipeListeners() {
         if (previewSwipeHandlers) return;
-        const previewCard = previewOverlay.querySelector('.preview-card');
+        const previewCard = previewOverlay.querySelector('.preview-card:not(.is-side)');
         const previewMatrix = previewOverlay.querySelector('.preview-matrix');
         const swipeZone = previewMatrix || previewCard;
         if (!previewCard) return;
@@ -7048,7 +7427,7 @@ function detachPreviewSwipeListeners() {
       }
 
       function measurePreviewRect() {
-        const previewCard = previewOverlay.querySelector('.preview-card');
+        const previewCard = previewOverlay.querySelector('.preview-card:not(.is-side)');
         if (!previewCard) return null;
 
         const wasVisible = previewOverlay.classList.contains('is-visible');
@@ -7129,7 +7508,7 @@ function detachPreviewSwipeListeners() {
       }
       function fitPreviewToViewport() {
         if (!previewOverlay) return;
-        const previewCard = previewOverlay.querySelector('.preview-card');
+        const previewCard = previewOverlay.querySelector('.preview-card:not(.is-side)');
         if (!previewCard) return;
 
         // Use the overlay padding as the safety inset for glow.
@@ -7164,6 +7543,7 @@ function detachPreviewSwipeListeners() {
       const handlePreviewResize = () => {
         if (!isPreviewOpen()) return;
         fitPreviewToViewport();
+        updatePreviewGhostSizing();
         if (currentPreviewCardEl) {
           applyPreviewCopyFromCard(currentPreviewCardEl);
         }
@@ -7219,7 +7599,7 @@ function detachPreviewSwipeListeners() {
         // Sync overlay/card CSS variable timings to this open.
         previewOverlay.style.setProperty('--preview-morph-duration', `${profile.duration}ms`);
         previewOverlay.style.setProperty('--preview-morph-ease', profile.easing);
-        const previewCard = previewOverlay.querySelector('.preview-card');
+        const previewCard = previewOverlay.querySelector('.preview-card:not(.is-side)');
         if (previewCard) {
           previewCard.style.setProperty('--preview-morph-duration', `${profile.duration}ms`);
           previewCard.style.setProperty('--preview-morph-ease', profile.easing);
@@ -7230,10 +7610,12 @@ function detachPreviewSwipeListeners() {
           previewOpening = false;
           schedulePreviewNavPulse();
           schedulePreviewEdgeFadeUpdate();
+          schedulePreviewFitUpdate();
           // Ensure the preview carousel recenters once the overlay is visible.
           requestAnimationFrame(() => {
             if (currentPreviewCardEl) {
-              movePreviewCardIntoSlideForCard(currentPreviewCardEl, true, true);
+              const centered = movePreviewCardIntoSlideForCard(currentPreviewCardEl, true, true);
+              if (centered) updateSidePreviewCards(centered);
             }
             positionPreviewMatrix();
           });
@@ -7303,7 +7685,7 @@ function detachPreviewSwipeListeners() {
         : [];
       const previewDetailsSections = Array.from(document.querySelectorAll('.preview-details-section[data-details-panel]'));
       const previewActions = document.querySelector('.preview-actions');
-      const previewCardRoot = document.querySelector('.preview-card');
+      const previewCardRoot = document.querySelector('.preview-card:not(.is-side)');
 
       function setDetailsMode(isOn) {
         if (!previewCardRoot) return;
@@ -7315,6 +7697,7 @@ function detachPreviewSwipeListeners() {
         if (detailsPanel) {
           detailsPanel.setAttribute('aria-hidden', isOn ? 'false' : 'true');
         }
+        schedulePreviewFitUpdate();
       }
       if (previewMatrixPrevButton) {
         previewMatrixPrevButton.addEventListener('click', (event) => {
@@ -7468,7 +7851,7 @@ function detachPreviewSwipeListeners() {
       function runOpenMorph(card, profile, morphSourceElement = card) {
         return new Promise((resolve) => {
           const startRect = morphSourceElement.getBoundingClientRect();
-          const previewCard = previewOverlay.querySelector('.preview-card');
+          const previewCard = previewOverlay.querySelector('.preview-card:not(.is-side)');
           if (previewCard) {
             previewCard.style.opacity = '0';
             previewCard.style.transition = '';
@@ -7593,7 +7976,7 @@ function detachPreviewSwipeListeners() {
           previewOverlay.style.setProperty('--preview-fit-scale', '1');
         }
 
-        // ZAQ TASK 2.4 â€” Close preview to active card (state-consistent exit)
+        // ZAQ TASK 2.4 — Close preview to active card (state-consistent exit)
         // Use the authoritative active-card state for the exit target.
         const authorityCard = (typeof window.getActiveCardAuthority === 'function')
           ? window.getActiveCardAuthority()
@@ -7609,7 +7992,7 @@ function detachPreviewSwipeListeners() {
               ? currentPreviewCardEl
               : lastOpenedCard);
 
-        const previewCard = previewOverlay.querySelector('.preview-card');
+        const previewCard = previewOverlay.querySelector('.preview-card:not(.is-side)');
         if (!previewCard) return;
         detachPreviewSwipeListeners();
 
@@ -7714,7 +8097,7 @@ function detachPreviewSwipeListeners() {
       });
 
       previewOverlay.addEventListener('click', (event) => {
-        const previewCard = previewOverlay.querySelector('.preview-card');
+        const previewCard = previewOverlay.querySelector('.preview-card:not(.is-side)');
         if (!previewCard) return;
         if (previewCard.contains(event.target)) return;
         if (event.target && event.target.closest('.preview-nav-arrow')) return;
@@ -7779,7 +8162,7 @@ document.addEventListener('keydown', (event) => {
     <div class="preview-carousel" aria-label="Preview carousel">
       <div class="preview-slide is-active">
         <div class="preview-card" role="dialog" aria-modal="true" aria-labelledby="preview-title">
-          <button class="preview-close-btn" type="button" aria-label="Close preview">Ã—</button>
+          <button class="preview-close-btn" type="button" aria-label="Close preview">×</button>
           <div class="preview-media">
             <!-- Later: video or wide poster goes here -->
             <div class="preview-media-placeholder"></div>
@@ -7792,12 +8175,12 @@ document.addEventListener('keydown', (event) => {
             <div class="preview-content-stack">
               <div class="preview-meta">
                 <span class="preview-runtime">2h 14m</span>
-                <span class="preview-tags">Prestige Drama â€¢ Mythic Noir â€¢ Altâ€‘History â€¢ Neoâ€‘Western â€¢ Psychological Thriller â€¢ Courtroom Chaos â€¢ Cyber Romance â€¢ Cosmic Horror â€¢ Folk Mystery â€¢ Retro Futurism â€¢ Experimental Soundscape</span>
+                <span class="preview-tags">Prestige Drama • Mythic Noir • Alt‑History • Neo‑Western • Psychological Thriller • Courtroom Chaos • Cyber Romance • Cosmic Horror • Folk Mystery • Retro Futurism • Experimental Soundscape</span>
               </div>
               <div class="preview-body-stack">
                 <div class="preview-body">
                   <p class="preview-description">
-                    This is an intentionally overlong description designed to push the limits of the preview body container, wrapping across many lines and forcing the scroll behavior to reveal how the layout handles dense narrative blocks. It layers multiple sentences with varied cadence, mentions a sweeping saga of rival archivists, and references a crossâ€‘continental chase that spans decades, climates, and shifting alliances. Even when the plot drifts into speculative territory and tangents about lost signals, the copy keeps flowing to ensure the text area is sufficiently stressed. Finally, the paragraph closes with a lingering note about unresolved mysteries, prompting the reader to keep scrolling just to see the end.
+                    This is an intentionally overlong description designed to push the limits of the preview body container, wrapping across many lines and forcing the scroll behavior to reveal how the layout handles dense narrative blocks. It layers multiple sentences with varied cadence, mentions a sweeping saga of rival archivists, and references a cross‑continental chase that spans decades, climates, and shifting alliances. Even when the plot drifts into speculative territory and tangents about lost signals, the copy keeps flowing to ensure the text area is sufficiently stressed. Finally, the paragraph closes with a lingering note about unresolved mysteries, prompting the reader to keep scrolling just to see the end.
                   </p>
                 </div>
                 <div class="preview-details-panel" aria-hidden="true">
@@ -7886,7 +8269,7 @@ document.addEventListener('keydown', (event) => {
 
 
 <script>
-  // ZAQ TASK 1 â€” "Zero Tolerance" Magnetic Pull
+  // ZAQ TASK 1 — "Zero Tolerance" Magnetic Pull
   (function(){
     const SETTLE_DELAY_MS = 420;   // Wait for scroll to settle
     const HERO_SETTLE_DELAY_MS = 620;
@@ -8390,7 +8773,7 @@ document.addEventListener('keydown', (event) => {
 
 
 <script>
-/* ZAQ TASK: Hero glow truth â†’ YouTube playback (preview override wins) */
+/* ZAQ TASK: Hero glow truth → YouTube playback (preview override wins) */
 (function(){
   var heroEl = document.querySelector('.hero');
   var previewEl = document.querySelector('.preview-overlay');
