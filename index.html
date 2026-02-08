@@ -291,6 +291,31 @@ border-bottom:0;
     gap:10px;
     padding:22px 22px 140px;
   }
+  /* DVD-style bouncing logo (menu-only) */
+  .nav-dropdown .dvd-bounce {
+    position:absolute;
+    top:0;
+    left:0;
+    display:block;
+    width:120px;
+    height:auto;
+    pointer-events:none;
+    user-select:none;
+    z-index:9999;
+  }
+  .nav-dropdown .dvd-bounce img{
+    display:block;
+    width:100%;
+    height:auto;
+    image-rendering:auto;
+    filter: drop-shadow(0 0 10px rgba(227,27,35,0.45))
+            drop-shadow(0 0 24px rgba(227,27,35,0.25));
+    pointer-events:none;
+    user-select:none;
+  }
+  .nav-dropdown-menu{
+    z-index:2;
+  }
   .nav-dropdown-menu a{
     color:#f7f7fb;
     text-decoration:none;
@@ -2667,6 +2692,9 @@ body.debug-row-zones .row-nav-zone{
   </header>
   <div class="nav-scrim" aria-hidden="true"></div>
   <div class="nav-dropdown" aria-hidden="true">
+    <div class="dvd-bounce" aria-hidden="true">
+      <img src="images/logo_dvd.png" alt="">
+    </div>
     <nav class="nav-dropdown-menu" aria-label="Mobile navigation">
       <a href="#hero">Film</a>
       <a href="#photography">Photography</a>
@@ -4653,6 +4681,121 @@ body.debug-row-zones .row-nav-zone{
       document.body.classList.toggle('debug-layout');
       syncDebugButtonState();
     });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const dropdown = document.querySelector('.nav-dropdown');
+    const logo = dropdown ? dropdown.querySelector('.dvd-bounce') : null;
+    if (!dropdown || !logo) return;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let rafId = null;
+    let lastTime = null;
+    let pos = { x: 24, y: 24 };
+    let vel = { x: 140, y: 110 }; // px/s
+
+    function measure() {
+      const rect = dropdown.getBoundingClientRect();
+      const logoRect = logo.getBoundingClientRect();
+      return {
+        w: rect.width,
+        h: rect.height,
+        lw: logoRect.width,
+        lh: logoRect.height
+      };
+    }
+
+    function clampPosition() {
+      const m = measure();
+      const maxX = Math.max(0, m.w - m.lw);
+      const maxY = Math.max(0, m.h - m.lh);
+      pos.x = Math.min(Math.max(0, pos.x), maxX);
+      pos.y = Math.min(Math.max(0, pos.y), maxY);
+      logo.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+    }
+
+    function stop() {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      lastTime = null;
+    }
+
+    function step(ts) {
+      if (reduceMotion.matches || !document.body.classList.contains('nav-open')) {
+        stop();
+        return;
+      }
+
+      if (!lastTime) lastTime = ts;
+      const dt = Math.min(0.05, (ts - lastTime) / 1000);
+      lastTime = ts;
+
+      const m = measure();
+      const maxX = Math.max(0, m.w - m.lw);
+      const maxY = Math.max(0, m.h - m.lh);
+
+      pos.x += vel.x * dt;
+      pos.y += vel.y * dt;
+
+      if (pos.x <= 0) {
+        pos.x = 0;
+        vel.x = Math.abs(vel.x);
+      } else if (pos.x >= maxX) {
+        pos.x = maxX;
+        vel.x = -Math.abs(vel.x);
+      }
+
+      if (pos.y <= 0) {
+        pos.y = 0;
+        vel.y = Math.abs(vel.y);
+      } else if (pos.y >= maxY) {
+        pos.y = maxY;
+        vel.y = -Math.abs(vel.y);
+      }
+
+      logo.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+      rafId = requestAnimationFrame(step);
+    }
+
+    function start() {
+      if (reduceMotion.matches) return;
+      if (rafId) return;
+      clampPosition();
+      rafId = requestAnimationFrame(step);
+    }
+
+    // Initial placement inside bounds.
+    const initial = measure();
+    const maxX = Math.max(0, initial.w - initial.lw);
+    const maxY = Math.max(0, initial.h - initial.lh);
+    pos.x = Math.round(Math.random() * maxX);
+    pos.y = Math.round(Math.random() * maxY);
+    logo.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+
+    const observer = new MutationObserver(() => {
+      if (document.body.classList.contains('nav-open')) {
+        start();
+      } else {
+        stop();
+      }
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+    window.addEventListener('resize', clampPosition);
+    if (typeof reduceMotion.addEventListener === 'function') {
+      reduceMotion.addEventListener('change', () => {
+        if (reduceMotion.matches) {
+          stop();
+        } else if (document.body.classList.contains('nav-open')) {
+          start();
+        }
+      });
+    }
+
+    if (document.body.classList.contains('nav-open')) start();
   });
 </script>
   <script>
