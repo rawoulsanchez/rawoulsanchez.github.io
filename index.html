@@ -2644,6 +2644,22 @@ body.debug-row-zones .row-nav-zone{
     box-shadow: none;
     color: #fff;
   }
+
+  /* Hero CTA jiggle */
+  .btn.is-jiggle{
+    animation: hero-cta-jiggle 700ms ease-in-out both;
+  }
+  @keyframes hero-cta-jiggle{
+    0%   { transform: translateX(0) rotate(0deg); }
+    12%  { transform: translateX(-2px) rotate(-1deg); }
+    25%  { transform: translateX(2px) rotate(1deg); }
+    37%  { transform: translateX(-3px) rotate(-1.5deg); }
+    50%  { transform: translateX(3px) rotate(1.5deg); }
+    62%  { transform: translateX(-2px) rotate(-1deg); }
+    75%  { transform: translateX(2px) rotate(1deg); }
+    87%  { transform: translateX(-1px) rotate(-0.5deg); }
+    100% { transform: translateX(0) rotate(0deg); }
+  }
   @keyframes preview-pill-bloom{
     0%{
       box-shadow:
@@ -4685,6 +4701,27 @@ body.debug-row-zones .row-nav-zone{
 </script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    const previewBtn = document.querySelector('.hero-details-button');
+    const playNowBtn = document.querySelector('.hero-cta .btn--solid');
+
+    function triggerJiggle(el) {
+      if (!el) return;
+      el.classList.remove('is-jiggle');
+      // Force reflow to restart animation when reused.
+      void el.offsetWidth;
+      el.classList.add('is-jiggle');
+      const clear = () => el.classList.remove('is-jiggle');
+      el.addEventListener('animationend', clear, { once: true });
+      // Safety fallback in case animationend doesn't fire.
+      window.setTimeout(clear, 900);
+    }
+
+    window.setTimeout(() => triggerJiggle(previewBtn), 5000);
+    window.setTimeout(() => triggerJiggle(playNowBtn), 10000);
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
     const dropdown = document.querySelector('.nav-dropdown');
     const logo = dropdown ? dropdown.querySelector('.dvd-bounce') : null;
     if (!dropdown || !logo) return;
@@ -4798,9 +4835,9 @@ body.debug-row-zones .row-nav-zone{
     if (document.body.classList.contains('nav-open')) start();
   });
 </script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    
       const morphCards = Array.from(document.querySelectorAll('.poster[data-morph-id]'));
 
       // Note: shelves clone posters for infinite scrolling. We use event delegation
