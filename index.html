@@ -5991,7 +5991,7 @@ body.debug-row-zones .row-nav-zone{
           }
           event.preventDefault();
           event.stopPropagation();
-          goToPreviewSiblingSlide(1);
+          goToPreviewSiblingSlide(-1);
         });
       }
       if (previewNavNextButton) {
@@ -6003,7 +6003,7 @@ body.debug-row-zones .row-nav-zone{
           }
           event.preventDefault();
           event.stopPropagation();
-          goToPreviewSiblingSlide(-1);
+          goToPreviewSiblingSlide(1);
         });
       }
 
@@ -8235,7 +8235,7 @@ function detachPreviewSwipeListeners() {
           if (!isPreviewOpen()) return;
           event.preventDefault();
           event.stopPropagation();
-          goToPreviewSiblingSlide(1);
+          goToPreviewSiblingSlide(-1);
         });
       }
       if (previewMatrixNextButton) {
@@ -8243,7 +8243,7 @@ function detachPreviewSwipeListeners() {
           if (!isPreviewOpen()) return;
           event.preventDefault();
           event.stopPropagation();
-          goToPreviewSiblingSlide(-1);
+          goToPreviewSiblingSlide(1);
         });
       }
       if (previewMatrix) {
