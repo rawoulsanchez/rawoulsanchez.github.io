@@ -102,7 +102,7 @@ border-bottom:0;
     scroll-margin-top:calc(var(--nav-height) + env(safe-area-inset-top) + 12px);
   }
   .nav-toggle {
-    display:none;
+    display:inline-grid;
     width:40px;
     height:40px;
     border-radius:999px;
@@ -156,16 +156,12 @@ border-bottom:0;
     }
   }
   @media (max-width:768px){
-    .nav-links{
-      display:none;
-    }
     .nav-actions .icon-btn{
       display:none;
     }
-    .nav-toggle{
-      display:inline-grid;
-      place-items:center;
-    }
+  }
+  .nav-links{
+    display:none;
   }
   .nav-actions {
     display:flex;
@@ -314,10 +310,23 @@ border-bottom:0;
     opacity:1;
     transform:translateY(0);
   }
-  @media (max-width:768px){
-    .nav-overlay{
-      display:none;
-    }
+  .nav-overlay{
+    display:none;
+  }
+  .nav-dropdown-debug{
+    margin-top:6px;
+    align-self:flex-start;
+    appearance:none;
+    border:1px solid rgba(255,255,255,0.2);
+    background:rgba(0,0,0,0.5);
+    color:#fff;
+    border-radius:999px;
+    padding:8px 14px;
+    font:600 0.95rem/1 var(--font-ui);
+    cursor:pointer;
+  }
+  .nav-dropdown-debug:hover{
+    background:rgba(20,20,20,0.9);
   }
   .title-chip{
   display:inline-flex; align-items:center; justify-content:center;
@@ -2600,7 +2609,6 @@ body.debug-row-zones .row-nav-zone{
           <span class="dot" aria-hidden="true"></span>
           <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a4 4 0 00-4 4v1.1C6.2 8 5 9.7 5 11.6V17l-1.5 1.5v1h17v-1L19 17v-5.4c0-1.9-1.2-3.6-3-4.5V6a4 4 0 00-4-4zm0 20a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
         </button>
-        <button class="icon-btn" id="debugToggleButton" type="button" aria-label="Toggle layout debug" aria-pressed="false">Debug</button>
         <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false">
           <span class="burger-line line1" aria-hidden="true"></span>
           <span class="burger-line line2" aria-hidden="true"></span>
@@ -2618,6 +2626,7 @@ body.debug-row-zones .row-nav-zone{
       <a href="#side-quests">Side Quests</a>
       <a href="#about">About</a>
       <a href="#contact">Contact</a>
+      <button class="nav-dropdown-debug" id="debugToggleButton" type="button" aria-label="Toggle layout debug" aria-pressed="false">Debug</button>
     </nav>
   </div>
   <div class="nav-overlay" aria-hidden="true">
@@ -4859,7 +4868,7 @@ body.debug-row-zones .row-nav-zone{
             const startDrag = (event) => {
               if (event.button !== 0) return;
               if (event.button !== 0) return;
-              if (event.target && event.target.closest('.preview-actions, .preview-play-button, .preview-synopsis-button, .preview-details-tabs, .preview-details-tab')) {
+              if (event.target && event.target.closest('.preview-play-button, .preview-synopsis-button, .preview-details-tabs, .preview-details-tab')) {
                 return;
               }
               if (event.target && event.target.closest('.preview-volume, .preview-volume__sliderWrap, .preview-volume__slider')) {
@@ -8083,10 +8092,6 @@ function detachPreviewSwipeListeners() {
       function openPreviewFromCard(card, triggerElement = card, morphSourceElement = card) {
         if (!card) return;
         setDetailsMode(false);
-        if (previewDetailsTabButtons && previewDetailsTabButtons.length) {
-          const defaultTab = previewDetailsTabButtons[0].getAttribute('data-details-tab');
-          setActiveDetailsTab(defaultTab);
-        }
         // ZAQ TASK 1.8: Pause hero video when preview begins opening.
         previewOpening = true;
         schedulePreviewNavPulse();
@@ -8227,6 +8232,15 @@ function detachPreviewSwipeListeners() {
         const detailsPanel = document.querySelector('.preview-details-panel');
         if (detailsPanel) {
           detailsPanel.setAttribute('aria-hidden', isOn ? 'false' : 'true');
+        }
+        if (!isOn) {
+          previewDetailsTabButtons.forEach((btn) => {
+            btn.classList.remove('is-active');
+            btn.setAttribute('aria-selected', 'false');
+          });
+          previewDetailsSections.forEach((section) => {
+            section.classList.remove('is-active');
+          });
         }
         schedulePreviewFitUpdate();
       }
