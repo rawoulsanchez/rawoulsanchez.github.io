@@ -1911,7 +1911,6 @@ body.debug-row-zones .row-nav-zone{
     align-items: center;
     position: relative;
     z-index: 9;
-    cursor: default;
     pointer-events: auto;
     overflow: visible;
   }
@@ -2341,6 +2340,10 @@ body.debug-row-zones .row-nav-zone{
     inset: 0;
     pointer-events: none;
     z-index: 12001;
+    display: none;
+  }
+  body.debug-layout .preview-debug-guides {
+    display: block;
   }
   .preview-debug-guide {
     position: fixed;
@@ -4857,14 +4860,16 @@ body.debug-row-zones .row-nav-zone{
                 suppressOverlayCloseUntil = performance.now() + 400;
                 clearDragSettleTimer();
                 const slides = getPreviewSlidesArray();
-                let target = getSnapSlideByDragStart(dragStartSlide);
+                const baseSlide = dragStartSlide || previewCarouselActiveLastSlide || getClosestPreviewSlideToCenter();
+                let target = getSnapSlideByDragStart(baseSlide);
                 if (slides.length && Math.abs(velocityX) > FLICK_VELOCITY_PX_MS) {
-                  const base = target || getClosestPreviewSlideToCenter() || dragStartSlide;
-                  const baseIdx = slides.indexOf(base);
-                  if (baseIdx >= 0) {
-                    const dir = velocityX < 0 ? 1 : -1; // drag left = next
-                    const nextIdx = (baseIdx + dir + slides.length) % slides.length;
-                    target = slides[nextIdx] || target;
+                  if (target === baseSlide && baseSlide) {
+                    const baseIdx = slides.indexOf(baseSlide);
+                    if (baseIdx >= 0) {
+                      const dir = velocityX < 0 ? 1 : -1; // drag left = next
+                      const nextIdx = (baseIdx + dir + slides.length) % slides.length;
+                      target = slides[nextIdx] || target;
+                    }
                   }
                 }
                 if (target) centerPreviewSlideWithAnimation(target);
@@ -8547,8 +8552,19 @@ function detachPreviewSwipeListeners() {
       previewOverlay.addEventListener('click', (event) => {
         const previewCard = previewOverlay.querySelector('.preview-card:not(.is-side)');
         if (!previewCard) return;
-        if (previewCard.contains(event.target)) return;
-        if (event.target && event.target.closest('.preview-nav-arrow')) return;
+        const clickPath = (event && typeof event.composedPath === 'function') ? event.composedPath() : [];
+        const clickedNavArrow = clickPath.some((node) => node && node.classList && node.classList.contains('preview-nav-arrow'));
+        if (clickedNavArrow) return;
+        const clickX = event.clientX;
+        const clickY = event.clientY;
+        if (typeof clickX === 'number' && typeof clickY === 'number') {
+          const cards = Array.from(previewOverlay.querySelectorAll('.preview-card'));
+          const hitCard = cards.some((card) => {
+            const rect = card.getBoundingClientRect();
+            return clickX >= rect.left && clickX <= rect.right && clickY >= rect.top && clickY <= rect.bottom;
+          });
+          if (hitCard) return;
+        }
         if (previewOverlay.__suppressCloseUntil && performance.now() < previewOverlay.__suppressCloseUntil) return;
         if (previewCarousel && typeof previewCarousel.__shouldSuppressOverlayClose === 'function') {
           if (previewCarousel.__shouldSuppressOverlayClose()) return;
