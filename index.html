@@ -3172,6 +3172,7 @@ body.debug-row-zones .row-nav-zone{
   let fullscreenPlayer = null;
   let hasUserGesturePlayback = false;
   let heroAutoplayUnlockBound = false;
+  let heroAudioAutoplayAttempted = false;
   window.heroPlaybackRequested = false;
   window.heroPlaybackPending = false;
   function isMobilePlayback() {
@@ -3257,25 +3258,23 @@ body.debug-row-zones .row-nav-zone{
           if (typeof e.target.setVolume === 'function') {
             e.target.setVolume(heroUiVolume);
           }
-          if (typeof e.target.playVideo === 'function') {
-            e.target.playVideo();
+          if (typeof e.target.mute === 'function') {
+            e.target.mute();
           }
           if (typeof e.target.playVideo === 'function') {
             e.target.playVideo();
           }
-          isMuted = false;
+          isMuted = true;
           updateHeroMuteUi();
-          attemptHeroAutoplayWithAudio(e.target);
         },
         onStateChange: e => {
           if (e.data === YT.PlayerState.PLAYING) {
             hasUserGesturePlayback = true;
             window.heroPlaybackRequested = true;
-            if (typeof e.target.unMute === 'function') {
-              e.target.unMute();
+            if (!heroAudioAutoplayAttempted) {
+              heroAudioAutoplayAttempted = true;
+              attemptHeroAutoplayWithAudio(e.target);
             }
-            isMuted = false;
-            updateHeroMuteUi();
             scheduleHeroPosterFadeNearEnd(e.target);
           }
           if (e.data === YT.PlayerState.ENDED) {
@@ -3360,7 +3359,6 @@ body.debug-row-zones .row-nav-zone{
     if (!player) return;
     const desiredVolume = Math.max(0, Math.min(100, Math.round(heroUiVolume || 0)));
     try {
-      if (typeof player.playVideo === 'function') player.playVideo();
       if (desiredVolume > 0) {
         if (typeof player.setVolume === 'function') player.setVolume(desiredVolume);
         if (typeof player.unMute === 'function') player.unMute();
