@@ -4960,6 +4960,9 @@ body.debug-row-zones .row-nav-zone{
   document.addEventListener('DOMContentLoaded', () => {
     const previewBtn = document.querySelector('.hero-details-button');
     const playNowBtn = document.querySelector('.hero-cta .btn--solid');
+    const previewGlowEclipse = document.querySelector('.hero-preview-pill-glow .hero-preview-pill-eclipse.glow');
+    const PREVIEW_GLOW_EXIT_RATIO = 0.24; // matches keyframe point where sweep exits left side
+    let playNowJiggleExitTimeout = null;
 
     function triggerJiggle(el) {
       if (!el) return;
@@ -4973,8 +4976,34 @@ body.debug-row-zones .row-nav-zone{
       window.setTimeout(clear, 900);
     }
 
+    function parseDurationMs(value) {
+      if (!value || typeof value !== 'string') return 0;
+      const token = value.split(',')[0].trim();
+      if (token.endsWith('ms')) return Number.parseFloat(token) || 0;
+      if (token.endsWith('s')) return (Number.parseFloat(token) || 0) * 1000;
+      return 0;
+    }
+
+    function schedulePlayNowJiggleAtSweepExit() {
+      if (!playNowBtn || !previewGlowEclipse) return;
+      if (playNowJiggleExitTimeout) {
+        clearTimeout(playNowJiggleExitTimeout);
+        playNowJiggleExitTimeout = null;
+      }
+      const styles = window.getComputedStyle(previewGlowEclipse);
+      const durationMs = parseDurationMs(styles.animationDuration) || 10000;
+      const delayMs = Math.max(0, Math.round(durationMs * PREVIEW_GLOW_EXIT_RATIO) - 750);
+      playNowJiggleExitTimeout = window.setTimeout(() => {
+        triggerJiggle(playNowBtn);
+      }, delayMs);
+    }
+
     window.setTimeout(() => triggerJiggle(previewBtn), 5000);
-    window.setTimeout(() => triggerJiggle(playNowBtn), 10000);
+    if (playNowBtn && previewGlowEclipse) {
+      schedulePlayNowJiggleAtSweepExit();
+      previewGlowEclipse.addEventListener('animationstart', schedulePlayNowJiggleAtSweepExit);
+      previewGlowEclipse.addEventListener('animationiteration', schedulePlayNowJiggleAtSweepExit);
+    }
   });
 </script>
 <script>
