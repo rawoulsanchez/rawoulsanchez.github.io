@@ -11,6 +11,7 @@
   :root{
     --font-ui: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
     --font-display: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+    --font-menu: "Rajdhani", "Inter", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
   }
   * { box-sizing:border-box; }
   body { margin:0; font-family:var(--font-ui); background:var(--bg); color:var(--fg); line-height:1.5; overflow-x:hidden; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
@@ -271,25 +272,103 @@ border-bottom:0;
     right:0;
     width:100%;
     height:calc(100dvh - (var(--nav-height) + env(safe-area-inset-top)));
-    background:#000;
-    overflow-x:hidden;
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
+    overflow:hidden;
     z-index:9900;
     opacity:0;
-    transform:translateY(-12px);
+    transform:translateY(-8px);
     pointer-events:none;
-    transition:transform 260ms ease, opacity 200ms ease;
+    transition:transform 260ms ease, opacity 220ms ease;
+    will-change:transform, opacity;
+    background:
+      radial-gradient(120% 85% at 50% 0%, rgba(227,27,35,0.12), rgba(0,0,0,0) 58%),
+      radial-gradient(150% 120% at 50% 50%, rgba(0,0,0,0.16), rgba(0,0,0,0.86) 65%, #000 100%),
+      #020202;
   }
-  .nav-dropdown{
-    will-change: transform, opacity;
+  .nav-dropdown::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+    background:
+      radial-gradient(90% 70% at 50% 45%, rgba(0,0,0,0) 42%, rgba(0,0,0,0.64) 100%),
+      repeating-linear-gradient(
+        0deg,
+        rgba(255,255,255,0.02) 0px,
+        rgba(255,255,255,0.02) 1px,
+        rgba(0,0,0,0) 2px,
+        rgba(0,0,0,0) 4px
+      );
+    opacity:0.58;
+  }
+  .nav-dropdown-inner{
+    position:relative;
+    z-index:2;
+    height:100%;
+    overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    padding: clamp(22px, 4vw, 44px) calc(22px + env(safe-area-inset-right)) clamp(120px, 20vh, 180px) calc(22px + env(safe-area-inset-left));
   }
   .nav-dropdown-menu{
     position:relative;
+    z-index:3;
     display:flex;
     flex-direction:column;
-    gap:10px;
-    padding:22px 22px 140px;
+    align-items:flex-start;
+    gap: clamp(10px, 1.5vh, 16px);
+    margin:0;
+    padding:0;
+    width:min(520px, 100%);
+  }
+  .nav-dropdown-menu a{
+    position:relative;
+    display:flex;
+    align-items:center;
+    min-height:44px;
+    width:min(360px, 100%);
+    color:#f6f7fb;
+    text-decoration:none;
+    text-transform:uppercase;
+    font:700 clamp(1.5rem, 3.6vw, 1.8rem)/1.15 var(--font-menu);
+    letter-spacing:0.045em;
+    padding:6px 2px 12px 2px;
+    border-radius:8px;
+    outline:0;
+    opacity:0;
+    transform:translateY(-8px);
+    transition:
+      opacity 220ms ease 120ms,
+      transform 220ms ease 120ms,
+      color 200ms ease;
+  }
+  .nav-dropdown-menu a::after{
+    content:"";
+    position:absolute;
+    left:0;
+    bottom:2px;
+    width:100%;
+    height:2px;
+    border-radius:999px;
+    background:linear-gradient(90deg, rgba(227,27,35,0), rgba(227,27,35,1) 50%, rgba(227,27,35,0));
+    transform-origin:left center;
+    transform:scaleX(0);
+    opacity:0.95;
+    box-shadow:0 0 6px rgba(227,27,35,0.45);
+    transition:transform 240ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease;
+  }
+  .nav-dropdown-menu a:hover,
+  .nav-dropdown-menu a:focus-visible{
+    color:#fff;
+  }
+  .nav-dropdown-menu a:hover::after,
+  .nav-dropdown-menu a:focus-visible::after{
+    transform:scaleX(1);
+    box-shadow:0 0 10px rgba(227,27,35,0.52);
+  }
+  .nav-dropdown-menu a:focus-visible{
+    outline:2px solid rgba(227,27,35,0.7);
+    outline-offset:4px;
   }
   /* DVD-style bouncing logo (menu-only) */
   .nav-dropdown .dvd-bounce {
@@ -297,56 +376,26 @@ border-bottom:0;
     top:0;
     left:0;
     display:block;
-    width:120px;
+    width:112px;
     height:auto;
     pointer-events:none;
     user-select:none;
-    z-index:9999;
+    z-index:1;
+    opacity:0.9;
   }
   .nav-dropdown .dvd-bounce img{
     display:block;
     width:100%;
     height:auto;
     image-rendering:auto;
-    filter: drop-shadow(0 0 10px rgba(227,27,35,0.45))
-            drop-shadow(0 0 24px rgba(227,27,35,0.25));
     pointer-events:none;
     user-select:none;
-  }
-  .nav-dropdown-menu{
-    z-index:2;
-  }
-  .nav-dropdown-menu a{
-    color:#f7f7fb;
-    text-decoration:none;
-    font-size:1rem;
-    font-weight:600;
-    letter-spacing:0.01em;
-    padding:8px 0;
-    border-radius:0;
-    border:0;
-    background:transparent;
-    box-shadow:none;
-    opacity:0;
-    transform:translateY(-8px);
-    transition:
-      opacity 220ms ease 120ms,
-      transform 220ms ease 120ms;
-  }
-  .nav-dropdown-menu a:hover{
-    color:#ffffff;
-  }
-  .nav-dropdown-menu a:focus-visible{
-    outline:2px solid rgba(227,27,35,0.65);
-    outline-offset:2px;
+    filter:drop-shadow(0 0 8px rgba(227,27,35,0.45)) drop-shadow(0 0 18px rgba(227,27,35,0.2));
   }
   body.nav-open .nav-dropdown{
     opacity:1;
     transform:translateY(0);
     pointer-events:auto;
-  }
-  body.nav-open .nav-dropdown{
-    animation: slide-in-top 0.55s cubic-bezier(0.230, 1.000, 0.320, 1.000) both;
   }
   body.nav-open .nav-dropdown-menu a{
     opacity:1;
@@ -354,38 +403,10 @@ border-bottom:0;
   }
 
   @media (prefers-reduced-motion: reduce){
-    body.nav-open .nav-dropdown{
-      animation: none;
-    }
-  }
-
-  /**
-   * ----------------------------------------
-   * animation slide-in-top
-   * ----------------------------------------
-   */
-  @-webkit-keyframes slide-in-top {
-    0% {
-      -webkit-transform: translateY(-120px);
-              transform: translateY(-120px);
-      opacity: 0;
-    }
-    100% {
-      -webkit-transform: translateY(0);
-              transform: translateY(0);
-      opacity: 1;
-    }
-  }
-  @keyframes slide-in-top {
-    0% {
-      -webkit-transform: translateY(-120px);
-              transform: translateY(-120px);
-      opacity: 0;
-    }
-    100% {
-      -webkit-transform: translateY(0);
-              transform: translateY(0);
-      opacity: 1;
+    .nav-dropdown,
+    .nav-dropdown-menu a,
+    .nav-dropdown-menu a::after{
+      transition:none;
     }
   }
   .nav-overlay{
@@ -406,6 +427,70 @@ border-bottom:0;
   }
   .nav-dropdown-debug:hover{
     background:rgba(20,20,20,0.9);
+  }
+  .nav-logo-speed{
+    margin-top:2px;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:8px;
+    width:min(360px, 100%);
+  }
+  .nav-logo-speed-toggle{
+    appearance:none;
+    border:1px solid rgba(255,255,255,0.28);
+    background:rgba(8,8,8,0.72);
+    color:#f2f4f9;
+    border-radius:999px;
+    padding:7px 13px;
+    font:700 0.95rem/1 var(--font-menu);
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    cursor:pointer;
+  }
+  .nav-logo-speed-toggle:focus-visible{
+    outline:2px solid rgba(227,27,35,0.72);
+    outline-offset:3px;
+  }
+  .nav-logo-speed-panel{
+    display:none;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .nav-logo-speed.is-open .nav-logo-speed-panel{
+    display:flex;
+  }
+  .nav-logo-speed-btn{
+    appearance:none;
+    border:1px solid rgba(255,255,255,0.28);
+    background:rgba(15,15,15,0.84);
+    color:#fff;
+    border-radius:999px;
+    min-width:38px;
+    height:34px;
+    padding:0 12px;
+    font:700 0.92rem/1 var(--font-ui);
+    cursor:pointer;
+  }
+  .nav-logo-speed-btn:focus-visible{
+    outline:2px solid rgba(227,27,35,0.72);
+    outline-offset:2px;
+  }
+  .nav-logo-speed-readout{
+    min-width:56px;
+    text-align:center;
+    color:#f3f5fb;
+    font:700 0.82rem/1 var(--font-ui);
+    letter-spacing:0.02em;
+  }
+  .nav-logo-bullet-btn.is-active{
+    border-color:rgba(227,27,35,0.88);
+    color:#fff;
+    box-shadow:0 0 10px rgba(227,27,35,0.45);
+  }
+  .nav-dropdown .dvd-bounce.is-bullet img{
+    filter:drop-shadow(0 0 9px rgba(227,27,35,0.65)) drop-shadow(0 0 20px rgba(227,27,35,0.42));
   }
   .title-chip{
   display:inline-flex; align-items:center; justify-content:center;
@@ -2684,7 +2769,7 @@ body.debug-row-zones .row-nav-zone{
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <header class="nav-bar" role="navigation" aria-label="Main">
@@ -2711,15 +2796,20 @@ body.debug-row-zones .row-nav-zone{
     <div class="dvd-bounce" aria-hidden="true">
       <img src="images/logo_dvd.png" alt="">
     </div>
-    <nav class="nav-dropdown-menu" aria-label="Mobile navigation">
-      <a href="#hero">Film</a>
-      <a href="#photography">Photography</a>
-      <a href="#social-media">Social Media</a>
-      <a href="#side-quests">Side Quests</a>
-      <a href="#about">About</a>
-      <a href="#contact">Contact</a>
-      <button class="nav-dropdown-debug" id="debugToggleButton" type="button" aria-label="Toggle layout debug" aria-pressed="false">Debug</button>
-    </nav>
+    <div class="nav-dropdown-inner">
+      <nav class="nav-dropdown-menu" aria-label="Mobile navigation">
+        <a href="#hero">Film</a>
+        <a href="#photography">Photography</a>
+        <a href="#social-media">Social Media</a>
+        <a href="#side-quests">Side Quests</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+        <div class="nav-logo-speed" id="logoSpeedControl">
+          <button class="nav-logo-speed-toggle nav-logo-bullet-btn" id="logoSpeedToggle" type="button" aria-pressed="false">Logo Bullet Time</button>
+        </div>
+        <button class="nav-dropdown-debug" id="debugToggleButton" type="button" aria-label="Toggle layout debug" aria-pressed="false">Debug</button>
+      </nav>
+    </div>
   </div>
   <div class="nav-overlay" aria-hidden="true">
     <button class="nav-overlay-close" type="button" aria-label="Close menu">×</button>
@@ -4486,59 +4576,62 @@ body.debug-row-zones .row-nav-zone{
         const rightZone = document.createElement('div');
         rightZone.className = 'row-nav-zone row-nav-zone--right';
 
+        const rowNavDragState = {
+          isDragging: false
+        };
+
         function attachNavButtonDrag(btn, direction) {
           let isPointerDown = false;
-          let isDragging = false;
           let startX = 0;
           let startScrollLeft = 0;
-          const dragThreshold = 4;
+          let startTime = 0;
+          let totalMove = 0;
+          const clickMoveThreshold = 3;
 
           btn.addEventListener('pointerdown', (event) => {
             if (event.button !== 0) return;
             event.preventDefault();
             event.stopPropagation();
             isPointerDown = true;
-            isDragging = false;
+            rowNavDragState.isDragging = true;
             startX = event.clientX;
             startScrollLeft = track.scrollLeft;
+            startTime = performance.now();
+            totalMove = 0;
+            track.classList.add('is-dragging');
+            cancelScrollAnimation(track);
             btn.setPointerCapture(event.pointerId);
           });
 
           btn.addEventListener('pointermove', (event) => {
             if (!isPointerDown) return;
             const dx = event.clientX - startX;
-            if (!isDragging && Math.abs(dx) > dragThreshold) {
-              isDragging = true;
-              setPreviewDragging(true);
-              track.classList.add('is-dragging');
-              cancelScrollAnimation(track);
-            }
-            if (isDragging) {
-              event.preventDefault();
-              track.scrollLeft = startScrollLeft - dx;
-            }
+            totalMove = Math.max(totalMove, Math.abs(dx));
+            event.preventDefault();
+            track.scrollLeft = startScrollLeft - dx;
           });
 
           btn.addEventListener('pointerup', (event) => {
             if (!isPointerDown) return;
             event.preventDefault();
             event.stopPropagation();
-            if (isDragging) {
-              track.classList.remove('is-dragging');
-            } else {
+            const elapsed = performance.now() - startTime;
+            const isClick = totalMove < clickMoveThreshold && elapsed < 250;
+            if (isClick) {
               goToSiblingPoster(track, direction);
             }
+            track.classList.remove('is-dragging');
             isPointerDown = false;
-            isDragging = false;
+            rowNavDragState.isDragging = false;
             try {
               btn.releasePointerCapture(event.pointerId);
             } catch (_) {}
           });
 
           btn.addEventListener('pointercancel', () => {
-            if (isDragging) track.classList.remove('is-dragging');
+            track.classList.remove('is-dragging');
             isPointerDown = false;
-            isDragging = false;
+            rowNavDragState.isDragging = false;
           });
         }
 
@@ -4582,6 +4675,12 @@ body.debug-row-zones .row-nav-zone{
           const y = rowNavState.pointerY;
           const insideY = (y >= trackTop && y <= trackBottom);
           if (!insideY) {
+            resetRowButton(leftBtn);
+            resetRowButton(rightBtn);
+            return;
+          }
+
+          if (rowNavDragState.isDragging || track.classList.contains('is-dragging')) {
             resetRowButton(leftBtn);
             resetRowButton(rightBtn);
             return;
@@ -4724,20 +4823,78 @@ body.debug-row-zones .row-nav-zone{
   document.addEventListener('DOMContentLoaded', () => {
     const dropdown = document.querySelector('.nav-dropdown');
     const logo = dropdown ? dropdown.querySelector('.dvd-bounce') : null;
+    const logoImg = logo ? logo.querySelector('img') : null;
     if (!dropdown || !logo) return;
+    const speedToggle = document.getElementById('logoSpeedToggle');
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let rafId = null;
     let lastTime = null;
     let pos = { x: 24, y: 24 };
-    let vel = { x: 140, y: 110 }; // px/s
+    const baseVel = { x: 96, y: 74 }; // px/s, subtle movement
+    let velDir = { x: 1, y: 1 };
+    let speedMultiplier = 1;
+    let bulletTimeEnabled = false;
+    let bulletCornerEase = 1;
+    let perfectCornerCooldown = 0;
+    let wallImpactSlow = 0;
+    let cornerPhase = 'idle';
+    let cornerTouchCount = 0;
+    let bulletPairIndex = 0;
+    let cornerTargetX = 1;
+    let cornerTargetY = 1;
+    let cornerPhaseCooldown = 0;
+    let recoverProgress = 1;
+    const baseLogoFilter = logoImg
+      ? (window.getComputedStyle(logoImg).filter !== 'none' ? window.getComputedStyle(logoImg).filter : '')
+      : '';
+
+    logo.style.pointerEvents = 'none';
+
+    function clampSpeed(value) {
+      return Math.max(0.25, Math.min(6, value));
+    }
+
+    function setSpeed(nextSpeed) {
+      speedMultiplier = clampSpeed(nextSpeed);
+    }
+
+    function setBulletTimeState(enabled) {
+      bulletTimeEnabled = !!enabled;
+      speedMultiplier = bulletTimeEnabled ? 6 : 1;
+      logo.classList.toggle('is-bullet', bulletTimeEnabled);
+      if (!bulletTimeEnabled) {
+        cornerPhase = 'idle';
+        cornerTouchCount = 0;
+        bulletPairIndex = 0;
+        cornerPhaseCooldown = 0;
+        recoverProgress = 1;
+        wallImpactSlow = 0;
+        bulletCornerEase = 1;
+      }
+      if (speedToggle) {
+        speedToggle.setAttribute('aria-pressed', bulletTimeEnabled ? 'true' : 'false');
+        speedToggle.classList.toggle('is-active', bulletTimeEnabled);
+      }
+      if (logoImg && !bulletTimeEnabled) {
+        logoImg.style.filter = baseLogoFilter;
+      }
+    }
+
+    if (speedToggle) {
+      speedToggle.addEventListener('click', () => {
+        setBulletTimeState(!bulletTimeEnabled);
+      });
+    }
+
+    setBulletTimeState(false);
 
     function measure() {
       const rect = dropdown.getBoundingClientRect();
       const logoRect = logo.getBoundingClientRect();
       return {
-        w: rect.width,
-        h: rect.height,
+        w: dropdown.clientWidth || rect.width,
+        h: dropdown.clientHeight || rect.height,
         lw: logoRect.width,
         lh: logoRect.height
       };
@@ -4769,28 +4926,188 @@ body.debug-row-zones .row-nav-zone{
       if (!lastTime) lastTime = ts;
       const dt = Math.min(0.05, (ts - lastTime) / 1000);
       lastTime = ts;
+      perfectCornerCooldown = Math.max(0, perfectCornerCooldown - dt);
+      cornerPhaseCooldown = Math.max(0, cornerPhaseCooldown - dt);
+      wallImpactSlow = Math.max(0, wallImpactSlow - (dt * 5.2));
 
       const m = measure();
       const maxX = Math.max(0, m.w - m.lw);
       const maxY = Math.max(0, m.h - m.lh);
+      // Corner-center proximity should be based on the logo's own corner point,
+      // not its center, so bullet-time only kicks in during final corner approach.
+      const cornerTopLeft = Math.hypot(pos.x, pos.y);
+      const cornerTopRight = Math.hypot(maxX - pos.x, pos.y);
+      const cornerBottomLeft = Math.hypot(pos.x, maxY - pos.y);
+      const cornerBottomRight = Math.hypot(maxX - pos.x, maxY - pos.y);
+      const nearestCornerDistance = Math.min(cornerTopLeft, cornerTopRight, cornerBottomLeft, cornerBottomRight);
+      const bulletRange = Math.max(22, Math.min(44, Math.max(m.lw, m.lh) * 0.42));
+      const distToXWallNow = velDir.x > 0 ? (maxX - pos.x) : pos.x;
+      const distToYWallNow = velDir.y > 0 ? (maxY - pos.y) : pos.y;
 
-      pos.x += vel.x * dt;
-      pos.y += vel.y * dt;
+      let cornerSpeedFactor = 1;
+      let cornerSlowStrength = 0;
+      let targetCornerFactor = 1;
+      if (bulletTimeEnabled) {
+        const laneDistX = Math.max(m.lw * 1.2, maxX * 0.28);
+        const laneDistY = Math.max(m.lh * 1.2, maxY * 0.28);
+        const inCornerLane = distToXWallNow <= laneDistX && distToYWallNow <= laneDistY;
 
-      if (pos.x <= 0) {
-        pos.x = 0;
-        vel.x = Math.abs(vel.x);
-      } else if (pos.x >= maxX) {
-        pos.x = maxX;
-        vel.x = -Math.abs(vel.x);
+        if (cornerPhase === 'idle' && cornerPhaseCooldown <= 0 && inCornerLane) {
+          cornerPhase = 'pre_slow_2nd_last';
+          cornerTouchCount = 0;
+          cornerTargetX = velDir.x;
+          cornerTargetY = velDir.y;
+          recoverProgress = 0;
+        }
+
+        if (cornerPhase === 'recover') {
+          recoverProgress = Math.min(1, recoverProgress + (dt * 14));
+          if (recoverProgress >= 1) {
+            cornerPhase = 'idle';
+            cornerTouchCount = 0;
+            cornerPhaseCooldown = 0.04;
+            wallImpactSlow = 0;
+          }
+        }
+
+        const pairIndex = Math.max(0, Math.min(2, bulletPairIndex));
+        const preSlowFactorByPair = [0.62, 0.48, 0.30];
+        const touchSlowFactorByPair = [0.42, 0.30, 0.16];
+        const climaxFactorByPair = [0.34, 0.24, 0.10];
+        const phaseFactorByName = {
+          idle: 1,
+          pre_slow_2nd_last: preSlowFactorByPair[pairIndex],
+          slow_2nd_last_touches: touchSlowFactorByPair[pairIndex],
+          slow_last_touches: touchSlowFactorByPair[pairIndex],
+          climax: climaxFactorByPair[pairIndex],
+          recover: 1
+        };
+        const phaseFactor = phaseFactorByName[cornerPhase] ?? 1;
+        const impactFactor = 0.52 + (0.48 * (1 - wallImpactSlow));
+        targetCornerFactor = Math.max(0.22, Math.min(phaseFactor, impactFactor));
+      }
+      const easingRate = targetCornerFactor < bulletCornerEase ? 0.20 : 0.78;
+      bulletCornerEase += (targetCornerFactor - bulletCornerEase) * easingRate;
+      cornerSpeedFactor = Math.max(0.22, Math.min(1, bulletCornerEase));
+      cornerSlowStrength = 1 - cornerSpeedFactor;
+
+      const vx = baseVel.x * speedMultiplier * cornerSpeedFactor * velDir.x;
+      const vy = baseVel.y * speedMultiplier * cornerSpeedFactor * velDir.y;
+
+      pos.x += vx * dt;
+      pos.y += vy * dt;
+      const hitLeft = pos.x <= 0;
+      const hitRight = pos.x >= maxX;
+      const hitTop = pos.y <= 0;
+      const hitBottom = pos.y >= maxY;
+      const hitX = hitLeft || hitRight;
+      const hitY = hitTop || hitBottom;
+      let allowPerfectCorner = false;
+      let shouldStartRecover = false;
+      if (hitX || hitY) {
+        if (bulletTimeEnabled && cornerPhase !== 'idle') {
+          const towardX = hitX && ((cornerTargetX > 0 && hitRight) || (cornerTargetX < 0 && hitLeft));
+          const towardY = hitY && ((cornerTargetY > 0 && hitBottom) || (cornerTargetY < 0 && hitTop));
+          if (towardX || towardY) {
+            wallImpactSlow = 1;
+            cornerTouchCount += 1;
+
+            if (cornerTouchCount === 1) {
+              cornerPhase = bulletPairIndex === 0 ? 'slow_2nd_last_touches' : 'slow_last_touches';
+            } else if (cornerTouchCount === 2) {
+              cornerPhase = 'climax';
+              const proximity = 1 - Math.max(0, Math.min(1, nearestCornerDistance / bulletRange));
+              const perfectCornerChance = bulletPairIndex === 2
+                ? (0.28 + (0.28 * proximity))
+                : (0.10 + (0.16 * proximity));
+              allowPerfectCorner = hitX && hitY && perfectCornerCooldown <= 0 && Math.random() < perfectCornerChance;
+              bulletPairIndex = (bulletPairIndex + 1) % 3;
+              shouldStartRecover = true;
+            }
+          } else {
+            cornerPhase = 'idle';
+            cornerTouchCount = 0;
+            cornerPhaseCooldown = 0.45;
+            wallImpactSlow = 0;
+          }
+        } else {
+          cornerPhase = 'idle';
+          cornerTouchCount = 0;
+          cornerPhaseCooldown = 0;
+          wallImpactSlow = 0;
+        }
       }
 
-      if (pos.y <= 0) {
-        pos.y = 0;
-        vel.y = Math.abs(vel.y);
-      } else if (pos.y >= maxY) {
-        pos.y = maxY;
-        vel.y = -Math.abs(vel.y);
+      if (hitX && hitY) {
+        if (allowPerfectCorner) {
+          pos.x = hitLeft ? 0 : maxX;
+          velDir.x = hitLeft ? 1 : -1;
+          pos.y = hitTop ? 0 : maxY;
+          velDir.y = hitTop ? 1 : -1;
+          perfectCornerCooldown = 2.8;
+        } else {
+          const penX = hitLeft ? -pos.x : (hitRight ? pos.x - maxX : 0);
+          const penY = hitTop ? -pos.y : (hitBottom ? pos.y - maxY : 0);
+          const preferX = penX >= penY;
+
+          if (preferX) {
+            pos.x = hitLeft ? 0 : maxX;
+            velDir.x = hitLeft ? 1 : -1;
+            if (hitTop) {
+              pos.y = Math.min(maxY, 1);
+              velDir.y = 1;
+            } else if (hitBottom) {
+              pos.y = Math.max(0, maxY - 1);
+              velDir.y = -1;
+            }
+          } else {
+            pos.y = hitTop ? 0 : maxY;
+            velDir.y = hitTop ? 1 : -1;
+            if (hitLeft) {
+              pos.x = Math.min(maxX, 1);
+              velDir.x = 1;
+            } else if (hitRight) {
+              pos.x = Math.max(0, maxX - 1);
+              velDir.x = -1;
+            }
+          }
+        }
+      } else {
+        if (hitX) {
+          pos.x = hitLeft ? 0 : maxX;
+          velDir.x = hitLeft ? 1 : -1;
+        }
+        if (hitY) {
+          pos.y = hitTop ? 0 : maxY;
+          velDir.y = hitTop ? 1 : -1;
+        }
+      }
+
+      if (shouldStartRecover) {
+        cornerPhase = 'recover';
+        cornerTouchCount = 0;
+        cornerPhaseCooldown = 0.08;
+        recoverProgress = 0;
+        wallImpactSlow = 0;
+      }
+
+      if (logoImg) {
+        if (bulletTimeEnabled) {
+          const trail = Math.max(0, Math.min(1, cornerSlowStrength));
+          const tailX = Math.round(-velDir.x * (12 + (20 * trail)));
+          const tailY = Math.round(-velDir.y * (8 + (16 * trail)));
+          const tailSoftX = Math.round(tailX * 0.55);
+          const tailSoftY = Math.round(tailY * 0.55);
+          const nearGlow = (0.24 + (0.56 * trail)).toFixed(3);
+          const hardGlow = (0.18 + (0.45 * trail)).toFixed(3);
+          logoImg.style.filter = [
+            'drop-shadow(0 0 9px rgba(227,27,35,0.60))',
+            `drop-shadow(${tailSoftX}px ${tailSoftY}px 7px rgba(227,27,35,${nearGlow}))`,
+            `drop-shadow(${tailX}px ${tailY}px 12px rgba(227,27,35,${hardGlow}))`
+          ].join(' ');
+        } else {
+          logoImg.style.filter = baseLogoFilter;
+        }
       }
 
       logo.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
