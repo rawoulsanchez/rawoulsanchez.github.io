@@ -3243,7 +3243,7 @@ body.debug-row-zones .row-nav-zone{
     ytPlayer = new YT.Player('hero-yt', {
       playerVars: {
         autoplay: 1,
-        mute: 0,
+        mute: 1,
         playsinline: 1,
         controls: 0,
         modestbranding: 1,
@@ -3256,8 +3256,8 @@ body.debug-row-zones .row-nav-zone{
           if (typeof e.target.setVolume === 'function') {
             e.target.setVolume(heroUiVolume);
           }
-          if (typeof e.target.unMute === 'function') {
-            e.target.unMute();
+          if (typeof e.target.playVideo === 'function') {
+            e.target.playVideo();
           }
           if (typeof e.target.playVideo === 'function') {
             e.target.playVideo();
@@ -3269,6 +3269,11 @@ body.debug-row-zones .row-nav-zone{
           if (e.data === YT.PlayerState.PLAYING) {
             hasUserGesturePlayback = true;
             window.heroPlaybackRequested = true;
+            if (typeof e.target.unMute === 'function') {
+              e.target.unMute();
+            }
+            isMuted = false;
+            updateHeroMuteUi();
             scheduleHeroPosterFadeNearEnd(e.target);
           }
           if (e.data === YT.PlayerState.ENDED) {
@@ -10255,6 +10260,5 @@ document.addEventListener('keydown', (event) => {
 </html>
 
 \n<!-- WRITE TEST -->
-
 
 
