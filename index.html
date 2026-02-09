@@ -1200,6 +1200,9 @@ body.debug-row-zones .row-nav-zone{
     opacity:1;
     pointer-events:auto;
   }
+  .shelf-outer.is-row-nav-scrubbing .row-nav-btn{
+    pointer-events:none !important;
+  }
 }
 /* Horizontal list of posters */
 /* --- SHELF TRACK --- */
@@ -1228,6 +1231,8 @@ body.debug-row-zones .row-nav-zone{
 .shelf-track.is-dragging {
   cursor: grabbing;
   user-select: none;
+  scroll-snap-type: none;
+  scroll-behavior: auto;
 }
 
 .hero-preview-source {
@@ -4561,11 +4566,12 @@ body.debug-row-zones .row-nav-zone{
 
       const handleScroll = () => {
         const isAnimating = !!track.__scrollAnimating;
+        const isTrackDragging = track.classList.contains('is-dragging');
 
         // Always keep the magnifier / active-card state in sync
         updateScalesAndActive();
 
-        if (!isAnimating) {
+        if (!isAnimating && !isTrackDragging) {
           const previousActiveTrack = lastActiveTrack;
 
           // Toggle the active shelf-track for row-scoped neon
@@ -4592,7 +4598,7 @@ body.debug-row-zones .row-nav-zone{
             clearTimeout(scrollEndTimeout);
           }
           scrollEndTimeout = setTimeout(() => {
-            if (!track.__scrollAnimating) {
+            if (!track.__scrollAnimating && !track.classList.contains('is-dragging')) {
               recenterTrackActivePoster(track);
             }
           }, 120);
@@ -4612,34 +4618,84 @@ body.debug-row-zones .row-nav-zone{
       // Desktop-only grab-to-drag behavior
       if (window.matchMedia && window.matchMedia('(pointer: fine)').matches) {
         let isDragging = false;
-        let startX;
-        let startScrollLeft;
+        let startX = 0;
+        let startScrollLeft = 0;
+        let activePointerId = null;
+        const hasPointerEvents = typeof window.PointerEvent === 'function';
 
-        track.addEventListener('mousedown', (event) => {
-          if (event.button !== 0) return; // left button only
-          cancelScrollAnimation(track);
-          isDragging = true;
-          track.classList.add('is-dragging');
-          startX = event.pageX - track.offsetLeft;
-          startScrollLeft = track.scrollLeft;
-        });
-
-        track.addEventListener('mousemove', (event) => {
-          if (!isDragging) return;
-          event.preventDefault();
-          const x = event.pageX - track.offsetLeft;
-          const walk = x - startX;
-          track.scrollLeft = startScrollLeft - walk;
-        });
-
-        const stopDragging = () => {
+        const stopDragging = (pointerId = null) => {
           if (!isDragging) return;
           isDragging = false;
           track.classList.remove('is-dragging');
+          if (hasPointerEvents && typeof pointerId === 'number') {
+            try {
+              if (track.hasPointerCapture(pointerId)) {
+                track.releasePointerCapture(pointerId);
+              }
+            } catch (_) {}
+          }
+          activePointerId = null;
         };
 
-        track.addEventListener('mouseleave', stopDragging);
-        track.addEventListener('mouseup', stopDragging);
+        if (hasPointerEvents) {
+          track.addEventListener('pointerdown', (event) => {
+            if (!event.isPrimary) return;
+            if (event.button !== 0) return; // left button only
+            cancelScrollAnimation(track);
+            isDragging = true;
+            activePointerId = event.pointerId;
+            track.classList.add('is-dragging');
+            startX = event.clientX;
+            startScrollLeft = track.scrollLeft;
+            try {
+              track.setPointerCapture(event.pointerId);
+            } catch (_) {}
+          });
+
+          track.addEventListener('pointermove', (event) => {
+            if (!isDragging) return;
+            if (!event.isPrimary) return;
+            if (event.pointerId !== activePointerId) return;
+            event.preventDefault();
+            const walk = event.clientX - startX;
+            track.scrollLeft = startScrollLeft - walk;
+          });
+
+          track.addEventListener('pointerup', (event) => {
+            if (!event.isPrimary) return;
+            if (event.pointerId !== activePointerId) return;
+            stopDragging(event.pointerId);
+          });
+          track.addEventListener('pointercancel', (event) => {
+            if (!event.isPrimary) return;
+            if (event.pointerId !== activePointerId) return;
+            stopDragging(event.pointerId);
+          });
+          track.addEventListener('lostpointercapture', (event) => {
+            if (event.pointerId !== activePointerId) return;
+            stopDragging();
+          });
+        } else {
+          track.addEventListener('mousedown', (event) => {
+            if (event.button !== 0) return; // left button only
+            cancelScrollAnimation(track);
+            isDragging = true;
+            track.classList.add('is-dragging');
+            startX = event.pageX - track.offsetLeft;
+            startScrollLeft = track.scrollLeft;
+          });
+
+          track.addEventListener('mousemove', (event) => {
+            if (!isDragging) return;
+            event.preventDefault();
+            const x = event.pageX - track.offsetLeft;
+            const walk = x - startX;
+            track.scrollLeft = startScrollLeft - walk;
+          });
+
+          track.addEventListener('mouseleave', () => stopDragging());
+          track.addEventListener('mouseup', () => stopDragging());
+        }
       }
 
       // Cancel any ongoing recenter animation when the user manually scrolls
@@ -4735,7 +4791,9 @@ body.debug-row-zones .row-nav-zone{
         rightZone.className = 'row-nav-zone row-nav-zone--right';
 
         const rowNavDragState = {
-          isDragging: false
+          isDragging: false,
+          activePointerId: null,
+          activeButton: null
         };
 
         function attachNavButtonDrag(btn, direction) {
@@ -4744,33 +4802,75 @@ body.debug-row-zones .row-nav-zone{
           let startScrollLeft = 0;
           let startTime = 0;
           let totalMove = 0;
+          let dragRafId = null;
+          let pendingScrollLeft = null;
           const clickMoveThreshold = 3;
+          const flushDragScroll = () => {
+            dragRafId = null;
+            if (pendingScrollLeft === null) return;
+            track.scrollLeft = pendingScrollLeft;
+            pendingScrollLeft = null;
+          };
+          const queueDragScroll = (value) => {
+            pendingScrollLeft = value;
+            if (dragRafId !== null) return;
+            dragRafId = requestAnimationFrame(flushDragScroll);
+          };
+          const cleanupDrag = (pointerId) => {
+            if (dragRafId !== null) {
+              cancelAnimationFrame(dragRafId);
+              dragRafId = null;
+            }
+            if (pendingScrollLeft !== null) {
+              track.scrollLeft = pendingScrollLeft;
+              pendingScrollLeft = null;
+            }
+            track.classList.remove('is-dragging');
+            outer.classList.remove('is-row-nav-scrubbing');
+            isPointerDown = false;
+            rowNavDragState.isDragging = false;
+            rowNavDragState.activePointerId = null;
+            rowNavDragState.activeButton = null;
+            if (typeof pointerId === 'number') {
+              try {
+                btn.releasePointerCapture(pointerId);
+              } catch (_) {}
+            }
+          };
 
           btn.addEventListener('pointerdown', (event) => {
             if (event.button !== 0) return;
+            if (rowNavDragState.isDragging) return;
             event.preventDefault();
             event.stopPropagation();
             isPointerDown = true;
             rowNavDragState.isDragging = true;
+            rowNavDragState.activePointerId = event.pointerId;
+            rowNavDragState.activeButton = btn;
             startX = event.clientX;
             startScrollLeft = track.scrollLeft;
             startTime = performance.now();
             totalMove = 0;
             track.classList.add('is-dragging');
+            outer.classList.add('is-row-nav-scrubbing');
             cancelScrollAnimation(track);
-            btn.setPointerCapture(event.pointerId);
+            try {
+              btn.setPointerCapture(event.pointerId);
+            } catch (_) {}
           });
 
           btn.addEventListener('pointermove', (event) => {
             if (!isPointerDown) return;
+            if (event.pointerId !== rowNavDragState.activePointerId) return;
             const dx = event.clientX - startX;
             totalMove = Math.max(totalMove, Math.abs(dx));
             event.preventDefault();
-            track.scrollLeft = startScrollLeft - dx;
+            queueDragScroll(startScrollLeft - dx);
           });
 
           btn.addEventListener('pointerup', (event) => {
             if (!isPointerDown) return;
+            if (event.pointerId !== rowNavDragState.activePointerId) return;
             event.preventDefault();
             event.stopPropagation();
             const elapsed = performance.now() - startTime;
@@ -4778,18 +4878,19 @@ body.debug-row-zones .row-nav-zone{
             if (isClick) {
               goToSiblingPoster(track, direction);
             }
-            track.classList.remove('is-dragging');
-            isPointerDown = false;
-            rowNavDragState.isDragging = false;
-            try {
-              btn.releasePointerCapture(event.pointerId);
-            } catch (_) {}
+            cleanupDrag(event.pointerId);
           });
 
-          btn.addEventListener('pointercancel', () => {
-            track.classList.remove('is-dragging');
-            isPointerDown = false;
-            rowNavDragState.isDragging = false;
+          btn.addEventListener('pointercancel', (event) => {
+            if (!isPointerDown) return;
+            if (event.pointerId !== rowNavDragState.activePointerId) return;
+            cleanupDrag(event.pointerId);
+          });
+
+          btn.addEventListener('lostpointercapture', (event) => {
+            if (!isPointerDown) return;
+            if (event.pointerId !== rowNavDragState.activePointerId) return;
+            cleanupDrag();
           });
         }
 
