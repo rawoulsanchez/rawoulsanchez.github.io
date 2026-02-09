@@ -2872,8 +2872,9 @@ body.debug-row-zones .row-nav-zone{
                 font-size:clamp(.95rem,2.2vw,1.15rem);line-height:1.55;
                 display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;
                 overflow:hidden;">
-        As a rogue AI network threatens global collapse, a disgraced former agent is called
-        back into the field for one last, impossible mission to save humanity.
+        As a rogue AI network threatens global collapse,<br>
+        a disgraced former agent is called back into the field<br>
+        for one last, impossible mission to save humanity.
       </p>
       <div class="hero-cta-anchor" aria-hidden="true"></div>
     </div>
@@ -6504,6 +6505,8 @@ body.debug-row-zones .row-nav-zone{
       const PREVIEW_TEASER_DEBUG = false;
       const PREVIEW_TEASER_FADE_START_MS = 13000;
       const PREVIEW_TEASER_AUDIO_STEP_MS = 50;
+      let previewPausedByMenu = false;
+      let previewWasPlayingBeforeMenuOpen = false;
 
       let heroPausedTime = null;
       let heroTargetVolume = 100;
@@ -7435,6 +7438,29 @@ body.debug-row-zones .row-nav-zone{
         previewTeaserFadeTimeout = setTimeout(() => {
           stopPreviewTeaser(true);
         }, PREVIEW_TEASER_FADE_MS);
+      }
+
+      function pausePreviewTeaserForMenuOpen() {
+        if (!isPreviewOpen()) return;
+        if (!previewTeaserContainer || !previewTeaserPlayer || previewTeaserIsFading) return;
+        const playingState = (window.YT && window.YT.PlayerState) ? window.YT.PlayerState.PLAYING : 1;
+        const playerState = typeof previewTeaserPlayer.getPlayerState === 'function'
+          ? previewTeaserPlayer.getPlayerState()
+          : playingState;
+        if (typeof playerState === 'number' && playerState !== playingState) return;
+        previewWasPlayingBeforeMenuOpen = true;
+        previewPausedByMenu = true;
+        beginPreviewTeaserFadeOut();
+      }
+
+      function resumePreviewTeaserAfterMenuClose() {
+        if (!previewPausedByMenu) return;
+        previewPausedByMenu = false;
+        if (!previewWasPlayingBeforeMenuOpen) return;
+        previewWasPlayingBeforeMenuOpen = false;
+        if (!isPreviewOpen()) return;
+        if (!currentPreviewCardEl) return;
+        schedulePreviewTeaserSwap(currentPreviewCardEl);
       }
 
       function schedulePreviewTeaserFadeForPlayer() {
@@ -9307,6 +9333,8 @@ function detachPreviewSwipeListeners() {
         if (!previewOverlay || !previewOverlay.classList.contains('is-visible')) return;
         setDetailsMode(false);
         previewOpening = false;
+        previewPausedByMenu = false;
+        previewWasPlayingBeforeMenuOpen = false;
         previewNavPulseReady = false;
         clearPreviewNavPulseTimer();
         previewOverlay.classList.remove('preview-nav-pulse');
@@ -9320,7 +9348,7 @@ function detachPreviewSwipeListeners() {
         stopPreviewCarouselMagnifier();
 
         window.removeEventListener('resize', handlePreviewResize);
-        if (previewOverlay) {
+      if (previewOverlay) {
           previewOverlay.style.setProperty('--preview-fit-scale', '1');
         }
 
@@ -9439,6 +9467,9 @@ function detachPreviewSwipeListeners() {
           }
         }, currentMorphDuration);
       }
+
+      window.addEventListener('app:menu-opened', pausePreviewTeaserForMenuOpen);
+      window.addEventListener('app:menu-closed', resumePreviewTeaserAfterMenuClose);
 
       previewCloseButton.addEventListener('click', () => {
         closePreview();
@@ -9880,6 +9911,7 @@ document.addEventListener('keydown', (event) => {
       toggle.setAttribute('aria-expanded', 'true');
       dropdown.setAttribute('aria-hidden', 'false');
       scrim.setAttribute('aria-hidden', 'false');
+      window.dispatchEvent(new CustomEvent('app:menu-opened'));
     };
 
     const closeMenu = () => {
@@ -9888,6 +9920,7 @@ document.addEventListener('keydown', (event) => {
       toggle.setAttribute('aria-expanded', 'false');
       dropdown.setAttribute('aria-hidden', 'true');
       scrim.setAttribute('aria-hidden', 'true');
+      window.dispatchEvent(new CustomEvent('app:menu-closed'));
     };
 
     const toggleMenu = () => {
@@ -10138,6 +10171,7 @@ document.addEventListener('keydown', (event) => {
 (function(){
   var heroEl = document.querySelector('.hero');
   var previewEl = document.querySelector('.preview-overlay');
+  var bodyEl = document.body;
 
   var pauseTimer = null;          // single shared delayed-pause timer
   var pendingIntent = null;       // 'play' | 'pause' | null
@@ -10152,6 +10186,10 @@ document.addEventListener('keydown', (event) => {
 
   function isPreviewOpen(){
     return !!(previewEl && previewEl.classList.contains('is-visible'));
+  }
+
+  function isMenuOpen(){
+    return !!(bodyEl && bodyEl.classList.contains('nav-open'));
   }
 
   function clearPauseTimer(){
@@ -10217,11 +10255,17 @@ document.addEventListener('keydown', (event) => {
     }
   }
 
-  function scheduleDelayedPause(){
+  function scheduleDelayedPause(shouldPause){
     clearPauseTimer();
     pauseTimer = setTimeout(function(){
       pauseTimer = null;
-      // only pause if preview still closed AND glow still inactive
+      if (typeof shouldPause === 'function') {
+        if (shouldPause()) {
+          applyIntent('pause');
+        }
+        return;
+      }
+      // default: only pause if preview still closed AND glow still inactive
       if (!isPreviewOpen() && !isHeroActive()){
         applyIntent('pause');
       }
@@ -10232,11 +10276,22 @@ document.addEventListener('keydown', (event) => {
     opts = opts || {};
     var previewOpen = isPreviewOpen();
     var heroActive = isHeroActive();
+    var menuOpen = isMenuOpen();
 
     // Preview override (always wins)
     if (previewOpen){
       clearPauseTimer();
       applyIntent('pause');
+      lastHeroActive = heroActive;
+      lastPreviewOpen = previewOpen;
+      return;
+    }
+
+    // Menu override: pause with same delayed timing while menu is open.
+    if (menuOpen){
+      scheduleDelayedPause(function(){
+        return isMenuOpen();
+      });
       lastHeroActive = heroActive;
       lastPreviewOpen = previewOpen;
       return;
@@ -10306,6 +10361,12 @@ document.addEventListener('keydown', (event) => {
     requeryElements();
     installObservers();
     syncToTruth({ initial:true });
+  });
+  window.addEventListener('app:menu-opened', function(){
+    syncToTruth({ initial:false, force:true });
+  });
+  window.addEventListener('app:menu-closed', function(){
+    syncToTruth({ initial:false, force:true });
   });
 })();
 </script>
