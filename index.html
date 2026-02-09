@@ -3171,6 +3171,7 @@ body.debug-row-zones .row-nav-zone{
   let heroPosterFadeTimeout = null;
   let fullscreenPlayer = null;
   let hasUserGesturePlayback = false;
+  let heroAutoplayUnlockBound = false;
   window.heroPlaybackRequested = false;
   window.heroPlaybackPending = false;
   function isMobilePlayback() {
@@ -3261,6 +3262,7 @@ body.debug-row-zones .row-nav-zone{
           }
           isMuted = true;
           updateHeroMuteUi();
+          attemptHeroAutoplayWithAudio(e.target);
         },
         onStateChange: e => {
           if (e.data === YT.PlayerState.PLAYING) {
@@ -3317,6 +3319,60 @@ body.debug-row-zones .row-nav-zone{
       heroVolumeButton.textContent = isMuted ? '\uD83D\uDD07' : '\uD83D\uDD0A';
       heroVolumeButton.setAttribute('aria-pressed', isMuted ? 'true' : 'false');
     }
+  }
+  function installHeroAutoplayUnlock() {
+    if (heroAutoplayUnlockBound) return;
+    heroAutoplayUnlockBound = true;
+    const unlock = () => {
+      if (!ytPlayer) return;
+      const desiredVolume = Math.max(0, Math.min(100, Math.round(heroUiVolume || 0)));
+      try {
+        if (typeof ytPlayer.playVideo === 'function') ytPlayer.playVideo();
+        if (desiredVolume > 0) {
+          if (typeof ytPlayer.unMute === 'function') ytPlayer.unMute();
+          if (typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(desiredVolume);
+          isMuted = false;
+          heroUiVolume = desiredVolume;
+        } else {
+          if (typeof ytPlayer.mute === 'function') ytPlayer.mute();
+          isMuted = true;
+        }
+      } catch (_) {}
+      updateHeroMuteUi();
+      window.removeEventListener('pointerdown', unlock, true);
+      window.removeEventListener('touchstart', unlock, true);
+      window.removeEventListener('keydown', unlock, true);
+      heroAutoplayUnlockBound = false;
+    };
+    window.addEventListener('pointerdown', unlock, { capture: true, once: true });
+    window.addEventListener('touchstart', unlock, { capture: true, once: true });
+    window.addEventListener('keydown', unlock, { capture: true, once: true });
+  }
+  function attemptHeroAutoplayWithAudio(player) {
+    if (!player) return;
+    const desiredVolume = Math.max(0, Math.min(100, Math.round(heroUiVolume || 0)));
+    try {
+      if (typeof player.playVideo === 'function') player.playVideo();
+      if (desiredVolume > 0) {
+        if (typeof player.setVolume === 'function') player.setVolume(desiredVolume);
+        if (typeof player.unMute === 'function') player.unMute();
+      } else if (typeof player.mute === 'function') {
+        player.mute();
+      }
+    } catch (_) {}
+    window.setTimeout(() => {
+      let stillMuted = true;
+      try {
+        stillMuted = typeof player.isMuted === 'function' ? !!player.isMuted() : false;
+      } catch (_) {
+        stillMuted = true;
+      }
+      isMuted = desiredVolume > 0 ? stillMuted : true;
+      updateHeroMuteUi();
+      if (desiredVolume > 0 && stillMuted) {
+        installHeroAutoplayUnlock();
+      }
+    }, 250);
   }
   function triggerVolumeSweep(control) {
     if (!control) return;
