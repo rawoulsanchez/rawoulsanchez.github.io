@@ -969,6 +969,92 @@ html { scrollbar-gutter: stable; }
 .hero-cta-layer .hero-cta{
   margin:0;
 }
+.hero-preview-pill-wrap{
+  position:relative;
+  display:inline-block;
+  border-radius:999px;
+}
+@keyframes hero-preview-eclipse{
+  0%{
+    transform:translateX(110%);
+    opacity:0;
+  }
+  2%{
+    opacity:1;
+  }
+  24%{
+    transform:translateX(-110%);
+    opacity:1;
+  }
+  26%,
+  100%{
+    transform:translateX(-110%);
+    opacity:0;
+  }
+}
+.hero-preview-pill-glow{
+  position:absolute;
+  inset:-1px;
+  border-radius:999px;
+  overflow:hidden;
+  filter:blur(3px);
+  pointer-events:none;
+}
+.hero-preview-pill-eclipse{
+  position:absolute;
+  inset:0;
+  border-radius:999px;
+  pointer-events:none;
+  background:linear-gradient(
+    90deg,
+    rgba(255,255,255,0) 30%,
+    rgba(255,255,255,0.9) 50%,
+    rgba(255,255,255,0) 70%
+  );
+  transform:translateX(50%);
+  filter:blur(1.6px);
+  opacity:0.55;
+  animation: hero-preview-eclipse 10s linear infinite;
+}
+.hero-preview-pill-eclipse.glow{
+  background-image:
+    radial-gradient(circle at 50% 50%, transparent, rgba(0,0,0,0.9)),
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,0) 30%,
+      rgba(255,255,255,1) 50%,
+      rgba(255,255,255,0) 70%
+    );
+  opacity:0.45;
+}
+.hero-preview-pill{
+  position:relative;
+  border-radius:999px;
+  z-index:1;
+  background:#121212;
+  overflow:hidden;
+  isolation:isolate;
+  box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.28);
+}
+.hero-preview-pill.btn--ghost{
+  background:#121212;
+  box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.28);
+}
+.hero-preview-pill.btn--ghost:hover{
+  background:#121212;
+  box-shadow: inset 0 0 0 1.25px rgba(255,255,255,0.45);
+}
+.hero-preview-pill svg{
+  width:16px;
+  height:16px;
+  display:block;
+}
+@media (prefers-reduced-motion: reduce){
+  .hero-preview-pill-eclipse{
+    animation:none;
+    transform:translateX(110%);
+  }
+}
 
 /* Smaller buttons */
 .btn{
@@ -2734,7 +2820,6 @@ body.debug-row-zones .row-nav-zone{
     box-shadow: none;
     color: #fff;
   }
-
   /* Hero CTA jiggle */
   .btn.is-jiggle{
     animation: hero-cta-jiggle 700ms ease-in-out both;
@@ -2892,13 +2977,18 @@ body.debug-row-zones .row-nav-zone{
       </button>
 
       <!-- Previews -->
-      <button type="button" class="btn btn--ghost hero-details-button">
-        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M13 16h-1v-4h-1m1-4h.01"/>
-          <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <span>Previews</span>
-      </button>
+      <div class="hero-preview-pill-wrap">
+        <div class="hero-preview-pill-glow" aria-hidden="true">
+          <div class="hero-preview-pill-eclipse glow"></div>
+        </div>
+        <button type="button" class="btn btn--ghost hero-details-button hero-preview-pill">
+          <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M13 16h-1v-4h-1m1-4h.01"/>
+            <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span>Previews</span>
+        </button>
+      </div>
       <div class="hero-volume" aria-label="Hero volume control">
         <button class="hero-volume__btn" type="button" aria-label="Hero volume">&#128266;</button>
         <div class="hero-volume__sliderWrap">
@@ -6507,6 +6597,8 @@ body.debug-row-zones .row-nav-zone{
       const PREVIEW_TEASER_AUDIO_STEP_MS = 50;
       let previewPausedByMenu = false;
       let previewWasPlayingBeforeMenuOpen = false;
+      let previewPausedByVisibility = false;
+      let previewWasPlayingBeforeVisibilityHide = false;
 
       let heroPausedTime = null;
       let heroTargetVolume = 100;
@@ -7460,6 +7552,38 @@ body.debug-row-zones .row-nav-zone{
         previewWasPlayingBeforeMenuOpen = false;
         if (!isPreviewOpen()) return;
         if (!currentPreviewCardEl) return;
+        schedulePreviewTeaserSwap(currentPreviewCardEl);
+      }
+
+      function pausePreviewTeaserForVisibilityHide() {
+        if (!isPreviewOpen()) return;
+        if (!previewTeaserPlayer || !previewTeaserContainer || previewTeaserIsFading) return;
+        const playingState = (window.YT && window.YT.PlayerState) ? window.YT.PlayerState.PLAYING : 1;
+        const playerState = typeof previewTeaserPlayer.getPlayerState === 'function'
+          ? previewTeaserPlayer.getPlayerState()
+          : playingState;
+        if (typeof playerState === 'number' && playerState !== playingState) return;
+        previewWasPlayingBeforeVisibilityHide = true;
+        previewPausedByVisibility = true;
+        clearPreviewTeaserTimer();
+        clearPreviewTeaserFadeTimeout();
+        clearPreviewTeaserFadeInterval();
+        try {
+          if (typeof previewTeaserPlayer.pauseVideo === 'function') {
+            previewTeaserPlayer.pauseVideo();
+          }
+        } catch (_) {}
+      }
+
+      function resumePreviewTeaserAfterVisibilityShow() {
+        if (!previewPausedByVisibility) return;
+        previewPausedByVisibility = false;
+        if (!previewWasPlayingBeforeVisibilityHide) return;
+        previewWasPlayingBeforeVisibilityHide = false;
+        if (document.hidden) return;
+        if (!isPreviewOpen()) return;
+        if (!currentPreviewCardEl) return;
+        if (document.body && document.body.classList.contains('nav-open')) return;
         schedulePreviewTeaserSwap(currentPreviewCardEl);
       }
 
@@ -9335,6 +9459,8 @@ function detachPreviewSwipeListeners() {
         previewOpening = false;
         previewPausedByMenu = false;
         previewWasPlayingBeforeMenuOpen = false;
+        previewPausedByVisibility = false;
+        previewWasPlayingBeforeVisibilityHide = false;
         previewNavPulseReady = false;
         clearPreviewNavPulseTimer();
         previewOverlay.classList.remove('preview-nav-pulse');
@@ -9470,6 +9596,13 @@ function detachPreviewSwipeListeners() {
 
       window.addEventListener('app:menu-opened', pausePreviewTeaserForMenuOpen);
       window.addEventListener('app:menu-closed', resumePreviewTeaserAfterMenuClose);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          pausePreviewTeaserForVisibilityHide();
+        } else {
+          resumePreviewTeaserAfterVisibilityShow();
+        }
+      });
 
       previewCloseButton.addEventListener('click', () => {
         closePreview();
@@ -10192,6 +10325,10 @@ document.addEventListener('keydown', (event) => {
     return !!(bodyEl && bodyEl.classList.contains('nav-open'));
   }
 
+  function isPageHidden(){
+    return !!document.hidden;
+  }
+
   function clearPauseTimer(){
     if (pauseTimer){
       clearTimeout(pauseTimer);
@@ -10277,6 +10414,16 @@ document.addEventListener('keydown', (event) => {
     var previewOpen = isPreviewOpen();
     var heroActive = isHeroActive();
     var menuOpen = isMenuOpen();
+    var pageHidden = isPageHidden();
+
+    // Tab hidden/minimized override: always pause while hidden.
+    if (pageHidden){
+      clearPauseTimer();
+      applyIntent('pause');
+      lastHeroActive = heroActive;
+      lastPreviewOpen = previewOpen;
+      return;
+    }
 
     // Preview override (always wins)
     if (previewOpen){
@@ -10366,6 +10513,9 @@ document.addEventListener('keydown', (event) => {
     syncToTruth({ initial:false, force:true });
   });
   window.addEventListener('app:menu-closed', function(){
+    syncToTruth({ initial:false, force:true });
+  });
+  document.addEventListener('visibilitychange', function(){
     syncToTruth({ initial:false, force:true });
   });
 })();
