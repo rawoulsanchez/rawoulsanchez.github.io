@@ -2323,6 +2323,7 @@ body.debug-row-zones .row-nav-zone{
     width: 90px;
     appearance: none;
     background: transparent;
+    touch-action: none;
   }
 
   .hero-volume__slider,
@@ -2394,8 +2395,7 @@ body.debug-row-zones .row-nav-zone{
   }
 
   @media (hover: none) and (pointer: coarse) {
-    .hero-volume__sliderWrap,
-    .preview-volume__sliderWrap {
+    .hero-volume__sliderWrap {
       display: none;
     }
 
@@ -2523,6 +2523,11 @@ body.debug-row-zones .row-nav-zone{
   .preview-slide.is-active{
     --preview-slide-scale: 1;
     --preview-slide-opacity: 1;
+    z-index: 6;
+    pointer-events: auto;
+  }
+  .preview-slide:not(.is-active){
+    pointer-events: none;
   }
 
   /* Debug: preview card geometry box */
@@ -5540,12 +5545,15 @@ body.debug-row-zones .row-nav-zone{
             if (usePointerEvents) {
               previewCarousel.addEventListener('pointerdown', (event) => {
                 if (!event.isPrimary) return;
+                if (event.target && event.target.closest('.preview-volume, .preview-volume__sliderWrap, .preview-volume__slider, .preview-volume__btn')) {
+                  return;
+                }
                 event.preventDefault();
                 startDrag(event);
               });
               previewCarousel.addEventListener('pointermove', (event) => {
                 if (!event.isPrimary) return;
-                event.preventDefault();
+                if (!isDragging) return;
                 handleDragMove(event);
               });
               previewCarousel.addEventListener('pointerup', (event) => {
@@ -7031,9 +7039,18 @@ body.debug-row-zones .row-nav-zone{
         updatePreviewVolumeUI({ muted: previewMuted, volume: previewVolume });
       }
 
+      function stopPreviewVolumeGesturePropagation(event) {
+        if (!event) return;
+        event.stopPropagation();
+      }
+
       if (previewVolumeSlider) {
         let previewSliderPointerActive = false;
         previewVolumeSlider.value = String(previewVolume);
+        previewVolumeSlider.addEventListener('pointerdown', stopPreviewVolumeGesturePropagation);
+        previewVolumeSlider.addEventListener('pointermove', stopPreviewVolumeGesturePropagation);
+        previewVolumeSlider.addEventListener('touchstart', stopPreviewVolumeGesturePropagation, { passive: true });
+        previewVolumeSlider.addEventListener('touchmove', stopPreviewVolumeGesturePropagation, { passive: true });
         previewVolumeSlider.addEventListener('input', (event) => {
           const value = Number(event.target.value);
           if (!Number.isNaN(value)) {
@@ -7079,6 +7096,10 @@ body.debug-row-zones .row-nav-zone{
       updatePreviewVolumeUI({ muted: previewMuted, volume: previewVolume });
 
       if (previewVolumeControl) {
+        previewVolumeControl.addEventListener('pointerdown', stopPreviewVolumeGesturePropagation);
+        previewVolumeControl.addEventListener('pointermove', stopPreviewVolumeGesturePropagation);
+        previewVolumeControl.addEventListener('touchstart', stopPreviewVolumeGesturePropagation, { passive: true });
+        previewVolumeControl.addEventListener('touchmove', stopPreviewVolumeGesturePropagation, { passive: true });
         previewVolumeControl.addEventListener('wheel', (event) => {
           event.preventDefault();
           const delta = event.deltaY || event.deltaX || 0;
@@ -7107,6 +7128,7 @@ body.debug-row-zones .row-nav-zone{
         previewVolumeButton.addEventListener('click', () => {
           togglePreviewMute();
           clearPreviewVolumeInitialClose();
+          openPreviewVolume();
           resetPreviewVolumeIdleClose('button');
         });
       }
@@ -7598,6 +7620,7 @@ body.debug-row-zones .row-nav-zone{
         let scrollableStartEl = null;
         let swipeDownEligible = false;
         let gestureDisabled = false;
+        let volumeGestureActive = false;
         let dragStarted = false;
         let gestureMode = null; // 'h' | 'v' | null
 
@@ -7610,13 +7633,23 @@ body.debug-row-zones .row-nav-zone{
           scrollableStartEl = null;
           swipeDownEligible = false;
           gestureDisabled = false;
+          volumeGestureActive = false;
           gestureMode = null;
           dragStarted = false;
+        };
+
+        const isPreviewVolumeTarget = (target) => {
+          return !!(target && typeof target.closest === 'function' &&
+            target.closest('.preview-volume, .preview-volume__sliderWrap, .preview-volume__slider, .preview-volume__btn'));
         };
 
         const onTouchStart = (event) => {
           if (!isPreviewOpen()) return;
           if (!event.touches || event.touches.length !== 1) return;
+          if (isPreviewVolumeTarget(event.target)) {
+            volumeGestureActive = true;
+            return;
+          }
 
         // Allow scrubbing anywhere; we'll distinguish tap vs drag by movement threshold.
 
@@ -7652,6 +7685,7 @@ body.debug-row-zones .row-nav-zone{
         const onTouchMove = (event) => {
           if (!isPreviewOpen()) return;
           if (!event.touches || event.touches.length !== 1) return;
+          if (volumeGestureActive || isPreviewVolumeTarget(event.target)) return;
           const t = event.touches[0];
           lastX = t.clientX;
           lastY = t.clientY;
