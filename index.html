@@ -3242,7 +3242,7 @@ body.debug-row-zones .row-nav-zone{
     ytPlayerInitialized = true;
     ytPlayer = new YT.Player('hero-yt', {
       playerVars: {
-        autoplay: 0,
+        autoplay: 1,
         mute: 0,
         playsinline: 1,
         controls: 0,
@@ -3258,6 +3258,9 @@ body.debug-row-zones .row-nav-zone{
           }
           if (typeof e.target.unMute === 'function') {
             e.target.unMute();
+          }
+          if (typeof e.target.playVideo === 'function') {
+            e.target.playVideo();
           }
           isMuted = false;
           updateHeroMuteUi();
@@ -10252,7 +10255,6 @@ document.addEventListener('keydown', (event) => {
 </html>
 
 \n<!-- WRITE TEST -->
-
 
 
 
