@@ -4622,6 +4622,10 @@ body.debug-row-zones .row-nav-zone{
         let startScrollLeft = 0;
         let activePointerId = null;
         const hasPointerEvents = typeof window.PointerEvent === 'function';
+        const isInteractiveTarget = (target) => {
+          if (!target || typeof target.closest !== 'function') return false;
+          return !!target.closest('button, a, input, select, textarea, label, [role="button"], .poster-preview-button');
+        };
 
         const stopDragging = (pointerId = null) => {
           if (!isDragging) return;
@@ -4641,6 +4645,7 @@ body.debug-row-zones .row-nav-zone{
           track.addEventListener('pointerdown', (event) => {
             if (!event.isPrimary) return;
             if (event.button !== 0) return; // left button only
+            if (isInteractiveTarget(event.target)) return;
             cancelScrollAnimation(track);
             isDragging = true;
             activePointerId = event.pointerId;
@@ -4678,6 +4683,7 @@ body.debug-row-zones .row-nav-zone{
         } else {
           track.addEventListener('mousedown', (event) => {
             if (event.button !== 0) return; // left button only
+            if (isInteractiveTarget(event.target)) return;
             cancelScrollAnimation(track);
             isDragging = true;
             track.classList.add('is-dragging');
